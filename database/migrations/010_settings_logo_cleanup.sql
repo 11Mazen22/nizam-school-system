@@ -1,0 +1,14 @@
+-- Nizam School Management System
+-- Migration 010: resolve the schools.logo_path vs school.logo_path ambiguity
+-- Blueprint reference: §D (schools.logo_path column), §J (school.logo_path setting)
+--
+-- §D's schools table and §J's settings catalog independently specified two
+-- storage locations for the same piece of data (the school logo). The
+-- precedent for resolving this already exists in SchoolRepository::current()'s
+-- own docblock: decision #6 put name/name_ar on the single schools row, and
+-- the settings catalog's entry for those two fields was simply never
+-- implemented that way. The same resolution applies here: schools.logo_path
+-- (tied to the one school-profile row, alongside name/name_ar/address/phone)
+-- is canonical. The settings-table key is removed so there is exactly one
+-- place the logo path can ever live, not two that could silently disagree.
+DELETE FROM settings WHERE setting_key = 'school.logo_path';

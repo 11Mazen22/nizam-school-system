@@ -1,0 +1,15 @@
+{
+    "name": "nizam/school-system",
+    "description": "Nizam -- offline Arabic-first school management system. Composer is a development-time tool only (decision #2); vendor/ is committed so the school never runs composer install.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "mpdf/mpdf": "^8.2",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

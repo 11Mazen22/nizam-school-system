@@ -1,0 +1,19 @@
+# Nizam -- re-allows the one folder that's meant to be web-servable (the
+# project root's own .htaccess denies everything by default, per §S-4).
+Require all granted
+
+# Standard front-controller routing: every request that isn't an existing
+# file or directory (vendored CSS/JS, images) goes to index.php, which is
+# what turns on Router's plain-string routes (/dashboard, /setup, /login,
+# ...). A real file/directory is served directly and never touches PHP --
+# the same behavior this app has been developed and tested against via PHP's
+# built-in dev server (`php -S ... -t public public/index.php`), whose own
+# router-script convention works the same way. Wrapped in <IfModule> so a
+# rare Apache build without mod_rewrite fails safe (deny-all still holds)
+# instead of a fatal .htaccess parse error.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>

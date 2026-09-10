@@ -1,0 +1,2171 @@
+﻿Nizam Blueprint
+
+
+  :root{
+    --ink:#1B2430; --ink-soft:#4B5768; --ink-faint:#7C8898;
+    --paper:#F2F4F3; --surface:#FFFFFF; --surface-2:#E8EBEA;
+    --border:#D6DBD9;
+    --accent:#2F4B7C; --accent-soft:#E4EAF2; --accent-strong:#1F3560;
+    --gold:#B4842A;
+    --sev-critical:#A23B3B; --sev-critical-bg:#F6E6E5;
+    --sev-high:#B4631F; --sev-high-bg:#F5E9DA;
+    --sev-medium:#5B6B7A; --sev-medium-bg:#E9ECEE;
+    --sev-low:#3F7D58; --sev-low-bg:#E4EFE8;
+    --font-display:'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body:'Public Sans', -apple-system, Segoe UI, Tahoma, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#E7EAEE; --ink-soft:#AEB8C4; --ink-faint:#7E8896;
+      --paper:#12161C; --surface:#1B212A; --surface-2:#232A34;
+      --border:#333C48;
+      --accent:#7C9CD6; --accent-soft:#22304A; --accent-strong:#9AB6E6;
+      --gold:#D2A24B;
+      --sev-critical:#E08277; --sev-critical-bg:#3A2222;
+      --sev-high:#E0A15E; --sev-high-bg:#3A2E1C;
+      --sev-medium:#9AABBC; --sev-medium-bg:#242C34;
+      --sev-low:#7FC79B; --sev-low-bg:#1E2E26;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#E7EAEE; --ink-soft:#AEB8C4; --ink-faint:#7E8896;
+    --paper:#12161C; --surface:#1B212A; --surface-2:#232A34;
+    --border:#333C48;
+    --accent:#7C9CD6; --accent-soft:#22304A; --accent-strong:#9AB6E6;
+    --gold:#D2A24B;
+    --sev-critical:#E08277; --sev-critical-bg:#3A2222;
+    --sev-high:#E0A15E; --sev-high-bg:#3A2E1C;
+    --sev-medium:#9AABBC; --sev-medium-bg:#242C34;
+    --sev-low:#7FC79B; --sev-low-bg:#1E2E26;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display); color:var(--ink); text-wrap:balance; margin:0;}
+  p{margin:0 0 1em 0; max-width:70ch;}
+  a{color:var(--accent);}
+  code, .mono{font-family:var(--font-mono); font-size:0.88em;}
+  ::selection{background:var(--accent-soft);}
+
+  .layout{display:flex; align-items:flex-start; min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .toc{
+    width:264px; flex:none; position:sticky; top:0; height:100vh;
+    background:var(--surface-2); border-right:1px solid var(--border);
+    padding:28px 20px; overflow-y:auto;
+  }
+  .toc-brand{display:flex; align-items:baseline; gap:8px; margin-bottom:4px;}
+  .toc-brand .mark{font-family:var(--font-display); font-weight:600; font-size:1.15rem;}
+  .toc-brand .ar{font-size:0.8rem; color:var(--ink-faint); direction:rtl;}
+  .toc-sub{font-size:0.78rem; color:var(--ink-faint); margin-bottom:22px;}
+  .toc-status{
+    display:inline-flex; align-items:center; gap:6px; font-size:0.72rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.06em; color:var(--gold);
+    border:1px solid var(--gold); border-radius:99px; padding:3px 10px; margin-bottom:22px;
+  }
+  .toc-status::before{content:"â—"; font-size:0.6rem;}
+  .toc nav{display:flex; flex-direction:column; gap:2px;}
+  .toc nav a{
+    display:flex; gap:10px; align-items:baseline; text-decoration:none; color:var(--ink-soft);
+    padding:7px 10px; border-radius:6px; font-size:0.87rem; font-weight:500;
+    border-left:2px solid transparent;
+  }
+  .toc nav a .n{font-family:var(--font-mono); color:var(--ink-faint); font-size:0.76rem;}
+  .toc nav a:hover{background:var(--surface); color:var(--ink);}
+  .toc nav a.active{background:var(--accent-soft); color:var(--accent-strong); border-left-color:var(--accent);}
+  .toc nav a.active .n{color:var(--accent);}
+  .toc-foot{margin-top:24px; padding-top:16px; border-top:1px solid var(--border); font-size:0.74rem; color:var(--ink-faint);}
+
+  /* ---------- Main ---------- */
+  main{flex:1; min-width:0;}
+  .cover{
+    padding:64px clamp(24px,5vw,72px) 48px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, var(--surface-2), var(--paper) 85%);
+  }
+  .cover .eyebrow{font-size:0.78rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:14px;}
+  .cover h1{font-size:clamp(2rem,4vw,2.9rem); font-weight:600; max-width:16ch; margin-bottom:10px;}
+  .cover .ar-title{direction:rtl; font-size:1.15rem; color:var(--ink-soft); margin-bottom:20px;}
+  .cover p.lede{font-size:1.05rem; color:var(--ink-soft); max-width:62ch;}
+  .meta-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:500;
+    background:var(--surface); border:1px solid var(--border); border-radius:99px; padding:5px 12px; color:var(--ink-soft);
+  }
+  .chip b{color:var(--ink); font-weight:600;}
+
+  section.block{padding:52px clamp(24px,5vw,72px); border-bottom:1px solid var(--border); max-width:1100px;}
+  section.block:last-of-type{border-bottom:none;}
+  .sec-head{margin-bottom:28px;}
+  .sec-head .eyebrow{
+    display:flex; align-items:center; gap:10px; font-size:0.78rem; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:10px;
+  }
+  .sec-head .eyebrow .ar{text-transform:none; letter-spacing:0; direction:rtl; color:var(--ink-faint); font-weight:500;}
+  .sec-head h2{font-size:clamp(1.5rem,2.6vw,2rem); font-weight:600;}
+  .sec-head .rule{width:56px; height:3px; background:var(--gold); margin-top:14px; border-radius:2px;}
+  .sec-head p.dek{margin-top:14px; color:var(--ink-soft); font-size:1rem;}
+
+  h3.sub{font-family:var(--font-display); font-size:1.2rem; font-weight:600; margin:32px 0 12px;}
+  h4.sub2{font-family:var(--font-body); font-size:0.95rem; font-weight:700; margin:22px 0 8px; color:var(--ink);}
+
+  ul.tight, ol.tight{padding-left:20px; margin:0 0 1em; max-width:70ch;}
+  ul.tight li, ol.tight li{margin-bottom:6px; color:var(--ink-soft);}
+  ul.tight li b, ol.tight li b{color:var(--ink); font-weight:600;}
+
+  .req-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; margin:20px 0;}
+  .req-card{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px;}
+  .req-card .k{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); font-weight:600; margin-bottom:6px;}
+  .req-card .v{font-size:0.92rem; color:var(--ink-soft); line-height:1.5;}
+  .req-card .v b{color:var(--ink);}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:10px; margin:18px 0;}
+  table{border-collapse:collapse; width:100%; min-width:560px; font-size:0.88rem; background:var(--surface);}
+  table.wide{min-width:920px;}
+  th, td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top;}
+  thead th{background:var(--surface-2); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); font-weight:700;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--accent-soft);}
+  td.mono, th.mono{font-family:var(--font-mono);}
+  td .pk{color:var(--accent); font-weight:600; font-size:0.72rem;}
+  td .fk{color:var(--gold); font-weight:600; font-size:0.72rem;}
+
+  .badge{display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:700; padding:2px 9px; border-radius:99px;}
+  .badge.rec{background:var(--accent-soft); color:var(--accent-strong);}
+  .badge.open{background:var(--sev-high-bg); color:var(--sev-high);}
+  .sev{display:inline-flex; align-items:center; gap:5px; font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:99px; white-space:nowrap;}
+  .sev.critical{background:var(--sev-critical-bg); color:var(--sev-critical);}
+  .sev.high{background:var(--sev-high-bg); color:var(--sev-high);}
+  .sev.medium{background:var(--sev-medium-bg); color:var(--sev-medium);}
+  .sev.low{background:var(--sev-low-bg); color:var(--sev-low);}
+
+  .decision{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin:18px 0;}
+  .decision .dh{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
+  .decision .dh h4{font-family:var(--font-display); font-size:1.05rem; font-weight:600; color:var(--ink);}
+  .decision .row{display:flex; gap:10px; margin-bottom:8px; font-size:0.9rem;}
+  .decision .row .lbl{flex:none; width:112px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); font-weight:700; padding-top:2px;}
+  .decision .row .val{color:var(--ink-soft);}
+  .decision .row .val b{color:var(--ink);}
+
+  details.schema{background:var(--surface); border:1px solid var(--border); border-radius:10px; margin:12px 0; overflow:hidden;}
+  details.schema summary{
+    cursor:pointer; padding:13px 18px; font-family:var(--font-mono); font-weight:600; font-size:0.92rem;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; list-style:none; color:var(--ink);
+  }
+  details.schema summary::-webkit-details-marker{display:none;}
+  details.schema summary .hint{font-family:var(--font-body); font-weight:400; font-size:0.78rem; color:var(--ink-faint);}
+  details.schema summary::after{content:"+"; font-family:var(--font-body); color:var(--ink-faint); font-size:1.1rem;}
+  details.schema[open] summary::after{content:"âˆ’";}
+  details.schema .body{padding:0 18px 16px;}
+  details.schema[open] summary{border-bottom:1px solid var(--border);}
+
+  figure{margin:24px 0;}
+  figure.diagram{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px;}
+  figcaption{font-size:0.82rem; color:var(--ink-faint); margin-top:10px; text-align:center;}
+
+  .rtl-demo{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:18px 0;}
+  .rtl-demo .pane{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px;}
+  .rtl-demo .pane .tag{font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); font-weight:700; margin-bottom:8px;}
+  .rtl-demo table{min-width:0; font-size:0.82rem;}
+  .rtl-demo th, .rtl-demo td{padding:6px 10px;}
+  @media (max-width:640px){.rtl-demo{grid-template-columns:1fr;}}
+
+  .phase-rail{display:flex; flex-wrap:wrap; gap:0; margin:22px 0 8px; counter-reset:phase;}
+  .phase{
+    flex:1 1 150px; position:relative; background:var(--surface); border:1px solid var(--border);
+    padding:14px 14px 14px 16px; margin-right:-1px; margin-bottom:-1px;
+  }
+  .phase .num{font-family:var(--font-mono); font-size:0.72rem; color:var(--gold); font-weight:700;}
+  .phase .name{font-weight:700; font-size:0.87rem; margin-top:3px;}
+
+  .risk-note{
+    background:var(--accent-soft); border:1px solid var(--border); border-left:3px solid var(--gold);
+    border-radius:8px; padding:16px 18px; margin:20px 0; font-size:0.92rem; color:var(--ink-soft);
+  }
+  .risk-note b{color:var(--ink);}
+
+  .tree{font-size:0.92rem;}
+  .tree ul{list-style:none; margin:4px 0 4px 18px; padding-left:14px; border-left:1px dashed var(--border);}
+  .tree > ul{margin-left:0; padding-left:0; border-left:none;}
+  .tree li{margin:5px 0; position:relative; padding-left:4px;}
+  .tree li.branch > span{font-weight:700; color:var(--ink);}
+  .tree li span.leaf{color:var(--ink-soft);}
+
+  pre.mermaid{background:transparent;}
+
+  .steps{list-style:none; margin:18px 0; padding:0; counter-reset:step;}
+  .steps li{position:relative; padding:0 0 22px 42px; counter-increment:step;}
+  .steps li:last-child{padding-bottom:0;}
+  .steps li::before{
+    content:counter(step); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:50%;
+    background:var(--accent-soft); color:var(--accent-strong); font-family:var(--font-mono); font-size:0.76rem;
+    font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+  .steps li::after{content:""; position:absolute; left:13px; top:26px; bottom:0; width:1px; background:var(--border);}
+  .steps li:last-child::after{display:none;}
+  .steps li b{color:var(--ink); display:block; margin-bottom:2px; font-size:0.94rem;}
+  .steps li .d{color:var(--ink-soft); font-size:0.88rem;}
+
+  .badge.done{background:var(--sev-low-bg); color:var(--sev-low);}
+  .kv{display:grid; grid-template-columns:112px 1fr; gap:6px 12px; font-size:0.9rem; margin:10px 0;}
+  .kv dt{color:var(--ink-faint); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; padding-top:2px;}
+  .kv dd{margin:0; color:var(--ink-soft);}
+  .kv dd b{color:var(--ink);}
+
+  footer.doc-foot{padding:40px clamp(24px,5vw,72px) 64px; color:var(--ink-faint); font-size:0.82rem;}
+
+  @media (max-width:880px){
+    .layout{display:block;}
+    .toc{position:relative; width:auto; height:auto; top:auto; border-right:none; border-bottom:1px solid var(--border);}
+    .req-grid{grid-template-columns:1fr 1fr;}
+  }
+
+
+
+  
+    NizamÙ†ÙØ¸Ø§Ù…
+    Blueprint Â· Offline School Management System
+    Frozen â€” Awaiting Your Approval
+    
+      A Requirements Analysis
+      B Decisions Needed
+      C System Architecture
+      D Database Design
+      E Module Map
+      F Development Roadmap
+      G Risk Analysis
+      H Mind Map
+      I Business Workflows
+      J Permissions &amp; Settings
+      K Reports Specification
+      L UI Component Library
+      M Testing &amp; QA Checklist
+      N Docs &amp; Installation
+      O Architecture Audit
+      P Final Decisions
+      Q Implementation Contract
+      R Implementation Mind Map
+      S Final Pre-Implementation Gate
+      T Task-Level Plan
+    
+    No implementation code anywhere in this document â€” planning only, per the brief. Â§O and Â§S audited the full blueprint twice; zero BLOCKER/HIGH findings remain open. Architecture frozen â€” Phase 3 begins only after your explicit approval.
+  
+
+  
+    
+      Architecture Blueprint Â· Prepared 2026-09-06
+      Offline School Management System
+      Ù†Ø¸Ø§Ù… Ø¥Ø¯Ø§Ø±Ø© Ù…Ø¯Ø±Ø³ÙŠ ÙŠØ¹Ù…Ù„ Ø¨Ø¯ÙˆÙ† Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª
+      A complete, locally-hosted administration system for a school running entirely on a Windows PC via XAMPP â€” students, teachers, classes, subjects, workloads, reports, backups, and academic-year transitions, with zero dependency on the internet, cloud services, or paid infrastructure.
+      
+        Stack PHP Â· MySQL/MariaDB Â· Bootstrap Â· jQuery
+        Primary language Arabic (RTL)
+        Secondary English (LTR)
+        Scope Single school per installation
+        Status Architecture frozen (2 gates, 31 fixes) â†’ pending your approval
+      
+    
+
+    
+    
+      
+        Section A ØªØ­Ù„ÙŠÙ„ Ø§Ù„Ù…ØªØ·Ù„Ø¨Ø§Øª
+        Requirements Analysis
+        
+        What the brief already specifies, organized so the rest of this document can build on it without re-litigating it.
+      
+
+      Non-negotiable constraints
+      
+        DeploymentWindows PC Â· XAMPP (Apache + PHP + MySQL/MariaDB) Â· copy-to-htdocs install.
+        ConnectivityMust run with internet fully disabled, indefinitely, after install. No CDNs, no external APIs, no SaaS.
+        FrontendHTML5 / CSS3 / vanilla JS + Bootstrap + jQuery where it earns its place â€” all vendored locally.
+        BackendPHP with PDO + prepared statements only. No raw string-built SQL, ever.
+        LanguageArabic-first, RTL by default; English/LTR as a full secondary mode â€” not a mirrored afterthought.
+        UsersNon-technical school staff. Plain-language messages, confirmations, empty states â€” no jargon.
+        ScaleMust stay fast with thousands of student records â€” indexed queries, pagination, no N+1s.
+        Data safetyStudent/teacher history is never overwritten; promotions and restores are transactional and reversible.
+      
+
+      The twelve functional pillars
+      Students Â· Teachers Â· Grades Â· Classes Â· Subjects Â· Teacherâ†”class assignments Â· Weekly teaching load Â· Statistics Â· Reports (print/PDF/Excel) Â· Backup &amp; restore Â· Academic-year transitions Â· Administrative settings.
+
+      Cross-cutting requirements
+      
+        Authentication &amp; roles â€” hashed passwords, sessions, login throttling, at minimum Administrator and Staff roles, enforced server-side.
+        Activity log â€” every consequential action (login, create/edit/archive, promotion, backup, restore) recorded with actor, entity, and timestamp.
+        Reports are real â€” generated from live database queries, never faked or computed client-side in JavaScript.
+        Backup is one-click, timestamped, with a safe, guarded restore path that never touches the live database without an emergency backup first.
+        First-run setup wizard â€” school identity, first academic year, admin account, seed subjects/grades â€” no manual database editing for normal setup.
+        Configurable business rules â€” expected weekly teaching load, staffing-shortage thresholds, ID formats â€” stored in settings, not hardcoded in PHP.
+      
+    
+
+    
+    
+      
+        Section B Ù‚Ø±Ø§Ø±Ø§Øª Ù…Ø¹Ù„Ù‚Ø©
+        Missing &amp; Ambiguous Decisions
+        
+        Fourteen decisions the brief leaves open, each with a recommendation and a reason. All fourteen are now confirmed â€” #6 was settled directly by the client on 2026-09-06 (single school per installation); the other thirteen proceed on the stated recommendation per the brief's own rule (item 40).
+      
+
+      
+        1 Â· Backend architecture styleProceeding
+        RecommendA hand-rolled, lightweight MVC â€” front controller, router, Composer PSR-4 autoloading â€” not Laravel/Symfony.
+        ReasonA full framework brings artisan/queue/cache assumptions and a much heavier vendor tree, which fights the "just copy to htdocs" promise. A slim custom MVC gives the same separation of concerns (controllers â†’ services â†’ repositories) with a footprint that's just PHP files behind Apache.
+        AlternativeLaravel â€” more built-in tooling (migrations, Eloquent, Blade), at the cost of deployment simplicity for a school running unmanaged XAMPP.
+      
+
+      
+        2 Â· Composer / vendor policyProceeding
+        RecommendUse Composer during development only; ship the populated vendor/ folder in the delivered package.
+        ReasonNeeded for mPDF / PhpSpreadsheet / a small logger without ever asking the school to run composer install or touch the internet.
+        AlternativeHand-vendor each library's source directly â€” no autoload discipline, harder to update later.
+      
+
+      
+        3 Â· PDF export engineProceeding â€” refined by audit Â§O-15
+        RecommendmPDF â€” pure PHP, strong Arabic shaping/RTL, embeddable fonts (e.g. Amiri, Noto Naskh Arabic), no shell dependency.
+        ReasonReports must render correct Arabic completely offline; mPDF is the most mature pure-PHP option for Arabic script shaping and justification.
+        Â§O-15 concrete deliverable"mPDF has RTL support" is not, by itself, a guarantee â€” mPDF ships with a limited default font set, and without explicit action it silently falls back to a non-Arabic-capable font (boxes/tofu instead of glyphs). The blueprint now names the exact asset: Amiri-Regular.ttf and Amiri-Bold.ttf bundled under vendor-assets/fonts/ and registered in mPDF's font configuration â€” this is a checklist item for Phase 7, not an assumption baked into the library choice.
+        AlternativeTCPDF â€” also RTL-capable, more verbose API. Dompdf â€” weaker Arabic support, not recommended for this project.
+      
+
+      
+        4 Â· Excel export engineProceeding
+        RecommendPhpSpreadsheet â€” de-facto standard, pure PHP, supports RTL sheet direction and cell styling.
+        ReasonProduces genuine .xlsx files with formatting, not a lossy CSV dump.
+        AlternativePlain CSV â€” trivial to generate, but loses formatting, RTL direction, and the "professional report" feel the brief asks for.
+      
+
+      
+        5 Â· Charting libraryProceeding
+        RecommendChart.js, vendored as a single local file.
+        ReasonCanvas-based, no build step, easy to theme, small enough to commit directly.
+        AlternativeApexCharts â€” nicer defaults, heavier payload; hand-rolled SVG â€” more control, more development time for no real gain here.
+      
+
+      
+        6 Â· Single school vs. multi-branchConfirmed 2026-09-06
+        AmbiguityThe dashboard spec asks for student breakdowns "by school," which could mean one school per install (most likely) or one install serving several campuses.
+        DecisionOne school per installation, confirmed directly by the client. The schools table still exists (single active row, created once by the Setup Wizard) so the "by school" dashboard stat and the school name/logo on printed reports have somewhere to live â€” it is not a multi-tenant feature, just a profile record.
+        Effect on Â§DNo school_id foreign key threading through students/classes/teachers â€” every table's scoping stops at academic_year_id. This is the schema actually built out in Â§D below.
+      
+
+      
+        7 Â· Authorization granularityProceeding
+        RecommendBuild the full roles / permissions / role_permissions schema now, but seed only Administrator and Staff with a fixed, code-defined permission checklist â€” not a drag-and-drop permission builder.
+        ReasonSatisfies the brief's explicit permissions table requirement while keeping v1's UI surface (and QA burden) proportionate.
+        AlternativeA full custom permission-matrix screen â€” more flexible, meaningfully more UI and testing for a first release.
+      
+
+      
+        8 Â· Backup engineProceeding
+        RecommendA pure-PHP dump routine (streaming table reads â†’ SQL statements), not shelling out to mysqldump.exe.
+        Reasonshell_exec() is often disabled by hardened PHP configs, and the XAMPP binary path varies by version â€” a pure-PHP dumper removes that entire failure class.
+        Alternativeshell_exec("mysqldump ...") â€” faster on very large databases, but fragile path detection and requires exec() permissions an admin may have locked down.
+      
+
+      
+        9 Â· Restore engineProceeding
+        RecommendParse and replay the uploaded .sql file in-app, batched, always preceded by an automatic emergency backup â€” never "go import it in phpMyAdmin."
+        ReasonKeeps restore inside the same confirmation / activity-log / rollback-messaging safety net as everything else.
+        AlternativePoint the admin at phpMyAdmin â€” simpler to build, but breaks the "safe, one-click, in-app" promise and drops the emergency-backup guarantee.
+      
+
+      
+        10 Â· Student / teacher ID formatProceeding â€” refined by audit Â§O-7
+        RecommendAuto-generated, human-readable codes â€” STU-2025-000118, TCH-000045 â€” pattern configurable in Settings.
+        ReasonStaff need something they can write on a physical form or register; a raw auto-increment ID isn't meaningful to them.
+        Generation (corrected)The audit caught a race condition in the original plan: computing the next number as MAX(seq)+1 in PHP is unsafe if two staff save a new student at the same moment. Corrected mechanism: insert the row first, letting MySQL's own AUTO_INCREMENT assign the primary key atomically, then UPDATE that same row's student_code using the now-known id â€” e.g. row id 118 becomes STU-2025-000118. No separate counter table, no race.
+        Year componentThe year in the code is the year the record was created, not a per-year-resetting sequence â€” numbers keep climbing across years (â€¦000118, 000119, 000120 regardless of year boundary). Simpler and race-free.
+        AlternativeA numbering scheme that resets to 1 every academic year, if the school specifically wants that â€” requires a dedicated id_sequences counter table with SELECT ... FOR UPDATE row locking per year. More familiar to some registrars, meaningfully more implementation and testing surface for a v1.
+      
+
+      
+        11 Â· Photo / logo storageProceeding â€” hardened by audit Â§O-18
+        RecommendLocal disk under /storage/uploads/&lt;type&gt;/, strict MIME + extension whitelist, images re-encoded on upload.
+        ReasonOffline-only by nature, and re-encoding neutralizes disguised-executable upload attacks.
+        Â§O-18 added hardeningRe-encoding alone isn't defense in depth. Three more layers: (1) stored files get a randomly-generated filename, never the name the browser sent; (2) a controller streams the file back with an explicitly-set Content-Type rather than letting Apache guess from the extension; (3) the uploads folder carries an .htaccess that disables PHP execution (php_flag engine off), so even a file that somehow bypassed re-encoding can never be executed as a script.
+        Â§S-10 â€” serving, not just storingEvery file-serving endpoint â€” this one, backup downloads, generated report files â€” resolves what to send by looking up a database id (the photo's owning student/teacher row, the backups.id row) and reading that record's stored path server-side. None of them ever accept a raw filename or path fragment from the request. A URL like ?file=../../../config.php has nothing to act on, because there is no "file" parameter that ever reaches the filesystem directly.
+        AlternativeStore as BLOBs in MySQL â€” a single-file backup story, but bloats ordinary dumps and slows unrelated queries.
+      
+
+      
+        12 Â· One database vs. one per academic yearProceeding
+        RecommendA single database; every year-scoped table carries academic_year_id. Closed years become read-only at the application layer, not by physical separation.
+        ReasonA student's full multi-year history needs a plain join, not a cross-database query; backup/restore also stays "one file, one operation."
+        AlternativeOne schema per year â€” perfect isolation, but no easy "show this student across years" query, and N schemas to manage.
+      
+
+      
+        13 Â· Concurrent editsProceeding
+        RecommendOptimistic concurrency â€” reject a save with "this record changed, please reload" if updated_at moved since the form opened. No pessimistic row locking.
+        ReasonThis is a handful of staff on one school LAN, not a high-contention system; locking would add complexity disproportionate to the actual risk.
+        AlternativePessimistic "checked out by X" locks â€” more correct under heavy contention, unnecessary at this scale.
+      
+
+      
+        14 Â· Installation modelProceeding
+        RecommendA first-run web Setup Wizard â€” environment check, DB connection test, schema install + seed data, school profile, first admin, first academic year.
+        ReasonThe brief explicitly rules out manual database editing for a non-technical administrator.
+        AlternativeShip a raw schema.sql + README â€” much simpler to build, fails the target-user bar outright.
+      
+    
+
+    
+    
+      
+        Section C Ø§Ù„Ø¨Ù†ÙŠØ© Ø§Ù„Ù…Ø¹Ù…Ø§Ø±ÙŠØ©
+        System Architecture
+        
+        A layered, plain-PHP MVC. Every request takes the same path; every layer has one job.
+      
+
+      
+
+graph TD
+    A["Browser(staff / admin)"] --> B["public/index.phpfront controller"]
+    B --> C["Router"]
+    C --> D["Middleware chainSession Â· CSRF Â· RoleGuard Â· YearContext"]
+    D --> E["Controller(one per module)"]
+    E --> F["Servicebusiness rules Â· transactions"]
+    F --> G["RepositoryPDO Â· prepared statements"]
+    G --> H[("MySQL / MariaDB")]
+    E --> I["ViewPHP templates + components"]
+    F -.logs.-> J["ActivityLogger"]
+    F -.errors.-> K["ErrorHandler / Loggerstorage/logs"]
+    I --> A
+
+        Request lifecycle. Controllers never touch PDO directly; services never render HTML â€” each layer only talks to its neighbor.
+      
+
+      Cross-cutting concerns
+      
+        
+          ConcernApproach
+          
+            Configurationconfig/config.php (gitignored, holds DB credentials) generated by the Setup Wizard from config.example.php.
+            AuthenticationPHP sessions; password_hash() (bcrypt); session ID regenerated on login; login attempts throttled per username+IP with exponential lockout, plus a secondary IP-wide threshold (Â§O-16) that cools down an IP after many failures spread across different usernames â€” closing the account-enumeration gap a per-username lock alone leaves open.
+            AuthorizationRoleGuard middleware checks the requesting user's permission code against the route before the controller runs.
+            CSRFOne token per session, embedded in every form, verified in middleware on every POST/PUT/DELETE using hash_equals() (Â§O-19) â€” a plain == comparison is vulnerable to a timing side-channel.
+            Output escapingA single e() helper (htmlspecialchars wrapper) used in every view â€” no raw variable echoes.
+            Error handlingset_exception_handler/set_error_handler log the technical detail to storage/logs and show the user a friendly, translated message â€” never a stack trace.
+            Localizationlang/ar.php / lang/en.php arrays behind a __() helper; active language sets &lt;html dir&gt; and swaps the vendored bootstrap.rtl.min.css in.
+            Academic-year contextMiddleware resolves the active year once per request; write operations against a closed year are rejected at the service layer, not just hidden in the UI.
+          
+        
+      
+
+      RTL is designed, not mirrored
+      Item 19 asks that Arabic UX be deliberate rather than a CSS flip. Concretely: table columns re-order (not just re-align) so the most important field reads first in each direction; numerals stay Western (Ù¡Ù¢Ù£ is avoided â€” Arabic-Indic digits confuse mixed Arabic/English data entry); and dates render in a consistent Gregorian format in both languages to avoid calendar ambiguity. A minimal illustration of the column re-ordering, not a stylesheet mirror:
+      
+        
+          English Â· LTR
+          
+            CodeNameClass
+            
+              STU-000118Youssef Amin3B
+              STU-000119Lina Haddad3B
+            
+          
+        
+        
+          Ø§Ù„Ø¹Ø±Ø¨ÙŠØ© Â· RTL
+          
+            Ø§Ù„ØµÙØ§Ù„Ø§Ø³Ù…Ø§Ù„Ø±Ù‚Ù…
+            
+              Ù£Ø¨ÙŠÙˆØ³Ù Ø£Ù…ÙŠÙ†STU-000118
+              Ù£Ø¨Ù„ÙŠÙ†Ø§ Ø­Ø¯Ø§Ø¯STU-000119
+            
+          
+        
+      
+
+      Application file structure
+      
+        
+          PathPurpose
+          
+            app/controllersThin HTTP-facing classes â€” validate input shape, call a service, hand data to a view.
+            app/servicesBusiness rules and transactions: PromotionService, BackupService, RestoreService, WorkloadService, ReportService.
+            app/repositoriesAll SQL lives here â€” one repository per aggregate, PDO prepared statements only.
+            app/middlewareSession, CSRF, RoleGuard, AcademicYearContext.
+            app/helpers__() translations, e() escaping, date/number formatting.
+            config/config.example.php (committed), config.php (generated, gitignored).
+            database/migrationsNumbered, additive SQL files applied by a small PHP migration runner.
+            database/seedsRoles, permissions, default subjects/grades, first academic year.
+            database/backupsDefault local backup destination (admin can also choose another folder). Contains full data dumps, including password hashes and every student's personal data â€” see Â§S-4.
+            public/index.php front controller + vendored CSS/JS assets (Bootstrap, jQuery, Chart.js â€” no CDN links). The only folder meant to be web-servable.
+            views/PHP templates, organized by module, with a views/components folder for navbar, sidebar, cards, tables, modals, pagination, filters, empty states.
+            reports/Print-CSS report templates and mPDF/PhpSpreadsheet export builders.
+            storage/Logs, uploads, generated PDFs/Excel files. "Never web-served directly" is a design intent that needed an actual guarantee â€” see Â§S-4.
+            vendor/Composer dependencies, committed â€” the school never installs anything.
+          
+        
+      
+      Â§S-4 â€” the install model itself was the vulnerability. Item 28's own installation model is "copy the whole project folder into htdocs." Under XAMPP's default Apache config, everything under htdocs is web-servable unless told otherwise â€” meaning database/backups/*.sql (password hashes, every student's name/DOB/religion/phone) and storage/uploads/* would sit at a guessable, browsable URL for anyone on the same LAN, the instant the admin follows the documented install steps exactly as written. A properly configured Apache vhost pointing at public/ only would prevent this, but requiring that from a non-technical admin contradicts the entire "just copy to htdocs" premise. Fix, mandatory, zero-configuration: the package ships a .htaccess at the project root containing Require all denied (Apache 2.4, XAMPP's bundled version) that blocks every request that isn't rewritten through public/, plus a second one specifically in public/ that re-allows access there. This works under the exact "copy the folder, done" install model â€” no vhost edit required â€” and needs AllowOverride All for htdocs, which is XAMPP's own default. Pointing Apache's DocumentRoot at public/ via a proper vhost remains the ideal, offered as an optional hardening step for a school with IT support (Â§N), not a requirement.
+    
+
+    
+    
+      
+        Section D ØªØµÙ…ÙŠÙ… Ù‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª
+        Database Design
+        
+        Normalized, relational, no comma-separated ID fields anywhere. Sixteen relational entities plus four standalone support tables.
+      
+
+      
+
+erDiagram
+    ACADEMIC_YEARS ||--o{ CLASSES : "has"
+    GRADES ||--o{ CLASSES : "has"
+    CLASSES ||--o{ STUDENT_ENROLLMENTS : "holds"
+    ACADEMIC_YEARS ||--o{ STUDENT_ENROLLMENTS : "scopes"
+    STUDENTS ||--o{ STUDENT_ENROLLMENTS : "enrolled as"
+    STUDENT_ENROLLMENTS |o--o| STUDENT_ENROLLMENTS : "promoted from"
+    CLASSES ||--o{ TEACHER_ASSIGNMENTS : "staffed by"
+    TEACHERS ||--o{ TEACHER_ASSIGNMENTS : "assigned to"
+    SUBJECTS ||--o{ TEACHER_ASSIGNMENTS : "taught as"
+    ACADEMIC_YEARS ||--o{ TEACHER_ASSIGNMENTS : "scopes"
+    TEACHERS ||--o{ TEACHER_SUBJECTS : "qualified in"
+    SUBJECTS ||--o{ TEACHER_SUBJECTS : "covered by"
+    SUBJECTS ||--o{ SUBJECT_STAFFING_REQUIREMENTS : "requires"
+    ACADEMIC_YEARS ||--o{ SUBJECT_STAFFING_REQUIREMENTS : "scopes"
+    ROLES ||--o{ USERS : "grants"
+    ROLES ||--o{ ROLE_PERMISSIONS : "has"
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : "included in"
+    USERS ||--o{ ACTIVITY_LOGS : "performs"
+    USERS ||--o{ BACKUPS : "creates"
+
+        Core relational spine. schools, settings, login_attempts and migrations are standalone support tables, omitted here for legibility â€” see the reference below.
+      
+
+      Why student_enrollments exists
+      The students table holds only biographical facts that don't change with the school year â€” name, date of birth, religion. Everything year-specific (grade, class, status) lives in student_enrollments, one row per student per academic year. Promotion never edits an existing enrollment; it closes the current one (status = 'promoted') and inserts a new one for the next year, linked back via previous_enrollment_id. This is the mechanism that satisfies "never blindly overwrite historical data" in item 3 â€” the student's entire academic history is a chain of enrollment rows, not a single mutated record.
+
+      Table reference
+
+      
+        students biographical, year-independent
+        
+          
+            ColumnTypeNotes
+            
+              PK idINTAuto-increment.
+              student_codeVARCHAR(20)UNIQUE. Auto-generated per decision #10.
+              full_nameVARCHAR(150)Required.
+              genderENUM('m','f')
+              date_of_birthDATE
+              religionENUM('muslim','christian','other')Drives the dashboard religion breakdown.
+              phoneVARCHAR(30)Nullable.
+              guardian_phoneVARCHAR(30)Nullable.
+              addressVARCHAR(255)Nullable.
+              photo_pathVARCHAR(255)Nullable; see decision #11.
+              notesTEXTNullable, free-form.
+              statusENUM('active','archived')Default active.
+              created_at / updated_atDATETIME
+            
+          
+        
+      
+
+      
+        student_enrollments one row per student per academic year
+        
+          
+            ColumnTypeNotes
+            
+              PK idINT
+              FK student_idINTâ†’ students.id, RESTRICT.
+              FK academic_year_idINTâ†’ academic_years.id, RESTRICT.
+              FK grade_idINTSee composite FK below (Â§S-1) â€” not a free-standing reference to grades.id on its own.
+              FK class_idINT NULLNullable â€” a promoted student can exist with a known grade and no class yet (Â§I.1 step 4, "left unassigned"). See composite FK below.
+              enrollment_dateDATE
+              statusENUM('active','promoted','repeated','graduated','transferred','withdrawn')Default active. graduated added in the Pre-Implementation Audit (Â§O-3) â€” the original list omitted it despite Â§I.1 relying on it for a final-grade student.
+              FK previous_enrollment_idINT NULLSelf-reference â†’ this table. The promotion lineage.
+              created_atDATETIME
+            
+          
+          Constraint: UNIQUE (student_id, academic_year_id) â€” a student cannot have two enrollments in the same year.
+          Â§S-1 â€” composite foreign key: FOREIGN KEY (class_id, grade_id, academic_year_id) REFERENCES classes(id, grade_id, academic_year_id), replacing three independent single-column FKs. grade_id is kept on this table (rather than derived only through class_id) specifically to support the unassigned-class state above â€” but that redundancy is exactly what let an enrollment silently claim a grade or year that disagreed with its own class. The composite FK closes that: MySQL/MariaDB rejects any row where (class_id, grade_id, academic_year_id) isn't a real (id, grade_id, academic_year_id) triple in classes, and â€” because FK columns that are NULL are simply not checked â€” the constraint goes quiet exactly when class_id is NULL (the legitimate unassigned case), never when it's set to something inconsistent.
+          Â§S-7 â€” immutability: once status leaves active, the row is never edited by any general-purpose UI action â€” no "edit enrollment" screen exists, ever. There is exactly one sanctioned, logged exception: the single-student Undo Promotion action (Â§I.1 step 9), which reopens a just-created promotion's source row back to active and deletes the just-created, zero-activity target row it produced â€” available only immediately after that specific promotion and only while nothing else has touched either row. Every other status transition is one-way. While a row is active, exactly one field may change outside promotion: class_id, via the mid-year reassignment action in Â§I.9.
+        
+      
+
+      
+        teachers
+        
+          
+            ColumnTypeNotes
+            
+              PK idINT
+              teacher_codeVARCHAR(20)UNIQUE, auto-generated.
+              full_nameVARCHAR(150)
+              phoneVARCHAR(30)Nullable.
+              emailVARCHAR(100)Nullable.
+              photo_pathVARCHAR(255)Nullable.
+              statusENUM('active','archived')Default active.
+              created_at / updated_atDATETIME
+            
+          
+        
+      
+
+      
+        teacher_subjects join table â€” subjects a teacher is qualified for
+        
+          
+            ColumnTypeNotes
+            
+              PK/FK teacher_idINTâ†’ teachers.id, CASCADE.
+              PK/FK subject_idINTâ†’ subjects.id, CASCADE.
+            
+          
+        
+      
+
+      
+        teacher_assignments the real many-to-many: teacher Ã— subject Ã— class Ã— year
+        
+          
+            ColumnTypeNotes
+            
+              PK idINT
+              FK teacher_idINTâ†’ teachers.id, RESTRICT.
+              FK subject_idINTâ†’ subjects.id, RESTRICT.
+              FK class_idINTSee composite FK below (Â§S-2) â€” not a free-standing reference to classes.id on its own.
+              FK academic_year_idINTSee composite FK below.
+              weekly_periodsSMALLINTFeeds the workload engine.
+              statusENUM('active','archived')Default active.
+              created_at / updated_atDATETIME
+            
+          
+          Constraint: UNIQUE (teacher_id, subject_id, class_id, academic_year_id). Qualification check (Â§O-9): AssignmentService checks whether (teacher_id, subject_id) exists in teacher_subjects before saving and warns if not â€” it does not hard-block. Substitute coverage outside a teacher's listed subjects is a real, legitimate school scenario; the DB has no trigger enforcing this, by design.
+          Â§S-2 â€” composite foreign key: FOREIGN KEY (class_id, academic_year_id) REFERENCES classes(id, academic_year_id), replacing two independent single-column FKs. Without this, nothing stopped a row from naming academic_year_id = 2026 while class_id pointed at a class that actually belongs to 2025 â€” a teacher silently "assigned" to a class from the wrong year. The Final Gate found this identical to the enrollment issue above (Â§S-1) and fixed it the same way.
+        
+      
+
+      
+        classes
+        
+          
+            ColumnTypeNotes
+            
+              PK idINT
+              FK grade_idINTâ†’ grades.id, RESTRICT.
+              FK academic_year_idINTâ†’ academic_years.id, RESTRICT.
+              nameVARCHAR(30)e.g. "A", "B".
+              capacityINTNullable, soft-enforced.
+              is_activeTINYINT(1)Default 1.
+              created_at / updated_atDATETIME
+            
+          
+          Constraints: UNIQUE (grade_id, academic_year_id, name). UNIQUE (id, grade_id, academic_year_id) â€” added at the Final Gate (Â§S-1/Â§S-2): a second, composite unique index over the primary key plus its own grade/year. It changes nothing about what a classes row can contain; it exists purely so student_enrollments and teacher_assignments can reference (class_id, grade_id, academic_year_id) as a single composite foreign key â€” see those tables below for why.
+        
+      
+
+      
+        grades &amp; subjects reference tables â€” no hardcoded lists in code
+        
+          
+            TableColumns
+            
+              gradesid, name_en, name_ar, sort_order, is_active
+              subjectsid, code (UNIQUE), name_en, name_ar, is_active
+            
+          
+        
+      
+
+      
+        academic_years
+        
+          
+            ColumnTypeNotes
+            
+              PK idINT
+              labelVARCHAR(20)UNIQUE, e.g. "2025/2026".
+              start_date / end_dateDATE
+              is_activeTINYINT(1)See Â§O-2 below â€” enforced at the database, not just the application.
+              is_closedTINYINT(1)Closed years reject writes at the service layer.
+              expected_weekly_capacitySMALLINT NULLAdded at the Final Gate (Â§S-11) â€” see note below.
+              created_atDATETIME
+            
+          
+          Â§S-11: the original plan kept "expected weekly teaching capacity" as one flat, global settings value shared by every year â€” inconsistent with subject_staffing_requirements, which correctly gives the structurally identical "target number" its own row per year. A flat global value means changing the policy for next year silently rewrites what every past year's workload report claims the target always was. Fixed by moving it onto academic_years itself: year creation copies the current academic.expected_weekly_capacity setting into the new row as its starting value (editable per year afterward), and Â§I.5's workload difference calculation reads it from the enrollment's own year, never from the live global setting.
+          Â§O-2: "exactly one active year" was originally application-enforced only â€” a bug or a second admin session could theoretically leave two years active, corrupting every default-year lookup in the system. Corrected: a generated column active_flag (= 1 WHEN is_active=1, NULL otherwise) carries a UNIQUE index. MySQL/MariaDB unique indexes ignore NULL, so any number of inactive years coexist freely, but a second row trying to set is_active=1 fails at the database itself, not just in application code that might have a bug or a bypassed code path.
+        
+      
+
+      
+        subject_staffing_requirements configurable shortage thresholds â€” item 9
+        
+          
+            ColumnTypeNotes
+            
+              PK idINT
+              FK subject_idINTâ†’ subjects.id.
+              FK academic_year_idINTâ†’ academic_years.id.
+              required_teachersSMALLINTAdmin-set target headcount.
+            
+          
+          Constraint: UNIQUE (subject_id, academic_year_id).
+        
+      
+
+      
+        roles Â· permissions Â· role_permissions Â· users
+        
+          
+            TableColumns
+            
+              rolesid, code (UNIQUE: admin/staff), name_en, name_ar
+              permissionsid, code (UNIQUE, e.g. students.delete), name_en, name_ar, module
+              role_permissionsrole_id + permission_id (composite PK), both CASCADE
+              usersid, username (UNIQUE), password_hash, full_name, role_id (RESTRICT), is_active, failed_attempts, locked_until, last_login_at, created_at, updated_at
+            
+          
+        
+      
+
+      
+        activity_logs Â· backups Â· login_attempts Â· settings Â· schools Â· migrations
+        
+          Â§O-1: settings originally used a column literally named key â€” a reserved word in MySQL/MariaDB SQL, requiring backtick-quoting everywhere it's referenced. Renamed to setting_key below.
+          
+            TableColumns
+            
+              activity_logsid, user_id (NULL-able FK), action, entity_type, entity_id, description, metadata (JSON), ip_address, created_at
+              backupsid, filename, file_size, type (manual/auto/pre_restore), status (success/failed), created_by (FK users), notes, created_at
+              login_attemptsid, username, ip_address, attempted_at, success
+              settingsid, setting_key (UNIQUE), value, value_type, updated_at
+              schoolsid, name, name_ar, logo_path, address, phone, created_at â€” single active row in v1, see decision #6
+              migrationsid, migration (UNIQUE filename), applied_at â€” internal bookkeeping only
+            
+          
+        
+      
+
+      Index &amp; constraint strategy
+      
+        Every foreign key is indexed (MySQL does this automatically) plus explicit composite indexes on student_enrollments(academic_year_id, class_id) and teacher_assignments(academic_year_id, teacher_id) â€” the two hottest report queries.
+        students(status) and activity_logs(created_at)/activity_logs(user_id) indexed for filtering and audit lookups.
+        Reference tables (grades, subjects, classes, academic_years, teachers, students) use ON DELETE RESTRICT â€” nothing with active children can be hard-deleted; archive instead.
+        Pure join tables (teacher_subjects, role_permissions) use ON DELETE CASCADE â€” the relationship, not the entity, disappears.
+        Character set &amp; collation are explicit, not inherited. The database and every table are created with CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci stated in the migration file itself â€” never left to whatever XAMPP's bundled MariaDB happens to default to. Added in Â§O-8: a default of plain utf8 or latin1 silently mis-stores or mis-sorts Arabic text, and the failure is invisible until someone notices garbled names months later.
+        No hard-delete route exists in the UI for students, teachers, classes, subjects, grades, academic_years, or users â€” only archive/deactivate. ON DELETE RESTRICT stops orphaning, but it does not stop permanently deleting a row that happens to have zero current children while still being named in historical activity_logs â€” added in Â§O-10.
+      
+
+      Example records
+      
+        TableExample row
+        
+          academic_yearsid=3, label="2025/2026", start_date=2025-09-01, is_active=1, is_closed=0
+          classesid=41, grade_id=3 ("Third Grade"), academic_year_id=3, name="B", capacity=32
+          studentsid=118, student_code="STU-2025-000118", full_name="ÙŠÙˆØ³Ù Ø£Ù…ÙŠÙ†", religion="muslim", status="active"
+          student_enrollmentsid=302, student_id=118, academic_year_id=3, class_id=41, status="active", previous_enrollment_id=210
+          teacher_assignmentsid=77, teacher_id=12, subject_id=2 ("Arabic"), class_id=41, academic_year_id=3, weekly_periods=5
+        
+      
+
+      Migration &amp; install strategy
+      Numbered, additive SQL files in database/migrations/001_*.sql â€¦ 0NN_*.sql. A small PHP runner reads a migrations bookkeeping table, applies whatever hasn't run yet â€” each file inside its own transaction â€” and records it. database/seeds/ holds idempotent seed scripts (roles, permissions, default subjects/grades, the first academic year) using INSERT ... ON DUPLICATE KEY UPDATE by unique code, so re-running setup never duplicates data. The Setup Wizard (decision #14) is simply the UI in front of "run pending migrations, then run seeds."
+    
+
+    
+    
+      
+        Section E Ø®Ø±ÙŠØ·Ø© Ø§Ù„ÙˆØ­Ø¯Ø§Øª
+        Module Map
+        
+        Thirteen modules, each a vertical slice through the layers in Â§C.
+      
+      
+        ModuleController(s)Service(s)Repository(ies)
+        
+          AuthAuthControllerAuthService, LoginThrottleServiceUserRepository, LoginAttemptRepository
+          DashboardDashboardControllerStatsServiceread-only across most repositories
+          StudentsStudentControllerStudentService, EnrollmentServiceStudentRepository, EnrollmentRepository
+          PromotionPromotionControllerPromotionService (transactional)EnrollmentRepository, StudentRepository
+          TeachersTeacherControllerTeacherServiceTeacherRepository
+          SubjectsSubjectControllerSubjectServiceSubjectRepository
+          Grades &amp; ClassesGradeController, ClassControllerClassServiceGradeRepository, ClassRepository
+          Assignments &amp; WorkloadAssignmentControllerAssignmentService, WorkloadServiceTeacherAssignmentRepository
+          Academic YearsAcademicYearControllerAcademicYearService (activate/close guard)AcademicYearRepository
+          ReportsReportControllerReportService, ExportService (PDF/Excel)read-only across most repositories
+          Backup &amp; RestoreBackupControllerBackupService, RestoreServiceBackupRepository
+          SettingsSettingsControllerSettingsServiceSettingsRepository
+          Activity Logcross-cutting, no dedicated controllerActivityLogger (called by every service)ActivityLogRepository
+        
+      
+    
+
+    
+    
+      
+        Section F Ø®Ø§Ø±Ø·Ø© Ø·Ø±ÙŠÙ‚ Ø§Ù„ØªØ·ÙˆÙŠØ±
+        Development Roadmap
+        
+        Ten sequential phases. Each phase's output is a precondition for the next â€” no phase starts before the previous one is verified.
+      
+
+      
+        01Discovery
+        02Architecture sign-off
+        03Database
+        04Core infrastructure
+        05UI foundation
+        06Core modules
+        07Reports
+        08Backup &amp; restore
+        09Testing
+        10Final QA &amp; docs
+      
+
+      
+        PhaseDeliverableDepends onNotes
+        
+          01This document â€” requirements, decisions, architecture, database, roadmap, risk, mind mapâ€”Complete
+          02Full planning expansion (Â§Iâ€“Â§N) plus a critical Pre-Implementation Architecture Audit â€” 35 findings, 19 already corrected back into the blueprint (Â§Oâ€“Â§R)01Current phase. Awaiting your final review before Phase 3 begins.
+          03Migrations, seeds, constraints, indexes02Schema from Â§D, applied via the migration runner.
+          04Config, DB wrapper, auth, CSRF, router, error handler, logger, i18n helper03Nothing user-facing yet â€” the plumbing every module needs.
+          05Layout shell, sidebar/nav, RTL/LTR switch, vendored assets, reusable components04Cards, tables, modals, pagination, filters, empty states â€” built once, reused everywhere.
+          06Dashboard â†’ Academic Years â†’ Grades/Classes â†’ Subjects â†’ Teachers â†’ Students â†’ Assignments/Workload05Ordered so each module's foreign keys already exist when it's built.
+          07Student, teacher, workload &amp; staffing reports; print CSS; PDF; Excel06Arabic PDF rendering gets tested here, not deferred to the end.
+          08Backup engine, restore engine, emergency backup, backup history UI03â€“07 stableRestore is tested against real data produced by the phases above.
+          09Full test pass â€” auth, CRUD, search, promotion, reports, printing, backup/restore, permissions, RTL, offline08See item 39's checklist.
+          10README, admin guide, developer docs, packaging for htdocs09Final professional-review pass per item 37/44.
+        
+      
+    
+
+    
+    
+      
+        Section G ØªØ­Ù„ÙŠÙ„ Ø§Ù„Ù…Ø®Ø§Ø·Ø±
+        Risk Analysis
+        
+        Ranked by impact. Likelihood assumes the mitigations in Â§B and Â§C are actually built, not skipped under schedule pressure.
+      
+
+      
+        RiskLikelihoodImpactMitigation
+        
+          Data loss during promotion or restoreLowCriticalBoth run inside DB transactions with rollback; restore is always preceded by an automatic emergency backup; promotion shows a preview + explicit confirmation before writing.
+          A single local backup is the only copy (fire, theft, disk failure)MediumCriticalInherent to "100% offline" â€” not solvable in-app. The backup screen lets the admin pick/see the destination folder, and the admin guide will explicitly recommend copying backups to a USB drive or second machine. Worth naming plainly rather than implying false safety.
+          Arabic text breaking in PDF/Excel exportsMediumHighmPDF with an embedded Arabic-shaping font (Amiri/Noto Naskh Arabic); PhpSpreadsheet RTL sheet direction; verified in Phase 07, not discovered in Phase 10.
+          XAMPP/PHP extension mismatch at install (pdo_mysql, mbstring, gd, zip, intl, fileinfo)MediumHighSetup Wizard runs an environment-check screen before allowing install to proceed, naming exactly which extension is missing.
+          Non-technical admin misconfigures the Setup WizardMediumMediumLive DB-connection test with a plain-language error before the wizard lets them continue.
+          Performance degradation at "thousands of students"LowMediumIndexes from Â§D enforced at migration time; pagination is a default, not an option; a query-review checklist item in Phase 09.
+          A CDN link gets pasted in for convenience during UI or reporting workMediumHighHard rule + Phase 09 checklist item: grep the shipped public/ and reports/ trees for http:///https:// before packaging.
+          Concurrent edits from two staff on the same recordLowLowOptimistic updated_at check per decision #13 â€” small-LAN usage makes heavier locking unnecessary.
+          Promotion mis-configured for a final-year grade (no "next grade" to promote into)LowMediumThe promotion workflow (Â§I.1) treats a grade with no defined successor as a forced graduate/transfer choice, never a silent no-op.
+        
+      
+
+      Note on "offline = secure." Every control in item 17 â€” PDO prepared statements, CSRF, output escaping, session hardening, password hashing, upload validation, login throttling â€” is treated as mandatory regardless of internet exposure. A LAN-only deployment still faces a malicious or careless local user, a compromised staff machine, or a USB-borne restore file; none of those threats require the internet to matter.
+    
+
+    
+    
+      
+        Section H Ø§Ù„Ø®Ø±ÙŠØ·Ø© Ø§Ù„Ø°Ù‡Ù†ÙŠØ©
+        Mind Map Structure
+        
+        The top-level branches, visually, then every branch expanded into the concrete tasks it resolves to â€” this is the structure to mirror in the project's mind-mapping tool.
+      
+
+      
+
+mindmap
+  root((Offline SchoolManagement System))
+    Product Requirements
+    Architecture
+    Database
+      Students
+      Teachers
+      Subjects
+      Classes
+      Grades
+      Academic Years
+      Relationships
+    Authentication
+    Dashboard
+    Students
+    Teachers
+    Classes
+    Subjects
+    Academic Years
+    Assignments
+    Reports
+    Backup and Restore
+    Settings
+    Security
+    UI and UX
+    Localization
+    Testing
+    Deployment
+    Documentation
+
+        High-level branches. Full task breakdown below.
+      
+
+      
+        
+          Product Requirements
+            
+              Twelve functional pillars confirmed (Â§A)
+              Fourteen open decisions resolved or explicitly deferred (Â§B)
+            
+          
+          Architecture
+            
+              Layered MVC: controller â†’ service â†’ repository (Â§C)
+              Middleware chain: session, CSRF, role guard, year context
+              i18n/RTL switch, error handler, activity logger as cross-cutting services
+            
+          
+          Database
+            
+              Studentsstudents, student_enrollments
+              Teachersteachers, teacher_subjects
+              Subjectssubjects, subject_staffing_requirements
+              Classes &amp; Gradesclasses, grades
+              Academic Yearsacademic_years (active/closed lifecycle)
+              Relationshipsteacher_assignments (the real many-to-many)
+              Migrations + idempotent seeds (Â§D)
+            
+          
+          Authentication
+            
+              roles, permissions, role_permissions, users
+              Login throttling, lockout, session hardening
+            
+          
+          Dashboard
+            
+              Summary cards: students, teachers, grades, classes, subjects
+              Religion / grade / class breakdown charts
+              Recent activity, quick actions, backup shortcut, active-year banner
+            
+          
+          Students
+            
+              CRUD, archive/restore, search/filter/sort/pagination
+              Promotion workflow: preview â†’ confirm â†’ transactional write (Â§D rationale)
+            
+          
+          Teachers
+            CRUD, archive, filter by subject
+          
+          Classes
+            Create/rename/archive, capacity, student count, assigned teachers
+          
+          Subjects
+            CRUD, archive, staffing-requirement configuration
+          
+          Academic Years
+            Create, activate, close; historical years read-only until reopened
+          
+          Assignments
+            
+              Teacher Ã— subject Ã— class Ã— year assignment CRUD
+              Weekly workload: total / highest / lowest / average, by subject and by class
+              Expected vs. actual load, staffing shortage per subject
+            
+          
+          Reports
+            
+              Religion statistics, class lists, class density ranking
+              Teachers by subject, workload report, staffing shortage report
+              Print CSS (A4), PDF (mPDF), Excel (PhpSpreadsheet) â€” all Arabic/RTL-correct
+            
+          
+          Backup and Restore
+            
+              One-click, timestamped, pure-PHP dump; backup history log
+              Guarded restore: validation â†’ emergency backup â†’ replay â†’ report
+            
+          
+          Settings
+            School identity, language default, expected workload, ID formats, staffing thresholds
+          
+          Security
+            PDO/prepared statements, CSRF, output escaping, upload validation, rate limiting (Â§C, item 17)
+          
+          UI and UX
+            Reusable components: navbar, sidebar, cards, tables, forms, modals, pagination, filters, empty states
+          
+          Localization
+            Arabic default / English toggle, deliberate RTL layout (not mirrored), bilingual reports
+          
+          Testing
+            Phase 09 checklist: auth, CRUD, promotion, reports, print/PDF/Excel, backup/restore, permissions, RTL, offline
+          
+          Deployment
+            Setup Wizard, environment check, htdocs packaging, vendored assets/dependencies
+          
+          Documentation
+            README, developer docs, administrator guide (adding students, promotion, backup, restore)
+          
+        
+      
+    
+
+    
+    
+      
+        Section I Ø³ÙŠØ± Ø§Ù„Ø¹Ù…Ù„
+        Business Workflows
+        
+        The six processes where getting the exact sequence wrong would either lose data or produce a wrong staffing number. Written as the step-by-step a service class will actually follow.
+      
+
+      I.1 Â· Student promotion
+      
+        Select source and target year.Source is the active or a recently-closed year; target is a year that already exists and has already been through year rollover (Â§I.4) so its classes exist before promotion runs.
+        System proposes defaults.Every active enrollment in the source year is listed, grouped by grade/class, each pre-assigned to the next grade by sort_order.
+        Admin marks exceptions.Per student or per whole class: repeat (same grade again, same grade_id on the new enrollment), graduate (final grade â€” forced when a grade has no defined successor), or one of two distinct leaving states corrected at the Final Gate (Â§S-5) â€” transferred (left for another school) or withdrawn (left school entirely / destination unknown). Both leaving states skip creating a new enrollment; which one is recorded is now an explicit admin choice, not a single conflated "transfer out (withdrawn)" option as originally drafted â€” the two carry genuinely different meaning for enrollment-drop reporting.
+        Admin assigns target classes.Bulk ("all of 2A â†’ 3A") or left unassigned for manual placement later; capacity is shown but only soft-warns, never blocks.
+        Preview.One table: every affected student, old grade/class/status â†’ new grade/class/status, with summary counts (promoted / repeated / graduated / transferred).
+        A promotion lock is acquired.Added in Â§O-17: before the batch starts, the service takes an app-level mutex (a single row/flag, not a DB table lock) so a second admin can't start a second promotion batch against the same source year concurrently. Released when the batch finishes or fails.
+        Confirm â†’ transaction.For each student: close the current enrollment (status set to promoted/repeated/graduated/transferred); for promoted/repeated students, insert a new student_enrollments row in the target year with previous_enrollment_id pointing back. One activity-log entry summarizes the whole batch â€” not one row per student.
+        Commit or roll back.Any failure rolls back the entire batch; nothing is left half-promoted. A student who already has an enrollment in the target year (e.g. the batch ran twice) is skipped with a friendly note, not a fatal error for the whole run.
+        Correcting a mistake.Added in Â§O-12, tightened at the Final Gate (Â§S-12): a narrow "Undo promotion" action, gated by the same students.promote permission as running a batch, lets the admin revert a single student â€” the source-year enrollment reopens to active, and the target-year row Undo just produced is deleted outright (not status-flipped â€” it never should have existed and carries zero dependent activity). Available only immediately after that promotion and only while nothing else has touched either row; this is the single sanctioned exception to Â§D's enrollment-immutability rule (Â§S-7), and the one correction path that doesn't require running an entire second promotion batch to fix one student.
+      
+
+      I.9 Â· Mid-year class reassignment â€” added at the Final Gate Â§S-6
+      A real, ordinary need the original blueprint never gave a legitimate outlet for: moving a currently-enrolled student from one class to another within the same grade and year â€” class rebalancing, a scheduling conflict, a parent request â€” without it being a promotion. Gated by the same students.edit permission Staff already hold (this is routine, not administrative), the action updates exactly one field on the student's current-year enrollment: class_id, and only while status = 'active'. The new class_id must belong to the same grade_id and academic_year_id as the enrollment already has â€” enforced by the same composite foreign key (Â§S-1) that protects promotion, so a mis-scoped reassignment fails at the database, not just the form. Logged in activity_logs like every other consequential action. This is the only routine path that touches an active enrollment outside promotion â€” it exists so staff never have a reason to ask a developer to "just update it in the database."
+
+      I.2 Â· Backup â€” corrected by audit Â§O-4
+      
+        Admin clicks "Back Up Now."Manual only in v1 â€” no scheduled/automatic backups (out of scope; see Â§G).
+        Dump schema, then data, in dependency order.Corrected: the original plan streamed data only. BackupService now writes each table's CREATE TABLE statement and its data, in a fixed dependency-safe order â€” reference tables first (schools, roles, permissions, role_permissions, grades, subjects, academic_years, settings), then users, then teachers/students, then classes, then student_enrollments/teacher_assignments/teacher_subjects/subject_staffing_requirements, then activity_logs/backups/login_attempts. Rows still stream in chunks (e.g. 500 at a time) â€” the database is never held in memory at once.
+        Finalize the file.Renamed to school_backup_YYYY-MM-DD_HHmm.sql, written with a leading signature comment that records the schema/migration version it was taken from â€” -- NIZAM-BACKUP v1 schema=0027 â€” so a restore can detect a version mismatch instead of silently applying an incompatible file.
+        Append a checksum.Added at the Final Gate (Â§S-8): a trailing -- CHECKSUM=&lt;sha256&gt; line, computed over everything written before it. This is the only way to catch a file truncated or corrupted after the fact (an interrupted copy to a USB drive, a bad download) â€” before replay starts, not mid-way through a DDL statement that can't be undone (Â§I.3).
+        Record the outcome.A backups row is written either way â€” status='success' with file size, or status='failed' with the partial file deleted and the technical reason logged (never shown raw to the admin).
+      
+      Why the schema is included now: a data-only dump assumes the live schema already matches â€” true today, but not guaranteed after months of migrations. A schema-inclusive dump can restore onto a freshly imaged PC with nothing but Apache and MySQL installed, without first hand-running migrations in the right order.
+
+      I.3 Â· Restore â€” corrected by audit Â§O-5
+      
+        Upload &amp; validate.Extension must be .sql; size checked against upload_max_filesize; the first bytes must contain the app's own NIZAM-BACKUP signature and a recognized schema version; the trailing checksum (Â§O-4/Â§S-8) is recomputed and compared â€” a mismatch (truncated upload, corrupted copy) is rejected right here, before any DB work starts, not discovered mid-replay.
+        Explicit warning.States the exact consequence in plain language ("this replaces all current data with the contents of this file") and requires a typed confirmation phrase, not just an OK button.
+        Automatic emergency backup.Runs the full I.2 procedure against the current database, tagged type='pre_restore', before anything is touched. This backup â€” not a database transaction â€” is the real safety net (see below).
+        Replay with foreign-key checks suspended.Corrected: the original plan said "replay inside a transaction," which is not actually possible here â€” see the note below. The replay instead runs with SET FOREIGN_KEY_CHECKS=0 for the duration (reset to 1 automatically when the connection closes, even on failure), so the dependency order from the backup file is a safety convention, not a hard requirement.
+        Validate structural sanity before declaring success.After replay, confirm at least one active Administrator user exists and at least one academic year exists. Extended at the Final Gate (Â§S-9): also spot-check the composite-FK invariants from Â§S-1/Â§S-2 with a direct query (any enrollment or assignment whose class doesn't share its own grade/year) â€” disabling FOREIGN_KEY_CHECKS for the replay means MySQL/MariaDB will not retroactively validate existing rows once checks are re-enabled, so a corrupted dump could otherwise import silently. Any of these checks failing treats the restore as failed even though the SQL itself executed without error.
+        Report the outcome.Success: activity log entry, confirmation message, forced re-login. Failure: the admin is told plainly what happened and pointed at the pre-restore emergency backup from step 3 to recover â€” never told "nothing was changed," which this design can no longer guarantee (see below).
+      
+      Why restore cannot be "one atomic transaction." MySQL/MariaDB DDL statements (CREATE TABLE, DROP TABLE, ALTER TABLE, and â€” in InnoDB â€” TRUNCATE) each cause an implicit commit and cannot be rolled back. A restore that recreates tables from a schema-inclusive backup (Â§I.2) is therefore never fully reversible by a SQL ROLLBACK alone, no matter how the code is written. The actual protection is the mandatory pre-restore emergency backup: if a restore fails partway, the admin recovers by restoring that file, not by relying on an in-flight rollback that MySQL cannot provide. Where the replay is data-only (tables already match the current schema), row deletion uses DELETE rather than TRUNCATE specifically so that portion stays inside a real, rollback-capable transaction â€” but the guarantee still stops at the first DDL statement.
+
+      I.4 Â· Academic-year activation, closing &amp; rollover â€” extended by audit Â§O-11
+      
+        CreateLabel + start/end dates. Â§O-11: creating a new year now offers "Start from previous year" â€” a YearRolloverService clones every active class from the outgoing year into the new year (same grade, name, capacity â€” new rows, since classes is scoped by academic_year_id) and clones every active teacher_assignments row onto the matching new class. The admin edits this starting point (reassign teachers, change periods, add/remove classes) before promotion runs â€” nothing is locked in by the clone.
+        ActivateSetting a year's is_active=1 deactivates the previous active year in the same transaction, and is additionally guaranteed at the database by the unique generated-column index from Â§O-2 â€” exactly one active year, ever, even under a bug or a race.
+        CloseBlocked (Â§S-3) unless zero enrollments in that year still have status='active' â€” checked live, before the flip, with a plain count and a plain message ("42 students still have unresolved enrollments â€” run promotion first") rather than a database error. Only once that count is zero does the action set is_closed=1, after which the service layer rejects any INSERT/UPDATE against student_enrollments, teacher_assignments, or classes scoped to that year.
+        ReopenA separate, permission-gated, logged action flips is_closed back to 0 â€” never implicit, never a side effect of another operation.
+      
+      Â§S-3 â€” why the guard is necessary: promotion writes to the source year's enrollments (closing each one to promoted/repeated/etc.) â€” exactly the write a closed year rejects. Without this guard, an admin who closes the outgoing year before promotion finishes would permanently strand every remaining active enrollment: promotion could never write to it again short of reopening the year, and reopening doesn't retroactively make "close the year, then promote" the safe order it looked like. The one hard rule that makes any admin ordering safe: promotion always precedes closing its own source year, and the guard above is what actually enforces that rather than merely recommending it.
+      Â§O-11 â€” why this matters: the original blueprint described promotion (Â§I.1) moving students into a target year's classes, but never described how those classes come to exist. Without rollover, every new year starts with zero classes and zero teacher assignments, and an admin would have to hand-recreate the entire class list and every assignment before promotion could even run â€” the single biggest practical blocker found in the original plan.
+
+      I.8 Â· Archiving a student or teacher â€” added by audit Â§O-13
+      Archiving is the only deletion path exposed anywhere in the UI for students, teachers, classes, subjects, grades, academic years, and users (Â§O-10) â€” there is no "delete" button for these entities, ever. Archiving a student or teacher who has an active enrollment or assignment in the current year is not a bare status flip: in the same transaction, StudentService/TeacherService also closes that current-year enrollment or assignment (status = 'withdrawn' / 'archived'). Without this, a report that joins on enrollment status could still list an archived student as if they were present, while a report that checks the student's own status column would correctly exclude them â€” two reports quietly disagreeing about the same student.
+
+      I.5 Â· Weekly workload calculation
+      WorkloadService, per teacher per explicitly specified year (O-23 â€” never "all years combined"): total = SUM(weekly_periods) WHERE status='active' across that teacher's teacher_assignments, also grouped by subject and by class. expected_weekly_capacity is read from that year's own academic_years.expected_weekly_capacity column (Â§S-11), not the live global setting; difference = total âˆ’ expected. Highest / lowest / average are computed across all active teachers in the year for the dashboard and the workload report (Â§K).
+
+      I.6 Â· Staffing shortage calculation
+      Per subject per year: shortage = required_teachers (subject_staffing_requirements) âˆ’ COUNT(DISTINCT teacher_id) WHERE subject_id=? AND status='active'. Positive means understaffed; zero or negative means adequately staffed. A subject with no configured requirement is excluded from the shortage report â€” it is not silently treated as "requires zero teachers."
+    
+
+    
+    
+      
+        Section J Ø§Ù„ØµÙ„Ø§Ø­ÙŠØ§Øª ÙˆØ§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª
+        Permissions &amp; Settings Catalog
+        
+        The concrete, seedable data behind decision #7 (authorization) and the "configurable, not hardcoded" rule in item 30 â€” every business rule the admin can tune lives here, not scattered through PHP.
+      
+
+      Permission catalog
+      
+        CodeModuleAdministratorStaff
+        
+          students.view / create / editStudentsâœ“âœ“
+          students.archive / restore / promoteStudentsâœ“â€”
+          teachers.viewTeachersâœ“âœ“
+          teachers.create / edit / archiveTeachersâœ“â€”
+          subjects.viewSubjectsâœ“âœ“
+          subjects.manageSubjectsâœ“â€”
+          classes.view / grades.viewClasses &amp; Gradesâœ“âœ“
+          classes.manage / grades.manageClasses &amp; Gradesâœ“â€”
+          assignments.viewAssignmentsâœ“âœ“
+          assignments.manageAssignmentsâœ“â€”
+          academic_years.viewAcademic Yearsâœ“âœ“
+          academic_years.manage / closeAcademic Yearsâœ“â€”
+          reports.view / exportReportsâœ“âœ“
+          backups.run / restoreBackupâœ“â€”
+          settings.manageSettingsâœ“â€”
+          users.manageUsersâœ“â€”
+          activity_log.viewActivity Logâœ“own actions only
+        
+      
+      Grants are fixed by role in v1 seed data per decision #7 â€” read from role_permissions, never an if ($role === 'admin') scattered through controllers. That data-driven check is what makes a future third role, or an admin-editable matrix, a seed-data change rather than a code change.
+      Â§S-12: two workflow actions didn't have an explicit permission mapping until this gate. Undo Promotion (Â§I.1 step 9) requires students.promote â€” the same permission as running a batch, since undoing one is a strictly smaller version of the same authority. Mid-year class reassignment (Â§I.9) requires only students.edit â€” Staff already hold it, matching that this is routine, not administrative, work.
+
+      Settings catalog
+      
+        KeyTypeDefaultPurpose
+        
+          school.name / school.name_arstringâ€”Set by the Setup Wizard; printed on every report header.
+          school.logo_pathstringnullOptional, shown on the dashboard and printed reports.
+          app.default_languagestringarLanguage a new session starts in.
+          academic.expected_weekly_capacityint20Template value only (Â§S-11) â€” copied onto academic_years.expected_weekly_capacity when a year is created. Â§I.5's calculation reads the year's own column, not this live setting, so changing this default never rewrites a past year's reported target.
+          academic.student_id_patternstringSTU-{year}-{seq:6}Decision #10.
+          academic.teacher_id_patternstringTCH-{seq:6}Decision #10.
+          backup.default_folderstringdatabase/backupsWhere one-click backups land by default.
+          security.login_max_attemptsint5Before lockout â€” item 17.
+          security.lockout_minutesint15Lockout duration after max attempts.
+          security.session_timeout_minutesint60Idle session expiry.
+          reports.school_footer_textstringnullOptional custom line on printed report footers.
+        
+      
+      Per-subject staffing targets live in subject_staffing_requirements (Â§D), not in this key-value table, since they're one row per subject per year rather than a single global value.
+    
+
+    
+    
+      
+        Section K Ù…ÙˆØ§ØµÙØ§Øª Ø§Ù„ØªÙ‚Ø§Ø±ÙŠØ±
+        Reports Specification
+        
+        Six reports, each pinned down to its filters, columns, and sort options now â€” so Phase 7 is a build, not a design discussion.
+      
+
+      
+        K.1 Â· Religion statisticsPrint Â· PDF Â· Excel
+        PurposeMuslim / Christian / Other counts and percentages, broken down by grade and class.
+        FiltersAcademic year (required), grade (optional), class (optional).
+        ColumnsGrade, Class, Muslim, Christian, Other, Total, Muslim %, Christian %.
+        SortBy grade then class order (not alphabetical â€” pedagogical order).
+      
+
+      
+        K.2 Â· Class student listPrint Â· PDF
+        PurposeA printable roster for a single class.
+        FiltersAcademic year, grade, class â€” all required.
+        Columns#, Student Code, Full Name, Religion, Date of Birth, Guardian Phone.
+        SortBy name or by student code (toggle).
+      
+
+      
+        K.3 Â· Class densityPrint Â· Excel
+        PurposeRank classes by how full they are.
+        FiltersAcademic year (required), grade (optional).
+        ColumnsClass, Grade, Enrolled Count, Capacity, Fill %.
+        SortEnrolled count, ascending or descending (toggle) â€” surfaces both over- and under-full classes.
+      
+
+      
+        K.4 Â· Teachers by subjectPrint Â· Excel
+        PurposeStaffing overview per subject.
+        FiltersAcademic year (required), subject (optional).
+        ColumnsSubject, Number of Teachers, Number of Assignments, Total Weekly Periods.
+        SortTeacher count, descending by default.
+      
+
+      
+        K.5 Â· Teacher workloadPrint Â· PDF Â· Excel
+        PurposePer-teacher load against the expected weekly capacity (Â§I.5).
+        FiltersAcademic year (required), subject (optional).
+        ColumnsTeacher, Subject(s), Weekly Periods, Expected, Difference.
+        SortHighest or lowest workload (toggle) â€” the two views that actually matter to an administrator.
+      
+
+      
+        K.6 Â· Staffing shortagePrint Â· Excel
+        PurposeWhich subjects are under-resourced, per Â§I.6's formula.
+        FiltersAcademic year (required).
+        ColumnsSubject, Required Teachers, Available Teachers, Shortage.
+        SortShortage, descending â€” worst gap first.
+      
+
+      Shared report conventions
+      
+        Every printed/exported report carries the same header block: school name and logo, report title, the active academic year, applied filters, and a "generated on" timestamp â€” the "report metadata" the brief asks for (item 10).
+        Multi-page PDF output gets a footer with page numbers; A4 margins and page breaks are set so a table row never splits across pages (item 11).
+        Filters are reflected in the URL query string, so a specific report view is bookmarkable/shareable on the school's own LAN without re-selecting filters.
+      
+    
+
+    
+    
+      
+        Section L Ù…ÙƒØªØ¨Ø© Ø¹Ù†Ø§ØµØ± Ø§Ù„ÙˆØ§Ø¬Ù‡Ø©
+        UI Component Library
+        
+        Built once in Phase 5 (Â§F), reused by every module in Phase 6 â€” this is what stops the "copied UI code across dozens of files" the brief explicitly warns against (item 23).
+      
+
+      
+        ComponentStates &amp; behaviorRTL note
+        
+          NavbarSchool name, active academic year badge, language toggle, user menu with logout.User menu opens toward the reading direction (left in RTL, right in LTR).
+          SidebarLinks the current role lacks permission for are hidden, never just disabled â€” a disabled-but-visible link invites a support call asking why it's greyed out.Sits on the right in RTL, left in LTR â€” a real re-flow, not a mirrored icon.
+          Data tableLoading skeleton â†’ populated rows, or an empty state (icon + one-sentence explanation + the one action that resolves it). Sortable headers, server-side pagination footer.Column order itself re-orders per Â§C's RTL example, not just text-align.
+          FormInline error text under each invalid field; one summary alert at the top only if submission fails; submit button disables and shows a spinner while in flight.Label position and required-field asterisk follow reading direction.
+          ModalReserved for confirm-destructive prompts and quick-view only â€” every create/edit form gets its own page, per item 18's "avoid excessive popups."Close control on the reading-direction-appropriate corner.
+          Alert / toastSuccess (green check) auto-dismisses; error (red) stays until dismissed â€” a mistake shouldn't disappear before it's read.Slides in from the reading-direction edge.
+          PaginationPage numbers + previous/next.Arrow direction mirrors â€” "next" always points toward where new content actually appears.
+          Filter barPersists the last-used filters in the URL query string (see Â§K).Filter chips flow in reading order.
+          Empty stateIcon + one-sentence explanation + the single action that resolves it â€” e.g. "No students yet â€” Add the first student," never a bare blank table.â€”
+        
+      
+    
+
+    
+    
+      
+        Section M Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±
+        Testing &amp; QA Checklist
+        
+        Item 39's test areas, made concrete enough to actually check off in Phase 9.
+      
+
+      
+        AreaVerifies
+        
+          AuthenticationCorrect login; wrong password rejected; lockout triggers at security.login_max_attempts and releases after security.lockout_minutes; session expires after the configured idle timeout.
+          CRUD (every module)Create/edit/view/archive/restore round-trips correctly; validation rejects bad input both client- and server-side (item 25); duplicate/unique-constraint violations show a friendly message, not a raw DB error.
+          Search, filter, sort, paginationEvery listed filter in Â§A/Â§K actually narrows results; pagination math is correct at the last partial page; sort direction toggles correctly.
+          PromotionPreview matches what actually gets written; a final-grade student is forced to graduate/transfer (Â§I.1); re-running an already-processed batch skips cleanly instead of erroring; a forced failure mid-batch rolls back completely.
+          ReportsEvery report in Â§K returns figures matching a manual query against the same filters â€” never a cached or client-computed number.
+          Printing / PDF / ExcelArabic renders correctly (no reversed ligatures, no boxes) in all three; A4 margins and page breaks hold on a genuinely long class list; report metadata header/footer present on every page.
+          Backup / restoreA backup file restores cleanly into a fresh database; a corrupted or foreign (non-Nizam) file is rejected before any write; a forced mid-restore failure leaves the pre-restore emergency backup intact and the live data untouched.
+          PermissionsA Staff-role session cannot reach an Administrator-only route even by typing the URL directly â€” server-side, not just a hidden sidebar link.
+          RTLEvery screen in Â§L checked in Arabic, not just the ones obviously exercised in demos â€” tables, forms, modals, pagination, charts, printed reports.
+          Offline operationDisconnect the network entirely (or block outbound at the firewall) and exercise every module â€” a hidden CDN reference is a Phase 9 failure, not a Phase 10 surprise (see the CDN risk in Â§G).
+        
+      
+    
+
+    
+    
+      
+        Section N Ø§Ù„ØªÙˆØ«ÙŠÙ‚ ÙˆØ§Ù„ØªØ±ÙƒÙŠØ¨
+        Documentation &amp; Installation Plan
+        
+        What ships alongside the code in Phase 10, and the exact first-run sequence a non-technical administrator follows.
+      
+
+      Documentation set
+      
+        
+          README
+            
+              What this is, requirements, XAMPP prerequisites
+              Installation (copy to htdocs, run the Setup Wizard)
+              Backup &amp; restore quick reference
+            
+          
+          Developer documentation
+            
+              Architecture (Â§C), database (Â§D), module map (Â§E)
+              Coding conventions: PSR-12 style, one class per file, repositories own all SQL
+              Extension points: adding a new report, a new setting, a new permission code
+            
+          
+          Administrator guide
+            
+              Adding/editing students and teachers
+              Running a promotion (Â§I.1), step by step with screenshots
+              Generating and exporting reports (Â§K)
+              Backing up, and â€” separately, clearly marked â€” restoring (Â§I.2, Â§I.3)
+              Opening a new academic year and closing the old one (Â§I.4)
+            
+          
+        
+      
+
+      First-run Setup Wizard â€” hardened by audit Â§O-6
+      
+        Environment check.Verifies PHP version and required extensions (pdo_mysql, mbstring, gd, zip, intl, fileinfo) before anything else; names exactly what's missing if something fails. If the DB user connects but lacks CREATE/ALTER/INDEX privileges, that is reported as its own distinct error at the next step, not a generic failure.
+        Database connection.Admin enters host/name/user/password; the wizard tests the connection live and only proceeds on success.
+        Schema install.Runs every pending migration (Â§D) inside the wizard, then the idempotent seed scripts (roles, permissions, default subjects/grades).
+        School profile.Name (Arabic + English), logo, address, phone â€” written to the single schools row (decision #6).
+        First academic year.Label and start/end dates; created and activated in one step.
+        Administrator account.Username and password for the first login â€” created with the Administrator role, no default/blank credentials ever shipped.
+        Done â€” and locked.Redirects straight to login and writes a setup.completed marker. Every subsequent request to any /setup/* route checks that marker first and redirects to login if it's set â€” no exceptions, no in-app "redo setup" button. Re-entering setup mode after go-live requires an explicit file-system or CLI action, never a page reachable by an unauthenticated visitor.
+      
+      Â§O-6 â€” why this matters: the original plan described the wizard's happy path only. Two gaps: (1) closing the browser between steps 3 and 6 left no described way to resume â€” the wizard now re-derives its position from what's actually true in the database (migrations applied? an admin user exists?) rather than tracking its own separate progress flag, so refreshing or reopening it always resumes at the right step; (2) an unguarded /setup route reachable after go-live is a backdoor that lets anyone on the LAN create a new Administrator account with zero authentication â€” the lockout above closes that.
+    
+
+    
+    
+      
+        Section O ØªØ¯Ù‚ÙŠÙ‚ Ù…Ø§ Ù‚Ø¨Ù„ Ø§Ù„ØªÙ†ÙÙŠØ°
+        Pre-Implementation Architecture Audit
+        
+        A critical, production-readiness pass over Â§Aâ€“Â§N â€” not a summary of them. Thirty-five findings across the twenty required audit areas: 10 CRITICAL, 9 HIGH, 13 MEDIUM, 3 LOW. Every CRITICAL and HIGH finding has already been folded back into Â§Bâ€“Â§N above (look for the Â§O-N tags); this section is the record of why, not a duplicate of the fix itself.
+      
+
+      O.1 Â· Database integrity and normalization
+      
+        O-1 Â· settings.key is a reserved SQL wordCritical
+        Current designThe settings table used a column literally named key.
+        ProblemKEY is a reserved word in MySQL/MariaDB â€” every reference needs backtick-quoting or the query errors.
+        Why it mattersOne unquoted reference â€” a hand-written debugging query, a future developer unaware of the reservation â€” breaks or throws a syntax error in a table every module reads from.
+        Recommended solutionRename the column to setting_key.
+        AlternativeBacktick-quote key everywhere, forever â€” fragile, depends on every future query remembering the reservation.
+        Blueprint changeApplied â€” Â§D settings table now reads setting_key.
+      
+
+      
+        O-9 Â· Teacher qualification vs. teacher assignment is undecidedCritical
+        Current designteacher_subjects (qualification) and teacher_assignments (actual duty) exist as two separate tables with no described relationship between them.
+        ProblemNothing stops assigning a teacher to a subject they have no listed qualification for, and no decision was ever made on whether that should be allowed.
+        Why it mattersReal schools genuinely use substitute teachers outside their primary subject â€” a hard database gate would block a legitimate scenario, but leaving the rule totally undecided invites different developers to implement conflicting assumptions later.
+        Recommended solutionApplication-layer soft validation: AssignmentService checks the pairing against teacher_subjects and warns, but never hard-blocks.
+        AlternativeA BEFORE INSERT trigger that hard-enforces qualification â€” correct for the common case, actively wrong for legitimate substitute coverage.
+        Blueprint changeApplied â€” Â§D teacher_assignments now states the soft-check rule explicitly.
+      
+      Otherwise, Â§D's schema holds up: every table is already in third normal form, no comma-separated ID fields exist anywhere, and the students / student_enrollments split (Â§D's own rationale) is the correct normalization for year-scoped vs. year-independent facts.
+
+      O.2 Â· Foreign keys, indexes, unique constraints, and delete behavior
+      The RESTRICT/CASCADE split in Â§D is sound, but it was doing more rhetorical work than it can actually do â€” see O-10 below. Composite unique constraints (enrollment-per-year, assignment-per-class-per-year, class-name-per-grade-per-year) are all correctly modeled. No new CRITICAL/HIGH finding beyond O-10 (filed under O.11, where it more precisely belongs) and O-22/O-25 in the medium table.
+
+      O.3 Â· Academic-year isolation and historical data preservation
+      The student_enrollments lineage chain is the right mechanism, and closed-year write-blocking is correctly scoped. Two things needed tightening: the active-year invariant itself (folded into O-2, filed under O.1 since it's fundamentally an integrity constraint) and what "preserved" means when biographical data changes (see medium findings O-26/O-27) â€” both addressed below rather than repeated here.
+
+      O.4 Â· Student promotion edge cases
+      
+        O-3 Â· student_enrollments.status has no 'graduated' valueCritical
+        Current designÂ§I.1 describes a final-grade student as forced to "graduate," but Â§D's ENUM only listed active, promoted, repeated, transferred, withdrawn.
+        ProblemA direct inconsistency between the documented workflow and the schema meant to support it â€” attempting to record a graduation would fail outright.
+        Why it mattersCaught now, this costs nothing. Caught after Phase 3, it's a migration plus a review of every statement that already assumed the old enum list.
+        Recommended solutionAdd 'graduated' to the ENUM.
+        AlternativeA separate boolean "graduated" flag instead of an enum value â€” adds a second field every graduation-aware query must also check, no real benefit.
+        Blueprint changeApplied â€” Â§D ENUM corrected.
+      
+      
+        O-12 Â· No correction path for a single mis-promoted studentHigh
+        Current designPromotion was described purely as a one-way batch with no undo.
+        ProblemFixing one student promoted into the wrong section required running an entire second promotion batch, or a direct SQL edit.
+        Why it mattersThis is a routine admin slip, not a rare edge case. A system with no small-scale undo pushes staff toward exactly the manual database editing item 29 exists to prevent.
+        Recommended solutionA narrow "Undo promotion" action per student, available only while the new enrollment has no dependent activity yet.
+        AlternativeNo undo â€” document a manual SQL fix procedure for developers. Reintroduces the manual-editing problem for a routine mistake.
+        Blueprint changeApplied â€” Â§I.1 gained an explicit step 9.
+      
+      
+        O-17 Â· Two admins could run promotion for the same year at onceHigh
+        Current designNo concurrency guard around the promotion batch itself (only per-record optimistic concurrency, decision #13, was specified â€” a different scenario).
+        ProblemA second promotion batch starting mid-way through the first could interleave writes against the same source-year enrollments.
+        Why it mattersPromotion is rare and whole-school in scope â€” a race here corrupts far more data at once than a single-record edit conflict ever could.
+        Recommended solutionA simple app-level mutex (one flag row) held for the duration of a promotion batch.
+        AlternativeRely on the per-student UNIQUE(student_id, academic_year_id) constraint to fail the second batch's duplicate inserts â€” technically prevents corruption, but produces a confusing wall of individual errors instead of a clean "a promotion is already running" message.
+        Blueprint changeApplied â€” Â§I.1 gained an explicit step 6.
+      
+
+      O.5 Â· Teacher qualification vs. teacher assignment rules
+      Covered fully as O-9 under O.1, where the underlying integrity question actually lives â€” filed here for the audit checklist's sake, not repeated.
+
+      O.6 Â· Weekly workload and staffing-shortage calculations
+      Both formulas (Â§I.5/Â§I.6) are correct as specified. Two implementation-discipline notes carried to the medium table rather than blocking anything: calculations must always take an explicit academic year (O-23), and aggregates must be computed in SQL, not a PHP loop per group (O-24).
+
+      O.7 Â· Backup correctness
+      
+        O-4 Â· Backup was data-only, with no guaranteed table orderCritical
+        Current designBackupService listed tables (effectively via SHOW TABLES) and streamed INSERT statements only.
+        ProblemA data-only dump can't restore onto a database whose tables don't exist yet, and the table order wasn't guaranteed to respect foreign-key dependencies during replay.
+        Why it mattersA backup is only as good as its ability to actually restore â€” discovering this gap during a real disaster is the worst possible moment.
+        Recommended solutionSchema-inclusive dump (CREATE TABLE + data) written in a fixed, dependency-safe table order, with the schema/migration version embedded in the file's signature comment.
+        AlternativeData-only dump plus a hard requirement that restore only ever targets a database on the exact same migration version â€” offers no disaster-recovery path onto a blank machine.
+        Blueprint changeApplied â€” Â§I.2 rewritten.
+      
+
+      O.8 Â· Restore correctness and MySQL/MariaDB transaction/DDL risks
+      
+        O-5 Â· Restore cannot actually run "inside one transaction"Critical
+        Current designÂ§I.3 originally claimed the whole replay ran in a transaction that would fully roll back on any failure.
+        ProblemMySQL/MariaDB DDL (CREATE/DROP/ALTER TABLE, and InnoDB TRUNCATE) auto-commits â€” none of it can be rolled back. The original claim was flatly incorrect for a schema-inclusive restore.
+        Why it mattersTrusting this claim in code would mean a partial DDL failure mid-restore leaves the database half-migrated while the app believes â€” and tells the admin â€” that "nothing was changed." That's a false promise at the exact moment the admin most needs an accurate one.
+        Recommended solutionReframe the safety model: the mandatory pre-restore emergency backup (already planned) is the actual recovery mechanism, not an in-flight rollback; data-only steps use DELETE (transactional) instead of TRUNCATE; SET FOREIGN_KEY_CHECKS=0 for the replay's duration rather than depending on dump order alone.
+        AlternativeForbid schema-inclusive restores entirely, requiring the exact same schema version every time â€” simpler, but reopens the O-4 disaster-recovery gap.
+        Blueprint changeApplied â€” Â§I.3 rewritten with an explicit risk-note explaining why.
+      
+
+      O.9 Â· Setup Wizard failure/recovery behavior
+      
+        O-6 Â· No resumability, and no lockout after go-liveCritical
+        Current designThe wizard was described as a linear happy path with no stated behavior for an interrupted run or for what happens to the wizard route after setup finishes.
+        Problem(1) Closing the browser mid-wizard had no described recovery. (2) Nothing stopped /setup from staying reachable and functional after go-live.
+        Why it matters(1) Bricks first-run for exactly the least technical user the brief protects most. (2) Is a live authentication bypass â€” anyone on the LAN could later create a new Administrator account with zero credentials.
+        Recommended solutionDerive the wizard's position from actual database state (migrations applied? an admin exists?) rather than a separate progress flag; write a setup.completed marker and gate every /setup/* route behind it, permanently, after completion.
+        AlternativeProtect /setup with a one-time install token deleted after use instead of a completed-marker gate â€” functionally similar, marginally more moving parts.
+        Blueprint changeApplied â€” Â§N wizard steps rewritten.
+      
+
+      O.10 Â· ID generation and collision risks
+      
+        O-7 Â· The ID-numbering scheme had a race conditionCritical
+        Current designDecision #10 implied computing the next sequence number as MAX(seq)+1 in application code.
+        ProblemClassic read-then-write race: two near-simultaneous "add student" requests can compute the same "next" number.
+        Why it mattersA collision either fails a UNIQUE constraint (a confusing error for a staff member who just wanted to add a student) or, without that constraint, silently issues two students the same code.
+        Recommended solutionInsert the row first â€” MySQL's own AUTO_INCREMENT is atomic â€” then UPDATE that same row's code using its own new id. No separate counter, no race.
+        AlternativeA dedicated per-year counter table with SELECT ... FOR UPDATE row locking, only needed if the school insists numbering resets to 1 each academic year.
+        Blueprint changeApplied â€” Â§B decision #10 rewritten.
+      
+
+      O.11 Â· Archive vs. permanent deletion semantics (and academic-year rollover, filed here as the other must-fix structural gap)
+      
+        O-11 Â· New academic years start with zero classes and zero assignmentsCritical
+        Current designÂ§I.1 described promotion moving students into a target year's classes; nothing described how those classes come to exist for the new year.
+        Problemclasses is (correctly) scoped by academic_year_id, so a brand-new year genuinely starts with zero class rows and zero teacher assignments â€” there is nowhere for promotion to place a student until someone manually recreates the entire class list.
+        Why it mattersThis is the single biggest practical blocker found in the whole blueprint: as written, the promotion feature cannot function at the one moment per year it's needed, because its precondition was never built.
+        Recommended solutionA YearRolloverService, run when a new year is created, that clones the outgoing year's active classes and teacher assignments into new rows for the new year as an editable starting point.
+        AlternativeRequire the admin to manually recreate every class and assignment each year â€” technically works, is the exact "excessive workflow complexity" item 18 warns against.
+        Blueprint changeApplied â€” Â§I.4 retitled and extended with the rollover step.
+      
+      
+        O-10 Â· No entity ever had hard-delete explicitly ruled outHigh
+        Current designON DELETE RESTRICT was treated as "the" protection against destructive data loss.
+        ProblemRESTRICT only stops deleting a row that still has children. It does nothing to stop permanently deleting a row with zero current children but real historical significance â€” e.g. a teacher with no active assignments but named in old activity-log entries.
+        Why it mattersA "temporarily convenient" hard-delete button on an old record could silently erase the subject of past audit-log entries â€” undermining the accountability item 16 exists to guarantee.
+        Recommended solutionNever expose a hard-delete action in the UI for the core entities (students, teachers, classes, subjects, grades, academic years, users); archive is the only path. RESTRICT remains a secondary database-level net, not the primary control.
+        AlternativeAllow hard-delete, but only via a DBA connecting directly to MySQL, entirely outside the application â€” already effectively true; needed stating as explicit policy rather than left implicit.
+        Blueprint changeApplied â€” Â§D index/constraint strategy gained an explicit bullet.
+      
+      
+        O-13 Â· Archiving didn't say what happens to the student's active enrollmentHigh
+        Current designArchiving a student or teacher was described as a status flip on their own record only.
+        ProblemNo described handling for a current-year active enrollment or assignment left dangling after the parent record is archived.
+        Why it mattersA report joining on enrollment status could still list an archived student as present, while a report checking the student's own status field correctly excludes them â€” two reports silently disagreeing about the same student.
+        Recommended solutionArchiving closes the current-year enrollment/assignment in the same transaction as the archive action itself.
+        AlternativeLeave it to every report to join both tables and filter on both statuses â€” correct only if every report author remembers to, every time.
+        Blueprint changeApplied â€” new Â§I.8.
+      
+
+      O.12 Â· Authentication, authorization, CSRF, XSS, session security, and local-LAN threats
+      
+        O-16 Â· Login throttling only keyed on username+IPHigh
+        Current designLockout triggered per (username, IP) pair after too many failures.
+        ProblemSpreading guesses across many different usernames from one IP never trips any single username's lockout.
+        Why it mattersCloses an account-enumeration path that the per-username design left wide open, at negligible extra cost.
+        Recommended solutionA secondary, higher-threshold IP-wide cool-down (e.g. 20 failures across any usernames from one IP within 15 minutes) alongside the existing per-username+IP lock.
+        AlternativeCAPTCHA after N failures â€” the brief explicitly bans bypassing/relying on CAPTCHAs for an offline admin tool with no external service to verify against; not viable here.
+        Blueprint changeApplied â€” Â§C Authentication row.
+      
+      
+        O-19 Â· CSRF comparison must be constant-timeHigh
+        Current design"Verified in middleware" â€” no comparison method specified.
+        ProblemA plain ==/=== string comparison leaks timing information an attacker could in principle exploit to guess the token byte-by-byte.
+        Why it mattersCheap to get right, easy to get wrong by default in plain PHP with no framework enforcing it.
+        Recommended solutionAlways compare with hash_equals().
+        AlternativeNone reasonable â€” this is a one-line fix with no real trade-off.
+        Blueprint changeApplied â€” Â§C CSRF row.
+      
+      
+        O-18 Â· Upload hardening needed more than re-encodingHigh
+        Current designDecision #11: MIME/extension whitelist plus re-encoding images on upload.
+        ProblemRe-encoding alone is one layer; a stored file still keeps its original name and is served by Apache guessing its content type from the extension.
+        Why it mattersDefense in depth matters most exactly where a single control might have a flaw nobody's found yet.
+        Recommended solutionRandom generated filenames; a controller that serves the file with an explicitly-set Content-Type; an .htaccess in the uploads folder disabling PHP execution outright.
+        AlternativeStore uploads entirely outside the web root, proxied through a controller for every request â€” stronger still, but adds a real request-path cost for something a folder-level execution lockout already neutralizes.
+        Blueprint changeApplied â€” Â§B decision #11.
+      
+      Residual, not-fully-fixable risk carried to the medium table: session cookies can't carry the Secure flag over the plain HTTP a LAN-only XAMPP install typically uses (O-31).
+
+      O.13 Â· Offline dependency completeness, including fonts and third-party assets
+      
+        O-15 Â· "mPDF has RTL support" was never turned into a bundled assetHigh
+        Current designDecision #3 named mPDF for its Arabic/RTL capability.
+        ProblemmPDF ships a limited default font set; without explicitly bundling and registering an Arabic-shaping font, it silently falls back to boxes/tofu instead of Arabic glyphs.
+        Why it matters"The library supports it" and "the deliverable actually renders it" are different claims â€” this is exactly the kind of gap that surfaces as a Phase 7 surprise instead of a Phase 2 checklist item.
+        Recommended solutionName the exact asset: Amiri-Regular.ttf/Amiri-Bold.ttf bundled under vendor-assets/fonts/ and registered in mPDF's config, as a Phase 7 checklist line item.
+        AlternativeNoto Naskh Arabic or Cairo â€” any properly-licensed, properly-shaping Arabic font works; Amiri is simply well-established and freely licensed for embedding.
+        Blueprint changeApplied â€” Â§B decision #3.
+      
+
+      O.14 Â· Arabic RTL/PDF/Excel correctness
+      Â§C's on-screen RTL discipline (columns re-order, not just re-align; Western numerals; consistent Gregorian dates) needs to be carried into exports with the same intent, not assumed to follow automatically from "the library supports RTL" â€” see medium finding O-32 for the concrete export-specific version of this rule.
+
+      O.15 Â· Concurrent editing
+      The per-record optimistic-concurrency decision (#13) is still the right call for ordinary edits. The one gap specific to a bulk, whole-school operation was promotion, already fixed as O-17 above.
+
+      O.16 Â· Import/export safety
+      
+        O-14 Â· Bulk student import (brief item 33) was never scopedHigh
+        Current designThe module map (Â§E) never mentioned an import feature at all.
+        ProblemA genuine, silent gap against the original brief, which explicitly asks for CSV/Excel import "where practical," with mandatory preview and validation if built.
+        Why it mattersBuilding it properly â€” with the same previewâ†’validateâ†’confirm discipline as promotion â€” is real scope competing directly with the ten-phase roadmap; silently dropping it is worse than explicitly deferring it.
+        Recommended solutionExplicitly scope bulk import OUT of v1 (manual entry only), documented as a deliberate, reasoned deferral â€” see Â§P.
+        AlternativeBuild it into v1 with the same preview/confirm pattern as promotion â€” legitimate if a school's onboarding roster is genuinely too large for manual entry; costs roughly one extra module's worth of Phase 6/7 time.
+        Blueprint changeRecorded as a Final Decision in Â§P; no schema change either way, since no import-specific tables exist.
+      
+
+      O.17 Â· Performance with thousands of students
+      The index strategy in Â§D holds at this scale without changes. Two implementation-discipline notes carried to the medium table: dashboard/report aggregates must be computed in GROUP BY SQL, never a PHP loop issuing one query per group (O-24), and pagination page size must be capped server-side regardless of what a request asks for (O-25).
+
+      O.18 Â· Logging and auditability
+      No CRITICAL/HIGH finding here â€” activity_logs' loose (non-FK) entity reference is an accepted, necessary trade-off given it must point at many different tables; the UI simply needs to handle a since-vanished entity gracefully (O-28, medium). Retention is addressed as O-33 (low).
+
+      O.19 Â· Configuration/settings architecture
+      No CRITICAL/HIGH finding here. Two implementation notes carried to the medium table: settings need a typed get/set wrapper so value_type is actually enforced (O-20), and the Settings screen should group by concern rather than list everything flat, so a security-relevant setting isn't sitting next to the report footer text (O-21).
+
+      O.20 Â· Long-term maintainability
+      No CRITICAL/HIGH finding here. One explicit convention worth locking in now rather than debating later: migrations are forward-only â€” there are no scripted down() migrations, since the real rollback path for this scale of deployment is always "restore the pre-migration backup," not a hand-maintained reverse script (O-30, medium).
+
+      Medium findings â€” address during implementation
+      
+        #Audit areaFinding
+        
+          O-20Configurationsettings.value_type isn't enforced anywhere â€” build one small typed SettingsService::get()/set() that casts on the way in and out, rather than letting every caller handle raw strings.
+          O-21ConfigurationGroup the Settings screen by concern (Profile / Localization / Academic Rules / Security / Backup) so a non-technical admin can't casually weaken a security setting while changing the report footer.
+          O-22Workload calcDon't rely on MySQL/MariaDB CHECK constraints for business validation (e.g. weekly_periods &gt; 0) â€” older MariaDB builds bundled with some XAMPP releases silently ignore them. Validate ranges in the service layer.
+          O-23Workload calcÂ§I.5/Â§I.6 formulas must always take an explicit academic_year_id parameter, defaulting to the active year â€” never "all years combined," which would double-count a teacher across years.
+          O-24PerformanceDashboard and report aggregates must be computed as GROUP BY queries, never a PHP loop issuing one query per grade/class/subject.
+          O-25PerformancePagination must cap the page size server-side regardless of what a request asks for â€” a crafted page_size=999999 shouldn't be able to dump a whole table in one response.
+          O-26Year isolationSubjects and grades aren't year-versioned â€” renaming one changes how it reads in every past report too. Accepted trade-off (identity persists, wording can be corrected); document it so it isn't mistaken for a bug later.
+          O-27Year isolationEditing a student's or teacher's biographical data is not a frozen historical snapshot â€” reports reflect current data at generation time, except enrollment fields (grade/class/status), which genuinely are frozen via Â§D's enrollment chain. State this explicitly so it's a decision, not a surprise.
+          O-28Auditabilityactivity_logs.entity_id is a loose, non-FK reference by necessity. The activity-log viewer must handle a since-archived-or-vanished entity gracefully ("this record no longer exists") rather than erroring.
+          O-29Scope boundaryweekly_periods is a count, not a calendar â€” there is no timetable/scheduling module (which day, which period) anywhere in this system. Stated explicitly so it isn't assumed later.
+          O-30MaintainabilityMigrations are forward-only, no scripted down() â€” rollback strategy is always "restore the pre-migration backup," a deliberate simplification appropriate to a single-school deployment.
+          O-31LAN securitySession cookies can't carry the Secure flag over the plain HTTP most schools will actually run XAMPP on â€” a residual risk on an unmanaged LAN. Document it, and document enabling XAMPP's self-signed HTTPS vhost as an optional hardening step, never a requirement that adds setup complexity for a non-technical admin.
+          O-32RTL correctnessPDF/Excel exports need the same "reading-order, not just visual-mirror" discipline as the on-screen RTL table example in Â§C â€” column order and date format must be set explicitly per export, not left to mPDF/PhpSpreadsheet's RTL flags alone.
+        
+      
+
+      Low findings â€” future improvement
+      
+        #Finding
+        
+          O-33activity_logs is never auto-pruned. Fine at this scale (audit trails are small relative to student data) â€” revisit only if it ever becomes an actual storage concern, and only as an explicit admin action, never silently.
+          O-34A future admin-editable permission matrix, beyond the fixed two-role seed in decision #7 â€” already flagged there as a deliberate v1 scope limit.
+          O-35A true per-year-resetting ID counter table (the alternative already named in decision #10), if the school specifically wants numbering to restart at 1 each academic year.
+        
+      
+    
+
+    
+    
+      
+        Section P Ø§Ù„Ù‚Ø±Ø§Ø±Ø§Øª Ø§Ù„Ù…Ø¹Ù…Ø§Ø±ÙŠØ© Ø§Ù„Ù†Ù‡Ø§Ø¦ÙŠØ©
+        Final Architecture Decisions
+        
+        Every decision implementation must follow, consolidated from Â§B and corrected by Â§O. If Phase 3 code conflicts with anything here, the code is wrong, not this list â€” per the brief's own rule (item 40), a real conflict gets raised for discussion, not silently worked around.
+      
+
+      Backend &amp; architecture
+      
+        Hand-rolled lightweight MVC â€” front controller, router, PSR-4 autoload â€” not a framework (decision #1).
+        Composer for development only â€” vendor/ shipped populated; the school never installs anything (decision #2).
+        Single school per installation â€” a schools table exists for the profile row (name/logo on reports), not as a multi-tenancy boundary (decision #6, client-confirmed 2026-09-06).
+        Bulk student import is out of scope for v1 â€” manual entry only; revisit post-launch (O-14).
+        No timetable/scheduling module â€” weekly_periods is a count, not a calendar (O-29).
+      
+
+      Database
+      
+        utf8mb4 / utf8mb4_unicode_ci, stated explicitly in every migration â€” never inherited from server defaults (O-8).
+        settings.setting_key, not key (O-1).
+        student_enrollments.status includes 'graduated' (O-3).
+        Exactly one active academic year, enforced by a generated-column unique index â€” not application logic alone (O-2).
+        A new academic year clones the previous year's classes and teacher assignments as an editable starting point (O-11).
+        Teacher-subject qualification is a soft, warn-not-block check at the service layer (O-9).
+        No hard-delete route, anywhere in the UI, for students, teachers, classes, subjects, grades, academic years, or users â€” archive only (O-10).
+        Archiving a student or teacher closes their current-year enrollment/assignment in the same transaction (O-13).
+        IDs derive their numeric part from the row's own AUTO_INCREMENT id, assigned after insert â€” never a pre-computed MAX+1 (O-7); numbering does not reset per year in v1.
+        Migrations are forward-only; there is no scripted rollback beyond restoring a backup (O-30).
+      
+
+      Security
+      
+        Login throttling is per-username+IP and a secondary, higher-threshold IP-wide cool-down (O-16).
+        CSRF tokens compared with hash_equals() only (O-19).
+        Uploads: random filenames, explicit Content-Type on serve, PHP execution disabled in the uploads folder, plus re-encoding (O-18, decision #11).
+        The Setup Wizard is permanently locked behind a setup.completed marker the moment it finishes â€” no exceptions (O-6).
+        Session cookies cannot carry Secure over plain HTTP on an unmanaged LAN â€” documented residual risk; a self-signed HTTPS vhost is offered as optional, not required (O-31).
+      
+
+      Backup &amp; restore
+      
+        Backups are schema-inclusive (DDL + data), written in a fixed dependency-safe table order, signature-tagged with a schema/migration version (O-4).
+        Restore is protected by a mandatory pre-restore emergency backup â€” not by a SQL transaction, which cannot fully wrap DDL in MySQL/MariaDB (O-5).
+        Restore validates structural sanity (at least one active Administrator, at least one academic year) before declaring success, in addition to the file's header signature.
+      
+
+      Reporting &amp; offline assets
+      
+        Arabic-shaping font files (Amiri or equivalent) are bundled and registered in mPDF explicitly â€” not assumed from "mPDF supports RTL" (O-15).
+        Exported PDF/Excel column order and date format follow the same reading-order discipline as on-screen RTL tables, set explicitly per export (O-32).
+      
+
+      Every other decision in Â§B (backend framework choice, PDF/Excel/chart libraries, one-database-for-all-years, concurrent-editing model, installation model) stands as originally written â€” the audit found no reason to revisit them.
+    
+
+    
+    
+      
+        Section Q Ø¹Ù‚Ø¯ Ø§Ù„ØªÙ†ÙÙŠØ°
+        Implementation Contract
+        
+        Explicit rules for Phase 3 onward. Every rule here traces back to a decision in Â§B/Â§P or a finding in Â§O â€” nothing here is a new, undiscussed preference. Five structural pieces below were found missing at the Final Gate (Â§S) and are added here so a developer never has to invent them mid-Phase-6.
+      
+
+      Screen inventory â€” added Â§S-14
+      
+        ModuleScreens
+        
+          AuthLogin
+          DashboardDashboard (single screen)
+          StudentsList, Add/Edit, View, Reassign Class (modal), Promotion Preview, Promotion Confirm, Archived list
+          TeachersList, Add/Edit, View, Archived list
+          SubjectsList, Add/Edit
+          Grades &amp; ClassesGrades list, Classes list, Add/Edit class
+          AssignmentsList, Add/Edit, Workload summary
+          Academic YearsList, Create (with rollover option), Activate/Close confirm
+          ReportsReports index, one view per report in Â§K (6), shared print view
+          Backup &amp; RestoreBackup/Restore screen, Backup history
+          SettingsFive grouped screens per Â§O-21 â€” Profile, Localization, Academic Rules, Security, Backup
+          UsersList, Add/Edit (Administrator only)
+          Activity LogList
+          Setup WizardSeven steps per Â§N (not reachable after completion, Â§O-6)
+        
+      
+
+      Routes â€” added Â§S-14
+      Convention: GET /{module} (list), GET /{module}/create + POST /{module} (add), GET /{module}/{id}/edit + POST /{module}/{id} (edit), POST /{module}/{id}/archive and /restore. Every module follows this except the workflow-specific routes below, which don't fit plain CRUD:
+      
+        RouteController Â· actionPermission
+        
+          GET/POST /students/promotionPromotionController::preview / confirmstudents.promote
+          POST /students/{id}/undo-promotionPromotionController::undostudents.promote
+          POST /students/{id}/reassign-classStudentController::reassignClassstudents.edit
+          POST /academic-years/{id}/activateAcademicYearController::activateacademic_years.manage
+          POST /academic-years/{id}/closeAcademicYearController::closeacademic_years.close
+          GET /reports/{key}ReportController::showreports.view
+          GET /reports/{key}/export/{format}ReportController::exportreports.export
+          POST /backupsBackupController::runbackups.run
+          POST /backups/restoreBackupController::restorebackups.restore
+          GET /backups/{id}/downloadBackupController::downloadbackups.run
+          GET/POST /setup/{step}SetupController::stepnone pre-completion; unreachable after (Â§O-6)
+        
+      
+
+      Validation rules â€” added Â§S-14
+      
+        FieldRule
+        
+          students.full_nameRequired, 2â€“150 characters.
+          students.date_of_birthRequired, valid date, not in the future, sanity-checked against a configurable plausible age range (catches a mistyped year, not a hard business rule).
+          students.religionRequired, one of the seeded enum values â€” never free text.
+          students/teachers .phone / .guardian_phoneOptional; digits, spaces, + and - only, 7â€“20 characters.
+          teachers.emailOptional; valid email format if present.
+          classes.nameRequired; unique within (grade, year) â€” the DB constraint is the backstop, but the form checks first for a friendly message.
+          classes.capacityOptional; positive integer if present.
+          academic_years.labelRequired, unique, must match YYYY/YYYY with the second year exactly one more than the first.
+          academic_years.start_date / end_dateBoth required; end strictly after start.
+          teacher_assignments.weekly_periodsRequired, positive integer â€” validated in the service layer, not a DB CHECK (O-22).
+          subject_staffing_requirements.required_teachersRequired, non-negative integer (zero is valid: "not offered this year").
+          users.usernameRequired, unique, no whitespace.
+          users.passwordRequired on create, minimum 8 characters.
+          settings.*Cast and validated against its seeded value_type before writing (O-20) â€” never stored as an unchecked raw string.
+        
+      
+
+      Error behavior â€” added Â§S-14
+      
+        ScenarioWhat the user seesWhat's logged
+        
+          Form validation failureInline error under each invalid field, one summary alert at the top.Nothing â€” this is expected, not an error.
+          Unique-constraint violationA specific friendly message mapped from the constraint name (e.g. "A class named 3B already exists for this grade and year").Debug-level only.
+          Permission denied"You don't have permission for this action."Activity log entry â€” repeated denials are themselves a signal worth an administrator's attention.
+          CSRF token invalid/expired"Your session expired â€” please try again."Logged.
+          Closed-year write rejected"This academic year is closed and can't be changed. Reopen it first if this was intentional."Logged.
+          Promotion lock already held (O-17)"A promotion is already running for this year. Try again shortly."Logged.
+          Restore validation failureThe specific reason (signature / checksum / version / structural sanity) named in plain language â€” never a generic failure.Full technical detail logged.
+          Uncaught exception / DB error"Something went wrong on our end. Try again, and tell your administrator if this keeps happening." â€” never a stack trace or SQL error text.Full stack trace to storage/logs with a reference id shown to the user, so it can be quoted back to a developer.
+        
+      
+
+      Service method inventory â€” added Â§S-14, names only, no signatures
+      
+        ServiceMethods
+        
+          AuthServicelogin, logout
+          LoginThrottleServicerecordAttempt, isLocked
+          StudentServicecreate, update, archive, restore, reassignClass
+          EnrollmentServicecurrentEnrollmentFor, historyFor
+          PromotionServicepreview, confirm, undoLast
+          TeacherServicecreate, update, archive, restore
+          AssignmentServicecreate, update, archive, checkQualification
+          WorkloadServicecalculateForTeacher, calculateForYear
+          ClassServicecreate, update, archive
+          AcademicYearServicecreate, activate, close, reopen
+          YearRolloverServicecloneClasses, cloneAssignments
+          ReportServicebuild (one method, dispatches by report key)
+          ExportServicetoPdf, toExcel
+          BackupServicerun, verify
+          RestoreServicevalidate, execute
+          SettingsServiceget, set
+          ActivityLoggerlog
+        
+      
+
+      Database
+      
+        Every CREATE TABLE states CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci explicitly.
+        Every write goes through PDO prepared statements. No string-concatenated SQL, anywhere, ever â€” not even for a "trusted" internal value.
+        No column is named key, order, group, or any other SQL reserved word.
+        No business-rule validation (ranges, positivity) lives in a CHECK constraint â€” validate in the service layer (O-22).
+        Every migration is forward-only and idempotent-safe to re-run; no down() scripts (O-30).
+        A hard-delete SQL statement against a core entity table is only ever run by a human DBA outside the application â€” the application itself never issues one.
+        student_enrollments and teacher_assignments reference classes through the composite foreign keys in Â§S-1/Â§S-2 â€” never a plain single-column class_id FK, which would let grade or year drift out of sync with the referenced class.
+        Closing an academic year first counts remaining active enrollments in it and refuses if that count is nonzero (Â§S-3) â€” never a bare UPDATE academic_years SET is_closed=1.
+      
+
+      PHP
+      
+        Controllers validate input shape and delegate â€” no business logic, no SQL, in a controller.
+        All SQL lives in repositories. Services never construct queries directly.
+        One class per file, PSR-4 autoloaded, PSR-12 style.
+        Every multi-step write that touches more than one table runs inside an explicit transaction, with the specific exception of restore's DDL steps, which cannot be (O-5) â€” that exception is documented in the code, not silent.
+        ID generation always follows the insert-then-update-own-id pattern (O-7) â€” never a pre-computed MAX+1.
+      
+
+      Frontend
+      
+        No CDN reference of any kind, anywhere in shipped HTML/CSS/JS â€” Bootstrap, jQuery, Chart.js are vendored files in public/assets/vendor.
+        Every reusable UI element (table, form, modal, pagination, filter bar, empty state) is built once as a component (Â§L) and reused â€” never copy-pasted per module.
+        RTL is re-ordered, not mirrored: column order, not just text-align, changes with direction (Â§C).
+        Every table's pagination request is capped server-side regardless of the requested page size (O-25).
+      
+
+      Security
+      
+        CSRF tokens are compared with hash_equals(), never == (O-19).
+        Login throttling checks both (username, IP) and IP-alone thresholds (O-16).
+        Every output goes through the e() escaping helper â€” no raw variable echoes in a view, ever, including report templates (Â§S-13) â€” a student's free-form notes field or an admin-set report footer is exactly as untrusted as any other user input before it reaches HTML that mPDF will parse.
+        Uploaded files get random filenames, an explicit served Content-Type, and live under a folder with PHP execution disabled (O-18).
+        The Setup Wizard checks its own completion marker on every request to any /setup/* route, with no exception (O-6).
+        The project root ships a deny-all .htaccess; only public/ is reachable regardless of whether the school points Apache at the project root or at public/ directly (Â§S-4).
+        Every file-serving route (uploads, backups, generated exports) resolves the file by a database id looked up server-side â€” never by a client-supplied filename or path (Â§S-10).
+      
+
+      Offline
+      
+        Zero external network calls of any kind â€” no CDN, no font host, no API â€” checked by grepping the shipped tree for http:///https:// before every package (Â§G, Phase 9).
+        mPDF's Arabic font files are physically present in the repository under vendor-assets/fonts/ and registered â€” not assumed (O-15).
+      
+
+      Reporting
+      
+        Every report query is a real, live database query â€” never a client-side JavaScript computation, never a cached/faked number.
+        Every report's filters, columns, and sort options match Â§K exactly â€” no silent scope changes during Phase 7.
+        Every printed/exported report carries the shared header/footer convention from Â§K (school identity, active year, filters, generated-on timestamp, page numbers on multi-page PDF).
+        Workload and staffing-shortage calculations always take an explicit academic year â€” never "all years combined" (O-23).
+      
+
+      Backup &amp; restore
+      
+        Backups are schema-inclusive, dependency-ordered, checksum-appended, and signature-tagged with a schema version (O-4, Â§S-8).
+        Restore always creates a pre_restore emergency backup before touching anything, with no way to skip this step.
+        Restore verifies the checksum before touching the database, then runs with SET FOREIGN_KEY_CHECKS=0 for its duration, and validates structural sanity â€” an active Administrator exists, an academic year exists, and no composite-FK invariant (Â§S-1/Â§S-2) is violated â€” before declaring success (O-5, Â§S-9).
+        No user-facing message ever claims a failed restore left "nothing changed" â€” the actual guarantee is the emergency backup, and messaging says so (O-5).
+      
+
+      Testing
+      
+        Every item in Â§M's checklist is exercised before a phase is considered done â€” not deferred to Phase 9 as a batch.
+        Promotion, backup, and restore are tested against realistic data volumes, not a three-row demo dataset.
+        RTL is tested on every screen touched in a given phase, not just the screens an English-speaking developer happens to look at.
+      
+
+      Code quality
+      
+        No comment explains what code does when the code already says so â€” comments exist only for non-obvious why.
+        No abstraction, helper, or configuration flag is added for a scenario that isn't in this document â€” extend the blueprint first if a real need appears, then the code.
+        A discovered conflict between a requirement and this contract is raised for discussion before a workaround is implemented â€” per the brief's own item 40, applied to this contract as much as to the original brief.
+      
+    
+
+    
+    
+      
+        Section R Ø®Ø±ÙŠØ·Ø© Ø§Ù„ØªÙ†ÙÙŠØ° Ø§Ù„Ø°Ù‡Ù†ÙŠØ©
+        Implementation-Ready Mind Map
+        
+        Organized by execution order (Â§F's ten phases), not by topic â€” this is the version meant to be worked from, task by task, not just read.
+      
+
+      
+
+mindmap
+  root((NizamImplementation))
+    Phase 3 Database
+      Migrations
+      Seeds
+      Charset and collation
+    Phase 4 Core Infrastructure
+      Config and DB wrapper
+      Auth and sessions
+      CSRF and RoleGuard
+      Router and error handler
+      i18n helper
+    Phase 5 UI Foundation
+      Layout shell
+      RTL and LTR switch
+      Vendored assets
+      Reusable components
+    Phase 6 Core Modules
+      Dashboard
+      Academic Years and Rollover
+      Grades and Classes
+      Subjects
+      Teachers
+      Students and Promotion
+      Assignments and Workload
+    Phase 7 Reports
+      Six report builders
+      Print CSS
+      PDF export
+      Excel export
+    Phase 8 Backup and Restore
+      Backup engine
+      Restore engine
+      Emergency backup
+    Phase 9 Testing
+      Auth and permissions
+      CRUD and promotion
+      Reports and exports
+      Backup and restore
+      RTL and offline
+    Phase 10 Final QA and Docs
+      README
+      Developer docs
+      Administrator guide
+      Packaging
+
+        Execution-order overview. Full task breakdown below.
+      
+
+      
+        
+          Phase 3 â€” Database
+            
+              Migration 001: schools, settings (with setting_key, O-1)
+              Migration 002: roles, permissions, role_permissions, users
+              Migration 003: academic_years + generated-column unique-active-year index (O-2)
+              Migration 004: grades, subjects, subject_staffing_requirements
+              Migration 005: classes
+              Migration 006: students, student_enrollments (status ENUM incl. graduated, O-3)
+              Migration 007: teachers, teacher_subjects, teacher_assignments
+              Migration 008: activity_logs, backups, login_attempts
+              Migration runner + migrations bookkeeping table
+              Seeds: two roles, full permission catalog (Â§J), default subjects/grades, no default academic year (created by the wizard instead)
+              Verify: every table created with utf8mb4/utf8mb4_unicode_ci explicitly (O-8)
+            
+          
+          Phase 4 â€” Core Infrastructure
+            
+              config.example.php â†’ config.php, PDO connection wrapper
+              Session bootstrap, password_hash/password_verify, session regenerate-on-login
+              Login throttling: per-username+IP and IP-wide (O-16)
+              CSRF middleware using hash_equals() (O-19)
+              RoleGuard middleware reading role_permissions
+              AcademicYearContext middleware (resolves active year, blocks writes to closed years)
+              Router + front controller (public/index.php)
+              Centralized error handler + file logger (storage/logs)
+              __() translation helper, e() escaping helper, date/number formatting helpers
+            
+          
+          Phase 5 â€” UI Foundation
+            
+              Layout shell: navbar, sidebar (role-aware visibility, Â§L)
+              RTL/LTR switch: &lt;html dir&gt;, vendored bootstrap.rtl.min.css swap
+              Vendor Bootstrap, jQuery, Chart.js locally under public/assets/vendor
+              Components: data table, form, modal, alert/toast, pagination, filter bar, empty state (Â§L)
+              Settings screen grouped by concern (Profile / Localization / Academic / Security / Backup, O-21)
+            
+          
+          Phase 6 â€” Core Modules
+            
+              DashboardSummary cards, religion/grade/class charts via GROUP BY queries (O-24), recent activity, quick actions
+              Academic YearsCreate, activate (DB-enforced single active year, O-2), close, reopen, year rollover clone (O-11)
+              Grades &amp; ClassesCRUD, capacity, per-year scoping, student count, assigned teachers
+              SubjectsCRUD, archive, staffing-requirement configuration (Â§I.6)
+              TeachersCRUD, archive with enrollment/assignment cascade (O-13), subject qualifications, filter by subject
+              Students
+                CRUD, ID generation via insert-then-update-own-id (O-7)
+                Archive with enrollment cascade (O-13); search/filter/sort/pagination with capped page size (O-25)
+                Promotion: preview, promotion lock (O-17), transactional batch, undo-single-student (O-12)
+              
+              Assignments &amp; Workload
+                Assignment CRUD with soft qualification check (O-9)
+                Workload calculation always year-scoped (O-23); staffing-shortage calculation
+              
+            
+          
+          Phase 7 â€” Reports
+            
+              Six report builders exactly matching Â§K's filters/columns/sort
+              Shared report header/footer component (school identity, filters, timestamp, page numbers)
+              Print CSS: A4 margins, no dashboard chrome, no split table rows
+              mPDF integration: Amiri font bundled and registered (O-15); export column order matches reading-order discipline (O-32)
+              PhpSpreadsheet integration: RTL sheet direction, explicit date cell format (O-32)
+            
+          
+          Phase 8 â€” Backup &amp; Restore
+            
+              Backup: schema+data dump, dependency-safe table order, versioned signature (O-4)
+              Restore: signature + version validation, mandatory pre-restore emergency backup, FOREIGN_KEY_CHECKS=0 replay, post-replay structural sanity check (O-5)
+              Backup history screen; failure messaging that names the emergency backup, never claims "nothing changed" (O-5)
+            
+          
+          Phase 9 â€” Testing
+            
+              Every row of Â§M's checklist, per module, as that module ships â€” not batched at the end
+              Forced-failure tests: mid-promotion failure, mid-restore failure, wizard interruption at every step (O-6)
+              Offline check: full network disconnect, grep shipped tree for http:///https://
+            
+          
+          Phase 10 â€” Final QA &amp; Docs
+            
+              README, developer docs, administrator guide per Â§N's table of contents
+              Setup Wizard lockout verified live (O-6): confirm /setup is unreachable after completion
+              Packaging for htdocs: vendor/ populated, no dev-only files, config.example.php present
+            
+          
+        
+      
+    
+
+    
+    
+      
+        Section S Ø§Ù„Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ù†Ù‡Ø§Ø¦ÙŠØ© Ù‚Ø¨Ù„ Ø§Ù„ØªÙ†ÙÙŠØ°
+        Final Pre-Implementation Gate
+        
+        Â§Aâ€“Â§R re-read as one system, not as seventeen independent sections â€” specifically hunting for contradictions between them. Seventeen findings: 4 BLOCKER, 8 HIGH, 2 MEDIUM, 3 LOW. Every BLOCKER and HIGH finding is already corrected back into Â§Bâ€“Â§Q above (tagged Â§S-N) and cross-checked against every section it touches.
+      
+
+      A. Student enrollment integrity
+      
+        S-1 Â· An enrollment's grade/year could disagree with its own classBlocker
+        Current designstudent_enrollments carried grade_id, class_id, and academic_year_id as three independent single-column foreign keys.
+        ProblemNothing enforced that the enrollment's own grade_id/academic_year_id actually matched the grade_id/academic_year_id of the classes row named by class_id â€” exactly the "Grade 3 enrollment pointing at a Grade 2 class" scenario named in this gate's brief.
+        Why it mattersThis is the single row every report, every promotion calculation, and every dashboard count reads to know "what grade is this student in." An impossible combination here doesn't stay contained â€” it silently corrupts every downstream number.
+        Recommended solutionKeep grade_id on the enrollment (it must remain independently readable for the unassigned-class state after promotion), but enforce agreement with a composite foreign key: FOREIGN KEY (class_id, grade_id, academic_year_id) REFERENCES classes(id, grade_id, academic_year_id), backed by a new UNIQUE (id, grade_id, academic_year_id) on classes. NULL class_id (unassigned) is simply not checked, by ordinary FK semantics â€” exactly the case that must stay legal.
+        AlternativeDrop grade_id from student_enrollments entirely, deriving grade only through class_id â€” clean in theory, but breaks the moment an enrollment is promoted-but-unassigned, since then there would be no class row to derive the grade from at all.
+        Blueprint changeApplied â€” Â§D classes and student_enrollments tables.
+      
+
+      B. Teacher assignment integrity
+      
+        S-2 Â· An assignment's class could belong to a different yearBlocker
+        Current designteacher_assignments carried class_id and academic_year_id as two independent single-column foreign keys.
+        ProblemIdentical shape to S-1: nothing stopped a row naming academic_year_id = 2026 while class_id pointed at a class that actually belongs to 2025.
+        Why it mattersWorkload and staffing-shortage calculations (Â§I.5/Â§I.6) are entirely dependent on assignments being correctly year-scoped â€” a single cross-year assignment silently inflates one year's workload numbers and understates another's.
+        Recommended solutionFOREIGN KEY (class_id, academic_year_id) REFERENCES classes(id, academic_year_id) â€” covered by the same composite unique index added for S-1.
+        AlternativeApplication-layer validation only (check on save) â€” correct for the happy path, but offers no protection against a direct data-layer bug or a future developer bypassing the service layer.
+        Blueprint changeApplied â€” Â§D teacher_assignments table.
+      
+
+      C. Academic-year lifecycle
+      
+        S-3 Â· Closing a year could permanently strand un-promoted studentsBlocker
+        Current designÂ§I.4 described closing a year as a simple flag flip; Â§I.1 described promotion as writing status changes onto the source year's enrollments. Nothing connected the two.
+        ProblemThe stated lifecycle order (create â†’ roll over â†’ promote â†’ verify â†’ activate â†’ close) is only safe if promotion always runs before closing â€” but nothing enforced that order. An admin closing the source year first (a plausible, even natural-seeming click, "the year is over, let's close it") would then find promotion itself blocked, since promotion needs to write to the very enrollments the closed year now protects.
+        Why it mattersThis is exactly a "workflow that attempts to modify data that should already be immutable/closed" turned into a dead end rather than a guardrail â€” the students concerned would be trapped with no clean path forward except reopening the year, which doesn't retroactively fix the ordering problem.
+        Recommended solution"Close" first counts remaining active-status enrollments in that year and refuses, with a plain count, if any remain. This makes the correct order the only order that succeeds, rather than a convention the UI merely suggests.
+        AlternativeWarn but allow closing anyway ("42 students unresolved â€” close anyway?") â€” leaves the same trap available on purpose, just with a confirmation step in front of it; rejected as too easy to click through under end-of-year time pressure.
+        Blueprint changeApplied â€” Â§I.4.
+      
+
+      D. Promotion / repetition / transfer / graduation
+      
+        S-5 Â· "Transferred" and "withdrawn" were conflated in the workflowHigh
+        Current designÂ§D's ENUM correctly listed both transferred and withdrawn as distinct values, but Â§I.1's own workflow text described a single option: "transfer out (withdrawn, no new enrollment)."
+        ProblemA duplicated/conflicting business rule in the sense the gate asked to hunt for: two enum values exist, but the one place that's supposed to explain when each applies never actually distinguished them â€” different staff members would record the same real-world event under different statuses with no guidance.
+        Why it mattersEnrollment-drop reporting (a real registrar concern â€” transfers-out vs. drop-outs are administratively distinct categories) becomes meaningless if the two statuses are applied inconsistently.
+        Recommended solutionState the distinction explicitly as two separate admin-selectable options: transferred (left for another school) and withdrawn (left entirely / destination unknown).
+        AlternativeCollapse to a single status and drop the distinction â€” simpler, but throws away real reporting value for no technical benefit.
+        Blueprint changeApplied â€” Â§I.1 step 3.
+      
+      
+        S-6 Â· No legitimate path existed for an ordinary mid-year class moveHigh
+        Current designThe only thing that could ever change a student's class_id was the once-a-year promotion batch.
+        ProblemReal schools need to move a currently-enrolled student to a different section mid-year â€” class rebalancing, a scheduling conflict â€” and nothing in the blueprint gave staff a sanctioned way to do it.
+        Why it mattersA missing legitimate path for a routine need is exactly what pushes staff toward asking a developer to "just update it in the database," undoing the entire "no manual database editing" principle for something that should be a two-click, logged, everyday action.
+        Recommended solutionA narrow "Reassign class" action, gated by students.edit, touching only class_id on an active enrollment, constrained to the same grade/year by the S-1 composite FK.
+        AlternativeRequire a full withdraw-and-re-enroll to move a student â€” technically avoids adding a new action, but destroys the enrollment's continuity for what is genuinely a same-year, same-grade change, not a real re-enrollment.
+        Blueprint changeApplied â€” new Â§I.9.
+      
+      
+        S-7 Â· Enrollment immutability was implied, never stated as a ruleHigh
+        Current designNo screen was ever described that would let staff freely edit a past enrollment â€” but nothing explicitly forbade one being added later, either.
+        ProblemAn unstated rule is not a rule a future developer (or future session of this same assistant) is bound by â€” "we never described an edit screen" is silence, not a guarantee.
+        Why it mattersThis is the exact category the gate named directly: "workflows that attempt to modify data that should already be immutable/closed." The enrollment chain is the system's entire historical record â€” it needs an explicit, written invariant, not an absence of counter-examples.
+        Recommended solutionState it directly: once status leaves active, a row is never edited by any general-purpose action, full stop, with exactly one named, logged, narrowly-scoped exception (Undo Promotion, S-6's sibling in Â§I.1).
+        AlternativeEnforce it only at the database level (e.g., a trigger rejecting updates to non-active rows) â€” more bulletproof, but heavier than this system needs given the rule is already enforced by simply never building an edit screen for it.
+        Blueprint changeApplied â€” Â§D student_enrollments.
+      
+      Final-year graduation was re-checked directly: a graduating student's last enrollment carries status='graduated', produces no new row, and its full previous_enrollment_id chain remains queryable forever under the immutability rule above â€” confirmed consistent, no further finding.
+
+      E. Backup and restore
+      
+        S-8 Â· Nothing detected a truncated or corrupted backup file before replayHigh
+        Current designÂ§I.2/Â§I.3 (post-Â§O) validated a header signature and a schema version, but nothing checked whether the file's actual bytes were complete and unaltered.
+        ProblemA file truncated by an interrupted copy to USB, or otherwise corrupted, could pass the header check and begin replaying â€” and since DDL can't be rolled back (Â§O-5), a failure discovered mid-replay is strictly worse than one caught before it starts.
+        Why it mattersCorruption detection was explicitly named in this gate's brief, and the cost of catching it upfront versus mid-disaster is the entire difference between "the restore was refused" and "the database is now half-migrated."
+        Recommended solutionAppend a SHA-256 checksum line to the backup file, computed over everything before it; verify it during upload, before any DB work starts.
+        AlternativeRely on MySQL's own SQL-syntax error if a truncated file breaks mid-statement â€” catches some truncation, but only after DDL has likely already run, and never catches a file corrupted in a way that's still syntactically valid SQL.
+        Blueprint changeApplied â€” Â§I.2, Â§I.3.
+      
+      
+        S-9 Â· Disabling FK checks during replay could let corrupted data in silentlyHigh
+        Current designÂ§O-5's fix runs replay with SET FOREIGN_KEY_CHECKS=0; Â§O-5's structural check afterward only confirmed an admin and an academic year exist.
+        ProblemMySQL/MariaDB do not retroactively validate existing rows when FOREIGN_KEY_CHECKS is turned back to 1 â€” so a corrupted dump that violates the new S-1/S-2 composite-FK invariants could import cleanly and stay silently wrong.
+        Why it mattersThe two composite FKs exist specifically to prevent impossible enrollment/assignment states â€” a restore path that can bypass them without detection would quietly reopen the exact hole they were built to close.
+        Recommended solutionExtend the post-replay structural check with a direct query for any enrollment or assignment whose class doesn't share its own grade/year â€” treat any hit as a failed restore.
+        AlternativeRe-enable FOREIGN_KEY_CHECKS mid-replay after each table instead of at the very end â€” doesn't help, since MySQL still never scans pre-existing rows retroactively; the explicit query is the only real check.
+        Blueprint changeApplied â€” Â§I.3.
+      
+      Everything else re-checked clean: schema+data completeness, dependency ordering, and MariaDB/MySQL syntax compatibility were already addressed at Â§O-4/Â§O-5/Â§O-8, and hold up under this second pass. utf8mb4_unicode_ci specifically (rather than MySQL 8's default utf8mb4_0900_ai_ci, which MariaDB doesn't have at all) is what makes a dump portable between the two â€” worth restating here since this gate's brief asked for it directly.
+
+      F. Security
+      
+        S-4 Â· The mandated install model exposes backups and student data on the LANBlocker
+        Current designÂ§C's file structure kept database/, storage/, etc. as siblings of public/, with storage/ merely annotated "never web-served directly."
+        ProblemThe brief's own installation model is "copy the whole project folder into htdocs." Under XAMPP's default Apache config, everything under htdocs is web-servable unless told otherwise â€” so following the documented install steps exactly as written would put every backup (password hashes, every student's name/DOB/religion/phone) and every uploaded file at a guessable, browsable LAN URL.
+        Why it mattersThis is the most severe finding in either gate: total, silent exposure of every student's personal data and every account's password hash to anyone on the same network, caused by following the installation instructions correctly rather than by misconfiguring anything.
+        Recommended solutionShip a deny-all .htaccess at the project root (Require all denied), which works under the exact "copy the folder, done" install model with no vhost edit required â€” XAMPP's default AllowOverride All on htdocs is what makes this sufficient.
+        AlternativeRequire the admin to configure an Apache vhost pointing at public/ â€” the textbook-correct fix, offered here as an optional hardening step for a school with IT support, but not viable as the only protection given the non-technical target user.
+        Blueprint changeApplied â€” Â§C.
+      
+      
+        S-10 Â· File-serving routes had no explicit path-traversal ruleHigh
+        Current designUpload-side hardening (random filenames, execution lockout, O-18) was specified; nothing was said about how a backup download or generated report is served back.
+        ProblemA naive download endpoint that takes a filename or path from the request is a classic path-traversal vector, explicitly named in this gate's security checklist.
+        Why it mattersCheap to prevent by construction, expensive to discover after the fact.
+        Recommended solutionEvery file-serving route resolves its file by a database id, looked up server-side â€” never a client-supplied filename or path fragment.
+        AlternativeSanitize/validate a client-supplied path (reject .., resolve and confirm it stays inside the expected folder) â€” works if implemented perfectly every time; resolving by id removes the entire attack surface instead of policing it.
+        Blueprint changeApplied â€” Â§B decision #11.
+      
+      Password hashing, CSRF, session regeneration on login (the session-fixation mitigation), login throttling, the Setup Wizard lockout, MIME validation, SQL injection defense, and audit logging were all re-checked against this gate's list and found consistent with Â§O's earlier fixes â€” no further finding. XSS escaping's scope was tightened to explicitly include report templates (Â§S-13, medium table).
+
+      Elsewhere in the system
+      
+        S-11 Â· Expected weekly capacity wasn't year-scoped, unlike the identical staffing-requirement patternHigh
+        Current designacademic.expected_weekly_capacity was a single flat, global settings value used by every year's workload report.
+        ProblemA conflicting business rule in the sense this gate asked to hunt for: subject_staffing_requirements correctly gives the structurally identical "target number" its own row per year, but the conceptually equivalent workload target didn't get the same treatment.
+        Why it mattersChanging the policy value for next year would silently rewrite what every past year's workload report claims the target always was â€” a report reflecting today's settings for historical events it should have frozen.
+        Recommended solutionMove it onto academic_years as its own column, copied from the global setting at year-creation time and editable per year afterward.
+        AlternativeLeave it global, and note in every historical report that the "expected" figure reflects current policy, not the policy in force at the time â€” technically consistent, but a worse report for no real savings.
+        Blueprint changeApplied â€” Â§D academic_years, Â§I.5, Â§J.
+      
+      
+        S-14 Â· The Implementation Contract was missing five structural piecesHigh
+        Current designÂ§Q defined rules by category (database, PHP, frontend, security, ...) but never enumerated the actual screens, routes, field-level validation rules, or error-response conventions a developer would need to start Phase 6 without inventing them.
+        ProblemThis gate's own brief requires the contract be "sufficiently precise that another developer could implement the system without having to make major architectural decisions" â€” a real, checkable bar the document didn't yet clear.
+        Why it mattersEvery one of these five gaps (screen inventory, routes, validation catalog, error catalog, service method inventory) is exactly the kind of decision that, left unmade, gets made ad hoc and differently by whoever happens to write that module first.
+        Recommended solutionAdd all five directly to Â§Q, at the same level of detail as everything already there â€” names and shapes, never actual code.
+        AlternativeLeave these to be decided during Phase 6 module-by-module â€” the more common approach, and exactly what produces the inconsistent conventions this gate exists to prevent.
+        Blueprint changeApplied â€” Â§Q gained five new subsections.
+      
+
+      Medium findings â€” address during implementation
+      
+        #Finding
+        
+          S-12Undo Promotion and Reassign Class had no explicit permission mapping until this gate â€” clarified as students.promote and students.edit respectively (applied, Â§J).
+          S-13The e() escaping rule's scope was ambiguous as to whether it covered report templates â€” clarified that it does; a student's free-form notes or an admin-set report footer is exactly as untrusted as any other input before mPDF parses it (applied, Â§Q).
+        
+      
+
+      Low findings â€” polish/documentation only
+      
+        #Finding
+        
+          S-15Session-ID regeneration on login (Â§C) is the system's session-fixation mitigation; worth naming explicitly by that term for anyone auditing this document against a security checklist later.
+          S-16MIME-sniffing a .sql text file is inherently unreliable â€” the app's own signature/checksum (Â§I.3) is the real authority for restore uploads, not the MIME type, which is only ever a first, cheap filter.
+          S-17If the exact XAMPP bundle (MySQL vs. MariaDB, and which version) a given school runs is unknown ahead of time, the backup/restore round-trip should be tested against both during Phase 9 â€” a testing-discipline reminder, not a design change.
+        
+      
+
+      Cross-reference check
+      Every corrected section was re-read against every other section it touches: Â§D's new composite FKs against Â§I.1/Â§I.9's writes (both only ever write consistent triples); Â§I.4's close-guard against Â§I.1's promotion sequence (the guard is what makes any admin ordering safe, not just the recommended one); Â§J's permission table against every new/changed action in Â§I (all mapped); Â§Q's new validation/error/route catalogs against Â§K/Â§L/Â§N (no conflicts â€” the report and UI specs already assumed exactly this level of behavior, they just hadn't been written down centrally). No BLOCKER or HIGH finding remains unresolved, and no correction introduced a new one.
+
+      Architecture: FROZEN FOR IMPLEMENTATION. Every BLOCKER and HIGH finding from both gates (Â§O and Â§S) has been corrected directly in the blueprint, and the cross-reference check above found no new contradiction introduced by those corrections. The 2 MEDIUM and 3 LOW items here, plus Â§O's 13 MEDIUM and 3 LOW, are explicitly acceptable to carry into implementation â€” none of them can force an architectural change once Phase 3 begins. This document, Â§A through Â§T, is the implementation contract.
+    
+
+    
+    
+      
+        Section T Ø®Ø·Ø© Ø§Ù„ØªÙ†ÙÙŠØ° Ø§Ù„ØªÙØµÙŠÙ„ÙŠØ©
+        Task-Level Implementation Plan
+        
+        Â§F's ten phases, broken into epics and tasks with dependencies, deliverables, acceptance criteria, and the tests that verify them. Granular enough to start Phase 3 without stopping to ask an architectural question; not so granular it turns into a line-by-line script.
+      
+
+      
+        Phase â†’ Epic â†’ TaskDepends onDeliverableAcceptance criteriaTests
+        
+          Phase 3 â€” DatabaseMigration set (8 files, Â§R)Â§S frozenAll tables from Â§D, including the S-1/S-2 composite FKs and S-11's academic_years columnEvery migration applies cleanly to an empty schema in order; re-running the set is a no-opFresh-install migration run; verify utf8mb4_unicode_ci on every table; attempt an inconsistent composite-FK insert and confirm rejection
+          â†³ SeedsMigrationsRoles, full permission catalog (Â§J, incl. S-12's mappings), default subjects/gradesRe-running seeds never duplicates a rowRun seeds twice, assert row counts unchanged
+          Phase 4 â€” Core InfrastructureAuth &amp; sessionPhase 3Login/logout, throttling (username+IP and IP-wide, O-16), session regenerationA locked-out account/IP is refused with the exact messages in Â§Q's error catalogScripted brute-force attempt trips both thresholds; session id changes on login
+          â†³ CSRF, RoleGuard, YearContext middlewareAuthThree middleware classesEvery mutating route is unreachable without a valid token and the right permissionForged-token request rejected; Staff-role request to an Administrator-only route rejected server-side even with a hand-crafted URL
+          â†³ Router, error handler, logger, i18nâ€”Front controller, friendly-error pages, storage/logs, __()/e() helpersAn uncaught exception never reaches the browser as a stack traceForce an exception; confirm the user sees Â§Q's generic message and a reference id, and the trace lands in the log
+          Phase 5 â€” UI FoundationLayout, RTL/LTR, vendored assetsPhase 4Navbar, sidebar, language switch, local Bootstrap/jQuery/Chart.jsFull app usable with the network disabledDisconnect network, load every Phase-5 screen, confirm no failed request
+          â†³ Reusable components (Â§L)LayoutTable, form, modal, alert, pagination, filter bar, empty stateEvery later module reuses these, none re-implements oneCode review checklist item in Phase 6/7, not a separate test
+          â†³ Root/uploads .htaccessâ€”Deny-all at project root (S-4), execution-lockout in uploads (O-18)Backups/uploads/logs return 403 when requested directly by URLRequest a known backup filename directly; confirm 403 regardless of whether a vhost is configured
+          Phase 6 â€” Core ModulesDashboard â†’ Academic Years â†’ Grades/Classes â†’ Subjects â†’ Teachers â†’ Students â†’ AssignmentsPhase 5Full CRUD + workflows per Â§E/Â§I, screens per Â§Q's inventory, routes per Â§Q's tableEvery screen in Â§Q's inventory exists and matches its route; every workflow step in Â§I is implemented, not summarizedFull Â§M checklist per module as it ships â€” not deferred to Phase 9
+          â†³ Year rollover (Â§I.4)Academic Years moduleYearRolloverServiceA new year created "from previous" has matching classes/assignments, editable before promotionCreate a year from a populated prior year; verify counts match; edit and re-verify independence
+          â†³ Promotion + Undo (Â§I.1)Students module, RolloverPromotionServicePreview matches confirmed result exactly; undo reverses a single student cleanly; a forced mid-batch failure leaves zero partial writesFull promotion run incl. repeat/graduate/transfer/withdraw per student; undo immediately after; kill the process mid-batch and confirm rollback
+          â†³ Close-year guard (Â§S-3)PromotionGuarded close actionClose is refused while any active enrollment remains in that yearAttempt to close a year with unresolved students; confirm refusal names the count
+          â†³ Reassign class (Â§I.9)Students modulereassignClass()Succeeds within the same grade/year, fails across eitherAttempt a cross-grade reassignment; confirm rejection at the composite FK, not just the form
+          Phase 7 â€” ReportsSix report builders (Â§K)Phase 6 data existsEvery report matching Â§K's filters/columns/sort exactlyEvery figure matches a manual query against the same filtersCross-check each report's numbers against a hand-written query per Â§M
+          â†³ Print CSS, mPDF, PhpSpreadsheetReport buildersA4 print stylesheets, Amiri-embedded PDF export, RTL Excel exportArabic renders correctly in both exported formats; no split table rows in printVisual check of Arabic PDF/Excel output on a genuinely long class list, both languages
+          Phase 8 â€” Backup &amp; RestoreBackup engineFull schema stableSchema-inclusive, dependency-ordered, checksummed dump (Â§O-4, Â§S-8)A fresh backup restores cleanly onto a blank databaseFull backup â†’ wipe â†’ restore â†’ diff row counts
+          â†³ Restore engineBackup engineSignature/checksum/version validation, emergency backup, FK-suspended replay, extended structural check (Â§S-9)A corrupted or foreign file is rejected before any write; a forced mid-restore failure leaves the pre-restore backup usableTruncate a valid backup file by one byte and attempt restore; corrupt a composite-FK relationship in a test dump and confirm the extended check catches it
+          Phase 9 â€” TestingFull Â§M passPhases 6â€“8Every checklist row exercised, not sampledZero unresolved failures in Â§MÂ§M itself is the test plan
+          Phase 10 â€” Final QA &amp; DocsSetup Wizard lockout, packaging, docsPhase 9README/dev docs/admin guide (Â§N), verified /setup lockout, populated vendor//setup unreachable after completion; project runs from a plain htdocs copy with no dev tooling installedCopy the packaged folder to a clean XAMPP install and run it end to end
+        
+      
+    
+
+    
+      Nizam Blueprint â€” architecture frozen for implementation (Â§Aâ€“Â§T). No implementation code has been written anywhere in this document. Two gates completed: Â§O (35 findings, 19 corrected) and Â§S (17 findings, 12 corrected) â€” zero BLOCKER or HIGH findings remain open. Â§P is the definitive decision list, Â§Q the engineering contract, Â§T the task-level plan. Phase 3 begins only after your explicit approval of this gate.
+    
+  
+
+
+
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#tocnav a'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function setActive(id){
+    links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+  }
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){ setActive(entry.target.id); }
+      });
+    }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+    sections.forEach(function(s){ if(s) io.observe(s); });
+  }
+  links.forEach(function(a){
+    a.addEventListener('click', function(){ setActive(a.getAttribute('href').slice(1)); });
+  });
+})();
+

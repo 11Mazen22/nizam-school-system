@@ -1,0 +1,7 @@
+# Nizam -- §S-4 (Blocker, applied to §C): deny-all at the project root so
+# that config/config.php (DB credentials), database/ (schema, and eventually
+# real backups), storage/logs/, and the app/ source tree are never reachable
+# by URL -- regardless of whether the school points Apache's DocumentRoot at
+# this project root or at public/ directly. public/.htaccess re-allows
+# access for the one folder that's actually meant to be web-served.
+Require all denied

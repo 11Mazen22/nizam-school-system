@@ -1,0 +1,3 @@
+# Nizam -- Backup directory protection
+# Prevents direct download of SQL dumps containing sensitive data
+Require all denied

@@ -1,0 +1,122 @@
+/*
+ * Nizam -- app-level styles layered on top of vendored Bootstrap.
+ * System fonts only (Tahoma/Segoe UI render Arabic correctly on Windows,
+ * the only target OS) -- no vendored web font, no Google Fonts (explicitly
+ * forbidden). Kept small and free of animation per Phase 5's "no
+ * unnecessary animations" rule.
+ */
+
+:root {
+  --nizam-sidebar-width: 230px;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  background-color: #f2f4f3;
+}
+
+/* ---------- App shell ---------- */
+.nizam-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.nizam-sidebar {
+  width: var(--nizam-sidebar-width);
+  flex-shrink: 0;
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.nizam-sidebar .nav-link {
+  color: #cbd5e1;
+}
+
+.nizam-sidebar .nav-link.active {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.nizam-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.nizam-topbar {
+  background-color: #fff;
+  border-bottom: 1px solid #d6dbd9;
+}
+
+.nizam-content {
+  padding: 24px;
+}
+
+/* Sidebar collapses to an off-canvas panel on narrow screens; Bootstrap's
+   .offcanvas component (already vendored) drives the actual behavior --
+   this just positions the toggle button. */
+@media (max-width: 768px) {
+  .nizam-sidebar {
+    display: none;
+  }
+}
+
+.stat-card .stat-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card .stat-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* RTL: Bootstrap's own bootstrap.rtl.min.css handles component mirroring;
+   this only covers the couple of app-specific rules above that need a
+   direction-aware tweak. */
+[dir="rtl"] .nizam-sidebar {
+  border-left: 1px solid #111827;
+}
+
+[dir="ltr"] .nizam-sidebar {
+  border-right: 1px solid #111827;
+}
+
+/* ---------- §K print CSS: A4, no dashboard chrome, no split table rows ---------- */
+@media print {
+  .nizam-sidebar,
+  .nizam-topbar,
+  .offcanvas,
+  .modal,
+  .no-print {
+    display: none !important;
+  }
+
+  .nizam-main {
+    width: 100% !important;
+  }
+
+  .nizam-content {
+    padding: 0 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm 12mm;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    display: table-header-group; /* repeats the header row on every printed page */
+  }
+
+  tr,
+  td,
+  th {
+    page-break-inside: avoid;
+  }
+}

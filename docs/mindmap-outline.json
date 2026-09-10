@@ -1,0 +1,208 @@
+{
+  "title": "Nizam Implementation Plan",
+  "children": [
+    {"topic": "Requirements", "children": [
+      {"topic": "12 Functional Pillars", "children": [
+        {"topic": "Students"}, {"topic": "Teachers"}, {"topic": "Grades"}, {"topic": "Classes"},
+        {"topic": "Subjects"}, {"topic": "Teacher Assignments"}, {"topic": "Weekly Teaching Load"},
+        {"topic": "Statistics"}, {"topic": "Reports"}, {"topic": "Backup & Restore"},
+        {"topic": "Academic-Year Transitions"}, {"topic": "Settings"}
+      ]},
+      {"topic": "Non-negotiable constraints", "children": [
+        {"topic": "100% offline after install"},
+        {"topic": "XAMPP / Apache / PHP / MySQL-MariaDB"},
+        {"topic": "Arabic-first, RTL by default"},
+        {"topic": "English secondary, full LTR"},
+        {"topic": "Scales to thousands of students"},
+        {"topic": "No CDN dependencies, ever"},
+        {"topic": "Non-technical end users"}
+      ]},
+      {"topic": "Scope decisions", "children": [
+        {"topic": "Single school per installation (confirmed)"},
+        {"topic": "Bulk import deferred to post-v1 (O-14)"},
+        {"topic": "No timetable/scheduling module (O-29)"}
+      ]}
+    ]},
+    {"topic": "Architecture", "children": [
+      {"topic": "Layered MVC", "children": [
+        {"topic": "Controller - input shape only"},
+        {"topic": "Service - business rules, transactions"},
+        {"topic": "Repository - all SQL, PDO prepared statements"}
+      ]},
+      {"topic": "Middleware chain", "children": [
+        {"topic": "Session"}, {"topic": "CSRF (hash_equals, O-19)"},
+        {"topic": "RoleGuard"}, {"topic": "AcademicYearContext"}
+      ]},
+      {"topic": "File structure", "children": [
+        {"topic": "app/ (controllers, services, repositories, middleware, helpers)"},
+        {"topic": "config/"},
+        {"topic": "database/ (migrations, seeds, backups)"},
+        {"topic": "public/ - the only web-servable folder"},
+        {"topic": "views/ + views/components"},
+        {"topic": "reports/"},
+        {"topic": "storage/"},
+        {"topic": "vendor/ (committed)"}
+      ]},
+      {"topic": "Web-root lockout", "children": [
+        {"topic": "Root .htaccess deny-all (S-4, BLOCKER)"},
+        {"topic": "public/.htaccess re-allows"},
+        {"topic": "Uploads folder: PHP execution disabled (O-18)"}
+      ]}
+    ]},
+    {"topic": "Database", "children": [
+      {"topic": "Core entities (16)", "children": [
+        {"topic": "schools"}, {"topic": "academic_years"}, {"topic": "roles / permissions / role_permissions"},
+        {"topic": "users"}, {"topic": "grades"}, {"topic": "subjects"}, {"topic": "classes"},
+        {"topic": "students"}, {"topic": "student_enrollments"}, {"topic": "teachers"},
+        {"topic": "teacher_subjects"}, {"topic": "teacher_assignments"}, {"topic": "subject_staffing_requirements"},
+        {"topic": "settings"}, {"topic": "activity_logs"}, {"topic": "backups / login_attempts / migrations"}
+      ]},
+      {"topic": "Integrity fixes from the Final Gate", "children": [
+        {"topic": "Composite FK: enrollment <-> class/grade/year (S-1, BLOCKER)"},
+        {"topic": "Composite FK: assignment <-> class/year (S-2, BLOCKER)"},
+        {"topic": "One active year, DB-enforced via unique generated column (O-2)"},
+        {"topic": "student_enrollments.status includes 'graduated' (O-3)"},
+        {"topic": "settings.setting_key not 'key' (O-1)"},
+        {"topic": "expected_weekly_capacity moved onto academic_years (S-11)"}
+      ]},
+      {"topic": "utf8mb4 / utf8mb4_unicode_ci everywhere (O-8)"},
+      {"topic": "No hard-delete anywhere - archive only (O-10)"},
+      {"topic": "Migration order: 8 files, forward-only, no down() (O-30)"},
+      {"topic": "Idempotent seeds: roles, permissions, subjects, grades"}
+    ]},
+    {"topic": "Security", "children": [
+      {"topic": "Passwords: password_hash, session regen on login"},
+      {"topic": "Login throttling: per-user+IP AND IP-wide (O-16)"},
+      {"topic": "CSRF via hash_equals (O-19)"},
+      {"topic": "Uploads: random filenames, explicit Content-Type, exec lockout (O-18)"},
+      {"topic": "File serving resolves by DB id, never client path (S-10)"},
+      {"topic": "Setup Wizard permanently locked after completion (O-6)"},
+      {"topic": "Backups/uploads never web-reachable (S-4, BLOCKER)"},
+      {"topic": "e() escaping everywhere, incl. report templates (S-13)"},
+      {"topic": "Residual: no HTTPS by default on LAN (O-31, documented)"}
+    ]},
+    {"topic": "Modules", "children": [
+      {"topic": "Auth", "children": [{"topic": "Login screen"}]},
+      {"topic": "Dashboard", "children": [{"topic": "Summary cards, charts via GROUP BY (O-24)"}]},
+      {"topic": "Students", "children": [
+        {"topic": "List / Add / Edit / View / Archive"},
+        {"topic": "Reassign Class (S-6)"},
+        {"topic": "Promotion Preview/Confirm"}
+      ]},
+      {"topic": "Teachers", "children": [{"topic": "List / Add / Edit / Archive"}]},
+      {"topic": "Subjects", "children": [{"topic": "List / Add / Edit"}]},
+      {"topic": "Grades & Classes", "children": [{"topic": "Grades list, Classes list, Add/Edit class"}]},
+      {"topic": "Assignments", "children": [{"topic": "List / Add / Edit, Workload summary"}]},
+      {"topic": "Academic Years", "children": [{"topic": "List, Create+Rollover, Activate/Close"}]},
+      {"topic": "Reports", "children": [{"topic": "Index + 6 report views + print view"}]},
+      {"topic": "Backup & Restore", "children": [{"topic": "Run/Restore screen, History"}]},
+      {"topic": "Settings", "children": [{"topic": "5 grouped screens (O-21)"}]},
+      {"topic": "Users", "children": [{"topic": "List / Add / Edit (Admin only)"}]},
+      {"topic": "Activity Log", "children": [{"topic": "List"}]}
+    ]},
+    {"topic": "Workflows", "children": [
+      {"topic": "Promotion (I.1)", "children": [
+        {"topic": "Select source/target year"},
+        {"topic": "Propose defaults by grade sort_order"},
+        {"topic": "Exceptions: repeat / graduate / transferred / withdrawn (S-5)"},
+        {"topic": "Assign target classes"},
+        {"topic": "Preview"},
+        {"topic": "Promotion lock (O-17)"},
+        {"topic": "Confirm -> transaction"},
+        {"topic": "Undo single student (O-12, S-7 exception)"}
+      ]},
+      {"topic": "Year rollover (I.4)", "children": [
+        {"topic": "Clone classes forward"},
+        {"topic": "Clone teacher assignments forward"}
+      ]},
+      {"topic": "Year close (I.4)", "children": [
+        {"topic": "Guard: zero active enrollments required (S-3, BLOCKER)"}
+      ]},
+      {"topic": "Reassign class (I.9)", "children": [
+        {"topic": "Same grade/year only, enforced by composite FK (S-6)"}
+      ]},
+      {"topic": "Enrollment immutability (S-7)", "children": [
+        {"topic": "Non-active rows never edited except Undo"}
+      ]},
+      {"topic": "Weekly workload (I.5)", "children": [{"topic": "Always explicit year (O-23)"}]},
+      {"topic": "Staffing shortage (I.6)", "children": [{"topic": "Excludes subjects with no requirement set"}]}
+    ]},
+    {"topic": "UI", "children": [
+      {"topic": "Reusable components", "children": [
+        {"topic": "Navbar / Sidebar (role-aware)"}, {"topic": "Data table"}, {"topic": "Form"},
+        {"topic": "Modal (confirm-destructive only)"}, {"topic": "Alert / toast"},
+        {"topic": "Pagination (capped page size, O-25)"}, {"topic": "Filter bar"}, {"topic": "Empty state"}
+      ]},
+      {"topic": "RTL is re-ordered, not mirrored", "children": [
+        {"topic": "Column order flips, not just text-align"},
+        {"topic": "Western numerals kept"},
+        {"topic": "Consistent Gregorian dates"}
+      ]}
+    ]},
+    {"topic": "Reports", "children": [
+      {"topic": "Religion statistics"}, {"topic": "Class student list"}, {"topic": "Class density"},
+      {"topic": "Teachers by subject"}, {"topic": "Teacher workload"}, {"topic": "Staffing shortage"},
+      {"topic": "Shared header/footer (school id, filters, timestamp)"},
+      {"topic": "Print CSS (A4)"},
+      {"topic": "PDF export - mPDF + bundled Amiri font (O-15)"},
+      {"topic": "Excel export - PhpSpreadsheet, RTL sheet direction (O-32)"}
+    ]},
+    {"topic": "Backup / Restore", "children": [
+      {"topic": "Backup engine", "children": [
+        {"topic": "Schema + data, dependency-ordered (O-4)"},
+        {"topic": "Versioned signature + SHA-256 checksum (S-8)"}
+      ]},
+      {"topic": "Restore engine", "children": [
+        {"topic": "Signature + checksum + version check before any write"},
+        {"topic": "Mandatory pre-restore emergency backup"},
+        {"topic": "Replay with FOREIGN_KEY_CHECKS=0 (O-5)"},
+        {"topic": "Structural sanity + composite-FK spot-check (S-9)"},
+        {"topic": "DDL can't roll back - emergency backup is the real safety net (O-5)"}
+      ]}
+    ]},
+    {"topic": "Testing", "children": [
+      {"topic": "Auth & permissions"},
+      {"topic": "CRUD, search, filter, pagination"},
+      {"topic": "Promotion incl. forced mid-batch failure"},
+      {"topic": "Reports vs. hand-written queries"},
+      {"topic": "Print / PDF / Excel Arabic rendering"},
+      {"topic": "Backup/restore incl. truncated-file and corrupted-FK cases"},
+      {"topic": "RTL on every screen, not just the obvious ones"},
+      {"topic": "Full offline: network disconnected, grep for http(s)://"}
+    ]},
+    {"topic": "Deployment", "children": [
+      {"topic": "Setup Wizard", "children": [
+        {"topic": "Environment check"}, {"topic": "DB connection test"}, {"topic": "Schema install + seeds"},
+        {"topic": "School profile"}, {"topic": "First academic year"}, {"topic": "Administrator account"},
+        {"topic": "Locked permanently on completion (O-6)"}
+      ]},
+      {"topic": "Packaging", "children": [
+        {"topic": "vendor/ pre-populated"}, {"topic": "Copy-to-htdocs, no build step"},
+        {"topic": "Root .htaccess included"}
+      ]}
+    ]},
+    {"topic": "Documentation", "children": [
+      {"topic": "README"},
+      {"topic": "Developer docs (architecture, DB, conventions)"},
+      {"topic": "Administrator guide (students, promotion, backup, restore, years)"}
+    ]},
+    {"topic": "Implementation Phases", "children": [
+      {"topic": "Phase 3 - Database (migrations, seeds)"},
+      {"topic": "Phase 4 - Core Infrastructure (auth, middleware, router, logging)"},
+      {"topic": "Phase 5 - UI Foundation (layout, components, .htaccess)"},
+      {"topic": "Phase 6 - Core Modules (Dashboard->Years->Classes->Subjects->Teachers->Students->Assignments)"},
+      {"topic": "Phase 7 - Reports (6 builders, print/PDF/Excel)"},
+      {"topic": "Phase 8 - Backup & Restore"},
+      {"topic": "Phase 9 - Testing (full §M pass)"},
+      {"topic": "Phase 10 - Final QA & Docs"}
+    ]},
+    {"topic": "Key Task Dependencies", "children": [
+      {"topic": "Migrations -> Seeds"},
+      {"topic": "Auth -> RoleGuard -> every protected route"},
+      {"topic": "Rollover -> Promotion (classes must exist first)"},
+      {"topic": "Promotion -> Close-year guard"},
+      {"topic": "Full stable schema -> Backup engine -> Restore engine"},
+      {"topic": "Every module -> its own §M checklist row, as it ships"}
+    ]}
+  ]
+}
