@@ -199,6 +199,9 @@ $router->get('/backups', [BackupController::class, 'index'], [$session, $csrf, $
 $router->post('/backups', [BackupController::class, 'store'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('backups.run')]);
 $router->get('/backups/{id}/download', [BackupController::class, 'download'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('backups.run')]);
 $router->post('/backups/restore', [BackupController::class, 'restore'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('backups.restore')]);
+// No session/CSRF/RoleGuard: a machine caller (external scheduler), not a
+// browser -- BackupController::scheduled() does its own bearer-token check.
+$router->post('/backups/scheduled', [BackupController::class, 'scheduled']);
 
 // Reports (§K) -- reports.view / .export, granted to BOTH admin and staff
 // per §J (unlike almost every other module's "manage" split). Read-only:

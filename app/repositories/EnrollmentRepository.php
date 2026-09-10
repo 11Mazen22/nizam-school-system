@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Database;
+use PDO;
 
 /**
  * Nizam -- student_enrollments (§D "why student_enrollments exists", §I.1
@@ -157,11 +158,20 @@ final class EnrollmentRepository
      */
     public function religionBreakdownByGradeClass(int $academicYearId, ?int $gradeId, ?int $classId): array
     {
+        // MySQL coerces a boolean expression to 1/0 inside SUM(); Postgres
+        // has no such coercion (SubjectStaffingRequirementRepository's note
+        // on the same pattern) -- COUNT(*) FILTER (WHERE ...) is the
+        // Postgres-native equivalent for a conditional count.
+        $isPgsql = Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
+        $muslimExpr = $isPgsql ? "COUNT(*) FILTER (WHERE s.religion = 'muslim')" : "SUM(s.religion = 'muslim')";
+        $christianExpr = $isPgsql ? "COUNT(*) FILTER (WHERE s.religion = 'christian')" : "SUM(s.religion = 'christian')";
+        $otherExpr = $isPgsql ? "COUNT(*) FILTER (WHERE s.religion = 'other')" : "SUM(s.religion = 'other')";
+
         $sql = "SELECT g.id AS grade_id, g.name_en AS grade_name_en, g.name_ar AS grade_name_ar,
                        c.id AS class_id, c.name AS class_name,
-                       SUM(s.religion = 'muslim') AS muslim,
-                       SUM(s.religion = 'christian') AS christian,
-                       SUM(s.religion = 'other') AS other,
+                       {$muslimExpr} AS muslim,
+                       {$christianExpr} AS christian,
+                       {$otherExpr} AS other,
                        COUNT(*) AS total
                 FROM student_enrollments e
                 JOIN students s ON s.id = e.student_id

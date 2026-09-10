@@ -44,7 +44,17 @@ final class SubjectStaffingRequirementRepository
      */
     public function shortageReportForYear(int $academicYearId): array
     {
-        $stmt = Database::connection()->prepare(
+        $pdo = Database::connection();
+        // MySQL's required_teachers - COUNT(...) subtraction needs an
+        // explicit signed cast (SIGNED) or MySQL's default-unsigned integer
+        // arithmetic can underflow to a huge positive number instead of
+        // going negative. Postgres has no UNSIGNED integer types at all --
+        // SMALLINT/INTEGER are always signed, and subtracting a BIGINT
+        // COUNT() from one promotes cleanly -- so the cast is unnecessary
+        // there (and "AS SIGNED" isn't valid Postgres syntax regardless).
+        $requiredTeachersExpr = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql'
+            ? 'r.required_teachers' : 'CAST(r.required_teachers AS SIGNED)';
+        $stmt = $pdo->prepare(
             "SELECT r.subject_id, s.name_en, s.name_ar, r.required_teachers,
                     (SELECT COUNT(DISTINCT a.teacher_id) FROM teacher_assignments a
                      WHERE a.subject_id = r.subject_id AND a.academic_year_id = r.academic_year_id
@@ -52,7 +62,7 @@ final class SubjectStaffingRequirementRepository
              FROM subject_staffing_requirements r
              JOIN subjects s ON s.id = r.subject_id
              WHERE r.academic_year_id = :y
-             ORDER BY (CAST(r.required_teachers AS SIGNED) -
+             ORDER BY ({$requiredTeachersExpr} -
                  (SELECT COUNT(DISTINCT a.teacher_id) FROM teacher_assignments a
                   WHERE a.subject_id = r.subject_id AND a.academic_year_id = r.academic_year_id
                     AND a.status = 'active')) DESC"

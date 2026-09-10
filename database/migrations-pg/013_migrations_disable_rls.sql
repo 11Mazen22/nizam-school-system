@@ -1,0 +1,27 @@
+-- Nizam School Management System (Postgres/Supabase)
+-- Migration 013: disable row-level security on the migrations table.
+--
+-- WHY THIS EXISTS: found live while testing RestoreService's Postgres path
+-- (migration 011 grants nizam_app SELECT on migrations, but a real
+-- SELECT COUNT(*) as nizam_app came back 0 against a table verified to hold
+-- 12 rows). Root cause: pg_class.relrowsecurity was true on migrations with
+-- zero pg_policy rows -- RLS enabled, no policy, which is default-deny for
+-- every role except the table owner. 010_app_role_and_rls.sql never
+-- intended this: its own comment says "migrations table deliberately
+-- excluded" from the 20 explicit ENABLE ROW LEVEL SECURITY statements, and
+-- that file never ran one for migrations either.
+--
+-- CONFIRMED (not just guessed) afterward, via 014_pin_function_search_path.sql's
+-- own investigation: this is Supabase's own platform-default "ensure_rls"
+-- event trigger (public.rls_auto_enable(), present on every new Supabase
+-- project alongside pgrst_ddl_watch/issue_pg_cron_access/etc. -- none of it
+-- application code) -- it fires on every CREATE TABLE in the public schema
+-- and auto-enables RLS, which is exactly what happened the moment
+-- bootstrapMigrationsTable() first ran "CREATE TABLE IF NOT EXISTS
+-- migrations". Not a leftover from anything this project did.
+--
+-- Safe to disable: migrations was never granted to anon/authenticated (the
+-- actual PostgREST-exposure risk RLS defends against here) and never will
+-- be -- it's excluded from every blanket grant in 010. RLS was never the
+-- thing protecting it; the missing grant already was, and still is.
+ALTER TABLE public.migrations DISABLE ROW LEVEL SECURITY;

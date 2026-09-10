@@ -440,6 +440,7 @@ return [
     'settings.session_timeout_help' => 'How long an inactive session stays signed in before requiring sign-in again.',
     'settings.default_folder' => 'Backup Folder',
     'settings.default_folder_help' => 'Where one-click backups are saved. Relative paths are resolved from the installation folder; existing backups are not moved if you change this.',
+    'settings.backup_cloud_storage_notice' => 'Backups are stored automatically in secure, encrypted cloud storage -- there is no local folder to configure on this deployment.',
     'settings.backup_run_hint' => 'To create or restore a backup, go to',
     'settings.error.capacity_range' => 'Expected weekly capacity must be between 1 and 60.',
     'settings.error.pattern_missing_seq' => 'Each ID pattern must include a {seq:N} placeholder.',

@@ -1,0 +1,18 @@
+-- Nizam School Management System (Postgres/Supabase)
+-- Migration 011: grant nizam_app read-only access to the migrations table.
+--
+-- WHY THIS EXISTS: migration 010 revoked ALL privileges on `migrations` from
+-- nizam_app on the reasoning that "the app itself never reads or writes the
+-- migrations bookkeeping table" -- found live to be WRONG once backup/restore
+-- was built out for Postgres. BackupService::run() and RestoreService::
+-- validate() both call MigrationService::getAppliedMigrations($pdo) over the
+-- app's own runtime connection (nizam_app in production) to stamp/verify a
+-- backup's schema version (§O-4) -- a genuine, narrow, read-only need that
+-- 010's blanket revoke didn't anticipate.
+--
+-- This grants SELECT only. INSERT/UPDATE/DELETE on migrations stay revoked
+-- from nizam_app -- schema bookkeeping is still only ever written by the
+-- postgres superuser running an actual migration file, preserving the exact
+-- security property 010 was written to protect (the running app can observe
+-- its own schema version, but can never forge or corrupt migration history).
+GRANT SELECT ON TABLE public.migrations TO nizam_app;

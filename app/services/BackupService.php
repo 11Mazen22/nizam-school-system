@@ -16,10 +16,29 @@ use Throwable;
  * table, in dependency-safe order, straight to disk with a rolling SHA-256,
  * so the database is never held fully in memory even for the "thousands of
  * students" scale §A requires.
+ *
+ * Two dump formats, driver-branched like everywhere else (Database.php /
+ * MigrationService.php): mysql produces the original schema+data dump
+ * (DROP/CREATE TABLE + INSERT, backtick-quoted) written straight to
+ * directory() -- completely unchanged. pgsql produces a DATA-ONLY dump
+ * (double-quoted, OVERRIDING SYSTEM VALUE for identity columns) written to a
+ * local scratch file just long enough to hash and size it, then uploaded to
+ * Supabase Storage and the scratch file deleted -- Render's free-tier
+ * container disk is ephemeral, so nothing written there survives a redeploy
+ * or restart. Schema is never dumped for pgsql because it doesn't need to
+ * be: the target's schema always comes from replaying the versioned
+ * database/migrations-pg/*.sql files, and RestoreService already refuses a
+ * backup whose declared schema version doesn't match what's live (§O-4) --
+ * a schema dump would be dead weight, never actually used to recreate
+ * anything.
  */
 final class BackupService
 {
-    public const FORMAT_VERSION = 'v1';
+    private const FORMAT_VERSION_MYSQL = 'v1';
+    private const FORMAT_VERSION_PGSQL = 'v1-pg';
+
+    /** Supabase Storage bucket for the pgsql/online path. */
+    private const BUCKET = 'backups';
 
     /**
      * A valid topological order for the FK graph in §D -- not copied
@@ -27,10 +46,27 @@ final class BackupService
      * only one), but every table here still appears after everything it
      * references. Order only matters for a human reading the dump by eye;
      * the replay itself runs with FOREIGN_KEY_CHECKS=0 (§O-5) so it isn't
-     * order-dependent.
+     * order-dependent. mysql only.
      */
     private const TABLE_ORDER = [
         'schools', 'settings', 'migrations', 'roles', 'permissions', 'role_permissions',
+        'academic_years', 'grades', 'subjects', 'users', 'classes',
+        'subject_staffing_requirements', 'students', 'teachers',
+        'student_enrollments', 'teacher_subjects', 'teacher_assignments',
+        'promotion_locks', 'activity_logs', 'backups', 'login_attempts',
+    ];
+
+    /**
+     * Same graph, minus 'migrations': nizam_app holds no grant on it at all
+     * (database/migrations-pg/010_app_role_and_rls.sql's own note -- schema
+     * bookkeeping is a postgres-superuser-only concern) and, unlike mysql,
+     * this order is load-bearing for pgsql restore, not just cosmetic --
+     * RestoreService deletes existing rows in reverse of this order (children
+     * before parents) and replays INSERTs forward, since nizam_app has no
+     * privilege to disable FK triggers the way FOREIGN_KEY_CHECKS=0 does.
+     */
+    public const TABLE_ORDER_PG = [
+        'schools', 'settings', 'roles', 'permissions', 'role_permissions',
         'academic_years', 'grades', 'subjects', 'users', 'classes',
         'subject_staffing_requirements', 'students', 'teachers',
         'student_enrollments', 'teacher_subjects', 'teacher_assignments',
@@ -41,9 +77,13 @@ final class BackupService
         private readonly BackupRepository $repo = new BackupRepository(),
         private readonly MigrationService $migrations = new MigrationService(),
     ) {
-        $dir = self::directory();
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        // No local persistent directory on the pgsql/online path -- backups
+        // live in Supabase Storage, never on Render's ephemeral disk.
+        if (Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'pgsql') {
+            $dir = self::directory();
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
         }
     }
 
@@ -115,9 +155,13 @@ final class BackupService
             }
         }
 
+        $isPgsql = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
         $filename = 'nizam_backup_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.sql';
-        $filepath = self::directory() . '/' . $filename;
+        // pgsql: a scratch file just long enough to stream-write, hash and
+        // size the dump -- never the final resting place (see class docblock).
+        $filepath = $isPgsql ? sys_get_temp_dir() . '/nizam_' . $filename : self::directory() . '/' . $filename;
         $handle = false;
+        $uploaded = false;
 
         try {
             $handle = fopen($filepath, 'wb');
@@ -132,26 +176,42 @@ final class BackupService
             };
 
             $schemaVersion = count($this->migrations->getAppliedMigrations($pdo));
-            $write(sprintf("-- NIZAM-BACKUP %s schema=%04d\n", self::FORMAT_VERSION, $schemaVersion));
+            $formatVersion = $isPgsql ? self::FORMAT_VERSION_PGSQL : self::FORMAT_VERSION_MYSQL;
+            $write(sprintf("-- NIZAM-BACKUP %s schema=%04d\n", $formatVersion, $schemaVersion));
             $write("-- Nizam Backup\n-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n\n");
 
-            $actualTables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-            $tablesToDump = array_values(array_intersect(self::TABLE_ORDER, $actualTables));
-            foreach ($actualTables as $table) {
-                if (!in_array($table, $tablesToDump, true)) {
-                    $tablesToDump[] = $table;
+            if ($isPgsql) {
+                foreach (self::TABLE_ORDER_PG as $table) {
+                    $this->dumpTablePgsql($pdo, $table, $write);
                 }
-            }
+            } else {
+                $actualTables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+                $tablesToDump = array_values(array_intersect(self::TABLE_ORDER, $actualTables));
+                foreach ($actualTables as $table) {
+                    if (!in_array($table, $tablesToDump, true)) {
+                        $tablesToDump[] = $table;
+                    }
+                }
 
-            foreach ($tablesToDump as $table) {
-                $this->dumpTable($pdo, $table, $write);
+                foreach ($tablesToDump as $table) {
+                    $this->dumpTable($pdo, $table, $write);
+                }
             }
 
             $checksum = hash_final($hashCtx);
             fwrite($handle, "-- SHA256: {$checksum}\n");
             fclose($handle);
+            $handle = false;
 
             $size = (int) filesize($filepath);
+
+            if ($isPgsql) {
+                $contents = (string) file_get_contents($filepath);
+                @unlink($filepath);
+                self::storage()->upload(self::BUCKET, $filename, $contents, 'application/sql');
+                $uploaded = true;
+            }
+
             $id = $this->repo->create([
                 'filename'   => $filename,
                 'file_size'  => $size,
@@ -169,6 +229,14 @@ final class BackupService
             }
             if (is_file($filepath)) {
                 unlink($filepath);
+            }
+            if ($isPgsql && $uploaded) {
+                try {
+                    self::storage()->delete(self::BUCKET, $filename);
+                } catch (RuntimeException) {
+                    // Best-effort cleanup of a partial upload -- the original
+                    // failure below is what actually gets reported.
+                }
             }
             error_log('[Nizam] Backup failed: ' . $e->getMessage());
             $this->repo->create([
@@ -229,6 +297,56 @@ final class BackupService
     }
 
     /**
+     * pgsql data-only equivalent of dumpTable() -- no DROP/CREATE TABLE (see
+     * class docblock: schema always comes from database/migrations-pg/, a
+     * dump of it would never actually be used to recreate anything).
+     * Double-quoted identifiers (Postgres's, vs mysql's backticks) and
+     * OVERRIDING SYSTEM VALUE for any identity column, so the row's original
+     * id can be replayed on restore instead of being silently reassigned --
+     * RestoreService::resyncSequence() fixes the sequence up afterward so
+     * the next ordinary insert doesn't collide with a restored id.
+     *
+     * No generated-column exclusion needed here the way dumpTable() has:
+     * confirmed (grep across database/migrations-pg/) there are no
+     * `GENERATED ALWAYS AS (...)` computed columns anywhere in the Postgres
+     * schema -- academic_years' single-active-year rule, the one MySQL
+     * needed a generated column for, is instead a partial unique index in
+     * Postgres (003_academic_years.sql), which SELECT * never returns a
+     * value for in the first place.
+     *
+     * @param callable(string):void $write
+     */
+    private function dumpTablePgsql(PDO $pdo, string $table, callable $write): void
+    {
+        $write("-- Table: {$table}\n");
+
+        $identityCheck = $pdo->prepare(
+            "SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'public' AND table_name = :t AND is_identity = 'YES' LIMIT 1"
+        );
+        $identityCheck->execute(['t' => $table]);
+        $overriding = $identityCheck->fetchColumn() !== false ? ' OVERRIDING SYSTEM VALUE' : '';
+
+        // student_enrollments self-references via previous_enrollment_id --
+        // see dumpTable()'s identical note; the whole-table DELETE this feeds
+        // into on restore doesn't care about row order, only the INSERT
+        // replay order does.
+        $orderClause = $table === 'student_enrollments' ? ' ORDER BY id ASC' : '';
+
+        $stmt = $pdo->query('SELECT * FROM "' . $table . '"' . $orderClause);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $cols = array_map(static fn (string $k): string => '"' . $k . '"', array_keys($row));
+            $vals = array_map(
+                static fn (mixed $v): string => $v === null ? 'NULL' : $pdo->quote((string) $v),
+                array_values($row)
+            );
+            $write('INSERT INTO "' . $table . '" (' . implode(', ', $cols) . ')' . $overriding
+                . ' VALUES (' . implode(', ', $vals) . ");\n");
+        }
+        $write("\n");
+    }
+
+    /**
      * Reads a backup file and validates it structurally -- signature,
      * supported format version, and checksum (§I.3 step 1) -- entirely
      * independent of any live database. RestoreService layers the
@@ -257,7 +375,15 @@ final class BackupService
         if (!preg_match('/^-- NIZAM-BACKUP (\S+) schema=(\d+)\r?\n/', $content, $sig)) {
             throw new RuntimeException('invalid_signature');
         }
-        if ($sig[1] !== self::FORMAT_VERSION) {
+        // Driver-specific tag ('v1' mysql, 'v1-pg' pgsql): a data-only pgsql
+        // dump and a schema+data mysql dump are never interchangeable (wrong
+        // quoting, DROP/CREATE TABLE nizam_app has no privilege to run) --
+        // this rejects a cross-deployment file here, with a clear reason
+        // code, instead of failing confusingly partway through exec().
+        $expected = Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql'
+            ? self::FORMAT_VERSION_PGSQL
+            : self::FORMAT_VERSION_MYSQL;
+        if ($sig[1] !== $expected) {
             throw new RuntimeException('unsupported_format_version');
         }
         $schemaVersion = (int) $sig[2];
@@ -273,5 +399,38 @@ final class BackupService
         }
 
         return ['sql' => $sql, 'schemaVersion' => $schemaVersion];
+    }
+
+    /**
+     * Raw bytes of a previously created backup, resolved by the
+     * database-recorded filename only -- the caller (BackupController::
+     * download()) looks the row up by id first, §S-10, never a
+     * client-supplied path. mysql: local disk, where run() left it. pgsql:
+     * Supabase Storage, the only place run() ever wrote it.
+     *
+     * @throws RuntimeException 'file_not_found'
+     */
+    public function retrieve(string $filename): string
+    {
+        $filename = basename($filename);
+
+        if (Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+            try {
+                return self::storage()->download(self::BUCKET, $filename);
+            } catch (RuntimeException $e) {
+                throw new RuntimeException('file_not_found', 0, $e);
+            }
+        }
+
+        $filepath = self::directory() . '/' . $filename;
+        if (!is_file($filepath)) {
+            throw new RuntimeException('file_not_found');
+        }
+        return (string) file_get_contents($filepath);
+    }
+
+    private static function storage(): SupabaseStorageClient
+    {
+        return new SupabaseStorageClient();
     }
 }

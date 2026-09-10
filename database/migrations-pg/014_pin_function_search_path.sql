@@ -1,0 +1,35 @@
+-- Nizam School Management System (Postgres/Supabase)
+-- Migration 014: pin set_updated_at()'s search_path.
+--
+-- WHY THIS EXISTS: found via a manual security-advisor-style audit (no
+-- Supabase Management API token available to run the real Advisor, so this
+-- replicates its "function_search_path_mutable" check directly against
+-- pg_proc). set_updated_at() (001_schools_settings.sql) had no SET
+-- search_path clause at all. Actual exploitability here is low -- it's
+-- SECURITY INVOKER (no privilege elevation) and only ever touches NEW.*  /
+-- CURRENT_TIMESTAMP, no unqualified object references a hijacked search
+-- path could redirect -- but pinning it is free, correct, and removes the
+-- finding outright rather than leaving a documented-but-unfixed lint result.
+ALTER FUNCTION public.set_updated_at() SET search_path = public, pg_temp;
+
+-- Not touched here, noted for the record: rls_auto_enable() / the
+-- "ensure_rls" event trigger already has "SET search_path TO 'pg_catalog'"
+-- -- it's a Supabase platform default (present on every new project,
+-- alongside pgrst_ddl_watch/issue_pg_cron_access/etc., none of which Nizam
+-- created), not application code, so it's left exactly as Supabase ships
+-- it. It's also the real, now-confirmed explanation for
+-- 013_migrations_disable_rls.sql's finding: this event trigger fires on
+-- every CREATE TABLE in the public schema and enables RLS automatically,
+-- which is what silently flipped it on for `migrations` when
+-- bootstrapMigrationsTable() first created it (013's own comment guessed
+-- "a leftover experiment" -- confirmed live afterward to actually be this).
+--
+-- Operationally this means: any FUTURE migration that CREATEs a new public
+-- table will have RLS auto-enabled on it by this same trigger, with zero
+-- policies, the moment the CREATE TABLE statement runs -- the new table is
+-- inaccessible to every role, including nizam_app, until that same
+-- migration (or a later one) also adds a nizam_app_full_access policy for
+-- it (the twenty explicit statements in 010_app_role_and_rls.sql are that
+-- policy, added once, after the fact, for the tables that existed when it
+-- ran). A migration adding a new table should add its policy in the same
+-- migration file, not assume a separate later cleanup pass will catch it.

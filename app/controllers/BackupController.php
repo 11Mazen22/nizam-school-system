@@ -58,6 +58,43 @@ final class BackupController extends Controller
         $this->redirect('/backups');
     }
 
+    /**
+     * Machine-triggered backup (type 'auto', §I.2's schema already reserves
+     * this value) -- no browser session, so none of the usual session/CSRF/
+     * RoleGuard middleware applies here; a single shared bearer token
+     * (SCHEDULED_BACKUP_TOKEN env var, timing-safe compared) is the entire
+     * auth story, matching what a machine-to-machine call actually needs.
+     * Neither deployment target has a built-in scheduler this app can rely
+     * on (Render's free tier has no cron; the Windows install has no
+     * always-on process beyond Apache/MariaDB themselves) -- the intended
+     * caller is an external trigger (a GitHub Actions scheduled workflow for
+     * the online deployment, optionally a Windows Scheduled Task hitting
+     * localhost for the offline one) calling this once a day. No route
+     * exists for THIS specific request without the correct token, by
+     * design -- see packaging-online/README.md for how it's wired up.
+     */
+    public function scheduled(Request $request): void
+    {
+        $configured = getenv('SCHEDULED_BACKUP_TOKEN');
+        $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        $provided = str_starts_with($header, 'Bearer ') ? substr($header, 7) : '';
+
+        header('Content-Type: text/plain');
+        if ($configured === false || $configured === '' || !hash_equals($configured, $provided)) {
+            http_response_code(401);
+            echo 'unauthorized';
+            return;
+        }
+
+        try {
+            $this->backups->run('auto', null, 'Automated scheduled backup');
+            echo 'ok';
+        } catch (RuntimeException) {
+            http_response_code(500);
+            echo 'backup_failed';
+        }
+    }
+
     /** §S-10: resolved by database id, never a client-supplied path. */
     public function download(Request $request): void
     {
@@ -68,13 +105,14 @@ final class BackupController extends Controller
             return;
         }
 
-        $filepath = BackupService::directory() . '/' . basename($backup['filename']);
-        if (!is_file($filepath)) {
+        try {
+            $contents = $this->backups->retrieve($backup['filename']);
+        } catch (RuntimeException) {
             ErrorHandler::renderNotFound();
             return;
         }
 
-        Response::download((string) file_get_contents($filepath), basename($filepath), 'application/sql');
+        Response::download($contents, basename($backup['filename']), 'application/sql');
     }
 
     public function restore(Request $request): void

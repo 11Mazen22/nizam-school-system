@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Controller;
+use App\Database;
 use App\Flash;
 use App\Repositories\SchoolRepository;
 use App\Request;
 use App\Services\ActivityLogger;
 use App\Services\SettingsService;
 use App\Services\UploadService;
+use PDO;
 use RuntimeException;
 
 /**
@@ -206,14 +208,28 @@ final class SettingsController extends Controller
     // ---------------------------------------------------------- Backup
     public function backup(Request $request): void
     {
+        // pgsql/online deployment: backups always go to Supabase Storage
+        // (BackupService's own docblock) -- a local-folder config form here
+        // would be a control with no effect, exactly the placeholder UI the
+        // zero-gap pass was built to eliminate. Show an informational
+        // notice instead.
         $this->view('settings/backup', [
             'error' => null,
+            'cloudStorage' => self::isPgsql(),
             'defaultFolder' => SettingsService::get('backup.default_folder', 'database/backups'),
         ]);
     }
 
     public function saveBackup(Request $request): void
     {
+        if (self::isPgsql()) {
+            // Defense in depth: the form is hidden on this deployment, but a
+            // direct POST must still be refused rather than silently
+            // accepted into a setting nothing ever reads.
+            $this->redirect('/settings/backup');
+            return;
+        }
+
         $folder = trim($request->post('default_folder', '') ?: '');
 
         $error = null;
@@ -235,7 +251,7 @@ final class SettingsController extends Controller
         }
 
         if ($error !== null) {
-            $this->view('settings/backup', ['error' => $error, 'defaultFolder' => $folder]);
+            $this->view('settings/backup', ['error' => $error, 'cloudStorage' => false, 'defaultFolder' => $folder]);
             return;
         }
 
@@ -243,5 +259,10 @@ final class SettingsController extends Controller
         ActivityLogger::log('settings.update', 'settings', null, 'Backup settings updated');
         Flash::set('success', __('settings.saved'));
         $this->redirect('/settings/backup');
+    }
+
+    private static function isPgsql(): bool
+    {
+        return Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
     }
 }

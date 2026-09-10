@@ -1,0 +1,30 @@
+name: Scheduled database backup
+
+# Render's free tier has no built-in cron; this is the free substitute --
+# GitHub Actions' own scheduled-workflow trigger, calling the app's
+# bearer-token-gated backup endpoint (App\Controllers\BackupController::
+# scheduled()) once a day. Two repository secrets required (Settings ->
+# Secrets and variables -> Actions): NIZAM_URL (the deployed https://
+# origin, no trailing slash) and NIZAM_SCHEDULED_BACKUP_TOKEN (must match
+# the Render service's own SCHEDULED_BACKUP_TOKEN environment variable
+# exactly -- rotate both together, never one alone).
+on:
+  schedule:
+    - cron: '0 2 * * *' # 02:00 UTC daily
+  workflow_dispatch: {} # manual "Run workflow" button, for an on-demand backup
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger scheduled backup
+        run: |
+          status=$(curl -s -o /tmp/response.txt -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.NIZAM_SCHEDULED_BACKUP_TOKEN }}" \
+            "${{ secrets.NIZAM_URL }}/backups/scheduled")
+          echo "HTTP status: $status"
+          cat /tmp/response.txt
+          if [ "$status" != "200" ]; then
+            echo "::error::Scheduled backup failed (HTTP $status)"
+            exit 1
+          fi

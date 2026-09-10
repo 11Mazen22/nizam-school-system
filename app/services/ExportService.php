@@ -184,19 +184,16 @@ final class ExportService
             . '</tr></table>';
     }
 
-    /** Embedded as a data: URI rather than a filesystem path -- mPDF resolves relative paths against its own working context, and a data: URI sidesteps that entirely. Returns null (never a broken-image icon) if no logo is configured or the stored file has since gone missing. */
+    /** Embedded as a data: URI rather than a filesystem path -- mPDF resolves relative paths against its own working context, and a data: URI sidesteps that entirely. Returns null (never a broken-image icon) if no logo is configured or the stored file has since gone missing. Retrieval itself (local disk vs Supabase Storage) is UploadService's own driver branch, not duplicated here. */
     private function logoDataUri(?string $logoPath): ?string
     {
-        if ($logoPath === null || $logoPath === '') {
+        $contents = UploadService::retrieve($logoPath);
+        if ($contents === null) {
             return null;
         }
-        $absolute = dataPath() . '/storage/uploads/' . $logoPath;
-        if (!is_file($absolute)) {
-            return null;
-        }
-        $extension = strtolower(pathinfo($absolute, PATHINFO_EXTENSION));
+        $extension = strtolower(pathinfo((string) $logoPath, PATHINFO_EXTENSION));
         $mime = $extension === 'png' ? 'image/png' : 'image/jpeg';
-        return 'data:' . $mime . ';base64,' . base64_encode((string) file_get_contents($absolute));
+        return 'data:' . $mime . ';base64,' . base64_encode($contents);
     }
 
     private function footerHtml(string $locale): string

@@ -60,9 +60,19 @@ final class SetupStatusService
             return self::STEP_DATABASE;
         }
 
-        $migrationService = new MigrationService();
-        if ($migrationService->pendingCount($pdo, dirname(__DIR__, 2) . '/database/migrations') > 0) {
-            return self::STEP_SCHEMA;
+        // pgsql/online: schema is always applied via database/migrations-pg/
+        // by the deployment process itself, running as the postgres
+        // superuser, before this app ever serves a request -- nizam_app (the
+        // app's own runtime role) has no CREATE privilege at all
+        // (database/migrations-pg/010_app_role_and_rls.sql, least privilege)
+        // and could never satisfy this step even if shown it. There is
+        // nothing for the wizard to do here for this deployment target, so
+        // it's skipped entirely rather than shown a step that can only fail.
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'pgsql') {
+            $migrationService = new MigrationService();
+            if ($migrationService->pendingCount($pdo, dirname(__DIR__, 2) . '/database/migrations') > 0) {
+                return self::STEP_SCHEMA;
+            }
         }
 
         if (!(new SchoolRepository())->exists()) {
