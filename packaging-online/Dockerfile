@@ -26,10 +26,14 @@
 # better trade than a container that boots with half its extensions silently
 # missing.
 #
-# mpm_prefork is forced explicitly: mod_php is not thread-safe and requires
-# it, but a fresh php:8.2-apache build in this pipeline came up with more
-# than one MPM module enabled ("AH00534: More than one MPM loaded",
-# Apache refusing to start at all) -- also found live, not assumed.
+# mod_php requires mpm_prefork specifically (not thread-safe). Fixing this
+# at build time here was tried and found NOT to stick -- the base image's
+# own mpm_event.load/.conf reappear by container start regardless, most
+# likely a BuildKit layer-caching quirk on this pipeline rather than
+# anything this RUN step actually does wrong. The real, guaranteed fix lives
+# in entrypoint.sh instead, applied fresh on every container start against
+# whatever the live filesystem actually is at that moment -- see its own
+# comment for the full story.
 
 FROM php:8.2-apache
 
@@ -51,12 +55,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         mbstring \
         curl \
     && a2enmod rewrite \
-    && rm -f /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_event.conf \
-             /etc/apache2/mods-enabled/mpm_worker.load /etc/apache2/mods-enabled/mpm_worker.conf \
-             /etc/apache2/mods-enabled/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.conf \
-    && a2enmod mpm_prefork \
-    && echo "=== mpm state after fix ===" && ls -la /etc/apache2/mods-enabled/ | grep -i mpm \
-    && grep -ri "loadmodule.*mpm" /etc/apache2/apache2.conf /etc/apache2/ports.conf 2>/dev/null || true \
     && rm -rf /var/lib/apt/lists/*
 
 COPY packaging-online/apache-nizam.conf /etc/apache2/sites-available/000-default.conf

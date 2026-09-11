@@ -55,14 +55,20 @@ file_put_contents("/var/www/html/config/config.php", $out);
 echo "config/config.php written.\n";
 '
 
-# Temporary runtime diagnostic for the "More than one MPM loaded" error --
-# the build-time filesystem state (checked separately) showed only
-# mpm_prefork enabled, yet apache2 still refuses to start with this error at
-# container startup, so something differs between build time and here.
-echo "=== runtime mods-enabled (mpm) ==="
-ls -la /etc/apache2/mods-enabled/ | grep -i mpm || echo "(none matched)"
-echo "=== apache2ctl -M ==="
-apache2ctl -M 2>&1 || true
-echo "=== end diagnostic ==="
+# mod_php is not thread-safe and requires mpm_prefork specifically. Found
+# live: doing this in the Dockerfile at build time does not stick -- the
+# base php:8.2-apache image's own mpm_event.load/.conf (dated from that
+# image's own build, not this one) are present again by the time the
+# container actually starts, alongside the mpm_prefork this Dockerfile
+# enabled, so Apache refuses to start with "AH00534: More than one MPM
+# loaded" every time. Doing it here instead, immediately before Apache
+# starts, removes any ambiguity about build-layer caching: this runs fresh
+# on every container start against whatever the real filesystem is at that
+# moment, not whatever a cached build layer happened to contain.
+rm -f /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_event.conf \
+      /etc/apache2/mods-enabled/mpm_worker.load /etc/apache2/mods-enabled/mpm_worker.conf
+if [ ! -e /etc/apache2/mods-enabled/mpm_prefork.load ]; then
+    a2enmod mpm_prefork > /dev/null
+fi
 
 exec "$@"
