@@ -68,8 +68,15 @@ COPY . .
 # installer already uses (packaging/installer.iss), applied here instead of
 # a version-controlled or image-baked file. Never commit real credentials
 # into this image.
+#
+# vendor/mpdf/mpdf/tmp is chowned too, not just storage/: found live, PDF
+# export 500'd with "Temporary files directory ... is not writable" --
+# mpdf/mpdf writes its own cache/temp files under its own package directory,
+# which COPY . left owned by root while Apache's worker runs as www-data.
 RUN rm -f config/config.php config/config.supabase.php \
     && chown -R www-data:www-data /var/www/html/storage \
+    && mkdir -p vendor/mpdf/mpdf/tmp \
+    && chown -R www-data:www-data vendor/mpdf/mpdf/tmp \
     && chmod +x packaging-online/entrypoint.sh
 
 EXPOSE 80
