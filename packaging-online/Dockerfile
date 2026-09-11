@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev \
         libicu-dev \
         libcurl4-openssl-dev \
+        libonig-dev \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install -j"$(nproc)" \
         pdo_pgsql \
@@ -34,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
     && a2enmod rewrite \
     && apt-get purge -y --auto-remove \
-        libpq-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libzip-dev libicu-dev libcurl4-openssl-dev \
+        libpq-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libzip-dev libicu-dev libcurl4-openssl-dev libonig-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY packaging-online/apache-nizam.conf /etc/apache2/sites-available/000-default.conf
