@@ -76,7 +76,21 @@ final class BackupController extends Controller
     public function scheduled(Request $request): void
     {
         $configured = getenv('SCHEDULED_BACKUP_TOKEN');
+        // Apache/mod_php doesn't pass Authorization through to $_SERVER by
+        // default (apache-nizam.conf's own SetEnvIf works around this at
+        // the vhost level) -- apache_request_headers() reads it directly
+        // from the request regardless, so this stays correct even if that
+        // vhost-level workaround is ever missing (e.g. a differently
+        // configured host).
         $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if ($header === '' && function_exists('apache_request_headers')) {
+            foreach (apache_request_headers() as $name => $value) {
+                if (strcasecmp($name, 'Authorization') === 0) {
+                    $header = $value;
+                    break;
+                }
+            }
+        }
         $provided = str_starts_with($header, 'Bearer ') ? substr($header, 7) : '';
 
         header('Content-Type: text/plain');
