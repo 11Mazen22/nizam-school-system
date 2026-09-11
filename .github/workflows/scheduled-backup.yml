@@ -1,13 +1,14 @@
 name: Scheduled database backup
 
-# Render's free tier has no built-in cron; this is the free substitute --
-# GitHub Actions' own scheduled-workflow trigger, calling the app's
-# bearer-token-gated backup endpoint (App\Controllers\BackupController::
-# scheduled()) once a day. Two repository secrets required (Settings ->
-# Secrets and variables -> Actions): NIZAM_URL (the deployed https://
-# origin, no trailing slash) and NIZAM_SCHEDULED_BACKUP_TOKEN (must match
-# the Render service's own SCHEDULED_BACKUP_TOKEN environment variable
-# exactly -- rotate both together, never one alone).
+# Neither Railway's nor Render's free tier has built-in cron; this is the
+# free substitute -- GitHub Actions' own scheduled-workflow trigger, calling
+# the app's bearer-token-gated backup endpoint (App\Controllers\
+# BackupController::scheduled()) once a day. Two repository secrets
+# required (Settings -> Secrets and variables -> Actions): NIZAM_URL (the
+# deployed https:// origin, no trailing slash) and
+# NIZAM_SCHEDULED_BACKUP_TOKEN (must match the deployed service's own
+# SCHEDULED_BACKUP_TOKEN environment variable exactly -- rotate both
+# together, never one alone).
 on:
   schedule:
     - cron: '0 2 * * *' # 02:00 UTC daily
