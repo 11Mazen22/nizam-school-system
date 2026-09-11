@@ -18,6 +18,23 @@ if (PHP_SAPI === 'cli-server') {
     }
 }
 
+// Platform health check (Railway/Render) -- deliberately answered here,
+// before bootstrap.php, config, or any database/session code runs at all.
+// A health check exists to answer one question only ("is this container
+// alive"), not "is the database reachable" (already covered by this app's
+// own extensive testing) or "does this route return exactly 200 for an
+// unauthenticated request." Found live: pointing the platform healthcheck
+// at /login instead left the deployment stuck indefinitely -- every check
+// got a 302 (showLogin() redirecting somewhere), which is a perfectly
+// correct response for a browser but which the platform's checker doesn't
+// follow and doesn't accept as healthy.
+if (($_SERVER['REQUEST_URI'] ?? '') === '/healthz') {
+    http_response_code(200);
+    header('Content-Type: text/plain');
+    echo 'ok';
+    exit;
+}
+
 require dirname(__DIR__) . '/app/bootstrap.php';
 
 use App\Controllers\AcademicYearController;
