@@ -55,4 +55,14 @@ file_put_contents("/var/www/html/config/config.php", $out);
 echo "config/config.php written.\n";
 '
 
+# Temporary runtime diagnostic for the "More than one MPM loaded" error --
+# the build-time filesystem state (checked separately) showed only
+# mpm_prefork enabled, yet apache2 still refuses to start with this error at
+# container startup, so something differs between build time and here.
+echo "=== runtime mods-enabled (mpm) ==="
+ls -la /etc/apache2/mods-enabled/ | grep -i mpm || echo "(none matched)"
+echo "=== apache2ctl -M ==="
+apache2ctl -M 2>&1 || true
+echo "=== end diagnostic ==="
+
 exec "$@"
