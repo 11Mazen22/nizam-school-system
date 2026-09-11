@@ -1,4 +1,6 @@
-# Nizam -- Render/Docker production image (online deployment target).
+# Nizam -- Docker production image for the online deployment target
+# (Railway; also works unmodified on Render or any other Dockerfile-based
+# host -- nothing here is platform-specific).
 #
 # Base: php:8.2-apache (Debian). vendor/ is committed to the repo (composer
 # is a dev-time-only tool per composer.json's own docblock -- "the school
@@ -13,6 +15,21 @@
 #   intl      -- PhpSpreadsheet's number/date formatting
 #   mbstring  -- mb_* string functions used throughout (UserService et al.)
 #   curl      -- SupabaseStorageClient's REST calls to Supabase Storage
+#
+# The -dev packages below are deliberately NOT purged after
+# docker-php-ext-install: found live (a real failed deploy, not a guess)
+# that apt's --auto-remove sweeps away the RUNTIME shared libraries
+# (libpq.so.5, libpng16.so.16, etc.) right along with the -dev headers,
+# since nothing else on the image depends on them once the -dev metapackage
+# is gone -- every compiled extension then fails to load at PHP startup.
+# Keeping the -dev packages costs a modest amount of image size; that's a
+# better trade than a container that boots with half its extensions silently
+# missing.
+#
+# mpm_prefork is forced explicitly: mod_php is not thread-safe and requires
+# it, but a fresh php:8.2-apache build in this pipeline came up with more
+# than one MPM module enabled ("AH00534: More than one MPM loaded",
+# Apache refusing to start at all) -- also found live, not assumed.
 
 FROM php:8.2-apache
 
@@ -34,8 +51,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         mbstring \
         curl \
     && a2enmod rewrite \
-    && apt-get purge -y --auto-remove \
-        libpq-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libzip-dev libicu-dev libcurl4-openssl-dev libonig-dev \
+    && (a2dismod mpm_event || true) \
+    && (a2dismod mpm_worker || true) \
+    && a2enmod mpm_prefork \
     && rm -rf /var/lib/apt/lists/*
 
 COPY packaging-online/apache-nizam.conf /etc/apache2/sites-available/000-default.conf
