@@ -35,6 +35,34 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/healthz') {
     exit;
 }
 
+// TEMPORARY -- diagnosing why this deployment's database connection isn't
+// reaching Supabase. Gated on a one-off query token so it isn't just a
+// public "here's whether the DB is reachable" probe; removed once diagnosed.
+if (($_SERVER['REQUEST_URI'] ?? '') === '/diag?t=nizam2026debug') {
+    header('Content-Type: text/plain');
+    try {
+        $config = require dirname(__DIR__) . '/config/config.php';
+    } catch (\Throwable $e) {
+        echo "config.php require failed: " . $e->getMessage() . "\n";
+        exit;
+    }
+    echo "driver=" . ($config['driver'] ?? '?') . " host=" . ($config['host'] ?? '?')
+        . " port=" . ($config['port'] ?? '?') . " db=" . ($config['database'] ?? '?')
+        . " user=" . ($config['username'] ?? '?') . "\n";
+    try {
+        $dsn = sprintf('pgsql:host=%s;port=%d;dbname=%s', $config['host'], $config['port'], $config['database']);
+        $pdo = new PDO($dsn, $config['username'], $config['password'], [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_TIMEOUT => 10,
+        ]);
+        $result = $pdo->query('SELECT 1')->fetchColumn();
+        echo "CONNECTED. SELECT 1 = {$result}\n";
+    } catch (\Throwable $e) {
+        echo "CONNECTION FAILED: " . get_class($e) . ": " . $e->getMessage() . "\n";
+    }
+    exit;
+}
+
 require dirname(__DIR__) . '/app/bootstrap.php';
 
 use App\Controllers\AcademicYearController;
