@@ -60,6 +60,28 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/diag?t=nizam2026debug') {
     } catch (\Throwable $e) {
         echo "CONNECTION FAILED: " . get_class($e) . ": " . $e->getMessage() . "\n";
     }
+
+    // Raw PDO connects fine (confirmed separately) -- now test the actual
+    // classes the real request path uses, to find where they diverge.
+    require dirname(__DIR__) . '/app/bootstrap.php';
+    try {
+        $realPdo = \App\Database::connection();
+        echo "App\\Database::connection() OK, driver=" . $realPdo->getAttribute(PDO::ATTR_DRIVER_NAME) . "\n";
+    } catch (\Throwable $e) {
+        echo "App\\Database::connection() FAILED: " . get_class($e) . ": " . $e->getMessage() . "\n";
+    }
+    try {
+        $setupCompleted = (bool) \App\Services\SettingsService::get('system.setup_completed', false);
+        echo "SettingsService::get('system.setup_completed') = " . var_export($setupCompleted, true) . "\n";
+    } catch (\Throwable $e) {
+        echo "SettingsService::get() FAILED: " . get_class($e) . ": " . $e->getMessage() . "\n";
+    }
+    try {
+        $isCompleted = (new \App\Services\SetupStatusService())->isCompleted();
+        echo "SetupStatusService::isCompleted() = " . var_export($isCompleted, true) . "\n";
+    } catch (\Throwable $e) {
+        echo "SetupStatusService::isCompleted() FAILED: " . get_class($e) . ": " . $e->getMessage() . "\n";
+    }
     exit;
 }
 
