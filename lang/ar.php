@@ -38,7 +38,7 @@ return [
     "backups.confirm_phrase_mismatch" => "يجب كتابة RESTORE بالضبط لتأكيد هذا الإجراء.",
     "backups.restore_success_relogin" => "تمت استعادة قاعدة البيانات بنجاح. الرجاء تسجيل الدخول مرة أخرى.",
     "backups.error.file_not_found" => "تعذرت قراءة ملف النسخة الاحتياطية.",
-    "backups.error.invalid_signature" => "هذا ليس ملف نسخة احتياطية صالحًا لنظام Nizam.",
+    "backups.error.invalid_signature" => "هذا ليس ملف نسخة احتياطية صالح.",
     "backups.error.unsupported_format_version" => "تم إنشاء هذا الملف بصيغة نسخ احتياطي غير مدعومة.",
     "backups.error.checksum_mismatch" => "ملف النسخة الاحتياطية تالف أو لم يتم رفعه بالكامل.",
     "backups.error.schema_version_mismatch" => "لا يتوافق هذا الملف مع إصدار قاعدة بيانات هذا التثبيت، ولا يمكن استعادته.",
@@ -48,7 +48,7 @@ return [
     "backups.error.restore_failed" => "فشلت الاستعادة. الرجاء استعادة النسخة الاحتياطية الطارئة :filename فورًا.",
     "backups.error.generic" => "حدث خطأ أثناء الاستعادة. حاول مرة أخرى، وأبلغ مسؤول النظام إذا استمرت المشكلة.",
 
-    'app.name' => 'نِظام',
+    'app.name' => 'هضبة الأهرام الثانوية',
 
     // Auth
     'auth.login.title' => 'تسجيل الدخول',
@@ -72,6 +72,8 @@ return [
     'auth.login.password_placeholder' => 'أدخل كلمة المرور',
     'auth.login.secure_connection' => 'اتصال آمن ومشفر',
     'auth.login.submit' => 'دخول',
+    'auth.login.recover_admin' => 'استعادة حساب المدير',
+    'auth.login.recover_admin_hint' => 'للطوارئ فقط: إنشاء حساب مدير جديد إذا فُقد الوصول',
     'auth.login.invalid' => 'اسم المستخدم أو كلمة المرور غير صحيحة.',
     'auth.login.locked' => 'تم قفل هذا الحساب مؤقتًا بسبب محاولات دخول متكررة. حاول مرة أخرى بعد :minutes دقيقة.',
     'auth.login.throttled' => 'تم رصد عدد كبير من محاولات الدخول من هذا الجهاز. حاول مرة أخرى لاحقًا.',

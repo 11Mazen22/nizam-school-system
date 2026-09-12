@@ -167,12 +167,19 @@ $schoolName = $school === null
           </button>
         </form>
         
+        <div class="mt-3 text-center">
+          <a href="/setup/recover-admin" class="btn btn-outline-warning btn-sm d-inline-flex align-items-center gap-2">
+            <?= icon('shield-alert') ?>
+            <span><?= e(__('auth.login.recover_admin')) ?></span>
+          </a>
+          <p class="text-muted small mt-2 mb-0"><?= e(__('auth.login.recover_admin_hint')) ?></p>
+        </div>
+        
         <div class="n-auth-footer">
           <div class="n-auth-security">
             <?= icon('shield-check') ?>
             <span><?= e(__('auth.login.secure_connection')) ?></span>
           </div>
-          <!-- Emergency admin recovery: visit /setup/recover-admin if no admin account exists -->
         </div>
       </div>
     </main>

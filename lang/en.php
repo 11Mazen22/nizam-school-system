@@ -37,7 +37,7 @@ return [
     "backups.confirm_phrase_mismatch" => "You must type RESTORE exactly to confirm this action.",
     "backups.restore_success_relogin" => "Database restored successfully. Please sign in again.",
     "backups.error.file_not_found" => "The backup file could not be read.",
-    "backups.error.invalid_signature" => "This is not a valid Nizam backup file.",
+    "backups.error.invalid_signature" => "This is not a valid backup file.",
     "backups.error.unsupported_format_version" => "This backup file was made with an unsupported backup format.",
     "backups.error.checksum_mismatch" => "This backup file is corrupted or was not fully uploaded.",
     "backups.error.schema_version_mismatch" => "This backup does not match this installation's database version and cannot be restored.",
@@ -47,7 +47,7 @@ return [
     "backups.error.restore_failed" => "Restore failed. Restore the emergency backup :filename immediately to recover.",
     "backups.error.generic" => "Something went wrong during restore. Try again, and tell your administrator if this keeps happening.",
 
-    'app.name' => 'Nizam',
+    'app.name' => 'Hadaba Al-Ahram School',
 
     // Auth
     'auth.login.title' => 'Sign In',
@@ -71,6 +71,8 @@ return [
     'auth.login.password_placeholder' => 'Enter your password',
     'auth.login.secure_connection' => 'Secure encrypted connection',
     'auth.login.submit' => 'Sign In',
+    'auth.login.recover_admin' => 'Recover Admin Access',
+    'auth.login.recover_admin_hint' => 'Emergency only: Create new admin account if access is lost',
     'auth.login.invalid' => 'That username or password is not correct.',
     'auth.login.locked' => 'This account is temporarily locked after repeated failed attempts. Try again in :minutes minutes.',
     'auth.login.throttled' => 'Too many login attempts from this device. Try again later.',
