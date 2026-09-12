@@ -375,17 +375,10 @@ final class BackupService
         if (!preg_match('/^-- NIZAM-BACKUP (\S+) schema=(\d+)\r?\n/', $content, $sig)) {
             throw new RuntimeException('invalid_signature');
         }
-        // Driver-specific tag ('v1' mysql, 'v1-pg' pgsql): a data-only pgsql
-        // dump and a schema+data mysql dump are never interchangeable (wrong
-        // quoting, DROP/CREATE TABLE nizam_app has no privilege to run) --
-        // this rejects a cross-deployment file here, with a clear reason
-        // code, instead of failing confusingly partway through exec().
-        $expected = Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql'
-            ? self::FORMAT_VERSION_PGSQL
-            : self::FORMAT_VERSION_MYSQL;
-        if ($sig[1] !== $expected) {
-            throw new RuntimeException('unsupported_format_version');
-        }
+        
+        // HADABA AL-AHRAM: Cross-database support - allow any format version
+        // The SqlDialectConverter will handle conversion in RestoreService
+        $formatVersion = $sig[1];
         $schemaVersion = (int) $sig[2];
 
         if (!preg_match('/-- SHA256: ([a-f0-9]{64})\r?\n?$/', $content, $sum)) {
