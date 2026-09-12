@@ -60,6 +60,7 @@ Source: "..\packaging\launcher\Microsoft.Web.WebView2.Core.dll"; DestDir: "{app}
 Source: "..\packaging\launcher\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\launcher\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\hadaba.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "assets\hadaba-256.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\apache\httpd-nizam.conf"; DestDir: "{app}\runtime-config"; Flags: ignoreversion
 Source: "..\packaging\mysql\my-nizam.ini"; DestDir: "{app}\runtime-config"; Flags: ignoreversion
 Source: "..\packaging\docs\User-Guide.pdf"; DestDir: "{app}\docs"; Flags: ignoreversion skipifsourcedoesntexist
@@ -78,9 +79,9 @@ Name: "{commonappdata}\{#MyDataDirName}\storage\logs"; Permissions: users-modify
 Name: "{commonappdata}\{#MyDataDirName}\storage\uploads"; Permissions: users-modify
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba-256.png"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba-256.png"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
