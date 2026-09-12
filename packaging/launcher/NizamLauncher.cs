@@ -29,10 +29,10 @@ using Microsoft.Web.WebView2.WinForms;
 
 internal static class NizamLauncher
 {
-    private const string ApacheServiceName = "NizamApache";
-    private const string MariaDbServiceName = "NizamMariaDB";
+    private const string ApacheServiceName = "HadabaApache";
+    private const string MariaDbServiceName = "HadabaMariaDB";
     private const string AppUrl = "http://127.0.0.1:8890/";
-    private const string WindowTitle = "Nizam";
+    private const string WindowTitle = "Hadaba Al-Ahram School";
     private const int HealthCheckTimeoutSeconds = 30;
 
     [STAThread]
@@ -45,7 +45,7 @@ internal static class NizamLauncher
         }
         
         bool createdNew;
-        using (var instanceLock = new Mutex(true, "Global\\NizamLauncherSingleInstance", out createdNew))
+        using (var instanceLock = new Mutex(true, "Global\\HadabaLauncherSingleInstance", out createdNew))
         {
             if (!createdNew)
             {
@@ -66,9 +66,9 @@ internal static class NizamLauncher
                 if (!WaitUntilHealthy())
                 {
                     ShowFriendlyError(
-                        "Nizam could not start",
-                        "Nizam's local service did not respond in time. Try restarting your computer. " +
-                        "If this keeps happening, ask your administrator to check the Nizam log files."
+                        "Hadaba Al-Ahram School could not start",
+                        "The local service did not respond in time. Try restarting your computer. " +
+                        "If this keeps happening, ask your administrator to check the log files."
                     );
                     return;
                 }
@@ -79,8 +79,8 @@ internal static class NizamLauncher
             {
                 LogStartupFailure(ex);
                 ShowFriendlyError(
-                    "Nizam could not start",
-                    "An unexpected problem prevented Nizam from starting. Try restarting your computer, " +
+                    "Hadaba Al-Ahram School could not start",
+                    "An unexpected problem prevented the application from starting. Try restarting your computer, " +
                     "and contact your administrator if this keeps happening."
                 );
             }
@@ -184,9 +184,9 @@ internal static class NizamLauncher
         if (!IsWebView2RuntimeAvailable())
         {
             ShowFriendlyError(
-                "Nizam needs the Microsoft Edge WebView2 Runtime",
+                "WebView2 Runtime required",
                 "This component is normally already included in Windows 10 and 11. If you see this message, " +
-                "try running Windows Update, then launch Nizam again. Contact your administrator if this " +
+                "try running Windows Update, then launch the application again. Contact your administrator if this " +
                 "keeps happening."
             );
             return;
@@ -253,7 +253,7 @@ internal static class NizamLauncher
     {
         try
         {
-            var dataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + "\\Nizam\\storage\\logs";
+            var dataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + "\\HadabaSchool\\storage\\logs";
             Directory.CreateDirectory(dataDir);
             var line = string.Format("[{0}] Launcher startup failure: {1}\r\n", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), ex.Message);
             File.AppendAllText(dataDir + "\\launcher.log", line);
@@ -309,7 +309,7 @@ internal static class NizamLauncher
                 // ProgramData, which is shared school data, not UI cache.
                 var userDataFolder = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Nizam", "WebView2");
+                    "HadabaSchool", "WebView2");
                 Directory.CreateDirectory(userDataFolder);
 
                 var environment = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
@@ -342,9 +342,9 @@ internal static class NizamLauncher
             {
                 LogStartupFailure(ex);
                 MessageBox.Show(
-                    "Nizam's window could not be started. Try restarting your computer, and contact your " +
+                    "The application window could not be started. Try restarting your computer, and contact your " +
                     "administrator if this keeps happening.",
-                    "Nizam could not start", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Application could not start", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
         }
