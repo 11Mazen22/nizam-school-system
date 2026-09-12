@@ -52,25 +52,34 @@ final class SqlDialectConverter
         $sql = self::replaceOutsideStrings($sql, static fn (string $segment): string => preg_replace(
             '/\bSELECT\s+setval\s*\([^;]*\)\s*;?/i', '', $segment
         ) ?? $segment);
+        
+        // Since a PostgreSQL dump is data-only (no DROP/CREATE TABLE), restoring it on MySQL
+        // requires explicitly clearing the tables first so INSERTs don't cause duplicate key errors.
+        if (preg_match_all('/^INSERT\s+INTO\s+`([^`]+)`/im', $sql, $matches)) {
+            $tables = array_unique($matches[1]);
+            $deletes = "";
+            foreach (array_reverse($tables) as $table) {
+                $deletes .= "DELETE FROM `{$table}`;\n";
+            }
+            $sql = preg_replace('/^-- NIZAM-BACKUP v1\b[^\n]*\n/m', "$0\n" . $deletes . "\n", $sql, 1) ?? $sql;
+        }
+
         return $sql;
     }
 
     private static function mysqlToPostgresql(string $sql): string
     {
         $sql = preg_replace('/^-- NIZAM-BACKUP v1\b(?!-pg)/m', '-- NIZAM-BACKUP v1-pg', $sql) ?? $sql;
+        
+        // PostgreSQL restores expect a data-only dump (no DROP/CREATE TABLE), because the schema 
+        // is managed by migrations and RestoreService already explicitly deletes rows before inserting.
+        // Attempting to convert MySQL CREATE TABLE statements is brittle, so we just strip them out.
+        $sql = preg_replace('/^-- Table:.*?\nDROP TABLE IF EXISTS `[^`]+`;\nCREATE TABLE `[^`]+`.*?\)\s*ENGINE=[^;]+;/ms', '', $sql) ?? $sql;
+
         $sql = self::convertIdentifiers($sql, '`', '"');
         $sql = self::replaceOutsideStrings($sql, static fn (string $segment): string => self::addOverridingSystemValue($segment));
-        $sql = self::replaceOutsideStrings($sql, static fn (string $segment): string => self::addCascadeToDrops($segment));
-        return self::replaceOutsideStrings($sql, static fn (string $segment): string => preg_replace(
-            [
-                '/\s+ENGINE\s*=\s*\w+/i',
-                '/\s+(?:DEFAULT\s+)?CHARSET\s*=\s*\w+/i',
-                '/\s+COLLATE\s*=\s*\w+/i',
-                '/\s+AUTO_INCREMENT\s*=\s*\d+/i',
-            ],
-            '',
-            $segment
-        ) ?? $segment);
+        
+        return trim($sql) . "\n";
     }
 
     /** Convert identifier delimiters without touching single-quoted data. */
@@ -113,17 +122,7 @@ final class SqlDialectConverter
         ) ?? $sql;
     }
 
-    /** Adds exactly one CASCADE modifier, including on multiline DROP statements. */
-    private static function addCascadeToDrops(string $sql): string
-    {
-        return preg_replace_callback(
-            '/\bDROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_]*)(?:\s*,\s*(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_]*))*\s*(?:CASCADE\s*)?;/i',
-            static fn (array $match): string => preg_match('/\bCASCADE\s*;$/i', $match[0]) === 1
-                ? $match[0]
-                : rtrim(substr($match[0], 0, -1)) . ' CASCADE;',
-            $sql
-        ) ?? $sql;
-    }
+
 
     /** Applies a transformation only to SQL outside single-quoted values. */
     private static function replaceOutsideStrings(string $sql, callable $replace): string
