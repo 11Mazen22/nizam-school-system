@@ -25,7 +25,7 @@ CREATE TABLE schools (
 -- Use OVERRIDING SYSTEM VALUE to force id=1
 INSERT INTO schools (id, name, name_ar, logo_path, address, phone) 
 OVERRIDING SYSTEM VALUE 
-VALUES (1, 'Hadaba Al-Ahram Language School', 'هضبة الأهرام الثانوية', NULL, NULL, NULL);
+VALUES (1, 'Hadaba Al-Ahram Language School', 'هضبة الأهرام الثانوية', '/assets/img/hadaba-logo.png', NULL, NULL);
 
 CREATE TABLE settings (
   id           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
