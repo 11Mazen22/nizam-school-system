@@ -12,7 +12,7 @@
 ; Launcher just health-checks and opens the browser.
 
 #define MyAppName "Hadaba Al-Ahram School"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Hadaba Al-Ahram Language School"
 #define MyAppURL "http://127.0.0.1:8890/"
 #define MyDataDirName "HadabaSchool"

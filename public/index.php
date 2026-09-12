@@ -40,11 +40,16 @@ require dirname(__DIR__) . '/app/bootstrap.php';
 use App\Controllers\AcademicYearController;
 use App\Controllers\ActivityLogController;
 use App\Controllers\AssignmentController;
+use App\Controllers\AttendanceController;
 use App\Controllers\AuthController;
 use App\Controllers\BackupController;
 use App\Controllers\ClassController;
 use App\Controllers\DashboardController;
+use App\Controllers\ExamController;
 use App\Controllers\GradeController;
+use App\Controllers\NotificationController;
+use App\Controllers\TimetableController;
+use App\Controllers\WelfareController;
 use App\Controllers\ImportController;
 use App\Controllers\PromotionController;
 use App\Controllers\ReportController;
@@ -263,6 +268,41 @@ $router->get('/logo', [SettingsController::class, 'logo'], [$session, $csrf, $ye
 
 // Activity Log -- activity_log.view, held by both roles (§J), scope enforced in the controller
 $router->get('/activity-log', [ActivityLogController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('activity_log.view')]);
+
+// ---------------------------------------------------------------- Attendance
+$router->get('/attendance',        [AttendanceController::class, 'index'],  [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('attendance.view')]);
+$router->post('/attendance',       [AttendanceController::class, 'store'],  [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('attendance.manage')]);
+$router->get('/attendance/report', [AttendanceController::class, 'report'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('attendance.view')]);
+
+// ---------------------------------------------------------------- Exams & Grading
+$router->get('/exams',                              [ExamController::class, 'index'],      [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.view')]);
+$router->post('/exams',                             [ExamController::class, 'store'],      [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.manage')]);
+$router->post('/exams/{id}/update',                 [ExamController::class, 'update'],     [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.manage')]);
+$router->post('/exams/{id}/delete',                 [ExamController::class, 'delete'],     [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.manage')]);
+$router->get('/exams/ranking',                      [ExamController::class, 'ranking'],    [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.view')]);
+$router->get('/exams/{id}/scores',                  [ExamController::class, 'scores'],     [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.view')]);
+$router->post('/exams/{id}/scores',                 [ExamController::class, 'saveScores'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.manage')]);
+$router->get('/exams/report-card/{id}',             [ExamController::class, 'reportCard'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.view')]);
+
+// ---------------------------------------------------------------- Student Welfare (Discipline + Health)
+$router->get('/welfare/discipline',              [WelfareController::class, 'discipline'],      [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('welfare.view')]);
+$router->post('/welfare/discipline',             [WelfareController::class, 'storeDiscipline'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('welfare.manage')]);
+$router->post('/welfare/discipline/{id}/delete', [WelfareController::class, 'deleteDiscipline'],[$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('welfare.manage')]);
+$router->get('/welfare/health',                  [WelfareController::class, 'health'],          [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('welfare.view')]);
+$router->post('/welfare/health',                 [WelfareController::class, 'storeHealth'],     [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('welfare.manage')]);
+$router->post('/welfare/health/{id}/delete',     [WelfareController::class, 'deleteHealth'],    [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('welfare.manage')]);
+
+// ---------------------------------------------------------------- Timetable
+$router->get('/timetable',            [TimetableController::class, 'index'],  [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('timetable.view')]);
+$router->post('/timetable',           [TimetableController::class, 'store'],  [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->post('/timetable/{id}/delete',[TimetableController::class, 'delete'],[$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->post('/timetable/clear',     [TimetableController::class, 'clear'],  [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+
+// ---------------------------------------------------------------- Notifications
+$router->get('/notifications',             [NotificationController::class, 'index'],      [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->post('/notifications/{id}/read',  [NotificationController::class, 'markRead'],   [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->post('/notifications/read-all',   [NotificationController::class, 'markAllRead'],[$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->get('/notifications/api',         [NotificationController::class, 'api'],        [$session, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 
 $router->get('/import/{entity}/template', [ImportController::class, 'template'], [$session, $csrf, $yearContext]);
 $router->post('/import/{entity}', [ImportController::class, 'import'], [$session, $csrf, $yearContext]);

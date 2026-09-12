@@ -1,9 +1,13 @@
--- Nizam School Management System (Postgres/Supabase) -- Seed: role_permissions
--- Grants exactly as §J tabulates, clarified by §S-12. Looked up by CODE,
--- never an assumed id. ON CONFLICT DO NOTHING: the composite PK has nothing
--- else to update on a re-run.
+-- Nizam School Management System -- Seed: role_permissions
+-- Grants exactly as tabulated in §J (Permission catalog) and clarified by §S-12
+-- (Undo Promotion rides on students.promote; Reassign Class rides on students.edit --
+-- no new permission codes needed for either). Looked up by CODE, never by assumed
+-- auto-increment id. INSERT IGNORE: the composite PK has nothing else to update on
+-- a re-run, so "ignore the duplicate" is the correct idempotency mechanism here
+-- (as opposed to ON DUPLICATE KEY UPDATE, used where there is a non-key column to
+-- refresh).
 
-INSERT INTO role_permissions (role_id, permission_id)
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM (
   -- Administrator: every permission in the catalog.
@@ -35,6 +39,15 @@ FROM (
   SELECT 'admin', 'settings.manage' UNION ALL
   SELECT 'admin', 'users.manage' UNION ALL
   SELECT 'admin', 'activity_log.view' UNION ALL
+  -- New modules
+  SELECT 'admin', 'attendance.view' UNION ALL
+  SELECT 'admin', 'attendance.manage' UNION ALL
+  SELECT 'admin', 'exams.view' UNION ALL
+  SELECT 'admin', 'exams.manage' UNION ALL
+  SELECT 'admin', 'welfare.view' UNION ALL
+  SELECT 'admin', 'welfare.manage' UNION ALL
+  SELECT 'admin', 'timetable.view' UNION ALL
+  SELECT 'admin', 'timetable.manage' UNION ALL
   -- Staff: the twelve view/create/edit-level permissions §J grants them.
   SELECT 'staff', 'students.view' UNION ALL
   SELECT 'staff', 'students.create' UNION ALL
@@ -47,8 +60,13 @@ FROM (
   SELECT 'staff', 'academic_years.view' UNION ALL
   SELECT 'staff', 'reports.view' UNION ALL
   SELECT 'staff', 'reports.export' UNION ALL
-  SELECT 'staff', 'activity_log.view'
+  SELECT 'staff', 'activity_log.view' UNION ALL
+  -- Staff can view and manage attendance and welfare, view exams and timetable
+  SELECT 'staff', 'attendance.view' UNION ALL
+  SELECT 'staff', 'attendance.manage' UNION ALL
+  SELECT 'staff', 'exams.view' UNION ALL
+  SELECT 'staff', 'welfare.view' UNION ALL
+  SELECT 'staff', 'timetable.view'
 ) AS mapping
 JOIN roles r ON r.code = mapping.role_code
-JOIN permissions p ON p.code = mapping.perm_code
-ON CONFLICT (role_id, permission_id) DO NOTHING;
+JOIN permissions p ON p.code = mapping.perm_code;

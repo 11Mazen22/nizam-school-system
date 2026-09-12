@@ -215,4 +215,51 @@ final class EnrollmentRepository
         $stmt->execute(['class' => $classId]);
         return $stmt->fetchAll();
     }
+
+    /**
+     * Active students enrolled in a specific class, with student details.
+     * Used to populate the attendance mark sheet.
+     * @return array<int, array<string,mixed>>
+     */
+    public function activeStudentsForClass(int $classId): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT s.id, s.student_code, s.full_name
+             FROM student_enrollments e
+             JOIN students s ON s.id = e.student_id
+             WHERE e.class_id = :class AND e.status = 'active'
+             ORDER BY s.full_name ASC"
+        );
+        $stmt->execute(['class' => $classId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Current enrollment for a student in the active year — used by StudentController show.
+     */
+    public function currentEnrollmentFor(int $studentId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT e.*, ay.label AS year_label, g.name_en AS grade_name_en, g.name_ar AS grade_name_ar, c.name AS class_name
+             FROM student_enrollments e
+             JOIN academic_years ay ON ay.id = e.academic_year_id
+             JOIN grades g ON g.id = e.grade_id
+             LEFT JOIN classes c ON c.id = e.class_id
+             WHERE e.student_id = :sid AND e.status = 'active'
+             ORDER BY e.id DESC LIMIT 1"
+        );
+        $stmt->execute(['sid' => $studentId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    /**
+     * Full enrollment history for a student — show page.
+     */
+    public function historyFor(int $studentId): array
+    {
+        return $this->historyForStudent($studentId);
+    }
 }
+
+

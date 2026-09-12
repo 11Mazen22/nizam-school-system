@@ -39,6 +39,15 @@ FROM (
   SELECT 'admin', 'settings.manage' UNION ALL
   SELECT 'admin', 'users.manage' UNION ALL
   SELECT 'admin', 'activity_log.view' UNION ALL
+  -- New modules
+  SELECT 'admin', 'attendance.view' UNION ALL
+  SELECT 'admin', 'attendance.manage' UNION ALL
+  SELECT 'admin', 'exams.view' UNION ALL
+  SELECT 'admin', 'exams.manage' UNION ALL
+  SELECT 'admin', 'welfare.view' UNION ALL
+  SELECT 'admin', 'welfare.manage' UNION ALL
+  SELECT 'admin', 'timetable.view' UNION ALL
+  SELECT 'admin', 'timetable.manage' UNION ALL
   -- Staff: the twelve view/create/edit-level permissions §J grants them.
   SELECT 'staff', 'students.view' UNION ALL
   SELECT 'staff', 'students.create' UNION ALL
@@ -51,7 +60,13 @@ FROM (
   SELECT 'staff', 'academic_years.view' UNION ALL
   SELECT 'staff', 'reports.view' UNION ALL
   SELECT 'staff', 'reports.export' UNION ALL
-  SELECT 'staff', 'activity_log.view'
+  SELECT 'staff', 'activity_log.view' UNION ALL
+  -- Staff can view and manage attendance and welfare, view exams and timetable
+  SELECT 'staff', 'attendance.view' UNION ALL
+  SELECT 'staff', 'attendance.manage' UNION ALL
+  SELECT 'staff', 'exams.view' UNION ALL
+  SELECT 'staff', 'welfare.view' UNION ALL
+  SELECT 'staff', 'timetable.view'
 ) AS mapping
 JOIN roles r ON r.code = mapping.role_code
 JOIN permissions p ON p.code = mapping.perm_code;

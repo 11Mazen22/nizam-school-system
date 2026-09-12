@@ -1,6 +1,7 @@
--- Nizam School Management System (Postgres/Supabase) -- Seed: permissions
--- Flat expansion of §J's permission catalog -- a faithful transcription of
--- database/seeds/002_permissions.sql, idempotent by unique code.
+-- Nizam School Management System -- Seed: permissions
+-- Flat expansion of §J's permission catalog (which groups codes like
+-- "students.view / create / edit" in one display row) into one row per code --
+-- a faithful transcription, not a new decision. Idempotent by unique code.
 
 INSERT INTO permissions (code, name_en, name_ar, module) VALUES
   ('students.view',        'View Students',           'عرض الطلاب',                 'students'),
@@ -30,8 +31,20 @@ INSERT INTO permissions (code, name_en, name_ar, module) VALUES
   ('backups.restore',      'Restore Backups',            'استعادة النسخ الاحتياطية', 'backups'),
   ('settings.manage',      'Manage Settings',            'إدارة الإعدادات',          'settings'),
   ('users.manage',         'Manage Users',                'إدارة المستخدمين',        'users'),
-  ('activity_log.view',    'View Activity Log',           'عرض سجل النشاط',          'activity_log')
-ON CONFLICT (code) DO UPDATE SET
-  name_en = EXCLUDED.name_en,
-  name_ar = EXCLUDED.name_ar,
-  module  = EXCLUDED.module;
+  ('activity_log.view',    'View Activity Log',           'عرض سجل النشاط',          'activity_log'),
+  -- Attendance
+  ('attendance.view',      'View Attendance',             'عرض سجل الحضور',           'attendance'),
+  ('attendance.manage',    'Manage Attendance',           'إدارة سجل الحضور',         'attendance'),
+  -- Exams & Grading
+  ('exams.view',           'View Exams & Grades',         'عرض الامتحانات والدرجات',  'exams'),
+  ('exams.manage',         'Manage Exams & Grades',       'إدارة الامتحانات والدرجات','exams'),
+  -- Student Welfare (Discipline + Health)
+  ('welfare.view',         'View Student Welfare',        'عرض رعاية الطلاب',         'welfare'),
+  ('welfare.manage',       'Manage Student Welfare',      'إدارة رعاية الطلاب',       'welfare'),
+  -- Timetable
+  ('timetable.view',       'View Timetable',              'عرض الجدول الدراسي',        'timetable'),
+  ('timetable.manage',     'Manage Timetable',            'إدارة الجدول الدراسي',      'timetable')
+ON DUPLICATE KEY UPDATE
+  name_en = VALUES(name_en),
+  name_ar = VALUES(name_ar),
+  module  = VALUES(module);

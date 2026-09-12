@@ -31,7 +31,19 @@ INSERT INTO permissions (code, name_en, name_ar, module) VALUES
   ('backups.restore',      'Restore Backups',            'استعادة النسخ الاحتياطية', 'backups'),
   ('settings.manage',      'Manage Settings',            'إدارة الإعدادات',          'settings'),
   ('users.manage',         'Manage Users',                'إدارة المستخدمين',        'users'),
-  ('activity_log.view',    'View Activity Log',           'عرض سجل النشاط',          'activity_log')
+  ('activity_log.view',    'View Activity Log',           'عرض سجل النشاط',          'activity_log'),
+  -- Attendance
+  ('attendance.view',      'View Attendance',             'عرض سجل الحضور',           'attendance'),
+  ('attendance.manage',    'Manage Attendance',           'إدارة سجل الحضور',         'attendance'),
+  -- Exams & Grading
+  ('exams.view',           'View Exams & Grades',         'عرض الامتحانات والدرجات',  'exams'),
+  ('exams.manage',         'Manage Exams & Grades',       'إدارة الامتحانات والدرجات','exams'),
+  -- Student Welfare (Discipline + Health)
+  ('welfare.view',         'View Student Welfare',        'عرض رعاية الطلاب',         'welfare'),
+  ('welfare.manage',       'Manage Student Welfare',      'إدارة رعاية الطلاب',       'welfare'),
+  -- Timetable
+  ('timetable.view',       'View Timetable',              'عرض الجدول الدراسي',        'timetable'),
+  ('timetable.manage',     'Manage Timetable',            'إدارة الجدول الدراسي',      'timetable')
 ON DUPLICATE KEY UPDATE
   name_en = VALUES(name_en),
   name_ar = VALUES(name_ar),

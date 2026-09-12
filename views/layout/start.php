@@ -95,6 +95,29 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
           <a class="btn btn-outline-secondary<?= currentLocale() === 'ar' ? ' active' : '' ?>" href="/lang?to=ar">ع</a>
           <a class="btn btn-outline-secondary<?= currentLocale() === 'en' ? ' active' : '' ?>" href="/lang?to=en">EN</a>
         </div>
+        <!-- Notification Bell -->
+        <?php if (!empty($_SESSION['user_id'])): ?>
+        <div class="dropdown" id="notif-bell-wrapper">
+          <button class="btn btn-sm btn-icon btn-outline-secondary position-relative"
+                  id="notifBellBtn" data-bs-toggle="dropdown" aria-expanded="false"
+                  aria-label="<?= e(__('notifications.title')) ?>">
+            <?= icon('inbox') ?>
+            <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  style="font-size:.6rem;display:none;">0</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:320px;max-width:360px;" aria-labelledby="notifBellBtn">
+            <li class="px-3 py-2 d-flex justify-content-between align-items-center border-bottom">
+              <span class="fw-semibold"><?= e(__('notifications.title')) ?></span>
+              <a href="/notifications/read-all" class="small text-muted text-decoration-none"
+                 id="notif-markall-link" onclick="markAllRead(event)"><?= e(__('notifications.mark_all_read')) ?></a>
+            </li>
+            <li id="notif-list"><li class="px-3 py-3 text-center text-muted small"><?= e(__('notifications.empty')) ?></li></li>
+            <li class="border-top">
+              <a class="dropdown-item text-center small py-2" href="/notifications"><?= e(__('notifications.view_all')) ?></a>
+            </li>
+          </ul>
+        </div>
+        <?php endif; ?>
         <span class="n-avatar d-none d-sm-inline-flex" aria-hidden="true"><?= e(mb_substr($_SESSION['full_name'] ?? '?', 0, 1)) ?></span>
         <span class="text-muted small d-none d-lg-inline"><?= e($_SESSION['full_name'] ?? '') ?></span>
         <button type="button" class="btn btn-sm btn-icon btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#logoutConfirm" aria-label="<?= e(__('auth.logout.submit')) ?>" title="<?= e(__('auth.logout.submit')) ?>">
