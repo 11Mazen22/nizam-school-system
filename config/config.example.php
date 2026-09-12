@@ -25,6 +25,20 @@ return [
     'username'  => 'root',
     'password'  => '',
     'charset'   => 'utf8mb4',
+    
+    // Email notification settings (for automations)
+    'email' => [
+        'enabled'       => false,  // Set to true to enable email notifications
+        'from_email'    => 'noreply@school.local',
+        'from_name'     => 'Nizam School System',
+        'smtp_host'     => null,   // Optional: SMTP server (e.g., smtp.gmail.com)
+        'smtp_port'     => null,   // Optional: SMTP port (587 for TLS, 465 for SSL)
+        'smtp_user'     => null,   // Optional: SMTP username
+        'smtp_password' => null,   // Optional: SMTP password
+    ],
+    
+    // Bearer token for scheduled tasks (GitHub Actions automation)
+    'scheduled_backup_token' => 'CHANGE_THIS_TO_A_RANDOM_SECRET',
 ];
 
 // Postgres/Supabase example (uncomment and remove the array above instead):

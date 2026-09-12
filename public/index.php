@@ -47,6 +47,7 @@ use App\Controllers\DashboardController;
 use App\Controllers\GradeController;
 use App\Controllers\PromotionController;
 use App\Controllers\ReportController;
+use App\Controllers\ScheduledController;
 use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
 use App\Controllers\StudentController;
@@ -218,6 +219,12 @@ $router->post('/backups/restore', [BackupController::class, 'restore'], [$sessio
 // No session/CSRF/RoleGuard: a machine caller (external scheduler), not a
 // browser -- BackupController::scheduled() does its own bearer-token check.
 $router->post('/backups/scheduled', [BackupController::class, 'scheduled']);
+
+// Scheduled automation endpoints (bearer token protected)
+$router->post('/scheduled/birthdays', [ScheduledController::class, 'checkBirthdays']);
+$router->post('/scheduled/year-rollover', [ScheduledController::class, 'checkYearRollover']);
+$router->post('/scheduled/cleanup', [ScheduledController::class, 'runCleanup']);
+$router->post('/scheduled/test-notification', [ScheduledController::class, 'testNotification']);
 
 // Reports (§K) -- reports.view / .export, granted to BOTH admin and staff
 // per §J (unlike almost every other module's "manage" split). Read-only:

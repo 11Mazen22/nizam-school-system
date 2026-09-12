@@ -616,4 +616,12 @@ return [
     'activity.action.grade.restore' => 'Grade restored',
     'activity.action.grade.archive' => 'Grade archived',
     'activity_log.total_suffix' => 'entries total',
+    
+    // Email notifications
+    'email.birthday_subject' => '🎂 Birthday: {name}',
+    'email.year_ending_subject' => '⚠️ Academic Year Ending in {days} Days',
+    'email.backup_success_subject' => '✅ Database Backup Successful',
+    'email.backup_failed_subject' => '❌ Database Backup Failed',
+    'email.report_ready_subject' => '📊 Report Ready: {report}',
 ];
+

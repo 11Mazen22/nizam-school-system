@@ -612,4 +612,12 @@ return [
     'activity.action.grade.restore' => 'استعادة صف',
     'activity.action.grade.archive' => 'أرشفة صف',
     'activity_log.total_suffix' => 'إجمالي السجلات',
+    
+    // Email notifications
+    'email.birthday_subject' => '🎂 عيد ميلاد: {name}',
+    'email.year_ending_subject' => '⚠️ العام الدراسي ينتهي خلال {days} أيام',
+    'email.backup_success_subject' => '✅ نجحت النسخة الاحتياطية',
+    'email.backup_failed_subject' => '❌ فشلت النسخة الاحتياطية',
+    'email.report_ready_subject' => '📊 التقرير جاهز: {report}',
 ];
+

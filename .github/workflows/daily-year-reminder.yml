@@ -1,0 +1,24 @@
+name: Daily Year Rollover Reminder
+
+# Checks if academic year is ending soon and sends reminders
+# Reminders sent at 60, 30, 14, and 7 days before end date
+on:
+  schedule:
+    - cron: '0 9 * * *' # 09:00 UTC daily
+  workflow_dispatch: {} # manual trigger
+
+jobs:
+  check-year-end:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check year end and send reminders
+        run: |
+          status=$(curl -s -o /tmp/response.txt -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.NIZAM_SCHEDULED_BACKUP_TOKEN }}" \
+            "${{ secrets.NIZAM_URL }}/scheduled/year-rollover")
+          echo "HTTP status: $status"
+          cat /tmp/response.txt
+          if [ "$status" != "200" ]; then
+            echo "::error::Year rollover check failed (HTTP $status)"
+            exit 1
+          fi

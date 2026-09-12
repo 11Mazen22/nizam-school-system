@@ -1,0 +1,27 @@
+name: Weekly Database Cleanup
+
+# Runs weekly maintenance tasks:
+# - Clean old activity logs (90+ days)
+# - Remove failed backup records (30+ days)  
+# - Clear expired login lockouts
+# - Close old academic years (2+ years old)
+on:
+  schedule:
+    - cron: '0 3 * * 0' # 03:00 UTC every Sunday
+  workflow_dispatch: {} # manual trigger
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run database cleanup tasks
+        run: |
+          status=$(curl -s -o /tmp/response.txt -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.NIZAM_SCHEDULED_BACKUP_TOKEN }}" \
+            "${{ secrets.NIZAM_URL }}/scheduled/cleanup")
+          echo "HTTP status: $status"
+          cat /tmp/response.txt
+          if [ "$status" != "200" ]; then
+            echo "::error::Database cleanup failed (HTTP $status)"
+            exit 1
+          fi

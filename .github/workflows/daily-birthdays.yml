@@ -1,0 +1,24 @@
+name: Daily Birthday Notifications
+
+# Runs every day at 8:00 AM UTC to check for student birthdays
+# and send email notifications to staff
+on:
+  schedule:
+    - cron: '0 8 * * *' # 08:00 UTC daily
+  workflow_dispatch: {} # manual trigger
+
+jobs:
+  check-birthdays:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check birthdays and send notifications
+        run: |
+          status=$(curl -s -o /tmp/response.txt -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.NIZAM_SCHEDULED_BACKUP_TOKEN }}" \
+            "${{ secrets.NIZAM_URL }}/scheduled/birthdays")
+          echo "HTTP status: $status"
+          cat /tmp/response.txt
+          if [ "$status" != "200" ]; then
+            echo "::error::Birthday check failed (HTTP $status)"
+            exit 1
+          fi
