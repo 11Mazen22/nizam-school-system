@@ -112,8 +112,8 @@ final class NotificationService
     {
         return $this->email->send(
             $email,
-            'Nizam Email Test',
-            '<h2>✅ Email Configuration Working!</h2><p>Your Nizam system can send emails successfully.</p>',
+            'Hadaba Al-Ahram School — Email Test',
+            '<h2>✅ Email Configuration Working!</h2><p>Hadaba Al-Ahram School management system can send emails successfully.</p>',
             true
         );
     }

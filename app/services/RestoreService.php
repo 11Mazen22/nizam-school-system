@@ -112,7 +112,7 @@ final class RestoreService
 
             ActivityLogger::log('backup.restore', 'backups', $preRestore['id'], 'Database restored from uploaded backup');
         } catch (Throwable $e) {
-            error_log('[Nizam] Restore failed: ' . $e->getMessage());
+            error_log('[Hadaba] Restore failed: ' . $e->getMessage());
             ActivityLogger::log('backup.restore_failed', 'backups', $preRestore['id'], 'Restore failed -- see storage/logs for detail');
 
             throw new RuntimeException('restore_failed:' . $preRestore['filename']);

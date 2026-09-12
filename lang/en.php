@@ -77,7 +77,7 @@ return [
     'auth.login.locked' => 'This account is temporarily locked after repeated failed attempts. Try again in :minutes minutes.',
     'auth.login.throttled' => 'Too many login attempts from this device. Try again later.',
     'auth.logout.submit' => 'Sign Out',
-    'auth.logout.confirm' => 'Sign out of Nizam?',
+    'auth.logout.confirm' => 'Sign out of Hadaba Al-Ahram School?',
     'auth.logout.done' => 'You have been signed out.',
 
     // Errors
@@ -494,7 +494,7 @@ return [
 
     // Users (§Q "Users | List, Add/Edit (Administrator only)")
     'users.title' => 'Users',
-    'users.description' => 'Manage the accounts that can sign in to Nizam and what they can do.',
+    'users.description' => 'Manage the accounts that can sign in to Hadaba Al-Ahram School and what they can do.',
     'users.stat_total' => 'Total Users',
     'users.stat_active' => 'Active',
     'users.tab_list' => 'Users List',

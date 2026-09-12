@@ -178,7 +178,7 @@ final class BackupService
             $schemaVersion = count($this->migrations->getAppliedMigrations($pdo));
             $formatVersion = $isPgsql ? self::FORMAT_VERSION_PGSQL : self::FORMAT_VERSION_MYSQL;
             $write(sprintf("-- NIZAM-BACKUP %s schema=%04d\n", $formatVersion, $schemaVersion));
-            $write("-- Nizam Backup\n-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n\n");
+            $write("-- Hadaba Al-Ahram School Backup\n-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n\n");
 
             if ($isPgsql) {
                 foreach (self::TABLE_ORDER_PG as $table) {
@@ -238,7 +238,7 @@ final class BackupService
                     // failure below is what actually gets reported.
                 }
             }
-            error_log('[Nizam] Backup failed: ' . $e->getMessage());
+            error_log('[Hadaba] Backup failed: ' . $e->getMessage());
             $this->repo->create([
                 'filename'   => $filename,
                 'file_size'  => 0,
