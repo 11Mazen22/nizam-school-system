@@ -32,20 +32,16 @@ final class SetupGateMiddleware implements MiddlewareInterface
         $completed = (new SetupStatusService())->isCompleted();
         $isSetupPath = $path === '/setup' || str_starts_with($path, '/setup/');
 
-        // Hadaba Al-Ahram: Setup is always complete, block setup wizard entirely
-        if ($isSetupPath && $path !== '/setup/recover-admin') {
-            Response::redirect('/login');
-            return false;
-        }
-
-        // Redundant check (setup always complete) but kept for safety
-        if ($completed && $isSetupPath) {
-            Response::redirect('/login');
-            return false;
-        }
-
+        // Hadaba Al-Ahram: If database not ready, allow setup wizard to run migrations
+        // Once complete, block setup routes and redirect to login
         if (!$completed && !$isSetupPath && $path !== '/lang') {
             Response::redirect('/setup');
+            return false;
+        }
+
+        // Setup complete: block setup wizard, redirect to login
+        if ($completed && $isSetupPath && $path !== '/setup/recover-admin') {
+            Response::redirect('/login');
             return false;
         }
 

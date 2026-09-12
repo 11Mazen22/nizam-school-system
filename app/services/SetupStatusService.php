@@ -33,9 +33,26 @@ final class SetupStatusService
 
     public function isCompleted(): bool
     {
-        // Hadaba Al-Ahram School: Setup wizard disabled - always return true
+        // Hadaba Al-Ahram School: Setup wizard disabled
         // School data is hardcoded in database migration
-        return true;
+        // But we still need to ensure database exists and migrations ran
+        $pdo = $this->pdo();
+        if ($pdo === null) {
+            return false; // No database connection yet
+        }
+
+        // Check if migrations have been applied
+        try {
+            $migrationService = new MigrationService();
+            $migrationsPath = dirname(__DIR__, 2) . '/database/migrations';
+            if ($migrationService->pendingCount($pdo, $migrationsPath) > 0) {
+                return false; // Migrations not applied yet
+            }
+        } catch (\Exception $e) {
+            return false; // Migration check failed
+        }
+
+        return true; // Database ready, school data exists from migration
     }
 
     public function canConnect(): bool
