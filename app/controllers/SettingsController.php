@@ -86,7 +86,7 @@ final class SettingsController extends Controller
         $this->redirect('/settings/profile');
     }
 
-    /** GET /logo -- any authenticated user (shown in the app shell for every role), not gated on settings.manage. Resolved by the single schools row, never client input (§S-10). */
+    /** GET /logo -- public, including the pre-login screen (a school crest isn't confidential); also shown in the app shell for every authenticated role, not gated on settings.manage. Resolved by the single schools row, never client input (§S-10). */
     public function logo(Request $request): void
     {
         $school = $this->schools->full();

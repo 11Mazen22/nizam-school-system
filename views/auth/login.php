@@ -4,14 +4,23 @@
  * @var string|null $notice
  */
 use App\Middleware\CsrfMiddleware;
+use App\Repositories\SchoolRepository;
 $notice ??= null;
+
+$school = (new SchoolRepository())->full();
+$schoolName = $school === null
+    ? __('app.name')
+    : (currentLocale() === 'ar' ? $school['name_ar'] : $school['name']);
 ?>
 <!DOCTYPE html>
 <html lang="<?= e(currentLocale()) ?>" dir="<?= e(currentDirection()) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= e(__('auth.login.title')) ?> — <?= e(__('app.name')) ?></title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/img/favicon-180.png">
+<title><?= e(__('auth.login.title')) ?> — <?= e($schoolName) ?></title>
 <?php if (currentDirection() === 'rtl'): ?>
   <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.rtl.min.css">
 <?php else: ?>
@@ -27,14 +36,24 @@ $notice ??= null;
       <div class="n-auth-blob n-auth-blob-3"></div>
       
       <div class="n-auth-side-top">
-        <div class="nizam-brand-mark n-auth-mark n-auth-mark-animated">
-          <?= icon('sparkle') ?>
-          <div class="n-auth-mark-glow"></div>
-        </div>
-        <div>
-          <div class="n-auth-app-name-lg"><?= e(__('app.name')) ?></div>
-          <div class="n-auth-app-subtitle"><?= e(__('auth.login.system_subtitle')) ?></div>
-        </div>
+        <?php if (!empty($school['logo_path'])): ?>
+          <div class="nizam-brand-mark nizam-brand-mark-logo n-auth-mark">
+            <img src="/logo" alt="">
+          </div>
+          <div>
+            <div class="n-auth-app-name-lg"><?= e($schoolName) ?></div>
+            <div class="n-auth-app-subtitle"><?= e(__('app.name')) ?> — <?= e(__('auth.login.system_subtitle')) ?></div>
+          </div>
+        <?php else: ?>
+          <div class="nizam-brand-mark n-auth-mark n-auth-mark-animated">
+            <?= icon('sparkle') ?>
+            <div class="n-auth-mark-glow"></div>
+          </div>
+          <div>
+            <div class="n-auth-app-name-lg"><?= e($schoolName) ?></div>
+            <div class="n-auth-app-subtitle"><?= e(__('auth.login.system_subtitle')) ?></div>
+          </div>
+        <?php endif; ?>
       </div>
       
       <div class="n-auth-side-mid">
@@ -93,7 +112,7 @@ $notice ??= null;
       <div class="n-auth-form-wrap n-reveal">
         <div class="n-auth-welcome">
           <div class="n-auth-welcome-icon"><?= icon('sparkle') ?></div>
-          <h1><?= e(__('auth.login.welcome_title')) ?></h1>
+          <h1><?= e(__('auth.login.welcome_title', ['school' => $schoolName])) ?></h1>
           <p class="n-auth-sub"><?= e(__('auth.login.subtitle')) ?></p>
         </div>
 

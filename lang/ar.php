@@ -53,7 +53,7 @@ return [
     // Auth
     'auth.login.title' => 'تسجيل الدخول',
     'auth.login.subtitle' => 'سجّل الدخول لإدارة مدرستك.',
-    'auth.login.welcome_title' => 'مرحباً بك في نِظام',
+    'auth.login.welcome_title' => 'مرحباً بك في :school',
     'auth.login.system_subtitle' => 'نظام إدارة مدرسي متكامل',
     'auth.login.tagline' => 'كل ما تحتاجه مدرستك، في مكان واحد.',
     'auth.login.tagline_description' => 'إدارة الطلاب والمعلمين والفصول والعمليات الأكاديمية في منصة موحدة.',
@@ -65,7 +65,7 @@ return [
     'auth.login.feature3' => 'الأعوام والفصول والمناهج',
     'auth.login.feature4_title' => 'التقارير والتحليلات',
     'auth.login.feature4' => 'تقارير شاملة ونسخ احتياطي',
-    'auth.login.trusted_by_schools' => 'موثوق به من قبل المدارس في المنطقة',
+    'auth.login.trusted_by_schools' => 'منصتكم الموثوقة لإدارة المدرسة',
     'auth.login.username' => 'اسم المستخدم',
     'auth.login.password' => 'كلمة المرور',
     'auth.login.username_placeholder' => 'أدخل اسم المستخدم',

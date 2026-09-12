@@ -36,6 +36,9 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/img/favicon-180.png">
   <title><?= e($pageTitle) ?> — <?= e($schoolName) ?></title>
   <?php if (currentDirection() === 'rtl'): ?>
     <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.rtl.min.css">
@@ -48,8 +51,12 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
 <div class="nizam-shell">
   <nav class="nizam-sidebar d-none d-md-flex">
     <div class="nizam-brand">
-      <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
-      <div class="nizam-brand-name"><?= e(__('app.name')) ?></div>
+      <?php if (!empty($school['logo_path'])): ?>
+        <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/logo" alt=""></div>
+      <?php else: ?>
+        <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
+      <?php endif; ?>
+      <div class="nizam-brand-name"><?= e($schoolName) ?></div>
     </div>
     <ul class="nav flex-column">
       <?php foreach ($navItemsList as $item): ?>
@@ -133,8 +140,12 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
     <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="nizamMobileNav">
       <div class="offcanvas-header">
         <div class="nizam-brand mb-0 p-0">
-          <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
-          <span class="fw-bold text-dark"><?= e(__('app.name')) ?></span>
+          <?php if (!empty($school['logo_path'])): ?>
+            <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/logo" alt=""></div>
+          <?php else: ?>
+            <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
+          <?php endif; ?>
+          <span class="fw-bold text-dark"><?= e($schoolName) ?></span>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="<?= e(__('common.close')) ?>"></button>
       </div>

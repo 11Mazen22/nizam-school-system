@@ -52,7 +52,7 @@ return [
     // Auth
     'auth.login.title' => 'Sign In',
     'auth.login.subtitle' => 'Sign in to manage your school.',
-    'auth.login.welcome_title' => 'Welcome to Nizam',
+    'auth.login.welcome_title' => 'Welcome to :school',
     'auth.login.system_subtitle' => 'Complete School Management System',
     'auth.login.tagline' => 'Everything your school needs, in one place.',
     'auth.login.tagline_description' => 'Manage students, teachers, classes, and academic operations in one unified platform.',
@@ -64,7 +64,7 @@ return [
     'auth.login.feature3' => 'Years, classes & curriculum',
     'auth.login.feature4_title' => 'Reports & Analytics',
     'auth.login.feature4' => 'Comprehensive reports & backups',
-    'auth.login.trusted_by_schools' => 'Trusted by schools across the region',
+    'auth.login.trusted_by_schools' => "Your school's trusted management platform",
     'auth.login.username' => 'Username',
     'auth.login.password' => 'Password',
     'auth.login.username_placeholder' => 'Enter your username',

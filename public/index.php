@@ -253,8 +253,8 @@ $router->get('/settings/security', [SettingsController::class, 'security'], [$se
 $router->post('/settings/security', [SettingsController::class, 'saveSecurity'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->get('/settings/backup', [SettingsController::class, 'backup'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->post('/settings/backup', [SettingsController::class, 'saveBackup'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
-// Shown in the app shell for every authenticated role regardless of settings.manage -- requiresAuth() only, matching decision #6/§J "shown on the dashboard."
-$router->get('/logo', [SettingsController::class, 'logo'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+// Shown in the app shell for every authenticated role regardless of settings.manage, AND on the pre-login screen itself (a school crest isn't confidential) -- no RoleGuardMiddleware, matching decision #6/§J "shown on the dashboard."
+$router->get('/logo', [SettingsController::class, 'logo'], [$session, $csrf, $yearContext]);
 
 // Activity Log -- activity_log.view, held by both roles (§J), scope enforced in the controller
 $router->get('/activity-log', [ActivityLogController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('activity_log.view')]);

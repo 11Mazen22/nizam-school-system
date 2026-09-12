@@ -24,6 +24,9 @@ $totalSteps = count($steps);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/img/favicon-180.png">
   <title><?= e($pageTitle) ?> — <?= e(__('app.name')) ?></title>
   <?php if (currentDirection() === 'rtl'): ?>
     <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.rtl.min.css">
