@@ -122,6 +122,10 @@ $router->post('/setup/year', [SetupController::class, 'saveYear'], [$session, $c
 $router->post('/setup/admin', [SetupController::class, 'saveAdmin'], [$session, $csrf]);
 $router->post('/setup/complete', [SetupController::class, 'complete'], [$session, $csrf]);
 
+// Emergency admin recovery (NOT gated by SetupGateMiddleware — only accessible when users table is empty)
+$router->get('/setup/recover-admin', [SetupController::class, 'showRecoverAdmin'], [$session, $csrf]);
+$router->post('/setup/recover-admin', [SetupController::class, 'recoverAdmin'], [$session, $csrf]);
+
 // ---------------------------------------------------------------- Auth
 $router->get('/login', [AuthController::class, 'showLogin'], [$session, $csrf]);
 $router->post('/login', [AuthController::class, 'login'], [$session, $csrf]);

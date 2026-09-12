@@ -16,20 +16,33 @@ use App\Services\SetupStatusService;
  * button." A single middleware covers both directions rather than a
  * scattered check per route, matching this phase's "do not duplicate
  * existing mechanisms" rule applied to this one too.
+ * 
+ * Exception: /setup/recover-admin is allowed through regardless of
+ * setup_completed flag — it gates itself on live ground truth (zero users
+ * in database), not the flag. This narrow escape hatch handles production
+ * deployments where setup_completed was manually set but no admin was
+ * actually created.
  */
 final class SetupGateMiddleware implements MiddlewareInterface
 {
     public function handle(Request $request): bool
     {
+        $path = $request->path();
+        
+        // Emergency admin recovery bypasses the setup gate entirely
+        if ($path === '/setup/recover-admin') {
+            return true;
+        }
+        
         $completed = (new SetupStatusService())->isCompleted();
-        $isSetupPath = $request->path() === '/setup' || str_starts_with($request->path(), '/setup/');
+        $isSetupPath = $path === '/setup' || str_starts_with($path, '/setup/');
 
         if ($completed && $isSetupPath) {
             Response::redirect('/login');
             return false;
         }
 
-        if (!$completed && !$isSetupPath && $request->path() !== '/lang') {
+        if (!$completed && !$isSetupPath && $path !== '/lang') {
             Response::redirect('/setup');
             return false;
         }

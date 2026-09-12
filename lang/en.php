@@ -625,5 +625,14 @@ return [
     'email.backup_success_subject' => '✅ Database Backup Successful',
     'email.backup_failed_subject' => '❌ Database Backup Failed',
     'email.report_ready_subject' => '📊 Report Ready: {report}',
+    
+    // Admin recovery
+    'setup.recover_admin_title' => 'Recover Admin Access',
+    'setup.recover_admin_subtitle' => 'Emergency admin account creation',
+    'setup.recover_admin_step' => 'Create First Admin',
+    'setup.recover_admin_warning_title' => 'No Administrator Account Found',
+    'setup.recover_admin_warning_text' => 'The system database is set up, but no administrator account exists. Use this form to create the first admin account. This form is only accessible when zero users exist in the database.',
+    'setup.recover_admin_submit' => 'Create Admin & Sign In',
+    'setup.admin_recovered' => 'Admin account created successfully. Welcome!',
 ];
 

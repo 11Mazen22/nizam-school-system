@@ -9,7 +9,24 @@ use PDO;
 
 /**
  * Email notification service using PHP's mail() function or SMTP.
- * For production, configure SMTP in config.php or use a service like SendGrid/Mailgun.
+ * 
+ * IMPORTANT: Current implementation uses PHP's mail() function which will
+ * NOT work on Railway/cloud hosting (no MTA configured, cloud IPs get spam-filtered).
+ * For production email delivery, you MUST configure SMTP credentials in config.php:
+ * 
+ * 'email' => [
+ *     'enabled' => true,
+ *     'smtp_host' => 'smtp.gmail.com',
+ *     'smtp_port' => 587,
+ *     'smtp_user' => 'your-email@gmail.com',
+ *     'smtp_password' => 'your-app-password',  // NOT your Gmail password!
+ * ]
+ * 
+ * Then install PHPMailer: composer require phpmailer/phpmailer
+ * And replace the send() method implementation below with PHPMailer SMTP.
+ * 
+ * Until SMTP is configured, automation workflows (birthdays, year reminders)
+ * will RUN their checks correctly but emails will NOT be delivered.
  */
 final class EmailService
 {

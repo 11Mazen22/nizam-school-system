@@ -621,5 +621,14 @@ return [
     'email.backup_success_subject' => '✅ نجحت النسخة الاحتياطية',
     'email.backup_failed_subject' => '❌ فشلت النسخة الاحتياطية',
     'email.report_ready_subject' => '📊 التقرير جاهز: {report}',
+    
+    // Admin recovery
+    'setup.recover_admin_title' => 'استعادة حساب المدير',
+    'setup.recover_admin_subtitle' => 'إنشاء حساب مدير طارئ',
+    'setup.recover_admin_step' => 'إنشاء المدير الأول',
+    'setup.recover_admin_warning_title' => 'لم يتم العثور على حساب مدير',
+    'setup.recover_admin_warning_text' => 'قاعدة البيانات جاهزة، لكن لا يوجد حساب مدير. استخدم هذا النموذج لإنشاء أول حساب مدير. هذا النموذج متاح فقط عندما لا يوجد مستخدمون في قاعدة البيانات.',
+    'setup.recover_admin_submit' => 'إنشاء المدير وتسجيل الدخول',
+    'setup.admin_recovered' => 'تم إنشاء حساب المدير بنجاح. مرحباً!',
 ];
 

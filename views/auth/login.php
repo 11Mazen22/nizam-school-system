@@ -172,6 +172,7 @@ $schoolName = $school === null
             <?= icon('shield-check') ?>
             <span><?= e(__('auth.login.secure_connection')) ?></span>
           </div>
+          <!-- Emergency admin recovery: visit /setup/recover-admin if no admin account exists -->
         </div>
       </div>
     </main>

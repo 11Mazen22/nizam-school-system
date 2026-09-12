@@ -278,6 +278,104 @@ final class SetupController extends Controller
         $this->redirect('/dashboard');
     }
 
+    /**
+     * Emergency admin recovery route — ONLY accessible when users table is
+     * literally empty (zero rows). Gates on live ground truth (no accounts
+     * exist), NOT on setup_completed flag (which can drift from reality).
+     * 
+     * Reuses exact validation/creation logic from saveAdmin() above, but
+     * does NOT touch setup_completed or re-run schema migrations. This is
+     * NOT part of the setup wizard — it's a narrow escape hatch for
+     * production deployments where setup_completed was force-set via
+     * direct database UPDATE but no admin was actually created.
+     * 
+     * Once ANY user exists, this route behaves as if it doesn't exist
+     * (404 or redirect to login) — mirrors §O-6's "no exceptions" spirit.
+     */
+    public function showRecoverAdmin(Request $request): void
+    {
+        // Check ground truth: do ANY users exist?
+        $pdo = Database::connection();
+        $userCount = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+        
+        if ($userCount > 0) {
+            // Users exist — this route is inert, redirect to login
+            $this->redirect('/login');
+            return;
+        }
+
+        // Zero users — show the recovery form
+        $this->view('setup/recover-admin', ['error' => null]);
+    }
+
+    public function recoverAdmin(Request $request): void
+    {
+        // Re-check ground truth on POST (prevent race condition)
+        $pdo = Database::connection();
+        $userCount = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+        
+        if ($userCount > 0) {
+            // Users exist now — someone else created one, abort
+            $this->redirect('/login');
+            return;
+        }
+
+        // Exact same validation as saveAdmin()
+        $fullName = $request->post('full_name', '') ?: '';
+        $username = $request->post('username', '') ?: '';
+        $password = $request->post('password', '') ?: '';
+        $confirm = $request->post('password_confirm', '') ?: '';
+
+        if ($fullName === '' || $username === '' || $password === '') {
+            $this->view('setup/recover-admin', ['error' => __('validation.required')]);
+            return;
+        }
+        if (strlen($password) < 8) {
+            $this->view('setup/recover-admin', ['error' => __('validation.password_length')]);
+            return;
+        }
+        if ($password !== $confirm) {
+            $this->view('setup/recover-admin', ['error' => __('validation.password_mismatch')]);
+            return;
+        }
+
+        // Username check is technically redundant (users table is empty) but
+        // kept for consistency with saveAdmin() logic
+        $exists = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = :u');
+        $exists->execute(['u' => $username]);
+        if ((int) $exists->fetchColumn() > 0) {
+            $this->view('setup/recover-admin', ['error' => __('validation.username_taken')]);
+            return;
+        }
+
+        $roleId = (int) $pdo->query("SELECT id FROM roles WHERE code = 'admin'")->fetchColumn();
+        $stmt = $pdo->prepare(
+            'INSERT INTO users (username, password_hash, full_name, role_id, is_active) VALUES (:u, :h, :f, :r, 1)'
+        );
+        $stmt->execute([
+            'u' => $username,
+            'h' => password_hash($password, PASSWORD_DEFAULT),
+            'f' => $fullName,
+            'r' => $roleId,
+        ]);
+
+        // Log this recovery action for audit trail
+        $pdo->prepare(
+            "INSERT INTO activity_log (user_id, action, entity_type, entity_id, details) 
+             VALUES (:uid, 'admin.recover', 'user', :eid, :details)"
+        )->execute([
+            'uid' => $pdo->lastInsertId(),
+            'eid' => $pdo->lastInsertId(),
+            'details' => 'Emergency admin account created via /setup/recover-admin',
+        ]);
+
+        // Auto-login the new admin
+        (new AuthService())->attempt($username, $password, $request->ip());
+
+        Flash::success(__('setup.admin_recovered'));
+        $this->redirect('/dashboard');
+    }
+
     private function writeConfigFile(string $host, int $port, string $database, string $username, string $password): void
     {
         $export = var_export([
