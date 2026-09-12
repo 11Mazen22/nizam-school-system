@@ -46,7 +46,6 @@ use App\Controllers\ClassController;
 use App\Controllers\DashboardController;
 use App\Controllers\GradeController;
 use App\Controllers\ImportController;
-use App\Controllers\ImportController;
 use App\Controllers\PromotionController;
 use App\Controllers\ReportController;
 use App\Controllers\ScheduledController;
