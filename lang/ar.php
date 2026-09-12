@@ -36,7 +36,7 @@ return [
     "backups.confirm_create" => "هل تريد إنشاء نسخة احتياطية جديدة الآن؟",
     "backups.confirm_phrase_prompt" => "اكتب RESTORE لتأكيد استبدال جميع البيانات الحالية:",
     "backups.confirm_phrase_mismatch" => "يجب كتابة RESTORE بالضبط لتأكيد هذا الإجراء.",
-    "backups.restore_success_relogin" => "تمت استعادة قاعدة البيانات بنجاح. الرجاء تسجيل الدخول مرة أخرى.",
+    "backups.restore_success_relogin" => "تمت الاستعادة. سجل الدخول مرة أخرى.",
     "backups.error.file_not_found" => "تعذرت قراءة ملف النسخة الاحتياطية.",
     "backups.error.invalid_signature" => "هذا ليس ملف نسخة احتياطية صالح.",
     "backups.error.unsupported_format_version" => "تم إنشاء هذا الملف بصيغة نسخ احتياطي غير مدعومة.",

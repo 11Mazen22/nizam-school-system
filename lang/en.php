@@ -35,7 +35,7 @@ return [
     "backups.confirm_create" => "Create a new backup now?",
     "backups.confirm_phrase_prompt" => "Type RESTORE to confirm this will overwrite all current data:",
     "backups.confirm_phrase_mismatch" => "You must type RESTORE exactly to confirm this action.",
-    "backups.restore_success_relogin" => "Database restored successfully. Please sign in again.",
+    "backups.restore_success_relogin" => "Database restored. Sign in again.",
     "backups.error.file_not_found" => "The backup file could not be read.",
     "backups.error.invalid_signature" => "This is not a valid backup file.",
     "backups.error.unsupported_format_version" => "This backup file was made with an unsupported backup format.",
