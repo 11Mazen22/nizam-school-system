@@ -79,9 +79,9 @@ Name: "{commonappdata}\{#MyDataDirName}\storage\logs"; Permissions: users-modify
 Name: "{commonappdata}\{#MyDataDirName}\storage\uploads"; Permissions: users-modify
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba-256.png"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba-256.png"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
