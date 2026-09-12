@@ -35,6 +35,8 @@ final class RestoreService
      *
      * HADABA AL-AHRAM ENHANCEMENT: Auto-converts between PostgreSQL and MySQL
      * formats so production backups work on local installs and vice versa.
+     * Schema version check is skipped for cross-database restores since they
+     * have different migration counts.
      *
      * @return array{sql: string, schemaVersion: int}
      */
@@ -42,18 +44,21 @@ final class RestoreService
     {
         $result = $this->backups->verify($filepath);
 
-        $pdo = Database::connection();
-        $currentSchema = count((new MigrationService())->getAppliedMigrations($pdo));
-        if ($result['schemaVersion'] !== $currentSchema) {
-            throw new RuntimeException('schema_version_mismatch');
-        }
-
         // Auto-convert between database types if needed
         $sourceDb = SqlDialectConverter::detectSource($result['sql']);
+        $pdo = Database::connection();
         $targetDb = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME); // 'mysql' or 'pgsql'
         
         if ($sourceDb && $sourceDb !== $targetDb) {
             $result['sql'] = SqlDialectConverter::convert($result['sql'], $sourceDb, $targetDb);
+            // Skip schema version check for cross-database restores
+            // (PostgreSQL and MySQL have different migration counts)
+        } else {
+            // Same database type: enforce schema version match
+            $currentSchema = count((new MigrationService())->getAppliedMigrations($pdo));
+            if ($result['schemaVersion'] !== $currentSchema) {
+                throw new RuntimeException('schema_version_mismatch');
+            }
         }
 
         return $result;
