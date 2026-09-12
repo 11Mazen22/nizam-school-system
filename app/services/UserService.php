@@ -24,7 +24,7 @@ final class UserService
     }
 
     /** @throws RuntimeException 'username_taken'|'password_too_short'|'invalid_role' */
-    public function create(string $username, string $password, string $fullName, string $roleCode): int
+    public function create(string $username, string $password, string $fullName, string $roleCode, ?string $email = null): int
     {
         if ($this->users->usernameExists($username)) {
             throw new RuntimeException('username_taken');
@@ -37,7 +37,7 @@ final class UserService
             throw new RuntimeException('invalid_role');
         }
 
-        $id = $this->users->create($username, password_hash($password, PASSWORD_BCRYPT), $fullName, $roleId);
+        $id = $this->users->create($username, password_hash($password, PASSWORD_BCRYPT), $fullName, $roleId, $email);
         ActivityLogger::log('user.create', 'users', $id, "User '{$username}' created");
         return $id;
     }
@@ -49,7 +49,7 @@ final class UserService
      *
      * @throws RuntimeException 'username_taken'|'password_too_short'|'invalid_role'|'last_admin'
      */
-    public function update(int $id, string $username, string $fullName, string $roleCode, string $newPassword): void
+    public function update(int $id, string $username, string $fullName, string $roleCode, string $newPassword, ?string $email = null): void
     {
         if ($this->users->usernameExists($username, $id)) {
             throw new RuntimeException('username_taken');
@@ -62,7 +62,7 @@ final class UserService
             throw new RuntimeException('last_admin');
         }
 
-        $this->users->update($id, $username, $fullName, $roleId);
+        $this->users->update($id, $username, $fullName, $roleId, $email);
 
         if ($newPassword !== '') {
             if (mb_strlen($newPassword) < self::MIN_PASSWORD_LENGTH) {

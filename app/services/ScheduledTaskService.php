@@ -21,7 +21,7 @@ final class ScheduledTaskService
         $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$daysToKeep} days"));
         
         $stmt = $pdo->prepare("
-            DELETE FROM activity_log
+            DELETE FROM activity_logs
             WHERE created_at < :cutoff
         ");
         
@@ -47,18 +47,21 @@ final class ScheduledTaskService
     }
 
     /**
-     * Clean up expired login lockouts
+     * Clear expired login lockouts. locked_until lives on users (set by the
+     * login-throttle check on repeated failures), not login_attempts (which
+     * only ever logs individual attempts, no lockout state of its own).
      */
     public function cleanupExpiredLockouts(): int
     {
         $pdo = Database::connection();
         $now = date('Y-m-d H:i:s');
-        
+
         $stmt = $pdo->prepare("
-            DELETE FROM login_attempts
+            UPDATE users
+            SET locked_until = NULL
             WHERE locked_until IS NOT NULL AND locked_until < :now
         ");
-        
+
         $stmt->execute(['now' => $now]);
         return $stmt->rowCount();
     }
@@ -104,7 +107,7 @@ final class ScheduledTaskService
             AND is_closed = 0
             AND is_active = 0
             AND NOT EXISTS (
-                SELECT 1 FROM enrollments e
+                SELECT 1 FROM student_enrollments e
                 WHERE e.academic_year_id = academic_years.id
                 AND e.status = 'active'
             )

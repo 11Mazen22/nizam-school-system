@@ -37,7 +37,7 @@ final class UserController extends Controller
         }
 
         try {
-            $this->service->create($fields['username'], $fields['password'], $fields['full_name'], $fields['role_code']);
+            $this->service->create($fields['username'], $fields['password'], $fields['full_name'], $fields['role_code'], $fields['email']);
             Flash::set('success', __('users.created'));
         } catch (RuntimeException $e) {
             Flash::set('danger', $this->errorMessage($e->getMessage()));
@@ -61,7 +61,7 @@ final class UserController extends Controller
         }
 
         try {
-            $this->service->update($id, $fields['username'], $fields['full_name'], $fields['role_code'], $fields['password']);
+            $this->service->update($id, $fields['username'], $fields['full_name'], $fields['role_code'], $fields['password'], $fields['email']);
             Flash::set('success', __('users.updated'));
         } catch (RuntimeException $e) {
             Flash::set('danger', $this->errorMessage($e->getMessage()));
@@ -100,6 +100,7 @@ final class UserController extends Controller
         $password = $request->post('password', '') ?: '';
         $fullName = $request->post('full_name', '') ?: '';
         $roleCode = $request->post('role_code', '') ?: '';
+        $email = $request->post('email', '') ?: '';
 
         $error = null;
         if (!preg_match('/^[a-zA-Z0-9_.\-]{3,50}$/', $username)) {
@@ -110,9 +111,11 @@ final class UserController extends Controller
             $error = __('users.error.invalid_role');
         } elseif ($requirePassword && $password === '') {
             $error = __('validation.required');
+        } elseif ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = __('validation.email_format');
         }
 
-        return ['username' => $username, 'password' => $password, 'full_name' => $fullName, 'role_code' => $roleCode, 'error' => $error];
+        return ['username' => $username, 'password' => $password, 'full_name' => $fullName, 'role_code' => $roleCode, 'email' => $email !== '' ? $email : null, 'error' => $error];
     }
 
     private function errorMessage(string $code): string

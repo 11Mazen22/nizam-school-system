@@ -55,7 +55,7 @@ final class UserRepository
     public function all(): array
     {
         $stmt = Database::connection()->query(
-            'SELECT u.id, u.username, u.full_name, u.role_id, u.is_active, u.last_login_at, r.code AS role_code, r.name_en AS role_name_en, r.name_ar AS role_name_ar
+            'SELECT u.id, u.username, u.full_name, u.email, u.role_id, u.is_active, u.last_login_at, r.code AS role_code, r.name_en AS role_name_en, r.name_ar AS role_name_ar
              FROM users u JOIN roles r ON r.id = u.role_id
              ORDER BY u.full_name ASC'
         );
@@ -65,7 +65,7 @@ final class UserRepository
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT u.id, u.username, u.full_name, u.role_id, u.is_active, r.code AS role_code
+            'SELECT u.id, u.username, u.full_name, u.email, u.role_id, u.is_active, r.code AS role_code
              FROM users u JOIN roles r ON r.id = u.role_id
              WHERE u.id = :id'
         );
@@ -87,21 +87,21 @@ final class UserRepository
         return $stmt->fetchColumn() !== false;
     }
 
-    public function create(string $username, string $passwordHash, string $fullName, int $roleId): int
+    public function create(string $username, string $passwordHash, string $fullName, int $roleId, ?string $email = null): int
     {
         $stmt = Database::connection()->prepare(
-            'INSERT INTO users (username, password_hash, full_name, role_id, is_active) VALUES (:username, :hash, :name, :role, 1)'
+            'INSERT INTO users (username, password_hash, full_name, email, role_id, is_active) VALUES (:username, :hash, :name, :email, :role, 1)'
         );
-        $stmt->execute(['username' => $username, 'hash' => $passwordHash, 'name' => $fullName, 'role' => $roleId]);
+        $stmt->execute(['username' => $username, 'hash' => $passwordHash, 'name' => $fullName, 'email' => $email, 'role' => $roleId]);
         return (int) Database::connection()->lastInsertId();
     }
 
-    public function update(int $id, string $username, string $fullName, int $roleId): void
+    public function update(int $id, string $username, string $fullName, int $roleId, ?string $email = null): void
     {
         $stmt = Database::connection()->prepare(
-            'UPDATE users SET username = :username, full_name = :name, role_id = :role WHERE id = :id'
+            'UPDATE users SET username = :username, full_name = :name, email = :email, role_id = :role WHERE id = :id'
         );
-        $stmt->execute(['username' => $username, 'name' => $fullName, 'role' => $roleId, 'id' => $id]);
+        $stmt->execute(['username' => $username, 'name' => $fullName, 'email' => $email, 'role' => $roleId, 'id' => $id]);
     }
 
     public function updatePassword(int $id, string $passwordHash): void
