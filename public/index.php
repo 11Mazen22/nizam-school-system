@@ -165,9 +165,7 @@ $router->post('/subjects/{id}/restore', [SubjectController::class, 'restore'], [
 
 // Classes -- classes.view / .manage
 $router->get('/classes', [ClassController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.view')]);
-$router->get('/classes/create', [ClassController::class, 'create'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
 $router->post('/classes', [ClassController::class, 'store'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
-$router->get('/classes/{id}/edit', [ClassController::class, 'edit'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
 $router->post('/classes/{id}', [ClassController::class, 'update'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
 $router->post('/classes/{id}/archive', [ClassController::class, 'archive'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
 $router->post('/classes/{id}/restore', [ClassController::class, 'restore'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
@@ -207,6 +205,7 @@ $router->get('/students/{id}/photo', [StudentController::class, 'photo'], [$sess
 $router->get('/assignments', [AssignmentController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.view')]);
 $router->get('/assignments/workload', [AssignmentController::class, 'workloadSummary'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.view')]);
 $router->get('/assignments/create', [AssignmentController::class, 'create'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);
+$router->get('/assignments/archived', [AssignmentController::class, 'archived'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.view')]);
 $router->post('/assignments', [AssignmentController::class, 'store'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);
 $router->post('/assignments/{id}', [AssignmentController::class, 'update'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);
 $router->post('/assignments/{id}/archive', [AssignmentController::class, 'archive'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);

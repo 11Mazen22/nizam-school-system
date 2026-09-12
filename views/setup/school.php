@@ -23,6 +23,9 @@ require dirname(__DIR__) . '/layout/setup-start.php';
           <label class="form-label" for="phone"><?= e(__('setup.school.phone')) ?></label>
           <input type="text" class="form-control" id="phone" name="phone">
         </div>
-        <button type="submit" class="btn btn-primary w-100"><?= e(__('common.save')) ?></button>
+        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+          <?= icon('arrow-forward', 'n-flip-rtl') ?>
+          <span><?= e(__('common.save')) ?></span>
+        </button>
       </form>
 <?php require dirname(__DIR__) . '/layout/setup-end.php'; ?>

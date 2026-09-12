@@ -6,6 +6,7 @@
 $pageTitle = __('reports.' . $key);
 $activeNav = 'reports';
 $pageScripts = ['/assets/js/reports-filter.js'];
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 
 $needsGrade = in_array($key, ['religion', 'class-list', 'density'], true);
@@ -14,6 +15,21 @@ $classRequired = $key === 'class-list';
 $gradeRequired = $key === 'class-list';
 $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
 ?>
+
+<div class="n-page-head no-print">
+  <div>
+    <h1 class="d-flex align-items-center gap-2">
+      <?= icon('filter', 'n-icon-lg text-body-secondary') ?>
+      <?= e($pageTitle) ?>
+    </h1>
+  </div>
+  <div class="n-page-head-actions">
+    <a href="/reports" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+      <?= icon('chevron-right', 'n-flip-rtl') ?>
+      <span><?= e(__('reports.title')) ?></span>
+    </a>
+  </div>
+</div>
 
 <div class="card mb-3 no-print">
   <div class="card-body">
@@ -99,28 +115,46 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
         </div>
       <?php endif; ?>
 
-      <div class="col-auto">
-        <button type="submit" class="btn btn-primary"><?= e(__('reports.apply_filters')) ?></button>
+      <div class="col-12 col-md-auto">
+        <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100">
+          <?= icon('filter') ?>
+          <span><?= e(__('reports.apply_filters')) ?></span>
+        </button>
       </div>
     </form>
   </div>
 </div>
 
 <?php if ($error !== null): ?>
-  <div class="alert alert-danger no-print"><?= e($error) ?></div>
+  <div class="alert alert-danger d-flex align-items-center gap-2 no-print">
+    <?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e($error) ?></span>
+  </div>
 <?php elseif ($report === null): ?>
-  <div class="alert alert-secondary no-print"><?= e(__('reports.choose_filters_prompt')) ?></div>
+  <div class="card no-print">
+    <div class="card-body">
+      <div class="n-empty py-4">
+        <div class="n-empty-icon"><?= icon('filter') ?></div>
+        <p class="mb-0"><?= e(__('reports.choose_filters_prompt')) ?></p>
+      </div>
+    </div>
+  </div>
 <?php else: ?>
   <div class="d-flex justify-content-end gap-2 mb-2 no-print">
-    <button type="button" class="btn btn-sm btn-outline-secondary" data-print-report><?= e(__('reports.print')) ?></button>
+    <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" data-print-report>
+      <?= icon('printer', 'n-icon-sm') ?>
+      <span><?= e(__('reports.print')) ?></span>
+    </button>
     <?php if (in_array('pdf', $report['formats'], true)): ?>
-      <a class="btn btn-sm btn-outline-secondary" href="/reports/<?= e($key) ?>/export/pdf?<?= e(http_build_query($filters)) ?>">
-        <?= e(__('reports.export_pdf')) ?>
+      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/pdf?<?= e(http_build_query($filters)) ?>">
+        <?= icon('download', 'n-icon-sm') ?>
+        <span><?= e(__('reports.export_pdf')) ?></span>
       </a>
     <?php endif; ?>
     <?php if (in_array('excel', $report['formats'], true)): ?>
-      <a class="btn btn-sm btn-outline-secondary" href="/reports/<?= e($key) ?>/export/excel?<?= e(http_build_query($filters)) ?>">
-        <?= e(__('reports.export_excel')) ?>
+      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/excel?<?= e(http_build_query($filters)) ?>">
+        <?= icon('download', 'n-icon-sm') ?>
+        <span><?= e(__('reports.export_excel')) ?></span>
       </a>
     <?php endif; ?>
   </div>
@@ -138,7 +172,14 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
     </div>
 
     <?php if (empty($report['rows'])): ?>
-      <div class="alert alert-secondary"><?= e(__('reports.no_data')) ?></div>
+      <div class="card">
+        <div class="card-body">
+          <div class="n-empty py-4">
+            <div class="n-empty-icon"><?= icon('inbox') ?></div>
+            <p class="mb-0"><?= e(__('reports.no_data')) ?></p>
+          </div>
+        </div>
+      </div>
     <?php else: ?>
       <div class="table-responsive">
         <table class="table table-sm table-bordered bg-white">

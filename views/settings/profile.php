@@ -3,14 +3,27 @@
 $pageTitle = __('settings.title');
 $activeNav = 'settings';
 $activeSettingsTab = 'profile';
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
+<div class="n-page-head">
+  <div>
+    <h1 class="d-flex align-items-center gap-2">
+      <?= icon('settings', 'n-icon-lg text-body-secondary') ?>
+      <?= e(__('settings.title')) ?>
+    </h1>
+  </div>
+</div>
+
 <?php require __DIR__ . '/_nav.php'; ?>
 
 <?php if ($error !== null): ?>
-  <div class="alert alert-danger"><?= e($error) ?></div>
+  <div class="alert alert-danger d-flex align-items-center gap-2">
+    <?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e($error) ?></span>
+  </div>
 <?php endif; ?>
 
 <div class="card" style="max-width: 720px;">
@@ -57,7 +70,10 @@ use App\Middleware\CsrfMiddleware;
       <input type="file" class="form-control mb-1" name="logo" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
       <div class="form-text mb-3"><?= e(__('settings.logo_help')) ?></div>
 
-      <button type="submit" class="btn btn-primary w-100"><?= e(__('common.save')) ?></button>
+      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+        <?= icon('check') ?>
+        <span><?= e(__('common.save')) ?></span>
+      </button>
     </form>
   </div>
 </div>

@@ -23,6 +23,9 @@ require dirname(__DIR__) . '/layout/setup-start.php';
           <label class="form-label" for="password_confirm"><?= e(__('setup.admin.password_confirm')) ?></label>
           <input type="password" class="form-control" id="password_confirm" name="password_confirm" minlength="8" required>
         </div>
-        <button type="submit" class="btn btn-primary w-100"><?= e(__('common.save')) ?></button>
+        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+          <?= icon('check') ?>
+          <span><?= e(__('common.save')) ?></span>
+        </button>
       </form>
 <?php require dirname(__DIR__) . '/layout/setup-end.php'; ?>

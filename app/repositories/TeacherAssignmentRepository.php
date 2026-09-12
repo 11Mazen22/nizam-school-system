@@ -27,6 +27,33 @@ final class TeacherAssignmentRepository
         return $stmt->fetchAll();
     }
 
+    /** @return array<int, array<string, mixed>> §O-13: archiving is the only deletion path for assignments -- this is a read-only history list, never paired with a restore action. */
+    public function archivedForYear(int $academicYearId): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT a.*, t.full_name AS teacher_name, s.name_en AS subject_name_en, s.name_ar AS subject_name_ar,
+                    c.name AS class_name, g.name_en AS grade_name_en, g.name_ar AS grade_name_ar
+             FROM teacher_assignments a
+             JOIN teachers t ON t.id = a.teacher_id
+             JOIN subjects s ON s.id = a.subject_id
+             JOIN classes c ON c.id = a.class_id
+             JOIN grades g ON g.id = c.grade_id
+             WHERE a.academic_year_id = :year AND a.status = 'archived'
+             ORDER BY g.sort_order ASC, c.name ASC, s.name_en ASC"
+        );
+        $stmt->execute(['year' => $academicYearId]);
+        return $stmt->fetchAll();
+    }
+
+    public function countArchivedForYear(int $academicYearId): int
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT COUNT(*) FROM teacher_assignments WHERE academic_year_id = :year AND status = 'archived'"
+        );
+        $stmt->execute(['year' => $academicYearId]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare('SELECT * FROM teacher_assignments WHERE id = :id');

@@ -8,17 +8,42 @@
 $pageTitle = __('backups.title');
 $activeNav = 'backups';
 $pageScripts = ['/assets/js/backups-restore.js'];
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 
 $lastPage = max(1, (int) ceil($total / $limit));
 ?>
 
-<div class="row g-4">
+<!-- POWERFUL PAGE HEADER -->
+<div class="n-grades-header">
+  <div class="n-grades-header-content">
+    <div class="n-grades-header-text">
+      <h1 class="n-grades-title">
+        <div class="n-grades-icon-wrapper">
+          <?= icon('shield-check', 'n-grades-icon') ?>
+        </div>
+        <?= e(__('backups.title')) ?>
+      </h1>
+      <p class="n-grades-subtitle"><?= e(__('backups.description')) ?></p>
+    </div>
+    <div class="n-grades-header-actions">
+      <div class="n-grades-stats-mini">
+        <div class="n-stat-mini">
+          <span class="n-stat-mini-value"><?= (int)$total ?></span>
+          <span class="n-stat-mini-label"><?= e(__('backups.total_backups')) ?></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 n-reveal-group mb-4">
   <div class="col-md-6">
     <div class="card h-100">
-      <div class="card-header bg-white fw-bold">
-        <?= e(__('backups.create')) ?>
+      <div class="card-header d-flex align-items-center gap-2">
+        <?= icon('database') ?>
+        <span><?= e(__('backups.create')) ?></span>
       </div>
       <div class="card-body">
         <form method="post" action="/backups" data-confirm="<?= e(__('backups.confirm_create')) ?>">
@@ -27,8 +52,9 @@ $lastPage = max(1, (int) ceil($total / $limit));
             <label class="form-label"><?= e(__('common.notes')) ?> <span class="text-muted"><?= e(__('common.optional')) ?></span></label>
             <input type="text" name="notes" class="form-control" maxlength="255">
           </div>
-          <button type="submit" class="btn btn-primary">
-            <?= e(__('backups.create')) ?>
+          <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+            <?= icon('download') ?>
+            <span><?= e(__('backups.create')) ?></span>
           </button>
         </form>
       </div>
@@ -37,11 +63,13 @@ $lastPage = max(1, (int) ceil($total / $limit));
 
   <div class="col-md-6">
     <div class="card h-100 border-danger">
-      <div class="card-header bg-danger text-white fw-bold">
-        <?= e(__('backups.restore')) ?>
+      <div class="card-header bg-danger text-white fw-bold d-flex align-items-center gap-2">
+        <?= icon('upload') ?>
+        <span><?= e(__('backups.restore')) ?></span>
       </div>
       <div class="card-body">
-        <div class="alert alert-warning">
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+          <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
           <strong><?= e(__('backups.restore_warning')) ?></strong>
         </div>
         <form method="post" action="/backups/restore" enctype="multipart/form-data" id="restoreForm">
@@ -55,8 +83,9 @@ $lastPage = max(1, (int) ceil($total / $limit));
             <input type="text" id="restoreConfirmPhrase" class="form-control" autocomplete="off" dir="ltr">
             <input type="hidden" name="confirm_phrase" id="restoreConfirmPhraseValue">
           </div>
-          <button type="submit" class="btn btn-danger" id="restoreSubmit" disabled>
-            <?= e(__('backups.restore')) ?>
+          <button type="submit" class="btn btn-danger d-flex align-items-center gap-2" id="restoreSubmit" disabled>
+            <?= icon('upload') ?>
+            <span><?= e(__('backups.restore')) ?></span>
           </button>
         </form>
       </div>
@@ -65,8 +94,10 @@ $lastPage = max(1, (int) ceil($total / $limit));
 </div>
 
 <div class="card mt-4">
-  <div class="card-header bg-white fw-bold">
-    <?= e(__('backups.history')) ?>
+  <div class="card-header d-flex align-items-center gap-2">
+    <?= icon('clock') ?>
+    <span><?= e(__('backups.history')) ?></span>
+    <span class="badge text-bg-light border ms-auto"><?= (int) $total ?></span>
   </div>
   <div class="card-body p-0">
     <div class="table-responsive">
@@ -85,8 +116,11 @@ $lastPage = max(1, (int) ceil($total / $limit));
         <tbody>
           <?php if (empty($backups)): ?>
             <tr>
-              <td colspan="7" class="text-center text-muted py-4">
-                <?= e(__('common.no_results')) ?>
+              <td colspan="7" class="p-0">
+                <div class="n-empty py-4">
+                  <div class="n-empty-icon"><?= icon('database') ?></div>
+                  <p class="mb-0"><?= e(__('common.no_results')) ?></p>
+                </div>
               </td>
             </tr>
           <?php else: ?>
@@ -119,8 +153,9 @@ $lastPage = max(1, (int) ceil($total / $limit));
                 <td><?= e($row['created_by_name'] ?? '-') ?></td>
                 <td class="text-end">
                   <?php if ($row['status'] === 'success'): ?>
-                    <a href="/backups/<?= e((string)$row['id']) ?>/download" class="btn btn-sm btn-outline-secondary">
-                      <?= e(__('backups.action.download')) ?>
+                    <a href="/backups/<?= e((string)$row['id']) ?>/download" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+                      <?= icon('download', 'n-icon-sm') ?>
+                      <span><?= e(__('backups.action.download')) ?></span>
                     </a>
                   <?php endif; ?>
                 </td>

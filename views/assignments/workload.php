@@ -3,13 +3,39 @@
 $pageTitle = __('assignments.workload_summary');
 $activeNav = 'assignments';
 $pageScripts = $hasActiveYear ? ['/assets/vendor/chartjs/chart.umd.min.js', '/assets/js/workload-chart.js'] : [];
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
+<div class="n-page-head">
+  <div>
+    <h1 class="d-flex align-items-center gap-2">
+      <?= icon('chart', 'n-icon-lg text-body-secondary') ?>
+      <?= e($pageTitle) ?>
+    </h1>
+  </div>
+  <div class="n-page-head-actions">
+    <a href="/assignments" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+      <?= icon('chevron-right', 'n-flip-rtl') ?>
+      <span><?= e(__('assignments.title')) ?></span>
+    </a>
+  </div>
+</div>
+
 <?php if (!$hasActiveYear): ?>
-  <div class="alert alert-warning"><?= e(__('assignments.no_active_year')) ?></div>
+  <div class="alert alert-warning d-flex align-items-center gap-2">
+    <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e(__('assignments.no_active_year')) ?></span>
+  </div>
 <?php elseif (empty($summary['perTeacher'])): ?>
-  <div class="alert alert-secondary"><?= e(__('common.no_results')) ?></div>
+  <div class="card">
+    <div class="card-body">
+      <div class="n-empty py-4">
+        <div class="n-empty-icon"><?= icon('chart') ?></div>
+        <p class="mb-0"><?= e(__('common.no_results')) ?></p>
+      </div>
+    </div>
+  </div>
 <?php else: ?>
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
@@ -42,23 +68,33 @@ require dirname(__DIR__) . '/layout/start.php';
     </div>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-hover align-middle bg-white">
-      <thead>
-        <tr>
-          <th><?= e(__('teachers.full_name')) ?></th>
-          <th><?= e(__('assignments.total_periods')) ?></th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($summary['perTeacher'] as $row): ?>
-          <tr>
-            <td><a href="/teachers/<?= (int) $row['teacher_id'] ?>"><?= e($row['full_name']) ?></a></td>
-            <td class="font-variant-numeric-tabular"><?= (int) $row['total'] ?></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+  <div class="card">
+    <div class="card-header d-flex align-items-center gap-2">
+      <?= icon('graduation-cap') ?>
+      <span><?= e(__('assignments.teachers_count')) ?></span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 n-table-stack">
+          <thead>
+            <tr>
+              <th><?= e(__('teachers.full_name')) ?></th>
+              <th><?= e(__('assignments.total_periods')) ?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($summary['perTeacher'] as $row): ?>
+              <tr>
+                <td data-label="<?= e(__('teachers.full_name')) ?>">
+                  <a href="/teachers/<?= (int) $row['teacher_id'] ?>"><?= e($row['full_name']) ?></a>
+                </td>
+                <td data-label="<?= e(__('assignments.total_periods')) ?>" class="font-variant-numeric-tabular"><?= (int) $row['total'] ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 <?php endif; ?>
 

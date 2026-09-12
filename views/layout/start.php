@@ -10,6 +10,9 @@
  * does"); this is the same plain-include pattern extended to a shared shell.
  *
  * @var string $pageTitle
+ * @var bool|null $suppressPageTitle Set true when the page builds its own
+ *   title treatment (a .n-page-head row or a "powerful" gradient header) so
+ *   this shell doesn't also render its own plain <h1>, duplicating it.
  */
 use App\Flash;
 use App\Middleware\AcademicYearContext;
@@ -20,6 +23,13 @@ $school = (new SchoolRepository())->full();
 $schoolName = $school === null
     ? __('app.name')
     : (currentLocale() === 'ar' ? $school['name_ar'] : $school['name']);
+
+// Computed once, reused for the sidebar, the mobile off-canvas nav, and the
+// page-title icon below -- navItems() itself is cheap (a static array), but
+// there is no reason to call it three times over one request.
+$navItemsList = navItems();
+$navIconByKey = array_column($navItemsList, 'icon', 'key');
+$pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
 ?>
 <!DOCTYPE html>
 <html lang="<?= e(currentLocale()) ?>" dir="<?= e(currentDirection()) ?>">
@@ -36,44 +46,52 @@ $schoolName = $school === null
 </head>
 <body>
 <div class="nizam-shell">
-  <nav class="nizam-sidebar p-3 d-none d-md-block">
-    <div class="fw-bold mb-4 fs-5"><?= e(__('app.name')) ?></div>
-    <ul class="nav nav-pills flex-column">
-      <?php foreach (navItems() as $item): ?>
+  <nav class="nizam-sidebar d-none d-md-flex">
+    <div class="nizam-brand">
+      <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
+      <div class="nizam-brand-name"><?= e(__('app.name')) ?></div>
+    </div>
+    <ul class="nav flex-column">
+      <?php foreach ($navItemsList as $item): ?>
         <?php if ($item['permission'] === null || hasPermission($item['permission'])): ?>
           <li class="nav-item">
             <a class="nav-link<?= ($activeNav ?? '') === $item['key'] ? ' active' : '' ?>" href="<?= e($item['href']) ?>">
-              <?= e(__($item['label'])) ?>
+              <?= icon($item['icon'] ?? 'dashboard') ?>
+              <span><?= e(__($item['label'])) ?></span>
             </a>
           </li>
         <?php endif; ?>
       <?php endforeach; ?>
     </ul>
+    <div class="nizam-sidebar-foot"><?= e($schoolName) ?></div>
   </nav>
 
   <div class="nizam-main">
-    <header class="nizam-topbar d-flex align-items-center justify-content-between px-3 py-2">
+    <header class="nizam-topbar d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-sm btn-outline-secondary d-md-none" type="button"
-                data-bs-toggle="offcanvas" data-bs-target="#nizamMobileNav">
-          ☰
+        <button class="btn btn-sm btn-icon btn-outline-secondary d-md-none" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#nizamMobileNav" aria-label="<?= e(__('nav.menu')) ?>">
+          <?= icon('menu') ?>
         </button>
         <?php if (!empty($school['logo_path'])): ?>
           <img src="/logo" alt="" style="height:28px; max-width:90px; object-fit:contain;">
         <?php endif; ?>
-        <span class="fw-semibold"><?= e($schoolName) ?></span>
+        <span class="fw-semibold d-none d-sm-inline"><?= e($schoolName) ?></span>
         <?php if (AcademicYearContext::activeYearId() !== null): ?>
-          <span class="badge text-bg-light border"><?= e(AcademicYearContext::label() ?? '') ?></span>
+          <span class="badge text-bg-light border d-none d-sm-inline-flex align-items-center gap-1">
+            <?= icon('calendar') ?><?= e(AcademicYearContext::label() ?? '') ?>
+          </span>
         <?php endif; ?>
       </div>
-      <div class="d-flex align-items-center gap-3">
-        <div class="btn-group btn-group-sm" role="group" aria-label="<?= e(__('nav.language')) ?>">
+      <div class="d-flex align-items-center gap-2 gap-sm-3">
+        <div class="btn-group btn-group-sm n-lang-switch" role="group" aria-label="<?= e(__('nav.language')) ?>">
           <a class="btn btn-outline-secondary<?= currentLocale() === 'ar' ? ' active' : '' ?>" href="/lang?to=ar">ع</a>
           <a class="btn btn-outline-secondary<?= currentLocale() === 'en' ? ' active' : '' ?>" href="/lang?to=en">EN</a>
         </div>
-        <span class="text-muted small"><?= e($_SESSION['full_name'] ?? '') ?></span>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#logoutConfirm">
-          <?= e(__('auth.logout.submit')) ?>
+        <span class="n-avatar d-none d-sm-inline-flex" aria-hidden="true"><?= e(mb_substr($_SESSION['full_name'] ?? '?', 0, 1)) ?></span>
+        <span class="text-muted small d-none d-lg-inline"><?= e($_SESSION['full_name'] ?? '') ?></span>
+        <button type="button" class="btn btn-sm btn-icon btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#logoutConfirm" aria-label="<?= e(__('auth.logout.submit')) ?>" title="<?= e(__('auth.logout.submit')) ?>">
+          <?= icon('logout') ?>
         </button>
       </div>
     </header>
@@ -114,16 +132,20 @@ $schoolName = $school === null
 
     <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="nizamMobileNav">
       <div class="offcanvas-header">
-        <span class="fw-bold"><?= e(__('app.name')) ?></span>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        <div class="nizam-brand mb-0 p-0">
+          <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
+          <span class="fw-bold text-dark"><?= e(__('app.name')) ?></span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="<?= e(__('common.close')) ?>"></button>
       </div>
       <div class="offcanvas-body">
-        <ul class="nav nav-pills flex-column">
-          <?php foreach (navItems() as $item): ?>
+        <ul class="nav flex-column">
+          <?php foreach ($navItemsList as $item): ?>
             <?php if ($item['permission'] === null || hasPermission($item['permission'])): ?>
               <li class="nav-item">
                 <a class="nav-link<?= ($activeNav ?? '') === $item['key'] ? ' active' : '' ?>" href="<?= e($item['href']) ?>">
-                  <?= e(__($item['label'])) ?>
+                  <?= icon($item['icon'] ?? 'dashboard') ?>
+                  <span><?= e(__($item['label'])) ?></span>
                 </a>
               </li>
             <?php endif; ?>
@@ -134,11 +156,17 @@ $schoolName = $school === null
 
     <main class="nizam-content">
       <?php foreach (Flash::consume() as $flash): ?>
-        <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show"
+        <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show d-flex align-items-center gap-3"
              role="alert" <?= $flash['type'] === 'success' ? 'data-flash-autodismiss' : '' ?>>
-          <?= e($flash['message']) ?>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?= e(__('common.close')) ?>"></button>
+          <?= icon($flash['type'] === 'success' ? 'check-circle' : ($flash['type'] === 'danger' ? 'alert-circle' : 'info'), 'n-icon-lg flex-shrink-0') ?>
+          <span class="flex-grow-1"><?= e($flash['message']) ?></span>
+          <button type="button" class="btn-close ms-2 n-notification-close" data-bs-dismiss="alert" aria-label="<?= e(__('common.close')) ?>"></button>
         </div>
       <?php endforeach; ?>
 
-      <h1 class="h4 mb-3"><?= e($pageTitle) ?></h1>
+      <?php if (empty($suppressPageTitle)): ?>
+      <h1 class="h4 mb-3 d-flex align-items-center gap-2">
+        <?= icon($pageIcon, 'n-icon-lg text-body-secondary') ?>
+        <?= e($pageTitle) ?>
+      </h1>
+      <?php endif; ?>

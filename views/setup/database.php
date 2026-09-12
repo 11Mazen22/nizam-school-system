@@ -48,7 +48,10 @@ require dirname(__DIR__) . '/layout/setup-start.php';
           <label class="form-label" for="password"><?= e(__('setup.database.password')) ?></label>
           <input type="password" class="form-control" id="password" name="password">
         </div>
-        <button type="submit" class="btn btn-primary w-100"><?= e(__('setup.database.test_and_save')) ?></button>
+        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+          <?= icon('database') ?>
+          <span><?= e(__('setup.database.test_and_save')) ?></span>
+        </button>
         </fieldset>
       </form>
 <?php require dirname(__DIR__) . '/layout/setup-end.php'; ?>

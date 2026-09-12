@@ -82,6 +82,18 @@ final class ErrorHandler
         if (!headers_sent()) {
             http_response_code($status);
         }
+        // A true 404 (no route matched) never runs SessionMiddleware, so
+        // without this the error view's currentLocale()/__() calls always
+        // see an empty $_SESSION and silently fall back to Arabic --
+        // wrong-language for any English-browsing visitor who hits a bad
+        // URL. Same session name SessionMiddleware uses (session_name()
+        // must match for PHP to pick up the browser's existing cookie); no
+        // need for the rest of its cookie-flag setup since this only reads
+        // the session that middleware already started for every other page.
+        if (session_status() === PHP_SESSION_NONE) {
+            session_name('nizam_session');
+            session_start();
+        }
         $view = dirname(__DIR__) . "/views/errors/{$status}.php";
         if (is_file($view)) {
             require $view;

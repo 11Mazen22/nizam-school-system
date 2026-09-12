@@ -3,6 +3,7 @@
 $pageTitle = __('promotion.preview_title');
 $activeNav = 'students';
 $pageScripts = ['/assets/js/promotion.js'];
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
@@ -16,14 +17,32 @@ use App\Middleware\CsrfMiddleware;
      one fragment in its own bidi run so it reads correctly regardless of
      the page's own direction, exactly like a phone number or URL embedded
      in RTL prose. -->
-<p class="text-muted">
-  <span dir="ltr"><?= e($source['label']) ?> &rarr; <?= e($target['label']) ?></span>
-</p>
+<div class="n-page-head">
+  <div>
+    <h1 class="d-flex align-items-center gap-2">
+      <?= icon('trending-up', 'n-icon-lg text-body-secondary') ?>
+      <?= e($pageTitle) ?>
+    </h1>
+    <p class="mb-0">
+      <span dir="ltr"><?= e($source['label']) ?> &rarr; <?= e($target['label']) ?></span>
+    </p>
+  </div>
+</div>
 
 <?php if (empty($rows)): ?>
-  <div class="alert alert-secondary"><?= e(__('promotion.no_active_enrollments')) ?></div>
+  <div class="card">
+    <div class="card-body">
+      <div class="n-empty py-4">
+        <div class="n-empty-icon"><?= icon('inbox') ?></div>
+        <p class="mb-0"><?= e(__('promotion.no_active_enrollments')) ?></p>
+      </div>
+    </div>
+  </div>
 <?php else: ?>
-  <div class="alert alert-warning"><?= e(__('promotion.confirm_warning')) ?></div>
+  <div class="alert alert-warning d-flex align-items-center gap-2">
+    <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e(__('promotion.confirm_warning')) ?></span>
+  </div>
 
   <form method="post" action="/students/promotion" data-confirm="<?= e(__('promotion.confirm_warning')) ?>">
     <?= CsrfMiddleware::field() ?>
@@ -85,7 +104,10 @@ use App\Middleware\CsrfMiddleware;
       </table>
     </div>
 
-    <button type="submit" class="btn btn-primary"><?= e(__('promotion.confirm')) ?></button>
+    <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+      <?= icon('check') ?>
+      <span><?= e(__('promotion.confirm')) ?></span>
+    </button>
   </form>
 <?php endif; ?>
 

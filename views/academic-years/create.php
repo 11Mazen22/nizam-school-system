@@ -2,12 +2,25 @@
 /** @var ?string $error @var array $years */
 $pageTitle = __('academic_years.add');
 $activeNav = 'academic-years';
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
+<div class="n-page-head">
+  <div>
+    <h1 class="d-flex align-items-center gap-2">
+      <?= icon('plus', 'n-icon-lg text-body-secondary') ?>
+      <?= e($pageTitle) ?>
+    </h1>
+  </div>
+</div>
+
 <?php if ($error !== null): ?>
-  <div class="alert alert-danger"><?= e($error) ?></div>
+  <div class="alert alert-danger d-flex align-items-center gap-2">
+    <?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e($error) ?></span>
+  </div>
 <?php endif; ?>
 
 <div class="card" style="max-width: 560px;">
@@ -39,7 +52,10 @@ use App\Middleware\CsrfMiddleware;
           </select>
         </div>
       <?php endif; ?>
-      <button type="submit" class="btn btn-primary w-100"><?= e(__('common.save')) ?></button>
+      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+        <?= icon('check') ?>
+        <span><?= e(__('common.save')) ?></span>
+      </button>
     </form>
   </div>
 </div>

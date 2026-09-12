@@ -30,17 +30,11 @@ final class ClassController extends Controller
             $row['enrolled'] = $this->classes->activeEnrollmentCount((int) $row['id']);
         }
         unset($row);
-        $this->view('classes/index', ['classes' => $rows, 'hasActiveYear' => $yearId !== null]);
-    }
-
-    public function create(Request $request): void
-    {
-        $yearId = AcademicYearContext::activeYearId();
-        if ($yearId === null) {
-            $this->redirect('/classes');
-            return;
-        }
-        $this->view('classes/form', ['error' => null, 'class' => null, 'grades' => $this->grades->all(true)]);
+        $this->view('classes/index', [
+            'classes' => $rows,
+            'hasActiveYear' => $yearId !== null,
+            'grades' => $yearId === null ? [] : $this->grades->all(true),
+        ]);
     }
 
     public function store(Request $request): void
@@ -52,33 +46,20 @@ final class ClassController extends Controller
         }
 
         [$gradeId, $name, $capacity, $error] = $this->fields($request);
+        if ($error === null) {
+            try {
+                $this->service->create($gradeId, $yearId, $name, $capacity);
+            } catch (RuntimeException $e) {
+                $error = $e->getMessage() === 'year_closed' ? __('academic_years.year_closed') : __('classes.duplicate_name');
+            }
+        }
+
         if ($error !== null) {
-            $this->view('classes/form', ['error' => $error, 'class' => null, 'grades' => $this->grades->all(true)]);
-            return;
+            Flash::set('danger', $error);
+        } else {
+            Flash::set('success', __('classes.created'));
         }
-
-        try {
-            $this->service->create($gradeId, $yearId, $name, $capacity);
-        } catch (RuntimeException $e) {
-            $this->view('classes/form', [
-                'error' => $e->getMessage() === 'year_closed' ? __('academic_years.year_closed') : __('classes.duplicate_name'),
-                'class' => null, 'grades' => $this->grades->all(true),
-            ]);
-            return;
-        }
-        Flash::set('success', __('classes.created'));
         $this->redirect('/classes');
-    }
-
-    public function edit(Request $request): void
-    {
-        $id = $request->paramInt('id');
-        $class = $id === null ? null : $this->classes->find($id);
-        if ($class === null) {
-            $this->redirect('/classes');
-            return;
-        }
-        $this->view('classes/form', ['error' => null, 'class' => $class, 'grades' => $this->grades->all(true)]);
     }
 
     public function update(Request $request): void
@@ -90,24 +71,23 @@ final class ClassController extends Controller
             return;
         }
 
-        [$gradeId, $name, $capacity, $error] = $this->fields($request);
-        if ($error !== null) {
-            $this->view('classes/form', ['error' => $error, 'class' => $class, 'grades' => $this->grades->all(true)]);
-            return;
-        }
+        [, $name, $capacity, $error] = $this->fields($request, requireGrade: false);
 
         // A class's grade/year are fixed at creation (student_enrollments' composite
         // FK is built against them) -- edit only ever touches name/capacity.
-        try {
-            $this->service->update($id, (int) $class['grade_id'], (int) $class['academic_year_id'], $name, $capacity);
-        } catch (RuntimeException $e) {
-            $this->view('classes/form', [
-                'error' => $e->getMessage() === 'year_closed' ? __('academic_years.year_closed') : __('classes.duplicate_name'),
-                'class' => $class, 'grades' => $this->grades->all(true),
-            ]);
-            return;
+        if ($error === null) {
+            try {
+                $this->service->update($id, (int) $class['grade_id'], (int) $class['academic_year_id'], $name, $capacity);
+            } catch (RuntimeException $e) {
+                $error = $e->getMessage() === 'year_closed' ? __('academic_years.year_closed') : __('classes.duplicate_name');
+            }
         }
-        Flash::set('success', __('classes.updated'));
+
+        if ($error !== null) {
+            Flash::set('danger', $error);
+        } else {
+            Flash::set('success', __('classes.updated'));
+        }
         $this->redirect('/classes');
     }
 
@@ -132,14 +112,14 @@ final class ClassController extends Controller
     }
 
     /** @return array{0:int,1:string,2:?int,3:?string} */
-    private function fields(Request $request): array
+    private function fields(Request $request, bool $requireGrade = true): array
     {
         $gradeId = (int) ($request->post('grade_id', '') ?: 0);
         $name = $request->post('name', '') ?: '';
         $capacityRaw = $request->post('capacity', '') ?: '';
         $capacity = $capacityRaw !== '' ? (int) $capacityRaw : null;
 
-        if ($gradeId <= 0 || $name === '') {
+        if (($requireGrade && $gradeId <= 0) || $name === '') {
             return [$gradeId, $name, $capacity, __('validation.required')];
         }
         if ($capacity !== null && $capacity <= 0) {

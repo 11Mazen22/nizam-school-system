@@ -2,15 +2,31 @@
 /** @var ?string $error @var array $teachers @var array $subjects @var array $classes @var bool $qualificationWarning */
 $pageTitle = __('assignments.add');
 $activeNav = 'assignments';
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
+<div class="n-page-head">
+  <div>
+    <h1 class="d-flex align-items-center gap-2">
+      <?= icon('plus', 'n-icon-lg text-body-secondary') ?>
+      <?= e($pageTitle) ?>
+    </h1>
+  </div>
+</div>
+
 <?php if ($error !== null): ?>
-  <div class="alert alert-danger"><?= e($error) ?></div>
+  <div class="alert alert-danger d-flex align-items-center gap-2">
+    <?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e($error) ?></span>
+  </div>
 <?php endif; ?>
 <?php if ($qualificationWarning): ?>
-  <div class="alert alert-warning"><?= e(__('assignments.qualification_warning')) ?></div>
+  <div class="alert alert-warning d-flex align-items-center gap-2">
+    <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e(__('assignments.qualification_warning')) ?></span>
+  </div>
 <?php endif; ?>
 
 <div class="card" style="max-width: 560px;">
@@ -47,7 +63,10 @@ use App\Middleware\CsrfMiddleware;
         <label class="form-label" for="weekly_periods"><?= e(__('assignments.weekly_periods')) ?></label>
         <input type="number" class="form-control" id="weekly_periods" name="weekly_periods" min="1" required>
       </div>
-      <button type="submit" class="btn btn-primary w-100"><?= e(__('common.save')) ?></button>
+      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+        <?= icon('check') ?>
+        <span><?= e(__('common.save')) ?></span>
+      </button>
     </form>
   </div>
 </div>

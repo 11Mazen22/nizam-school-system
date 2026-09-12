@@ -139,9 +139,7 @@ final class MigrationService
     /**
      * @return string[]
      *
-     * Two things a plain explode(';') can't handle, both needed once the
-     * Postgres migrations exist (MySQL files never trigger either path --
-     * the split result for them is byte-for-byte identical to before):
+     * Three things a plain explode(';') can't handle:
      *   - Dollar-quoted function bodies ($$ ... $$ / $tag$ ... $tag$, used by
      *     the Postgres migrations' set_updated_at() trigger function): a
      *     semicolon inside one is literal function-body text, never a
@@ -151,26 +149,43 @@ final class MigrationService
      *     codebase's migrations are comment-heavy prose, and an explanatory
      *     comment containing a semicolon is a realistic, recurring thing to
      *     write, not a one-off edge case worth leaving unhandled.
+     *   - A '...' string literal (e.g. a column's COMMENT '...' clause): a
+     *     "--" or ";" inside one is literal string content, not a comment
+     *     marker or statement separator -- found live via a MySQL 1064 error
+     *     on migration 001's `setting_key` COMMENT, which contains a literal
+     *     "--". Several other migrations have the same pattern in their own
+     *     COMMENT clauses. A quote is toggled on every unescaped "'"; the
+     *     standard SQL '' (doubled-quote) escape used in this codebase's own
+     *     migrations (e.g. "the row''s own id") is handled for free by plain
+     *     toggling, since the pair's two toggles cancel out with nothing
+     *     between them. Backslash-escaped quotes (MySQL-only, unused here)
+     *     are not handled.
      */
     public static function splitStatements(string $sql): array
     {
         $parts = [];
         $current = '';
         $inDollarQuote = false;
+        $inString = false;
         $tag = '';
         $length = strlen($sql);
         for ($i = 0; $i < $length; $i++) {
-            if (!$inDollarQuote && $sql[$i] === '-' && ($sql[$i + 1] ?? '') === '-') {
+            if (!$inDollarQuote && $sql[$i] === "'") {
+                $inString = !$inString;
+                $current .= $sql[$i];
+                continue;
+            }
+            if (!$inDollarQuote && !$inString && $sql[$i] === '-' && ($sql[$i + 1] ?? '') === '-') {
                 $end = strpos($sql, "\n", $i);
                 $i = ($end === false ? $length : $end) - 1;
                 continue;
             }
-            if (!$inDollarQuote && $sql[$i] === ';') {
+            if (!$inDollarQuote && !$inString && $sql[$i] === ';') {
                 $parts[] = $current;
                 $current = '';
                 continue;
             }
-            if ($sql[$i] === '$' && preg_match('/\G\$(\w*)\$/', $sql, $m, 0, $i)) {
+            if (!$inString && $sql[$i] === '$' && preg_match('/\G\$(\w*)\$/', $sql, $m, 0, $i)) {
                 $current .= $m[0];
                 if (!$inDollarQuote) {
                     $inDollarQuote = true;

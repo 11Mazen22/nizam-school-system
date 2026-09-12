@@ -2,23 +2,56 @@
 /** @var array $students @var string $q @var int $page @var int $perPage @var int $total @var int $lastPage */
 $pageTitle = __('students.title');
 $activeNav = 'students';
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 ?>
+
+<!-- POWERFUL PAGE HEADER -->
+<div class="n-grades-header">
+  <div class="n-grades-header-content">
+    <div class="n-grades-header-text">
+      <h1 class="n-grades-title">
+        <div class="n-grades-icon-wrapper">
+          <?= icon('users', 'n-grades-icon') ?>
+        </div>
+        <?= e(__('students.title')) ?>
+      </h1>
+      <p class="n-grades-subtitle"><?= e(__('students.description')) ?></p>
+    </div>
+    <div class="n-grades-header-actions">
+      <div class="n-grades-stats-mini">
+        <div class="n-stat-mini">
+          <span class="n-stat-mini-value" data-count-up><?= $total ?></span>
+          <span class="n-stat-mini-label"><?= e(__('students.total_students')) ?></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="d-flex justify-content-between mb-3 gap-2 flex-wrap">
   <form method="get" action="/students" class="d-flex gap-2">
     <input type="text" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>">
-    <button type="submit" class="btn btn-outline-secondary"><?= e(__('common.search')) ?></button>
+    <button type="submit" class="btn btn-outline-secondary"><?= icon('search') ?> <?= e(__('common.search')) ?></button>
   </form>
   <div class="d-flex gap-2">
-    <a href="/students/archived" class="btn btn-outline-secondary"><?= e(__('common.archived_list')) ?></a>
-    <a href="/students/promotion" class="btn btn-outline-primary"><?= e(__('promotion.title')) ?></a>
-    <a href="/students/create" class="btn btn-primary"><?= e(__('students.add')) ?></a>
+    <a href="/students/archived" class="btn btn-outline-secondary"><?= icon('archive') ?> <?= e(__('common.archived_list')) ?></a>
+    <a href="/students/promotion" class="btn btn-outline-primary"><?= icon('trending-up') ?> <?= e(__('promotion.title')) ?></a>
+    <a href="/students/create" class="btn btn-primary"><?= icon('plus') ?> <?= e(__('students.add')) ?></a>
   </div>
 </div>
 
 <?php if (empty($students)): ?>
-  <div class="alert alert-secondary"><?= e(__('common.no_results')) ?></div>
+  <div class="n-empty-state">
+    <div class="n-empty-icon" style="background: linear-gradient(135deg, var(--n-primary) 0%, var(--n-primary-strong) 100%);">
+      <?= icon('users', 'n-icon-xl') ?>
+    </div>
+    <h3 class="n-empty-title"><?= e(__('students.empty_title')) ?></h3>
+    <p class="n-empty-description"><?= e(__('students.empty_description')) ?></p>
+    <a href="/students/create" class="btn btn-primary btn-lg mt-2">
+      <?= icon('plus') ?> <?= e(__('students.add')) ?>
+    </a>
+  </div>
 <?php else: ?>
   <div class="table-responsive">
     <table class="table table-hover align-middle bg-white">

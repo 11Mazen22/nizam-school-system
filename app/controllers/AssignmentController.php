@@ -34,6 +34,18 @@ final class AssignmentController extends Controller
         $this->view('assignments/index', [
             'assignments' => $yearId === null ? [] : $this->assignments->allForYear($yearId),
             'hasActiveYear' => $yearId !== null,
+            'archivedCount' => $yearId === null ? 0 : $this->assignments->countArchivedForYear($yearId),
+            'teachers' => $this->teachers->all('active'),
+            'subjects' => $this->subjects->all(true),
+            'classes' => $yearId === null ? [] : $this->classes->allForYear($yearId),
+        ]);
+    }
+
+    public function archived(Request $request): void
+    {
+        $yearId = AcademicYearContext::activeYearId();
+        $this->view('assignments/archived', [
+            'assignments' => $yearId === null ? [] : $this->assignments->archivedForYear($yearId),
         ]);
     }
 

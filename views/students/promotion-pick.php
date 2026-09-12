@@ -2,11 +2,24 @@
 /** @var ?string $error @var array $years */
 $pageTitle = __('promotion.title');
 $activeNav = 'students';
+$suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
+<div class="n-page-head">
+  <div>
+    <h1 class="d-flex align-items-center gap-2">
+      <?= icon('trending-up', 'n-icon-lg text-body-secondary') ?>
+      <?= e($pageTitle) ?>
+    </h1>
+  </div>
+</div>
+
 <?php if ($error !== null): ?>
-  <div class="alert alert-danger"><?= e($error) ?></div>
+  <div class="alert alert-danger d-flex align-items-center gap-2">
+    <?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e($error) ?></span>
+  </div>
 <?php endif; ?>
 
 <div class="card" style="max-width: 560px;">
@@ -28,7 +41,10 @@ require dirname(__DIR__) . '/layout/start.php';
           <?php endforeach; ?>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary w-100"><?= e(__('promotion.start')) ?></button>
+      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+        <?= icon('arrow-forward', 'n-flip-rtl') ?>
+        <span><?= e(__('promotion.start')) ?></span>
+      </button>
     </form>
   </div>
 </div>

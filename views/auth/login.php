@@ -2,9 +2,6 @@
 /**
  * @var string|null $error
  * @var string|null $notice
- * Bare, functional login screen -- proves the auth/session/CSRF/i18n
- * foundation works end to end. Deliberately minimal styling: the real
- * component library (§L) and visual design are Phase 5 scope, not this one.
  */
 use App\Middleware\CsrfMiddleware;
 $notice ??= null;
@@ -13,33 +10,156 @@ $notice ??= null;
 <html lang="<?= e(currentLocale()) ?>" dir="<?= e(currentDirection()) ?>">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e(__('auth.login.title')) ?> — <?= e(__('app.name')) ?></title>
-<style>
-  body { font-family: Tahoma, Arial, sans-serif; background:#f2f4f3; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
-  form { background:#fff; border:1px solid #d6dbd9; border-radius:8px; padding:28px 32px; width:280px; }
-  h1 { font-size:1.1rem; margin:0 0 18px; }
-  label { display:block; font-size:0.85rem; margin:12px 0 4px; }
-  input[type=text], input[type=password] { width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px; }
-  button { margin-top:18px; width:100%; padding:9px; background:#2f4b7c; color:#fff; border:0; border-radius:4px; cursor:pointer; }
-  .error { background:#f6e6e5; color:#a23b3b; padding:8px 10px; border-radius:4px; font-size:0.85rem; margin-bottom:10px; }
-  .notice { background:#e4efe8; color:#3f7d58; padding:8px 10px; border-radius:4px; font-size:0.85rem; margin-bottom:10px; }
-</style>
+<?php if (currentDirection() === 'rtl'): ?>
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.rtl.min.css">
+<?php else: ?>
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
+<?php endif; ?>
+<link rel="stylesheet" href="/assets/css/app.css">
 </head>
-<body>
-  <form method="post" action="/login">
-    <h1><?= e(__('auth.login.title')) ?></h1>
-    <?php if ($notice !== null): ?>
-      <div class="notice"><?= e($notice) ?></div>
-    <?php endif; ?>
-    <?php if ($error !== null): ?>
-      <div class="error"><?= e($error) ?></div>
-    <?php endif; ?>
-    <?= CsrfMiddleware::field() ?>
-    <label for="username"><?= e(__('auth.login.username')) ?></label>
-    <input type="text" id="username" name="username" autofocus required>
-    <label for="password"><?= e(__('auth.login.password')) ?></label>
-    <input type="password" id="password" name="password" required>
-    <button type="submit"><?= e(__('auth.login.submit')) ?></button>
-  </form>
+<body class="n-auth-body">
+  <div class="n-auth-shell">
+    <aside class="n-auth-side">
+      <div class="n-auth-blob n-auth-blob-1"></div>
+      <div class="n-auth-blob n-auth-blob-2"></div>
+      <div class="n-auth-blob n-auth-blob-3"></div>
+      
+      <div class="n-auth-side-top">
+        <div class="nizam-brand-mark n-auth-mark n-auth-mark-animated">
+          <?= icon('sparkle') ?>
+          <div class="n-auth-mark-glow"></div>
+        </div>
+        <div>
+          <div class="n-auth-app-name-lg"><?= e(__('app.name')) ?></div>
+          <div class="n-auth-app-subtitle"><?= e(__('auth.login.system_subtitle')) ?></div>
+        </div>
+      </div>
+      
+      <div class="n-auth-side-mid">
+        <h2 class="n-auth-tagline"><?= e(__('auth.login.tagline')) ?></h2>
+        <p class="n-auth-tagline-sub"><?= e(__('auth.login.tagline_description')) ?></p>
+        <ul class="n-auth-features">
+          <li>
+            <div class="n-auth-feature-icon"><?= icon('users') ?></div>
+            <div class="n-auth-feature-text">
+              <strong><?= e(__('auth.login.feature1_title')) ?></strong>
+              <span><?= e(__('auth.login.feature1')) ?></span>
+            </div>
+          </li>
+          <li>
+            <div class="n-auth-feature-icon"><?= icon('layers') ?></div>
+            <div class="n-auth-feature-text">
+              <strong><?= e(__('auth.login.feature2_title')) ?></strong>
+              <span><?= e(__('auth.login.feature2')) ?></span>
+            </div>
+          </li>
+          <li>
+            <div class="n-auth-feature-icon"><?= icon('chart') ?></div>
+            <div class="n-auth-feature-text">
+              <strong><?= e(__('auth.login.feature3_title')) ?></strong>
+              <span><?= e(__('auth.login.feature3')) ?></span>
+            </div>
+          </li>
+          <li>
+            <div class="n-auth-feature-icon"><?= icon('shield-check') ?></div>
+            <div class="n-auth-feature-text">
+              <strong><?= e(__('auth.login.feature4_title')) ?></strong>
+              <span><?= e(__('auth.login.feature4')) ?></span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="n-auth-side-foot">
+        <div class="n-auth-stats">
+          <div class="n-auth-stat-item">
+            <div class="n-auth-stat-icon"><?= icon('building') ?></div>
+            <span><?= e(__('auth.login.trusted_by_schools')) ?></span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="n-auth-main">
+      <div class="n-auth-lang">
+        <div class="btn-group btn-group-sm n-lang-switch" role="group" aria-label="<?= e(__('nav.language')) ?>">
+          <a class="btn btn-outline-secondary<?= currentLocale() === 'ar' ? ' active' : '' ?>" href="/lang?to=ar">عربي</a>
+          <a class="btn btn-outline-secondary<?= currentLocale() === 'en' ? ' active' : '' ?>" href="/lang?to=en">English</a>
+        </div>
+      </div>
+
+      <div class="n-auth-form-wrap n-reveal">
+        <div class="n-auth-welcome">
+          <div class="n-auth-welcome-icon"><?= icon('sparkle') ?></div>
+          <h1><?= e(__('auth.login.welcome_title')) ?></h1>
+          <p class="n-auth-sub"><?= e(__('auth.login.subtitle')) ?></p>
+        </div>
+
+        <?php if ($notice !== null): ?>
+          <div class="alert alert-success d-flex align-items-center gap-2 n-auth-alert">
+            <?= icon('check-circle', 'n-icon-lg flex-shrink-0') ?>
+            <span><?= e($notice) ?></span>
+          </div>
+        <?php endif; ?>
+        <?php if ($error !== null): ?>
+          <div class="alert alert-danger d-flex align-items-center gap-2 n-auth-alert">
+            <?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?>
+            <span><?= e($error) ?></span>
+          </div>
+        <?php endif; ?>
+
+        <form method="post" action="/login" class="n-auth-form">
+          <?= CsrfMiddleware::field() ?>
+          
+          <div class="n-form-group">
+            <label class="n-form-label" for="username">
+              <span class="n-form-label-icon"><?= icon('users') ?></span>
+              <span><?= e(__('auth.login.username')) ?></span>
+            </label>
+            <div class="n-input-enhanced">
+              <div class="n-input-icon-prefix"><?= icon('users') ?></div>
+              <input type="text" class="form-control n-input-premium" id="username" name="username" 
+                     placeholder="<?= e(__('auth.login.username_placeholder')) ?>"
+                     autofocus required autocomplete="username">
+              <div class="n-input-focus-border"></div>
+            </div>
+          </div>
+          
+          <div class="n-form-group">
+            <label class="n-form-label" for="password">
+              <span class="n-form-label-icon"><?= icon('lock') ?></span>
+              <span><?= e(__('auth.login.password')) ?></span>
+            </label>
+            <div class="n-input-enhanced">
+              <div class="n-input-icon-prefix"><?= icon('lock') ?></div>
+              <input type="password" class="form-control n-input-premium" id="password" name="password"
+                     placeholder="<?= e(__('auth.login.password_placeholder')) ?>"
+                     required autocomplete="current-password">
+              <div class="n-input-focus-border"></div>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-lg w-100 n-btn-animated">
+            <span class="n-btn-text"><?= e(__('auth.login.submit')) ?></span>
+            <span class="n-btn-icon"><?= icon('arrow-forward', 'n-flip-rtl') ?></span>
+            <div class="n-btn-shine"></div>
+          </button>
+        </form>
+        
+        <div class="n-auth-footer">
+          <div class="n-auth-security">
+            <?= icon('shield-check') ?>
+            <span><?= e(__('auth.login.secure_connection')) ?></span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script src="/assets/vendor/jquery/jquery.min.js"></script>
+  <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/app.js"></script>
 </body>
 </html>
