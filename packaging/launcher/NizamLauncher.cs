@@ -283,10 +283,14 @@ internal static class NizamLauncher
             StartPosition = FormStartPosition.CenterScreen;
             ShowInTaskbar = true;
 
-            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "hadaba.ico");
+            // Use high-quality PNG for window icon instead of ICO
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "hadaba-256.png");
             if (File.Exists(iconPath))
             {
-                Icon = new Icon(iconPath);
+                using (var bitmap = new System.Drawing.Bitmap(iconPath))
+                {
+                    Icon = System.Drawing.Icon.FromHandle(bitmap.GetHicon());
+                }
             }
 
             _webView = new WebView2 { Dock = DockStyle.Fill };
