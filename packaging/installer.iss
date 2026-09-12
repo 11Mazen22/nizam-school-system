@@ -11,13 +11,13 @@
 ; needs to start anything or see a UAC prompt for day-to-day use; the
 ; Launcher just health-checks and opens the browser.
 
-#define MyAppName "Nizam"
+#define MyAppName "Hadaba Al-Ahram School"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "Nizam"
+#define MyAppPublisher "Hadaba Al-Ahram Language School"
 #define MyAppURL "http://127.0.0.1:8890/"
-#define MyDataDirName "Nizam"
-#define ApacheServiceName "NizamApache"
-#define MariaDbServiceName "NizamMariaDB"
+#define MyDataDirName "HadabaSchool"
+#define ApacheServiceName "HadabaApache"
+#define MariaDbServiceName "HadabaMariaDB"
 
 [Setup]
 AppId={{2F3B7B6E-7B5C-4A6D-9B0E-4C1F2A9E7D31}
@@ -29,9 +29,9 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=..\dist
-OutputBaseFilename=Nizam-Setup-{#MyAppVersion}
-SetupIconFile=assets\nizam.ico
-UninstallDisplayIcon={app}\NizamLauncher.exe
+OutputBaseFilename=Hadaba-Al-Ahram-School-Setup-{#MyAppVersion}
+SetupIconFile=assets\hadaba.ico
+UninstallDisplayIcon={app}\HadabaLauncher.exe
 Compression=lzma2/max
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible
@@ -46,7 +46,7 @@ VersionInfoVersion={#MyAppVersion}
 VersionInfoProductName={#MyAppName}
 VersionInfoProductVersion={#MyAppVersion}
 VersionInfoCompany={#MyAppPublisher}
-VersionInfoDescription=Nizam School Management System Setup
+VersionInfoDescription=Hadaba Al-Ahram School Management System Setup
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -55,11 +55,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 ; --- Application (Program Files -- read-mostly, replaced on every update) ---
 Source: "stage\app\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "stage\runtime\*"; DestDir: "{app}\runtime"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\packaging\launcher\NizamLauncher.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\packaging\launcher\HadabaLauncher.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\launcher\Microsoft.Web.WebView2.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\launcher\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\launcher\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "assets\nizam.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "assets\hadaba.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\apache\httpd-nizam.conf"; DestDir: "{app}\runtime-config"; Flags: ignoreversion
 Source: "..\packaging\mysql\my-nizam.ini"; DestDir: "{app}\runtime-config"; Flags: ignoreversion
 Source: "..\packaging\docs\User-Guide.pdf"; DestDir: "{app}\docs"; Flags: ignoreversion skipifsourcedoesntexist
@@ -78,15 +78,15 @@ Name: "{commonappdata}\{#MyDataDirName}\storage\logs"; Permissions: users-modify
 Name: "{commonappdata}\{#MyDataDirName}\storage\uploads"; Permissions: users-modify
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\NizamLauncher.exe"; IconFilename: "{app}\nizam.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\NizamLauncher.exe"; IconFilename: "{app}\nizam.ico"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Run]
-Filename: "{app}\NizamLauncher.exe"; Description: "Launch {#MyAppName} now"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\HadabaLauncher.exe"; Description: "Launch {#MyAppName} now"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; Program-files side only -- ProgramData is handled explicitly in code

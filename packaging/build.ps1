@@ -19,7 +19,7 @@ $stage = Join-Path $packaging "stage"
 $xampp = "C:\xampp"
 $iscc = "$env:USERPROFILE\tools\InnoSetup\ISCC.exe"
 
-Write-Host "=== Nizam Windows build ===" -ForegroundColor Cyan
+Write-Host "=== Hadaba Al-Ahram School - Windows Build ===" -ForegroundColor Cyan
 
 Write-Host "Cleaning previous app stage..."
 if (Test-Path "$stage\app") { Remove-Item -Recurse -Force "$stage\app" }
