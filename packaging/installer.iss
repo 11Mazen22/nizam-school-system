@@ -77,6 +77,7 @@ Name: "{commonappdata}\{#MyDataDirName}\database\data"; Permissions: users-modif
 Name: "{commonappdata}\{#MyDataDirName}\database\backups"; Permissions: users-modify
 Name: "{commonappdata}\{#MyDataDirName}\storage\logs"; Permissions: users-modify
 Name: "{commonappdata}\{#MyDataDirName}\storage\uploads"; Permissions: users-modify
+Name: "{commonappdata}\{#MyDataDirName}\storage\uploads\school"; Permissions: users-modify
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"
@@ -240,6 +241,13 @@ begin
     // original deployment instructions, not an end school user.
     if not DataDirExisted then
     begin
+      // The seeded schools row references this relative UploadService path.
+      // Keep it in ProgramData so updates never replace a customized logo,
+      // while every fresh install has a working default logo.
+      ForceDirectories(DataDir() + '\storage\uploads\school');
+      FileCopy(AppDir() + '\public\assets\img\hadaba-logo.png',
+               DataDir() + '\storage\uploads\school\hadaba-logo.png', False);
+
       Exec(RuntimeDir() + '\mysql\bin\mysql.exe',
            '--protocol=TCP -h 127.0.0.1 -P 3319 -u root -e "CREATE DATABASE IF NOT EXISTS nizam CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"',
            '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
@@ -259,6 +267,17 @@ begin
         '  ''charset'' => ''utf8mb4'',' + #13#10 +
         ');' + #13#10,
         False);
+    end;
+
+    // Upgrade compatibility: migration 012/016 repairs installs whose
+    // database still referenced the former public-assets path. Supply the
+    // matching default only when it is absent; a school-managed file is
+    // never overwritten.
+    if not FileExists(DataDir() + '\storage\uploads\school\hadaba-logo.png') then
+    begin
+      ForceDirectories(DataDir() + '\storage\uploads\school');
+      FileCopy(AppDir() + '\public\assets\img\hadaba-logo.png',
+               DataDir() + '\storage\uploads\school\hadaba-logo.png', True);
     end;
 
     Exec('net.exe', 'start "{#ApacheServiceName}"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);

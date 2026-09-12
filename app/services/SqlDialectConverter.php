@@ -4,141 +4,164 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use InvalidArgumentException;
+
 /**
- * Hadaba Al-Ahram School -- Cross-Database SQL Converter
- * 
- * Automatically converts SQL dumps between PostgreSQL and MySQL/MariaDB formats
- * so production (Supabase/PostgreSQL) backups can restore to local (MariaDB) 
- * and vice versa, without manual conversion.
- * 
- * Detects source database from backup signature and converts to target database type.
+ * Converts Nizam backup batches between the small syntax differences used by
+ * MariaDB and PostgreSQL. The converter is deliberately data-preserving:
+ * values inside INSERT statements are never rewritten. In particular, the
+ * application's 0/1 SMALLINT flags (including is_active) are not booleans.
  */
 final class SqlDialectConverter
 {
-    /**
-     * Detect source database type from backup signature line
-     * 
-     * @return 'pgsql'|'mysql'|null
-     */
+    /** @return 'pgsql'|'mysql'|null */
     public static function detectSource(string $sql): ?string
     {
-        if (preg_match('/^-- NIZAM-BACKUP v1-pg/m', $sql)) {
+        if (preg_match('/^-- NIZAM-BACKUP v1-pg\b/m', $sql) === 1) {
             return 'pgsql';
         }
-        if (preg_match('/^-- NIZAM-BACKUP v1/m', $sql)) {
+        if (preg_match('/^-- NIZAM-BACKUP v1\b/m', $sql) === 1) {
             return 'mysql';
         }
         return null;
     }
 
-    /**
-     * Convert SQL from one dialect to another
-     * 
-     * @param 'pgsql'|'mysql' $from Source database type
-     * @param 'pgsql'|'mysql' $to Target database type
-     */
+    /** @param 'pgsql'|'mysql' $from @param 'pgsql'|'mysql' $to */
     public static function convert(string $sql, string $from, string $to): string
     {
-        // No conversion needed if same database type
         if ($from === $to) {
             return $sql;
         }
-
-        if ($from === 'pgsql' && $to === 'mysql') {
-            return self::postgresqlToMysql($sql);
-        }
-
-        if ($from === 'mysql' && $to === 'pgsql') {
-            return self::mysqlToPostgresql($sql);
-        }
-
-        throw new \InvalidArgumentException("Unsupported conversion: {$from} to {$to}");
+        return match ($from . ':' . $to) {
+            'pgsql:mysql' => self::postgresqlToMysql($sql),
+            'mysql:pgsql' => self::mysqlToPostgresql($sql),
+            default => throw new InvalidArgumentException("Unsupported conversion: {$from} to {$to}"),
+        };
     }
 
-    /**
-     * Convert PostgreSQL dump to MySQL/MariaDB format
-     */
     private static function postgresqlToMysql(string $sql): string
     {
-        // 1. Change signature
-        $sql = preg_replace('/^-- NIZAM-BACKUP v1-pg/m', '-- NIZAM-BACKUP v1', $sql);
-
-        // 2. Double quotes to backticks for identifiers
-        $sql = preg_replace('/"([a-zA-Z_][a-zA-Z0-9_]*)"/','`$1`', $sql);
-
-        // 3. Boolean values: true/false → 1/0
-        $sql = preg_replace('/\btrue\b/i', '1', $sql);
-        $sql = preg_replace('/\bfalse\b/i', '0', $sql);
-
-        // 4. OVERRIDING SYSTEM VALUE → remove (MySQL doesn't need it)
-        $sql = preg_replace('/\s+OVERRIDING SYSTEM VALUE/i', '', $sql);
-
-        // 5. PostgreSQL-specific type casts: ::type → remove or convert
-        $sql = preg_replace('/::date\b/', '', $sql);
-        $sql = preg_replace('/::timestamp\b/', '', $sql);
-        $sql = preg_replace('/::integer\b/', '', $sql);
-        $sql = preg_replace('/::bigint\b/', '', $sql);
-        $sql = preg_replace('/::boolean\b/', '', $sql);
-        $sql = preg_replace('/::text\b/', '', $sql);
-
-        // 6. Sequences: remove sequence-related commands (MySQL uses AUTO_INCREMENT)
-        $sql = preg_replace('/SELECT setval\([^)]+\);?/i', '', $sql);
-
-        // 7. String concatenation: || → CONCAT()
-        // Complex: handle within VALUES, skip for now (rarely used in data dumps)
-
+        $sql = preg_replace('/^-- NIZAM-BACKUP v1-pg\b/m', '-- NIZAM-BACKUP v1', $sql) ?? $sql;
+        $sql = self::convertIdentifiers($sql, '"', '`');
+        $sql = preg_replace('/\s+OVERRIDING\s+SYSTEM\s+VALUE\b/i', '', $sql) ?? $sql;
+        $sql = self::replaceOutsideStrings($sql, static fn (string $segment): string => preg_replace(
+            '/::\s*(?:smallint|integer|bigint|numeric|decimal|real|double\s+precision|boolean|date|timestamp(?:\s+with(?:out)?\s+time\s+zone)?|text|character\s+varying)\b/i',
+            '',
+            $segment
+        ) ?? $segment);
+        $sql = self::replaceOutsideStrings($sql, static fn (string $segment): string => preg_replace(
+            '/\bSELECT\s+setval\s*\([^;]*\)\s*;?/i', '', $segment
+        ) ?? $segment);
         return $sql;
     }
 
-    /**
-     * Convert MySQL/MariaDB dump to PostgreSQL format
-     */
     private static function mysqlToPostgresql(string $sql): string
     {
-        // 1. Change signature
-        $sql = preg_replace('/^-- NIZAM-BACKUP v1\b/m', '-- NIZAM-BACKUP v1-pg', $sql);
+        $sql = preg_replace('/^-- NIZAM-BACKUP v1\b(?!-pg)/m', '-- NIZAM-BACKUP v1-pg', $sql) ?? $sql;
+        $sql = self::convertIdentifiers($sql, '`', '"');
+        $sql = self::replaceOutsideStrings($sql, static fn (string $segment): string => self::addOverridingSystemValue($segment));
+        $sql = self::replaceOutsideStrings($sql, static fn (string $segment): string => self::addCascadeToDrops($segment));
+        return self::replaceOutsideStrings($sql, static fn (string $segment): string => preg_replace(
+            [
+                '/\s+ENGINE\s*=\s*\w+/i',
+                '/\s+(?:DEFAULT\s+)?CHARSET\s*=\s*\w+/i',
+                '/\s+COLLATE\s*=\s*\w+/i',
+                '/\s+AUTO_INCREMENT\s*=\s*\d+/i',
+            ],
+            '',
+            $segment
+        ) ?? $segment);
+    }
 
-        // 2. Backticks to double quotes for identifiers
-        $sql = preg_replace('/`([a-zA-Z_][a-zA-Z0-9_]*)`/','"$1"', $sql);
+    /** Convert identifier delimiters without touching single-quoted data. */
+    private static function convertIdentifiers(string $sql, string $from, string $to): string
+    {
+        $length = strlen($sql);
+        $out = '';
+        for ($i = 0; $i < $length; $i++) {
+            $char = $sql[$i];
+            if ($char === "'") {
+                $end = self::quotedEnd($sql, $i, "'");
+                $out .= substr($sql, $i, $end - $i + 1);
+                $i = $end;
+                continue;
+            }
+            if ($char === $from) {
+                $end = self::quotedEnd($sql, $i, $from);
+                $identifier = substr($sql, $i + 1, $end - $i - 1);
+                $out .= $to . str_replace($from . $from, $to . $to, $identifier) . $to;
+                $i = $end;
+                continue;
+            }
+            $out .= $char;
+        }
+        return $out;
+    }
 
-        // 3. Boolean values: 1/0 → true/false (context-aware)
-        // Only in INSERT VALUES, not in numbers like "2024" or "10"
-        // Complex: needs proper parsing, simplified version:
-        $sql = preg_replace_callback(
-            '/VALUES\s*\(([^)]+)\)/i',
-            function ($matches) {
-                $values = $matches[1];
-                // Replace standalone 1, 0 that look like booleans
-                // Avoid replacing in dates/numbers: look for , 1, or , 0,
-                $values = preg_replace('/,\s*1\s*,/', ', true,', $values);
-                $values = preg_replace('/,\s*0\s*,/', ', false,', $values);
-                $values = preg_replace('/^\s*1\s*,/', 'true,', $values); // First value
-                $values = preg_replace('/,\s*1\s*$/', ', true', $values); // Last value
-                $values = preg_replace('/^\s*0\s*,/', 'false,', $values);
-                $values = preg_replace('/,\s*0\s*$/', ', false', $values);
-                return 'VALUES (' . $values . ')';
+    /** Adds OVERRIDING SYSTEM VALUE to multiline INSERTs that explicitly provide id. */
+    private static function addOverridingSystemValue(string $sql): string
+    {
+        return preg_replace_callback(
+            '/\bINSERT\s+INTO\s+"[^"]+"\s*(\((?:[^()]|\([^()]*\))*\))(\s*)(?!OVERRIDING\s+SYSTEM\s+VALUE\b)(?=VALUES\b)/is',
+            static function (array $match): string {
+                if (preg_match('/(?:^|,)\s*"id"\s*(?=,|$)/i', trim($match[1], '() \t\r\n')) !== 1) {
+                    return $match[0];
+                }
+                return substr($match[0], 0, -strlen($match[2])) . ' OVERRIDING SYSTEM VALUE' . $match[2];
             },
             $sql
-        );
+        ) ?? $sql;
+    }
 
-        // 4. Add OVERRIDING SYSTEM VALUE for identity columns
-        $sql = preg_replace(
-            '/INSERT INTO\s+"([a-zA-Z_][a-zA-Z0-9_]*)"\s+\(([^)]*"id"[^)]*)\)/i',
-            'INSERT INTO "$1" ($2) OVERRIDING SYSTEM VALUE',
+    /** Adds exactly one CASCADE modifier, including on multiline DROP statements. */
+    private static function addCascadeToDrops(string $sql): string
+    {
+        return preg_replace_callback(
+            '/\bDROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_]*)(?:\s*,\s*(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_]*))*\s*(?:CASCADE\s*)?;/i',
+            static fn (array $match): string => preg_match('/\bCASCADE\s*;$/i', $match[0]) === 1
+                ? $match[0]
+                : rtrim(substr($match[0], 0, -1)) . ' CASCADE;',
             $sql
-        );
+        ) ?? $sql;
+    }
 
-        // 5. DROP TABLE IF EXISTS → PostgreSQL format
-        // MySQL: DROP TABLE IF EXISTS `table`;
-        // PostgreSQL: DROP TABLE IF EXISTS "table" CASCADE;
-        $sql = preg_replace('/DROP TABLE IF EXISTS ([^;]+);/i', 'DROP TABLE IF EXISTS $1 CASCADE;', $sql);
+    /** Applies a transformation only to SQL outside single-quoted values. */
+    private static function replaceOutsideStrings(string $sql, callable $replace): string
+    {
+        $length = strlen($sql);
+        $out = '';
+        $start = 0;
+        for ($i = 0; $i < $length; $i++) {
+            if ($sql[$i] !== "'") {
+                continue;
+            }
+            $out .= $replace(substr($sql, $start, $i - $start));
+            $end = self::quotedEnd($sql, $i, "'");
+            $out .= substr($sql, $i, $end - $i + 1);
+            $i = $end;
+            $start = $i + 1;
+        }
+        return $out . $replace(substr($sql, $start));
+    }
 
-        // 6. Remove MySQL-specific syntax
-        $sql = preg_replace('/ENGINE\s*=\s*\w+/i', '', $sql);
-        $sql = preg_replace('/DEFAULT CHARSET\s*=\s*\w+/i', '', $sql);
-        $sql = preg_replace('/AUTO_INCREMENT\s*=\s*\d+/i', '', $sql);
-        $sql = preg_replace('/CHARACTER SET\s+\w+\s+COLLATE\s+\w+/i', '', $sql);
-
-        return $sql;
+    /** Finds the end of an SQL string/identifier using doubled delimiters. */
+    private static function quotedEnd(string $sql, int $start, string $delimiter): int
+    {
+        $length = strlen($sql);
+        for ($i = $start + 1; $i < $length; $i++) {
+            if ($delimiter === "'" && $sql[$i] === '\\' && $i + 1 < $length) {
+                $i++;
+                continue;
+            }
+            if ($sql[$i] !== $delimiter) {
+                continue;
+            }
+            if ($i + 1 < $length && $sql[$i + 1] === $delimiter) {
+                $i++;
+                continue;
+            }
+            return $i;
+        }
+        return $length - 1;
     }
 }

@@ -26,7 +26,7 @@ CREATE TABLE schools (
 -- Hadaba Al-Ahram Language School: Hardcoded school data
 -- No setup wizard - school information pre-populated for single-school deployment
 INSERT INTO schools (id, name, name_ar, logo_path, address, phone) 
-VALUES (1, 'Hadaba Al-Ahram Language School', 'هضبة الأهرام الثانوية', '/assets/img/hadaba-logo.png', NULL, NULL);
+VALUES (1, 'Hadaba Al-Ahram Language School', 'هضبة الأهرام الثانوية', 'school/hadaba-logo.png', NULL, NULL);
 
 CREATE TABLE settings (
   id           INT UNSIGNED NOT NULL AUTO_INCREMENT,

@@ -16,7 +16,7 @@
   /* ---- Layout ---- */
   --n-sidebar-width: 250px;
   --n-topbar-height: 60px;
-  --n-content-max: 1320px;
+--n-content-max: 1680px;
 
   /* ---- Color: neutrals (a warm-neutral scale, not flat gray) ---- */
   --n-bg: #f3f6f4;
@@ -295,7 +295,7 @@ a:hover {
 }
 
 .nizam-content {
-  padding: 26px 28px 48px;
+  padding: 30px clamp(24px, 3vw, 56px) 52px;
   max-width: var(--n-content-max);
   width: 100%;
   margin-inline: auto;
@@ -916,7 +916,7 @@ a.text-decoration-none:hover .card,
 
 /* =============== BRANDING SIDE - PREMIUM CREATIVE =============== */
 .n-auth-side {
-  flex: 0 0 45%;
+  flex: 0 0 clamp(420px, 42vw, 760px);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -1169,7 +1169,7 @@ a.text-decoration-none:hover .card,
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  padding: clamp(32px, 5vw, 88px);
   background: var(--n-bg);
 }
 
@@ -1182,7 +1182,7 @@ a.text-decoration-none:hover .card,
 
 .n-auth-form-wrap { 
   width: 100%; 
-  max-width: 440px;
+  max-width: 540px;
   position: relative;
 }
 
@@ -1960,7 +1960,7 @@ a.text-decoration-none:hover .card,
 
 /* Page transitions */
 .nizam-content {
-  padding: 28px 32px 56px;
+  padding: 30px clamp(24px, 3vw, 56px) 52px;
   max-width: var(--n-content-max);
   width: 100%;
   margin-inline: auto;
