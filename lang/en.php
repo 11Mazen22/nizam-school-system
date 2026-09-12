@@ -636,5 +636,12 @@ return [
     'setup.recover_admin_warning_text' => 'The system database is set up, but no administrator account exists. Use this form to create the first admin account. This form is only accessible when zero users exist in the database.',
     'setup.recover_admin_submit' => 'Create Admin & Sign In',
     'setup.admin_recovered' => 'Admin account created successfully. Welcome!',
+    "app.import" => "Bulk Import",
+    "app.import_instructions" => "Upload an Excel or CSV file to import multiple records at once. Download the template for the correct column format.",
+    "app.download_template" => "Download Template",
+    "app.select_file" => "Select File",
+    "app.cancel" => "Cancel",
+    "app.upload" => "Upload",
+    "app.close" => "Close",
+    "app.import_success" => "Import completed: {success} added, {errors} failed.",
 ];
-

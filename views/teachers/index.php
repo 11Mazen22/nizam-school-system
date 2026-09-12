@@ -28,7 +28,11 @@ $totalTeachers = count($teachers);
           <span class="n-stat-mini-label"><?= e(__('teachers.total_teachers')) ?></span>
         </div>
       </div>
-    </div>
+          <button type="button" class="btn btn-outline-primary ms-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
+        <?= icon("upload", "n-icon-sm") ?>
+        <?= e(__("app.import")) ?>
+      </button>
+</div>
   </div>
 </div>
 
@@ -92,3 +96,11 @@ $totalTeachers = count($teachers);
 <?php endif; ?>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
+
+
+<?php
+$title = __("app.import");
+$action = "/import/teachers";
+$templateUrl = "/import/teachers/template";
+require dirname(__DIR__) . "/partials/import_modal.php";
+?>

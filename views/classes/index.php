@@ -48,7 +48,11 @@ $utilizationPercent = $totalCapacity > 0 ? (int) round(($totalEnrolled / $totalC
             <span class="n-stat-mini-label"><?= e(__('classes.utilization')) ?></span>
           </div>
         </div>
-      </div>
+            <button type="button" class="btn btn-outline-primary ms-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
+        <?= icon("upload", "n-icon-sm") ?>
+        <?= e(__("app.import")) ?>
+      </button>
+</div>
     </div>
   </div>
 
@@ -283,3 +287,11 @@ $utilizationPercent = $totalCapacity > 0 ? (int) round(($totalEnrolled / $totalC
 <?php endif; ?>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
+
+
+<?php
+$title = __("app.import");
+$action = "/import/classes";
+$templateUrl = "/import/classes/template";
+require dirname(__DIR__) . "/partials/import_modal.php";
+?>

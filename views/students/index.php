@@ -25,7 +25,11 @@ require dirname(__DIR__) . '/layout/start.php';
           <span class="n-stat-mini-label"><?= e(__('students.total_students')) ?></span>
         </div>
       </div>
-    </div>
+          <button type="button" class="btn btn-outline-primary ms-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
+        <?= icon("upload", "n-icon-sm") ?>
+        <?= e(__("app.import")) ?>
+      </button>
+</div>
   </div>
 </div>
 
@@ -113,3 +117,11 @@ require dirname(__DIR__) . '/layout/start.php';
 <?php endif; ?>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
+
+
+<?php
+$title = __("app.import");
+$action = "/import/students";
+$templateUrl = "/import/students/template";
+require dirname(__DIR__) . "/partials/import_modal.php";
+?>

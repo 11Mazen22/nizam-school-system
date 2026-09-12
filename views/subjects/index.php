@@ -37,7 +37,11 @@ $archivedSubjects = array_filter($subjects, fn($s) => (int)$s['is_active'] === 0
         <?php endif; ?>
       </div>
     </div>
-  </div>
+        <button type="button" class="btn btn-outline-primary ms-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
+        <?= icon("upload", "n-icon-sm") ?>
+        <?= e(__("app.import")) ?>
+      </button>
+</div>
 </div>
 
 <!-- TABS NAVIGATION -->
@@ -294,3 +298,11 @@ $archivedSubjects = array_filter($subjects, fn($s) => (int)$s['is_active'] === 0
 </div>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
+
+
+<?php
+$title = __("app.import");
+$action = "/import/subjects";
+$templateUrl = "/import/subjects/template";
+require dirname(__DIR__) . "/partials/import_modal.php";
+?>

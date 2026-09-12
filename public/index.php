@@ -45,6 +45,8 @@ use App\Controllers\BackupController;
 use App\Controllers\ClassController;
 use App\Controllers\DashboardController;
 use App\Controllers\GradeController;
+use App\Controllers\ImportController;
+use App\Controllers\ImportController;
 use App\Controllers\PromotionController;
 use App\Controllers\ReportController;
 use App\Controllers\ScheduledController;
@@ -262,5 +264,8 @@ $router->get('/logo', [SettingsController::class, 'logo'], [$session, $csrf, $ye
 
 // Activity Log -- activity_log.view, held by both roles (§J), scope enforced in the controller
 $router->get('/activity-log', [ActivityLogController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('activity_log.view')]);
+
+$router->get('/import/{entity}/template', [ImportController::class, 'template'], [$session, $csrf, $yearContext]);
+$router->post('/import/{entity}', [ImportController::class, 'import'], [$session, $csrf, $yearContext]);
 
 $router->dispatch($request);
