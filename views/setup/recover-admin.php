@@ -1,106 +1,47 @@
 <?php
 /**
- * Emergency admin recovery form — only shown when users table is empty.
- * Reuses the same form structure as setup/admin.php but with different
- * messaging to make it clear this is recovery, not initial setup.
+ * Emergency admin recovery form -- reachable ONLY when SetupController::showRecoverAdmin()
+ * has confirmed the users table is genuinely empty (checked again on POST too).
+ * Deliberately reuses the exact same wizard shell/lang keys as setup/admin.php
+ * (this IS effectively that same step, just reachable outside the normal
+ * setup_completed gate) rather than a bespoke page, so it looks and behaves
+ * like part of the app instead of a one-off hack.
+ *
+ * @var string|null $error
  */
+use App\Middleware\CsrfMiddleware;
+$pageTitle = __('setup.recover_admin_title');
+$stepNumber = 6; // beyond $totalSteps (5) -- hides the normal step indicator, same trick setup/done.php uses
+require dirname(__DIR__) . '/layout/setup-start.php';
 ?>
-<!DOCTYPE html>
-<html lang="<?= htmlspecialchars($_SESSION['lang'] ?? 'ar') ?>" dir="<?= $_SESSION['lang'] === 'en' ? 'ltr' : 'rtl' ?>">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= __('setup.recover_admin_title') ?> — <?= __('app.name') ?></title>
-    <link rel="stylesheet" href="/assets/css/app.css">
-    <link rel="stylesheet" href="/assets/css/setup.css">
-</head>
-<body class="setup-page">
-    <div class="setup-container">
-        <div class="setup-header">
-            <h1 class="setup-logo">
-                <span class="setup-logo-icon">🔐</span>
-                <?= __('app.name') ?>
-            </h1>
-            <p class="setup-subtitle"><?= __('setup.recover_admin_subtitle') ?></p>
+      <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
+        <?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?>
+        <div>
+          <strong><?= e(__('setup.recover_admin_warning_title')) ?></strong>
+          <div class="small"><?= e(__('setup.recover_admin_warning_text')) ?></div>
         </div>
-
-        <div class="setup-progress">
-            <div class="setup-step active">
-                <div class="setup-step-number">⚠️</div>
-                <div class="setup-step-label"><?= __('setup.recover_admin_step') ?></div>
-            </div>
+      </div>
+      <form method="post" action="/setup/recover-admin">
+        <?= CsrfMiddleware::field() ?>
+        <div class="mb-3">
+          <label class="form-label" for="full_name"><?= e(__('setup.admin.full_name')) ?></label>
+          <input type="text" class="form-control" id="full_name" name="full_name" required autofocus>
         </div>
-
-        <div class="setup-content">
-            <?php if (isset($error)): ?>
-                <div class="alert alert-danger">
-                    <?= htmlspecialchars($error) ?>
-                </div>
-            <?php endif; ?>
-
-            <div class="setup-info-box">
-                <p><strong><?= __('setup.recover_admin_warning_title') ?></strong></p>
-                <p><?= __('setup.recover_admin_warning_text') ?></p>
-            </div>
-
-            <form method="POST" action="/setup/recover-admin" class="setup-form">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-
-                <div class="form-group">
-                    <label for="full_name"><?= __('setup.admin_full_name') ?></label>
-                    <input type="text" 
-                           id="full_name" 
-                           name="full_name" 
-                           class="form-control" 
-                           required 
-                           autofocus
-                           placeholder="<?= __('setup.admin_full_name_placeholder') ?>">
-                </div>
-
-                <div class="form-group">
-                    <label for="username"><?= __('setup.admin_username') ?></label>
-                    <input type="text" 
-                           id="username" 
-                           name="username" 
-                           class="form-control" 
-                           required
-                           placeholder="<?= __('setup.admin_username_placeholder') ?>">
-                </div>
-
-                <div class="form-group">
-                    <label for="password"><?= __('setup.admin_password') ?></label>
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
-                           class="form-control" 
-                           required
-                           minlength="8"
-                           placeholder="<?= __('setup.admin_password_placeholder') ?>">
-                    <small class="form-text text-muted"><?= __('setup.admin_password_hint') ?></small>
-                </div>
-
-                <div class="form-group">
-                    <label for="password_confirm"><?= __('setup.admin_password_confirm') ?></label>
-                    <input type="password" 
-                           id="password_confirm" 
-                           name="password_confirm" 
-                           class="form-control" 
-                           required
-                           minlength="8"
-                           placeholder="<?= __('setup.admin_password_confirm_placeholder') ?>">
-                </div>
-
-                <div class="setup-actions">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <?= __('setup.recover_admin_submit') ?>
-                    </button>
-                </div>
-            </form>
+        <div class="mb-3">
+          <label class="form-label" for="username"><?= e(__('setup.admin.username')) ?></label>
+          <input type="text" class="form-control" id="username" name="username" required>
         </div>
-
-        <div class="setup-footer">
-            <p><?= __('setup.footer_text') ?></p>
+        <div class="mb-3">
+          <label class="form-label" for="password"><?= e(__('setup.admin.password')) ?></label>
+          <input type="password" class="form-control" id="password" name="password" minlength="8" required>
         </div>
-    </div>
-</body>
-</html>
+        <div class="mb-3">
+          <label class="form-label" for="password_confirm"><?= e(__('setup.admin.password_confirm')) ?></label>
+          <input type="password" class="form-control" id="password_confirm" name="password_confirm" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+          <?= icon('check') ?>
+          <span><?= e(__('setup.recover_admin_submit')) ?></span>
+        </button>
+      </form>
+<?php require dirname(__DIR__) . '/layout/setup-end.php'; ?>

@@ -16,6 +16,7 @@ use App\Services\MigrationService;
 use App\Services\SeedService;
 use App\Services\SettingsService;
 use App\Services\SetupStatusService;
+use App\Services\ActivityLogger;
 use DateTime;
 use PDO;
 use PDOException;
@@ -359,20 +360,15 @@ final class SetupController extends Controller
             'r' => $roleId,
         ]);
 
-        // Log this recovery action for audit trail
-        $pdo->prepare(
-            "INSERT INTO activity_log (user_id, action, entity_type, entity_id, details) 
-             VALUES (:uid, 'admin.recover', 'user', :eid, :details)"
-        )->execute([
-            'uid' => $pdo->lastInsertId(),
-            'eid' => $pdo->lastInsertId(),
-            'details' => 'Emergency admin account created via /setup/recover-admin',
-        ]);
+        $newUserId = (int) $pdo->lastInsertId();
 
-        // Auto-login the new admin
+        // Auto-login the new admin first, so the activity log entry below
+        // is correctly attributed to them (ActivityLogger reads $_SESSION['user_id']).
         (new AuthService())->attempt($username, $password, $request->ip());
 
-        Flash::success(__('setup.admin_recovered'));
+        ActivityLogger::log('admin.recover', 'users', $newUserId, "Emergency admin account '{$username}' created via /setup/recover-admin");
+
+        Flash::set('success', __('setup.admin_recovered'));
         $this->redirect('/dashboard');
     }
 
