@@ -22,8 +22,11 @@ CREATE TABLE schools (
   created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- Single active row in v1 (decision #6) -- created once by the Setup Wizard (Phase 4+),
--- never seeded here per §N: no fake school data.
+
+-- Hadaba Al-Ahram Language School: Hardcoded school data
+-- No setup wizard - school information pre-populated for single-school deployment
+INSERT INTO schools (id, name, name_ar, logo_path, address, phone) 
+VALUES (1, 'Hadaba Al-Ahram Language School', 'هضبة الأهرام الثانوية', NULL, NULL, NULL);
 
 CREATE TABLE settings (
   id           INT UNSIGNED NOT NULL AUTO_INCREMENT,

@@ -18,8 +18,14 @@ CREATE TABLE schools (
   phone       VARCHAR(30)  NULL,
   created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
--- Single active row in v1 (decision #6) -- created once by the Setup Wizard,
--- never seeded here per §N: no fake school data.
+
+-- Hadaba Al-Ahram Language School: Hardcoded school data
+-- No setup wizard - school information pre-populated for single-school deployment
+-- Note: PostgreSQL IDENTITY columns don't allow manual ID insertion by default
+-- Use OVERRIDING SYSTEM VALUE to force id=1
+INSERT INTO schools (id, name, name_ar, logo_path, address, phone) 
+OVERRIDING SYSTEM VALUE 
+VALUES (1, 'Hadaba Al-Ahram Language School', 'هضبة الأهرام الثانوية', NULL, NULL, NULL);
 
 CREATE TABLE settings (
   id           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
