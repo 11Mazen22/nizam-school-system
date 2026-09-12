@@ -33,19 +33,9 @@ final class SetupStatusService
 
     public function isCompleted(): bool
     {
-        if (!$this->canConnect()) {
-            return false;
-        }
-        // canConnect() only proves the server and database are reachable --
-        // between the database step and the schema step, that's true while
-        // the settings table (and everything else) still doesn't exist yet.
-        // Same reasoning as pdo() below: a database that can't answer this
-        // query yet is not a completed setup.
-        try {
-            return (bool) SettingsService::get('system.setup_completed', false);
-        } catch (PDOException $e) {
-            return false;
-        }
+        // Hadaba Al-Ahram School: Setup wizard disabled - always return true
+        // School data is hardcoded in database migration
+        return true;
     }
 
     public function canConnect(): bool

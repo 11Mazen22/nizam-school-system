@@ -9,19 +9,14 @@ use App\Response;
 use App\Services\SetupStatusService;
 
 /**
- * Nizam -- Setup Wizard gate, applied to EVERY route (§O-6 hardened):
- * while setup is incomplete, nothing except /setup/* is reachable; once
- * setup is complete, /setup/* itself becomes permanently unreachable, for
- * anyone, authenticated or not -- "no exceptions, no in-app redo-setup
- * button." A single middleware covers both directions rather than a
- * scattered check per route, matching this phase's "do not duplicate
- * existing mechanisms" rule applied to this one too.
+ * Nizam -- Setup Wizard gate (DISABLED for Hadaba Al-Ahram deployment).
  * 
- * Exception: /setup/recover-admin is allowed through regardless of
- * setup_completed flag — it gates itself on live ground truth (zero users
- * in database), not the flag. This narrow escape hatch handles production
- * deployments where setup_completed was manually set but no admin was
- * actually created.
+ * This deployment is hardcoded for "هضبة الأهرام الثانوية / Hadaba Al-Ahram 
+ * Language School" with no setup wizard. School data is pre-populated in
+ * database migrations. Setup routes are blocked entirely - users go 
+ * straight to /login.
+ * 
+ * Exception: /setup/recover-admin still works for emergency admin recovery.
  */
 final class SetupGateMiddleware implements MiddlewareInterface
 {
@@ -37,6 +32,13 @@ final class SetupGateMiddleware implements MiddlewareInterface
         $completed = (new SetupStatusService())->isCompleted();
         $isSetupPath = $path === '/setup' || str_starts_with($path, '/setup/');
 
+        // Hadaba Al-Ahram: Setup is always complete, block setup wizard entirely
+        if ($isSetupPath && $path !== '/setup/recover-admin') {
+            Response::redirect('/login');
+            return false;
+        }
+
+        // Redundant check (setup always complete) but kept for safety
         if ($completed && $isSetupPath) {
             Response::redirect('/login');
             return false;
