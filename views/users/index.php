@@ -83,6 +83,7 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
                 <tr>
                   <th><?= e(__('users.username')) ?></th>
                   <th><?= e(__('users.full_name')) ?></th>
+                  <th><?= e(__('users.email')) ?></th>
                   <th><?= e(__('users.role')) ?></th>
                   <th><?= e(__('users.last_login')) ?></th>
                   <th><?= e(__('academic_years.status')) ?></th>
@@ -100,6 +101,9 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
                         </div>
                         <span><?= e($user['full_name']) ?></span>
                       </div>
+                    </td>
+                    <td data-label="<?= e(__('users.email')) ?>" class="text-muted small">
+                      <?= e($user['email'] ?? '—') ?>
                     </td>
                     <td data-label="<?= e(__('users.role')) ?>">
                       <?= e(currentLocale() === 'ar' ? $user['role_name_ar'] : $user['role_name_en']) ?>
@@ -120,6 +124,7 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
                          data-user-id="<?= (int) $user['id'] ?>"
                          data-user-username="<?= e($user['username']) ?>"
                          data-user-full-name="<?= e($user['full_name']) ?>"
+                         data-user-email="<?= e($user['email'] ?? '') ?>"
                          data-user-role="<?= e($user['role_code']) ?>">
                         <?= icon('edit') ?>
                         <span class="d-none d-lg-inline ms-1"><?= e(__('common.edit')) ?></span>
@@ -182,6 +187,12 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
         </div>
 
         <div class="n-form-group-powerful">
+          <label class="n-label-powerful" for="email_new"><span><?= e(__('users.email')) ?> (<?= e(__('common.optional')) ?>)</span></label>
+          <input type="email" class="form-control n-input-powerful" id="email_new" name="email">
+          <div class="form-text"><?= e(__('users.email_help')) ?></div>
+        </div>
+
+        <div class="n-form-group-powerful">
           <label class="n-label-powerful" for="role_code_new"><span><?= e(__('users.role')) ?></span></label>
           <select class="form-select n-input-powerful" id="role_code_new" name="role_code" required>
             <?php foreach ($roles as $role): ?>
@@ -237,6 +248,12 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
         <div class="n-form-group-powerful">
           <label class="n-label-powerful" for="full_name_edit"><span><?= e(__('users.full_name')) ?></span></label>
           <input type="text" class="form-control n-input-powerful" id="full_name_edit" name="full_name" required>
+        </div>
+
+        <div class="n-form-group-powerful">
+          <label class="n-label-powerful" for="email_edit"><span><?= e(__('users.email')) ?> (<?= e(__('common.optional')) ?>)</span></label>
+          <input type="email" class="form-control n-input-powerful" id="email_edit" name="email">
+          <div class="form-text"><?= e(__('users.email_help')) ?></div>
         </div>
 
         <div class="n-form-group-powerful">

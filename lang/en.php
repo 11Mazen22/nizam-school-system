@@ -502,6 +502,8 @@ return [
     'users.form_edit_subtitle' => 'Update this account\'s details.',
     'users.add' => 'Add User',
     'users.username' => 'Username',
+    'users.email' => 'Email',
+    'users.email_help' => 'Used for automated notifications (birthday reminders, year-end alerts, backup results). Leave blank to skip these for this account.',
     'users.full_name' => 'Full Name',
     'users.role' => 'Role',
     'users.password' => 'Password',

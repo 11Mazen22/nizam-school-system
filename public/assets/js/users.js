@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var editTab = document.getElementById('edit-tab');
   var usernameField = document.getElementById('username_edit');
   var fullNameField = document.getElementById('full_name_edit');
+  var emailField = document.getElementById('email_edit');
   var roleField = document.getElementById('role_code_edit');
   var passwordField = document.getElementById('password_edit');
   var form = document.getElementById('editUserForm');
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
       wrapper.classList.remove('d-none');
       usernameField.value = btn.getAttribute('data-user-username');
       fullNameField.value = btn.getAttribute('data-user-full-name');
+      emailField.value = btn.getAttribute('data-user-email');
       roleField.value = btn.getAttribute('data-user-role');
       passwordField.value = '';
       form.action = '/users/' + id;
