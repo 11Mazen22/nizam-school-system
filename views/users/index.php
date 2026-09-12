@@ -33,11 +33,11 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
           <span class="n-stat-mini-label"><?= e(__('users.stat_active')) ?></span>
         </div>
       </div>
-          <button type="button" class="btn btn-outline-primary ms-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
-        <?= icon("upload", "n-icon-sm") ?>
-        <?= e(__("app.import")) ?>
+      <button type="button" class="btn btn-outline-light d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
+        <?= icon("upload") ?>
+        <span><?= e(__("app.import")) ?></span>
       </button>
-</div>
+    </div>
   </div>
 </div>
 

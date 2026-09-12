@@ -774,4 +774,5 @@ return [
     'notifications.subtitle'     => 'تنبيهات النظام والإشعارات التلقائية.',
     'notifications.empty'        => 'لا توجد إشعارات بعد.',
     'notifications.new'          => 'جديد',
+    'notifications.mark_all_read'=> 'تعليم الكل كمقروء',
 ];

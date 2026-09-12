@@ -25,11 +25,11 @@ require dirname(__DIR__) . '/layout/start.php';
           <span class="n-stat-mini-label"><?= e(__('students.total_students')) ?></span>
         </div>
       </div>
-          <button type="button" class="btn btn-outline-primary ms-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
-        <?= icon("upload", "n-icon-sm") ?>
-        <?= e(__("app.import")) ?>
+      <button type="button" class="btn btn-outline-light d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
+        <?= icon("upload") ?>
+        <span><?= e(__("app.import")) ?></span>
       </button>
-</div>
+    </div>
   </div>
 </div>
 

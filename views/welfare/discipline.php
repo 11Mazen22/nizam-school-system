@@ -25,9 +25,9 @@ use App\Middleware\CsrfMiddleware;
         <span class="n-stat-mini-value"><?= count($records) ?></span>
         <span class="n-stat-mini-label"><?= e(__('welfare.total_records')) ?></span>
       </div>
-      <a href="/welfare/health" class="btn btn-outline-light ms-2"><?= icon('inbox') ?> <?= e(__('welfare.health_title')) ?></a>
+      <a href="/welfare/health" class="btn btn-outline-light"><?= icon('inbox') ?> <?= e(__('welfare.health_title')) ?></a>
       <?php if (hasPermission('welfare.manage')): ?>
-        <button class="btn btn-light ms-2" data-bs-toggle="modal" data-bs-target="#addDiscipline">
+        <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#addDisciplineModal">
           <?= icon('plus') ?> <?= e(__('welfare.add_record')) ?>
         </button>
       <?php endif; ?>
@@ -38,24 +38,24 @@ use App\Middleware\CsrfMiddleware;
 <!-- Filters -->
 <form method="get" class="card border-0 shadow-sm mb-4">
   <div class="card-body d-flex gap-3 flex-wrap align-items-end">
-    <div>
-      <label class="form-label fw-semibold"><?= e(__('welfare.type')) ?></label>
-      <select name="type" class="form-select form-select-sm">
+    <div style="min-width: 180px;">
+      <label class="form-label fw-semibold small"><?= e(__('welfare.type')) ?></label>
+      <select name="type" class="form-select">
         <option value=""><?= e(__('welfare.all_types')) ?></option>
         <option value="infraction" <?= $type === 'infraction' ? 'selected' : '' ?>><?= e(__('welfare.type_infraction')) ?></option>
         <option value="reward"     <?= $type === 'reward'     ? 'selected' : '' ?>><?= e(__('welfare.type_reward')) ?></option>
       </select>
     </div>
-    <div>
-      <label class="form-label fw-semibold"><?= e(__('welfare.severity')) ?></label>
-      <select name="severity" class="form-select form-select-sm">
+    <div style="min-width: 180px;">
+      <label class="form-label fw-semibold small"><?= e(__('welfare.severity')) ?></label>
+      <select name="severity" class="form-select">
         <option value=""><?= e(__('welfare.all_severities')) ?></option>
         <option value="low"    <?= $severity === 'low'    ? 'selected' : '' ?>><?= e(__('welfare.severity_low')) ?></option>
         <option value="medium" <?= $severity === 'medium' ? 'selected' : '' ?>><?= e(__('welfare.severity_medium')) ?></option>
         <option value="high"   <?= $severity === 'high'   ? 'selected' : '' ?>><?= e(__('welfare.severity_high')) ?></option>
       </select>
     </div>
-    <button class="btn btn-primary btn-sm"><?= icon('filter') ?> <?= e(__('reports.apply_filters')) ?></button>
+    <button type="submit" class="btn btn-primary"><?= icon('filter') ?> <?= e(__('reports.apply_filters')) ?></button>
   </div>
 </form>
 
@@ -77,7 +77,7 @@ use App\Middleware\CsrfMiddleware;
             <th><?= e(__('welfare.title')) ?></th>
             <th><?= e(__('welfare.action_taken')) ?></th>
             <th><?= e(__('welfare.reported_by')) ?></th>
-            <?php if (hasPermission('welfare.manage')): ?><th></th><?php endif; ?>
+            <?php if (hasPermission('welfare.manage')): ?><th class="text-end"><?= e(__('common.actions')) ?></th><?php endif; ?>
           </tr>
         </thead>
         <tbody>
@@ -95,11 +95,11 @@ use App\Middleware\CsrfMiddleware;
               <td class="text-muted small"><?= e($row['action_taken'] ?? '—') ?></td>
               <td class="text-muted small"><?= e($row['reporter_name'] ?? '—') ?></td>
               <?php if (hasPermission('welfare.manage')): ?>
-                <td>
-                  <form method="post" action="/welfare/discipline/<?= (int)$row['id'] ?>/delete"
-                        data-confirm="<?= e(__('common.confirm_archive')) ?>">
+                <td class="text-end">
+                  <form method="post" action="/welfare/discipline/<?= (int)$row['id'] ?>/delete" class="d-inline"
+                        onsubmit="return confirm('<?= e(__('common.confirm_archive')) ?>')">
                     <?= CsrfMiddleware::field() ?>
-                    <button class="btn btn-sm btn-outline-danger"><?= icon('trash') ?></button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><?= icon('trash') ?></button>
                   </form>
                 </td>
               <?php endif; ?>
@@ -111,58 +111,64 @@ use App\Middleware\CsrfMiddleware;
   </div>
 <?php endif; ?>
 
-<!-- Add modal -->
+<!-- Add Discipline Modal -->
 <?php if (hasPermission('welfare.manage')): ?>
-<div class="modal fade" id="addDiscipline" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <form method="post" action="/welfare/discipline" class="modal-content">
-      <?= CsrfMiddleware::field() ?>
-      <div class="modal-header">
-        <h5 class="modal-title"><?= e(__('welfare.add_discipline')) ?></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body row g-3">
-        <div class="col-12">
-          <label class="form-label"><?= e(__('students.full_name')) ?> (ID)</label>
-          <input type="number" name="student_id" class="form-control" placeholder="Student ID" required min="1">
+<div class="modal fade" id="addDisciplineModal" tabindex="-1" aria-labelledby="addDisciplineModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="/welfare/discipline">
+        <?= CsrfMiddleware::field() ?>
+        <div class="modal-header">
+          <h5 class="modal-title" id="addDisciplineModalLabel"><?= e(__('welfare.add_discipline')) ?></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= e(__('common.close')) ?>"></button>
         </div>
-        <div class="col-md-4">
-          <label class="form-label"><?= e(__('welfare.incident_date')) ?></label>
-          <input type="date" name="incident_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="disciplineStudentId" class="form-label"><?= e(__('students.full_name')) ?> (ID) <span class="text-danger">*</span></label>
+              <input type="number" id="disciplineStudentId" name="student_id" class="form-control" placeholder="<?= e(__('students.code')) ?>" required min="1">
+              <div class="form-text"><?= e(__('common.enter')) ?> <?= e(__('students.code')) ?></div>
+            </div>
+            <div class="col-md-4">
+              <label for="disciplineDate" class="form-label"><?= e(__('welfare.incident_date')) ?> <span class="text-danger">*</span></label>
+              <input type="date" id="disciplineDate" name="incident_date" class="form-control" value="<?= date('Y-m-d') ?>" required max="<?= date('Y-m-d') ?>">
+            </div>
+            <div class="col-md-4">
+              <label for="disciplineType" class="form-label"><?= e(__('welfare.type')) ?> <span class="text-danger">*</span></label>
+              <select id="disciplineType" name="type" class="form-select" required>
+                <option value="infraction"><?= e(__('welfare.type_infraction')) ?></option>
+                <option value="reward"><?= e(__('welfare.type_reward')) ?></option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="disciplineSeverity" class="form-label"><?= e(__('welfare.severity')) ?> <span class="text-danger">*</span></label>
+              <select id="disciplineSeverity" name="severity" class="form-select" required>
+                <option value="low"><?= e(__('welfare.severity_low')) ?></option>
+                <option value="medium" selected><?= e(__('welfare.severity_medium')) ?></option>
+                <option value="high"><?= e(__('welfare.severity_high')) ?></option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="disciplineTitle" class="form-label"><?= e(__('welfare.title')) ?> <span class="text-danger">*</span></label>
+              <input type="text" id="disciplineTitle" name="title" class="form-control" required maxlength="200">
+            </div>
+            <div class="col-12">
+              <label for="disciplineDescription" class="form-label"><?= e(__('welfare.description')) ?> <span class="text-danger">*</span></label>
+              <textarea id="disciplineDescription" name="description" class="form-control" rows="4" required maxlength="1000"></textarea>
+            </div>
+            <div class="col-12">
+              <label for="disciplineAction" class="form-label"><?= e(__('welfare.action_taken')) ?></label>
+              <input type="text" id="disciplineAction" name="action_taken" class="form-control" maxlength="500">
+              <div class="form-text"><?= e(__('common.optional')) ?></div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-4">
-          <label class="form-label"><?= e(__('welfare.type')) ?></label>
-          <select name="type" class="form-select" required>
-            <option value="infraction"><?= e(__('welfare.type_infraction')) ?></option>
-            <option value="reward"><?= e(__('welfare.type_reward')) ?></option>
-          </select>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= e(__('app.cancel')) ?></button>
+          <button type="submit" class="btn btn-primary"><?= icon('check') ?> <?= e(__('common.save')) ?></button>
         </div>
-        <div class="col-md-4">
-          <label class="form-label"><?= e(__('welfare.severity')) ?></label>
-          <select name="severity" class="form-select" required>
-            <option value="low"><?= e(__('welfare.severity_low')) ?></option>
-            <option value="medium"><?= e(__('welfare.severity_medium')) ?></option>
-            <option value="high"><?= e(__('welfare.severity_high')) ?></option>
-          </select>
-        </div>
-        <div class="col-12">
-          <label class="form-label"><?= e(__('welfare.title')) ?></label>
-          <input name="title" class="form-control" required>
-        </div>
-        <div class="col-12">
-          <label class="form-label"><?= e(__('welfare.description')) ?></label>
-          <textarea name="description" class="form-control" rows="3" required></textarea>
-        </div>
-        <div class="col-12">
-          <label class="form-label"><?= e(__('welfare.action_taken')) ?> <span class="text-muted small">(<?= e(__('common.optional')) ?>)</span></label>
-          <input name="action_taken" class="form-control">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= e(__('common.cancel')) ?></button>
-        <button type="submit" class="btn btn-primary"><?= e(__('common.save')) ?></button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
 <?php endif; ?>
