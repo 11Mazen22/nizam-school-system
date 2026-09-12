@@ -33,6 +33,9 @@ final class RestoreService
      * file"). A newer or older schema is refused outright rather than
      * attempted, since there is no supported upgrade/downgrade path.
      *
+     * HADABA AL-AHRAM ENHANCEMENT: Auto-converts between PostgreSQL and MySQL
+     * formats so production backups work on local installs and vice versa.
+     *
      * @return array{sql: string, schemaVersion: int}
      */
     public function validate(string $filepath): array
@@ -43,6 +46,14 @@ final class RestoreService
         $currentSchema = count((new MigrationService())->getAppliedMigrations($pdo));
         if ($result['schemaVersion'] !== $currentSchema) {
             throw new RuntimeException('schema_version_mismatch');
+        }
+
+        // Auto-convert between database types if needed
+        $sourceDb = SqlDialectConverter::detectSource($result['sql']);
+        $targetDb = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME); // 'mysql' or 'pgsql'
+        
+        if ($sourceDb && $sourceDb !== $targetDb) {
+            $result['sql'] = SqlDialectConverter::convert($result['sql'], $sourceDb, $targetDb);
         }
 
         return $result;
