@@ -38,6 +38,12 @@ internal static class NizamLauncher
     [STAThread]
     private static void Main()
     {
+        // Enable high-DPI support for crisp rendering on modern displays
+        if (Environment.OSVersion.Version.Major >= 6)
+        {
+            SetProcessDPIAware();
+        }
+        
         bool createdNew;
         using (var instanceLock = new Mutex(true, "Global\\NizamLauncherSingleInstance", out createdNew))
         {
@@ -210,6 +216,9 @@ internal static class NizamLauncher
 
     // --- Duplicate-launch: activate the existing window instead of opening a second one ---
     [DllImport("user32.dll")]
+    private static extern bool SetProcessDPIAware();
+    
+    [DllImport("user32.dll")]
     private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     [DllImport("user32.dll")]
@@ -274,7 +283,7 @@ internal static class NizamLauncher
             StartPosition = FormStartPosition.CenterScreen;
             ShowInTaskbar = true;
 
-            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "nizam.ico");
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "hadaba.ico");
             if (File.Exists(iconPath))
             {
                 Icon = new Icon(iconPath);
