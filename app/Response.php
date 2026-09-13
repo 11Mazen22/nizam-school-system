@@ -13,10 +13,6 @@ final class Response
 {
     public static function redirect(string $path): void
     {
-        // Ensure session is written before redirect
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
         header('Location: ' . $path, true, 302);
         exit;
     }

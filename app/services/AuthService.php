@@ -74,8 +74,6 @@ final class AuthService
         // The session-fixation mitigation (§S-15): a new session ID is
         // issued at the exact moment privilege changes, so a session ID an
         // attacker fixed before login is worthless afterward.
-        // IMPORTANT: session_regenerate_id must be called BEFORE setting session variables
-        // and we must ensure the session is properly saved
         session_regenerate_id(true);
 
         $_SESSION['user_id'] = (int) $user['id'];
@@ -84,11 +82,6 @@ final class AuthService
         $_SESSION['role_code'] = $user['role_code'];
         $_SESSION['permissions'] = $this->users->permissionCodesFor((int) $user['id']);
         $_SESSION['locale'] = $_SESSION['locale'] ?? 'ar';
-
-        // Explicitly commit the session to ensure it's saved before any redirect
-        session_write_close();
-        // Restart session immediately for the current request
-        session_start();
 
         ActivityLogger::log('login', 'users', (int) $user['id'], "User '{$user['username']}' signed in");
     }
