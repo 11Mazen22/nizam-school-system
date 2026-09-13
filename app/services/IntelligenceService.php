@@ -18,7 +18,7 @@ final class IntelligenceService
      */
     public function getAtRiskStudents(int $limit = 5): array
     {
-        $yearId = AcademicYearContext::getId();
+        $yearId = AcademicYearContext::activeYearId();
         if (!$yearId) {
             return [];
         }
