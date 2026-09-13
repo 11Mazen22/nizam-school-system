@@ -23,7 +23,7 @@ final class IntelligenceService
             return [];
         }
 
-        $pdo = Database::get();
+        $pdo = Database::connection();
         // Intelligent Query: Find students with >= 3 absences OR >= 2 discipline records
         // Wrapped in a derived table so we can filter/order by the computed aliases in both MySQL and PostgreSQL.
         $stmt = $pdo->prepare("
