@@ -35,7 +35,7 @@ Write-Host "Staging application files..."
 # referencing HTML the offline check below would otherwise (correctly)
 # flag. The school-facing guides live under packaging\docs instead (see
 # installer.iss's own [Files] entries), installed to {app}\docs.
-$appIncludes = @("app", "database", "lang", "public", "storage", "vendor", "vendor-assets", "views", "composer.json", "composer.lock")
+$appIncludes = @("app", "database", "lang", "public", "storage", "vendor", "vendor-assets", "views", "composer.json", "composer.lock", "scripts")
 foreach ($item in $appIncludes) {
     Copy-Item -Path "$root\$item" -Destination "$stage\app\$item" -Recurse
 }
