@@ -8,7 +8,7 @@ $modalId ??= "importModal";
   <div class="modal-dialog">
     <div class="modal-content">
       <form action="<?= e($action) ?>" method="POST" enctype="multipart/form-data">
-        <?= \App\CsrfMiddleware::field() ?>
+        <?= \App\Middleware\CsrfMiddleware::field() ?>
         <div class="modal-header">
           <h5 class="modal-title" id="<?= e($modalId) ?>Label"><?= e($title) ?></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= e(__("app.close")) ?>"></button>

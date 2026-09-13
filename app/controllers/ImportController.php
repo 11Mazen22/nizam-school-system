@@ -74,7 +74,7 @@ final class ImportController extends Controller
                     if ($nameEn === "" || $nameAr === "") throw new RuntimeException("Missing data");
                     (new TeacherService())->create($nameEn, $nameAr, $email, $phone, $maxPeriods);
                 },
-                "permission" => "teachers.manage",
+                "permission" => "teachers.create",
                 "redirect" => "/teachers"
             ],
             "students" => [
@@ -101,7 +101,7 @@ final class ImportController extends Controller
                     // create(string $nameEn, string $nameAr, ?string $nationalId, string $gender, ?string $dob, ?string $bloodType, ?string $address, ?string $medicalNotes, ?int $enrollmentYearId, ?int $enrollmentGradeId): int
                     $studentService->create($nameEn, $nameAr, $nationalId, $gender, $dob, null, null, null, $yearId, $gradeId > 0 ? $gradeId : null);
                 },
-                "permission" => "students.manage", // Wait, students have students.edit or students.create? Actually usually students.edit
+                "permission" => "students.create",
                 "redirect" => "/students"
             ],
                         "users" => [
@@ -173,7 +173,7 @@ final class ImportController extends Controller
         }
 
         if (!isset($_FILES["import_file"]) || $_FILES["import_file"]["error"] !== UPLOAD_ERR_OK) {
-            Flash::set("danger", "File upload failed");
+            Flash::set("danger", __("import.no_file"));
             $this->redirect($config["redirect"]);
             return;
         }
@@ -181,7 +181,13 @@ final class ImportController extends Controller
         try {
             $rows = (new ImportService())->parseFile($_FILES["import_file"]["tmp_name"]);
         } catch (Throwable $e) {
-            Flash::set("danger", "Invalid file format");
+            Flash::set("danger", __("import.invalid_format"));
+            $this->redirect($config["redirect"]);
+            return;
+        }
+
+        if (empty($rows)) {
+            Flash::set("warning", __("import.no_data"));
             $this->redirect($config["redirect"]);
             return;
         }
@@ -190,16 +196,31 @@ final class ImportController extends Controller
         $errors = 0;
         $process = $config["process"];
 
-        foreach ($rows as $row) {
-            try {
-                $process($row);
-                $success++;
-            } catch (Throwable) {
-                $errors++;
+        try {
+            foreach ($rows as $row) {
+                try {
+                    $process($row);
+                    $success++;
+                } catch (Throwable $e) {
+                    $errors++;
+                    // Log the specific error for debugging
+                    error_log("Import row error for {$entity}: " . $e->getMessage());
+                }
             }
+
+            if ($success > 0) {
+                Flash::set("success", strtr(__("app.import_success"), ["{success}" => $success, "{errors}" => $errors]));
+            } elseif ($errors > 0) {
+                Flash::set("danger", __("import.failed"));
+            } else {
+                Flash::set("warning", __("import.no_data"));
+            }
+        } catch (Throwable $e) {
+            // Catch any unexpected errors during the import process
+            Flash::set("danger", __("import.error"));
+            error_log("Import process error for {$entity}: " . $e->getMessage());
         }
 
-        Flash::set("success", strtr(__("app.import_success"), ["{success}" => $success, "{errors}" => $errors]));
         $this->redirect($config["redirect"]);
     }
 }

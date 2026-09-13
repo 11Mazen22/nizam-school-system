@@ -127,7 +127,7 @@ use App\Middleware\CsrfMiddleware;
             <div class="col-12">
               <label for="disciplineStudentId" class="form-label"><?= e(__('students.full_name')) ?> (ID) <span class="text-danger">*</span></label>
               <input type="number" id="disciplineStudentId" name="student_id" class="form-control" placeholder="<?= e(__('students.code')) ?>" required min="1">
-              <div class="form-text"><?= e(__('common.enter')) ?> <?= e(__('students.code')) ?></div>
+              <div class="form-text"><?= e(__('welfare.student_id_hint')) ?></div>
             </div>
             <div class="col-md-4">
               <label for="disciplineDate" class="form-label"><?= e(__('welfare.incident_date')) ?> <span class="text-danger">*</span></label>

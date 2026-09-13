@@ -1,5 +1,7 @@
 <?php
-/** @var array $notifications */
+/**
+ * @var array $notifications
+ */
 $pageTitle = __('notifications.title');
 $activeNav = 'notifications';
 $suppressPageTitle = true;
@@ -8,6 +10,7 @@ use App\Middleware\CsrfMiddleware;
 $locale = currentLocale();
 ?>
 
+<!-- Powerful Notifications Header -->
 <div class="n-grades-header">
   <div class="n-grades-header-content">
     <div class="n-grades-header-text">
@@ -18,55 +21,90 @@ $locale = currentLocale();
       <p class="n-grades-subtitle"><?= e(__('notifications.subtitle')) ?></p>
     </div>
     <div class="n-grades-header-actions">
-      <form method="post" action="/notifications/read-all">
-        <?= CsrfMiddleware::field() ?>
-        <button class="btn btn-outline-light btn-sm"><?= icon('check') ?> <?= e(__('notifications.mark_all_read')) ?></button>
-      </form>
+      <div class="n-stat-mini">
+        <span class="n-stat-mini-value"><?= count(array_filter($notifications, fn($n) => !$n['is_read'])) ?></span>
+        <span class="n-stat-mini-label"><?= e(__('notifications.unread')) ?></span>
+      </div>
+      <?php if (!empty($notifications) && count(array_filter($notifications, fn($n) => !$n['is_read'])) > 0): ?>
+        <form method="post" action="/notifications/read-all" class="d-inline">
+          <?= CsrfMiddleware::field() ?>
+          <button type="submit" class="btn btn-outline-light">
+            <?= icon('check') ?> <?= e(__('notifications.mark_all_read')) ?>
+          </button>
+        </form>
+      <?php endif; ?>
     </div>
   </div>
 </div>
 
 <?php if (empty($notifications)): ?>
+  <!-- Professional Empty State -->
   <div class="n-empty-state">
-    <div class="n-empty-icon"><?= icon('inbox', 'n-icon-xl') ?></div>
-    <h3 class="n-empty-title"><?= e(__('notifications.empty')) ?></h3>
+    <div class="n-empty-powerful">
+      <div class="n-empty-powerful-bg">
+        <div class="n-empty-blob n-empty-blob-1"></div>
+        <div class="n-empty-blob n-empty-blob-2"></div>
+        <div class="n-empty-blob n-empty-blob-3"></div>
+      </div>
+      <div class="n-empty-powerful-content">
+        <div class="n-empty-powerful-icon">
+          <?= icon('inbox', 'n-icon-massive') ?>
+        </div>
+        <h3 class="n-empty-powerful-title"><?= e(__('notifications.empty')) ?></h3>
+        <p class="n-empty-powerful-text"><?= e(__('notifications.empty_description')) ?></p>
+      </div>
+    </div>
   </div>
 <?php else: ?>
-  <div class="card border-0 shadow-sm">
-    <ul class="list-group list-group-flush">
-      <?php foreach ($notifications as $n): ?>
-        <?php $isRead = (bool)$n['is_read']; ?>
-        <li class="list-group-item py-3 px-4 <?= !$isRead ? 'bg-primary-soft' : '' ?>" style="<?= !$isRead ? 'background:var(--n-primary-softer)' : '' ?>">
-          <div class="d-flex align-items-start gap-3">
-            <div class="flex-shrink-0 mt-1">
-              <span class="rounded-circle d-inline-flex align-items-center justify-content-center"
-                    style="width:36px;height:36px;background:<?= $isRead ? 'var(--n-surface-sunken)' : 'var(--n-primary-soft)' ?>;">
-                <?= icon('inbox', $isRead ? 'text-muted' : 'text-primary') ?>
-              </span>
-            </div>
-            <div class="flex-grow-1">
-              <div class="fw-semibold <?= $isRead ? 'text-muted' : '' ?>">
-                <?= e($locale === 'ar' ? $n['title_ar'] : $n['title_en']) ?>
-                <?php if (!$isRead): ?><span class="badge bg-primary ms-1" style="font-size:.65rem;"><?= e(__('notifications.new')) ?></span><?php endif; ?>
-              </div>
-              <div class="text-muted small mt-1"><?= e($locale === 'ar' ? $n['body_ar'] : $n['body_en']) ?></div>
-              <div class="text-muted" style="font-size:.75rem;margin-top:4px;"><?= e($n['created_at']) ?></div>
-            </div>
-            <div class="flex-shrink-0 d-flex gap-2">
+  <!-- Notifications List -->
+  <div class="notifications-container">
+    <?php foreach ($notifications as $n): ?>
+      <?php 
+        $isRead = (bool)$n['is_read'];
+        $title = $locale === 'ar' ? $n['title_ar'] : $n['title_en'];
+        $body = $locale === 'ar' ? $n['body_ar'] : $n['body_en'];
+        $hasLink = !empty($n['link']);
+      ?>
+      <div class="notification-card <?= !$isRead ? 'notification-unread' : '' ?>" data-notification-id="<?= (int)$n['id'] ?>">
+        <div class="notification-icon">
+          <div class="notification-icon-circle <?= !$isRead ? 'notification-icon-active' : '' ?>">
+            <?= icon('inbox') ?>
+          </div>
+        </div>
+        <div class="notification-content">
+          <div class="notification-header">
+            <h4 class="notification-title <?= !$isRead ? 'fw-bold' : '' ?>">
+              <?= e($title) ?>
+            </h4>
+            <?php if (!$isRead): ?>
+              <span class="badge bg-primary notification-new-badge"><?= e(__('notifications.new')) ?></span>
+            <?php endif; ?>
+          </div>
+          <p class="notification-body"><?= e($body) ?></p>
+          <div class="notification-footer">
+            <span class="notification-time">
+              <?= icon('clock', 'n-icon-sm') ?>
+              <?= e(date('M d, Y H:i', strtotime($n['created_at']))) ?>
+            </span>
+            <div class="notification-actions">
               <?php if (!$isRead): ?>
-                <form method="post" action="/notifications/<?= (int)$n['id'] ?>/read">
+                <form method="post" action="/notifications/<?= (int)$n['id'] ?>/read" class="d-inline">
                   <?= CsrfMiddleware::field() ?>
-                  <button class="btn btn-sm btn-outline-secondary"><?= icon('check') ?></button>
+                  <button type="submit" class="btn btn-sm btn-outline-secondary notification-action-btn">
+                    <?= icon('check', 'n-icon-sm') ?> <?= e(__('notifications.mark_read')) ?>
+                  </button>
                 </form>
               <?php endif; ?>
-              <?php if (!empty($n['link'])): ?>
-                <a href="<?= e($n['link']) ?>" class="btn btn-sm btn-outline-primary"><?= icon('arrow-forward') ?></a>
+              <?php if ($hasLink): ?>
+                <a href="<?= e($n['link']) ?>" class="btn btn-sm btn-primary notification-action-btn">
+                  <?= e(__('notifications.view_details')) ?> <?= icon('arrow-forward', 'n-icon-sm') ?>
+                </a>
               <?php endif; ?>
             </div>
           </div>
-        </li>
-      <?php endforeach; ?>
-    </ul>
+        </div>
+      </div>
+    <?php endforeach; ?>
   </div>
 <?php endif; ?>
 

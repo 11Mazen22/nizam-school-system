@@ -1,11 +1,11 @@
-# Nizam School System
+# Hadaba Al-Ahram Language School
 
 **Version 1.0.0**
 
-A comprehensive school management system designed for independent K-12 schools, packaged for simple, reliable deployment on self-hosted local networks.
+A comprehensive school management platform for Hadaba Al-Ahram Language School, packaged for simple, reliable deployment on self-hosted local networks.
 
 ## Architecture & Design
-Nizam is a robust, monolithic PHP application built to run on XAMPP or similar standard web server environments. 
+Hadaba Al-Ahram Language School runs on a robust, monolithic PHP application built for XAMPP or similar standard web server environments. 
 - **Backend**: Plain PHP 8.2+, following modern MVC patterns without a heavy framework dependency.
 - **Database**: MariaDB / MySQL.
 - **Frontend**: Bootstrap 5, jQuery, and Chart.js, fully bundled locally. No external CDNs are used to ensure the system is 100% functional offline (e.g., when the school's internet connection drops).
@@ -18,8 +18,8 @@ Nizam is a robust, monolithic PHP application built to run on XAMPP or similar s
 - **Database**: MariaDB 10.4+ or MySQL 8.0+
 
 ## Local Installation / Setup
-Nizam is designed for an "unzip and run" installation model, but requires pointing your web server's DocumentRoot correctly for the application router to function.
-1. Download the Nizam `htdocs` release package.
+The application is designed for an "unzip and run" installation model, but requires pointing your web server's DocumentRoot correctly for the application router to function.
+1. Download the Hadaba `htdocs` release package.
 2. Extract the folder into a location on your server (e.g., `C:\xampp\htdocs\nizam`).
 3. **CRITICAL:** You must configure Apache so that the `public/` directory is the DocumentRoot. The application routes (like `/setup` and `/login`) require the application to run at the root of the domain/host.
    - *Option A (VirtualHost):* Create a VirtualHost (e.g., `nizam.local`) with `DocumentRoot "C:/xampp/htdocs/nizam/public"`.
@@ -38,7 +38,7 @@ All system configurations are managed via the `config/config.php` file, which is
 - DO NOT commit `config.php` to version control.
 
 ## Backup & Restore
-Nizam includes a robust, pure-PHP backup and restore utility, removing the need for administrators to use `mysqldump` or phpMyAdmin.
+The application includes a robust, pure-PHP backup and restore utility, removing the need for administrators to use `mysqldump` or phpMyAdmin.
 - **Backup**: One-click process that generates a checksummed, dependency-ordered SQL dump including both schema and data.
 - **Restore**: Guarded operation that validates file signatures, performs an emergency pre-restore backup, and carefully manages foreign key constraints.
 

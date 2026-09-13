@@ -1,12 +1,12 @@
-# 🤖 Nizam Automation Guide
+# 🤖 Hadaba Al-Ahram Language School Automation Guide
 
-This guide explains all the automated features in Nizam School System and how to set them up for cloud deployment (Railway + Supabase + GitHub Actions).
+This guide explains the automated features in Hadaba Al-Ahram Language School and how to set them up for cloud deployment (Railway + Supabase + GitHub Actions).
 
 ---
 
 ## 📋 Overview
 
-Nizam includes **5 automated workflows**:
+Hadaba Al-Ahram Language School includes **5 automated workflows**:
 
 1. **Daily Birthday Notifications** - Alerts staff when students have birthdays
 2. **Year Rollover Reminders** - Warns admins when academic year is ending
@@ -71,7 +71,7 @@ Nizam includes **5 automated workflows**:
        'email' => [
            'enabled'       => true,
            'from_email'    => 'nizam@yourschool.com',
-           'from_name'     => 'Al-Nizam School',
+           'from_name'     => 'Hadaba Al-Ahram Language School',
        ],
        
        'scheduled_backup_token' => 'GENERATE_RANDOM_SECRET_HERE',
@@ -110,7 +110,7 @@ openssl rand -hex 32
 'email' => [
     'enabled' => true,
     'from_email' => 'nizam@yourschool.com',
-    'from_name' => 'Al-Nizam School',
+    'from_name' => 'Hadaba Al-Ahram Language School',
 ]
 ```
 
@@ -119,7 +119,7 @@ openssl rand -hex 32
 'email' => [
     'enabled'       => true,
     'from_email'    => 'notifications@yourschool.com',
-    'from_name'     => 'Al-Nizam School',
+    'from_name'     => 'Hadaba Al-Ahram Language School',
     'smtp_host'     => 'smtp.gmail.com',
     'smtp_port'     => 587,
     'smtp_user'     => 'your-email@gmail.com',

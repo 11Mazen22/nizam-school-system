@@ -47,7 +47,7 @@ return [
     "backups.error.restore_failed" => "Restore failed. Restore the emergency backup :filename immediately to recover.",
     "backups.error.generic" => "Something went wrong during restore. Try again, and tell your administrator if this keeps happening.",
 
-    'app.name' => 'Hadaba Al-Ahram School',
+    'app.name' => 'Hadaba Al-Ahram Language School',
 
     // Auth
     'auth.login.title' => 'Sign In',
@@ -77,7 +77,7 @@ return [
     'auth.login.locked' => 'This account is temporarily locked after repeated failed attempts. Try again in :minutes minutes.',
     'auth.login.throttled' => 'Too many login attempts from this device. Try again later.',
     'auth.logout.submit' => 'Sign Out',
-    'auth.logout.confirm' => 'Sign out of Hadaba Al-Ahram School?',
+    'auth.logout.confirm' => 'Sign out of Hadaba Al-Ahram Language School?',
     'auth.logout.done' => 'You have been signed out.',
 
     // Errors
@@ -100,6 +100,13 @@ return [
     'common.go_back' => 'Go Back',
     'common.back_to_dashboard' => 'Back to Dashboard',
     'common.continue' => 'Continue',
+    'common.enter' => 'Enter',
+    'common.detailed' => 'Detailed',
+    'common.example' => 'Example',
+    'common.just_now' => 'Just now',
+    'common.minutes_ago' => 'min ago',
+    'common.hours_ago' => 'h ago',
+    'common.days_ago' => 'd ago',
 
     // Navigation / shell
     'nav.dashboard' => 'Dashboard',
@@ -494,7 +501,7 @@ return [
 
     // Users (§Q "Users | List, Add/Edit (Administrator only)")
     'users.title' => 'Users',
-    'users.description' => 'Manage the accounts that can sign in to Hadaba Al-Ahram School and what they can do.',
+    'users.description' => 'Manage the accounts that can sign in to Hadaba Al-Ahram Language School and what they can do.',
     'users.stat_total' => 'Total Users',
     'users.stat_active' => 'Active',
     'users.tab_list' => 'Users List',
@@ -644,6 +651,12 @@ return [
     "app.upload" => "Upload",
     "app.close" => "Close",
     "app.import_success" => "Import completed: {success} added, {errors} failed.",
+    "import.failed" => "Import failed. Please check the file format and try again.",
+    "import.invalid_format" => "Invalid file format. Only .xlsx or .csv files are accepted.",
+    "import.no_file" => "No file uploaded. Please select a file and try again.",
+    "import.no_data" => "The file is empty or contains no valid data.",
+    "import.processing" => "Processing import...",
+    "import.error" => "An unexpected error occurred during import. Please try again.",
 
     // Navigation — new modules
     'nav.attendance'   => 'Attendance',
@@ -777,9 +790,16 @@ return [
     'notifications.title'        => 'Notifications',
     'notifications.subtitle'     => 'System alerts and automated notifications.',
     'notifications.empty'        => 'No notifications yet.',
+    'notifications.empty_description' => 'When important events occur, you\'ll see them here.',
     'notifications.new'          => 'New',
-    'notifications.mark_all_read'=> 'Mark all read',
-    'notifications.view_all'     => 'View all notifications',
+    'notifications.unread'       => 'Unread',
+    'notifications.mark_all_read'=> 'Mark All as Read',
+    'notifications.mark_read'    => 'Mark as Read',
+    'notifications.view_all'     => 'View All',
+    'notifications.view_details' => 'View Details',
+
+    // Welfare hints
+    'welfare.student_id_hint' => 'Enter the student ID from the students page',
 
     // Activity action labels — new modules
     'activity.action.attendance.save'         => 'Attendance saved',

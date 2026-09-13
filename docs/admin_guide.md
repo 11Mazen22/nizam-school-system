@@ -1,6 +1,6 @@
-# Nizam Administrator Guide
+# Hadaba Al-Ahram Language School Administrator Guide
 
-Welcome to the Nizam School System. This guide covers daily operations and system management.
+Welcome to Hadaba Al-Ahram Language School. This guide covers daily operations and system management.
 
 ## 1. Access and Responsibilities
 - **Login**: Access the system via the `/login` route. After 5 failed attempts, accounts are temporarily locked to prevent brute-force attacks.
@@ -49,5 +49,5 @@ Administrators reach **Settings** from the sidebar, grouped into five screens so
 - **Backup**: where one-click backups are saved. Moving this to a new folder does not move backups already saved to the old one.
 
 ## 8. Operational & Security Warnings
-- **Keep the System Offline**: Nizam is designed for local LAN usage. Do not expose this server directly to the public internet without consulting an IT security professional to configure HTTPS and firewall rules.
+- **Keep the System Offline**: Hadaba Al-Ahram Language School is designed for local LAN usage. Do not expose this server directly to the public internet without consulting an IT security professional to configure HTTPS and firewall rules.
 - **Uploads**: All student photos and documents are stored securely. Never place custom PHP scripts in the `uploads/` or `backups/` directories.

@@ -297,12 +297,12 @@ $archivedSubjects = array_filter($subjects, fn($s) => (int)$s['is_active'] === 0
 
 </div>
 
-<?php require dirname(__DIR__) . '/layout/end.php'; ?>
-
-
 <?php
+ob_start();
 $title = __("app.import");
 $action = "/import/subjects";
 $templateUrl = "/import/subjects/template";
 require dirname(__DIR__) . "/partials/import_modal.php";
+$pageModals = ob_get_clean();
+require dirname(__DIR__) . '/layout/end.php';
 ?>

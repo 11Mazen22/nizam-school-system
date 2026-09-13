@@ -36,6 +36,8 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f6f5c">
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/img/favicon-180.png">
@@ -111,7 +113,9 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
               <a href="/notifications/read-all" class="small text-muted text-decoration-none"
                  id="notif-markall-link" onclick="markAllRead(event)"><?= e(__('notifications.mark_all_read')) ?></a>
             </li>
-            <li id="notif-list"><li class="px-3 py-3 text-center text-muted small"><?= e(__('notifications.empty')) ?></li></li>
+            <ul id="notif-list" class="list-unstyled mb-0" style="max-height: 400px; overflow-y: auto; padding: 0;">
+              <li class="px-3 py-3 text-center text-muted small"><?= e(__('notifications.empty')) ?></li>
+            </ul>
             <li class="border-top">
               <a class="dropdown-item text-center small py-2" href="/notifications"><?= e(__('notifications.view_all')) ?></a>
             </li>

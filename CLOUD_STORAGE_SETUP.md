@@ -2,7 +2,7 @@
 
 ## ✅ **COMPLETE CLOUD ARCHITECTURE**
 
-Nizam is now configured for **100% cloud-based storage** with **ZERO local file dependencies**.
+Hadaba Al-Ahram Language School is now configured for **100% cloud-based storage** with **ZERO local file dependencies**.
 
 ---
 
@@ -200,7 +200,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 ### **Where to Find Supabase Keys:**
 
 1. Go to: https://supabase.com/dashboard
-2. Select your project: `Nizam School System`
+2. Select your project: `Hadaba Al-Ahram Language School`
 3. Go to: **Settings → API**
 4. Copy:
    - **URL:** `https://aubtmfcwlrjwuwqnltuu.supabase.co`
@@ -209,7 +209,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 ### **Railway Configuration:**
 
 1. Go to: https://railway.app
-2. Select your Nizam project
+2. Select your Hadaba Al-Ahram Language School project
 3. Go to: **Variables** tab
 4. Add:
    ```
@@ -243,7 +243,7 @@ echo $SUPABASE_SERVICE_ROLE_KEY | head -c 50
    - ✅ `backups` (private)
 
 ### **Test Upload Flow:**
-1. Login to Nizam admin
+1. Log in to the Hadaba Al-Ahram Language School admin panel
 2. Go to: **Students → Add New**
 3. Upload a photo
 4. Check Supabase Storage → `uploads/students/`
@@ -389,7 +389,7 @@ railway variables set SUPABASE_SERVICE_ROLE_KEY="eyJ..."
 
 ## 🎯 **SUMMARY**
 
-**Your Nizam system is now 100% cloud-native:**
+**Your Hadaba Al-Ahram Language School system is now 100% cloud-native:**
 
 | Component | Storage Location | Provider |
 |-----------|-----------------|----------|

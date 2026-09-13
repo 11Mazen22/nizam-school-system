@@ -267,12 +267,12 @@ use App\Middleware\CsrfMiddleware;
 
 <?php endif; ?>
 
-<?php require dirname(__DIR__) . '/layout/end.php'; ?>
-
-
 <?php
+ob_start();
 $title = __("app.import");
 $action = "/import/assignments";
 $templateUrl = "/import/assignments/template";
 require dirname(__DIR__) . "/partials/import_modal.php";
+$pageModals = ob_get_clean();
+require dirname(__DIR__) . '/layout/end.php';
 ?>

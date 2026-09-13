@@ -54,7 +54,7 @@ return [
     'auth.login.title' => 'تسجيل الدخول',
     'auth.login.subtitle' => 'سجّل الدخول لإدارة مدرستك.',
     'auth.login.welcome_title' => 'مرحباً بك في :school',
-    'auth.login.system_subtitle' => 'نظام إدارة مدرسي متكامل',
+    'auth.login.system_subtitle' => 'منصة إدارة مدرسية متكاملة',
     'auth.login.tagline' => 'كل ما تحتاجه مدرستك، في مكان واحد.',
     'auth.login.tagline_description' => 'إدارة الطلاب والمعلمين والفصول والعمليات الأكاديمية في منصة موحدة.',
     'auth.login.feature1_title' => 'إدارة الطلاب',
@@ -101,6 +101,13 @@ return [
     'common.go_back' => 'رجوع',
     'common.back_to_dashboard' => 'العودة للوحة التحكم',
     'common.continue' => 'متابعة',
+    'common.enter' => 'أدخل',
+    'common.detailed' => 'تفصيلي',
+    'common.example' => 'مثال',
+    'common.just_now' => 'الآن',
+    'common.minutes_ago' => 'د',
+    'common.hours_ago' => 'س',
+    'common.days_ago' => 'ي',
 
     // Navigation / shell
     'nav.dashboard' => 'لوحة التحكم',
@@ -495,7 +502,7 @@ return [
 
     // المستخدمون (§Q "المستخدمون | قائمة، إضافة/تعديل (للمدير فقط)")
     'users.title' => 'المستخدمون',
-    'users.description' => 'إدارة الحسابات التي يمكنها الدخول إلى نِظام وما يمكنها فعله.',
+    'users.description' => 'إدارة الحسابات التي يمكنها تسجيل الدخول إلى هضبة الأهرام الثانوية وما يمكنها فعله.',
     'users.stat_total' => 'إجمالي المستخدمين',
     'users.stat_active' => 'نشط',
     'users.tab_list' => 'قائمة المستخدمين',
@@ -640,6 +647,12 @@ return [
     "app.upload" => "رفع",
     "app.close" => "إغلاق",
     "app.import_success" => "تم الاستيراد: نجاح {success}، فشل {errors}.",
+    "import.failed" => "فشل الاستيراد. يرجى التحقق من تنسيق الملف والمحاولة مرة أخرى.",
+    "import.invalid_format" => "تنسيق الملف غير صالح. يُقبل فقط .xlsx أو .csv.",
+    "import.no_file" => "لم يتم رفع أي ملف. يرجى اختيار ملف والمحاولة مرة أخرى.",
+    "import.no_data" => "الملف فارغ أو لا يحتوي على بيانات صالحة.",
+    "import.processing" => "جارٍ معالجة الاستيراد...",
+    "import.error" => "حدث خطأ غير متوقع أثناء الاستيراد. يرجى المحاولة مرة أخرى.",
 
     // Navigation — new modules
     'nav.attendance'   => 'الحضور',
@@ -773,6 +786,14 @@ return [
     'notifications.title'        => 'الإشعارات',
     'notifications.subtitle'     => 'تنبيهات النظام والإشعارات التلقائية.',
     'notifications.empty'        => 'لا توجد إشعارات بعد.',
+    'notifications.empty_description' => 'عند حدوث أحداث مهمة، ستراها هنا.',
     'notifications.new'          => 'جديد',
+    'notifications.unread'       => 'غير مقروءة',
     'notifications.mark_all_read'=> 'تعليم الكل كمقروء',
+    'notifications.mark_read'    => 'تعليم كمقروء',
+    'notifications.view_all'     => 'عرض الكل',
+    'notifications.view_details' => 'عرض التفاصيل',
+
+    // Welfare hints
+    'welfare.student_id_hint' => 'أدخل رقم تعريف الطالب من صفحة الطلاب',
 ];

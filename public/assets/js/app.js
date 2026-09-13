@@ -110,4 +110,80 @@ document.addEventListener('DOMContentLoaded', function () {
       if (target) { target.click(); }
     });
   });
+
+  // ---- Enhanced modal backdrop click handling ---------------------------
+  // Ensures modals can be properly dismissed by clicking the backdrop or
+  // pressing ESC. This fixes issues where modals become "stuck" with grey
+  // backdrops blocking interaction.
+  document.addEventListener('click', function (e) {
+    // Check if click was directly on a modal backdrop
+    if (e.target.classList.contains('modal') && e.target.classList.contains('show')) {
+      var backdrop = e.target.querySelector('.modal-dialog');
+      if (backdrop && !backdrop.contains(e.target)) {
+        // Click was on backdrop, not dialog content
+        var modalInstance = window.bootstrap && window.bootstrap.Modal 
+          ? window.bootstrap.Modal.getInstance(e.target) 
+          : null;
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+      }
+    }
+  });
+
+  // Handle ESC key for modals
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' || e.keyCode === 27) {
+      var openModal = document.querySelector('.modal.show');
+      if (openModal) {
+        var modalInstance = window.bootstrap && window.bootstrap.Modal 
+          ? window.bootstrap.Modal.getInstance(openModal) 
+          : null;
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+      }
+    }
+  });
+
+  // ---- Ensure modal backdrops are properly removed ----------------------
+  // Sometimes Bootstrap leaves orphaned backdrops after closing modals.
+  // This cleanup handler ensures no backdrops are left behind.
+  document.addEventListener('hidden.bs.modal', function (e) {
+    // Small delay to ensure Bootstrap has finished its cleanup
+    setTimeout(function () {
+      var orphanedBackdrops = document.querySelectorAll('.modal-backdrop');
+      if (orphanedBackdrops.length > 0 && !document.querySelector('.modal.show')) {
+        // No open modals but backdrops exist - clean them up
+        orphanedBackdrops.forEach(function (backdrop) {
+          backdrop.remove();
+        });
+        // Restore body scroll if it was disabled
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    }, 100);
+  });
+
+  // ---- Modal stacking fix -----------------------------------------------
+  // Modals nested inside .nizam-content sit in a transformed stacking
+  // context, so Bootstrap's body-level backdrop renders on top of them.
+  // Reparent every modal to <body> before Bootstrap initialises them.
+  document.querySelectorAll('.modal').forEach(function (modalEl) {
+    if (modalEl.parentElement !== document.body) {
+      document.body.appendChild(modalEl);
+    }
+    if (!modalEl.hasAttribute('data-bs-backdrop')) {
+      modalEl.setAttribute('data-bs-backdrop', 'true');
+    }
+    if (!modalEl.hasAttribute('data-bs-keyboard')) {
+      modalEl.setAttribute('data-bs-keyboard', 'true');
+    }
+  });
+
+  // ---- Service worker (offline PWA) ------------------------------------
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function () {});
+  }
 });

@@ -120,7 +120,7 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
             <div class="col-12">
               <label for="healthStudentId" class="form-label"><?= e(__('students.full_name')) ?> (ID) <span class="text-danger">*</span></label>
               <input type="number" id="healthStudentId" name="student_id" class="form-control" placeholder="<?= e(__('students.code')) ?>" required min="1">
-              <div class="form-text"><?= e(__('common.enter')) ?> <?= e(__('students.code')) ?></div>
+              <div class="form-text"><?= e(__('welfare.student_id_hint')) ?></div>
             </div>
             <div class="col-md-6">
               <label for="healthType" class="form-label"><?= e(__('welfare.record_type')) ?> <span class="text-danger">*</span></label>

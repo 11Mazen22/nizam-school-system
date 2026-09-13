@@ -30,7 +30,7 @@ return [
     'email' => [
         'enabled'       => false,  // Set to true to enable email notifications
         'from_email'    => 'noreply@school.local',
-        'from_name'     => 'Nizam School System',
+        'from_name'     => 'Hadaba Al-Ahram Language School',
         'smtp_host'     => null,   // Optional: SMTP server (e.g., smtp.gmail.com)
         'smtp_port'     => null,   // Optional: SMTP port (587 for TLS, 465 for SSL)
         'smtp_user'     => null,   // Optional: SMTP username

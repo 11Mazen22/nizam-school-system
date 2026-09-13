@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Controller;
 use App\Request;
 use App\Services\DashboardStatsService;
+use App\Services\IntelligenceService;
 
 /**
  * Phase 5 dashboard: the statistics §A actually specifies (student/teacher/
@@ -20,6 +21,7 @@ final class DashboardController extends Controller
     public function index(Request $request): void
     {
         $stats = (new DashboardStatsService())->build();
-        $this->view('dashboard', ['stats' => $stats]);
+        $insights = (new IntelligenceService())->getAtRiskStudents();
+        $this->view('dashboard', ['stats' => $stats, 'insights' => $insights]);
     }
 }

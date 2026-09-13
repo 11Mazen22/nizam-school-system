@@ -293,12 +293,12 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
 
 </div>
 
-<?php require dirname(__DIR__) . '/layout/end.php'; ?>
-
-
 <?php
+ob_start();
 $title = __("app.import");
 $action = "/import/users";
 $templateUrl = "/import/users/template";
 require dirname(__DIR__) . "/partials/import_modal.php";
+$pageModals = ob_get_clean();
+require dirname(__DIR__) . '/layout/end.php';
 ?>

@@ -178,7 +178,7 @@ final class BackupService
             $schemaVersion = count($this->migrations->getAppliedMigrations($pdo));
             $formatVersion = $isPgsql ? self::FORMAT_VERSION_PGSQL : self::FORMAT_VERSION_MYSQL;
             $write(sprintf("-- NIZAM-BACKUP %s schema=%04d\n", $formatVersion, $schemaVersion));
-            $write("-- Hadaba Al-Ahram School Backup\n-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n\n");
+            $write("-- Hadaba Al-Ahram Language School Backup\n-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n\n");
 
             if ($isPgsql) {
                 foreach (self::TABLE_ORDER_PG as $table) {

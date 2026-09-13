@@ -298,12 +298,12 @@ $archivedGrades = array_filter($grades, fn($g) => (int)$g['is_active'] === 0);
 
 </div>
 
-<?php require dirname(__DIR__) . '/layout/end.php'; ?>
-
-
 <?php
+ob_start();
 $title = __("app.import") . " - " . __("grades.title");
 $action = "/import/grades";
 $templateUrl = "/import/grades/template";
 require dirname(__DIR__) . "/partials/import_modal.php";
+$pageModals = ob_get_clean();
+require dirname(__DIR__) . '/layout/end.php';
 ?>

@@ -95,12 +95,12 @@ $totalTeachers = count($teachers);
   </div>
 <?php endif; ?>
 
-<?php require dirname(__DIR__) . '/layout/end.php'; ?>
-
-
 <?php
+ob_start();
 $title = __("app.import");
 $action = "/import/teachers";
 $templateUrl = "/import/teachers/template";
 require dirname(__DIR__) . "/partials/import_modal.php";
+$pageModals = ob_get_clean();
+require dirname(__DIR__) . '/layout/end.php';
 ?>

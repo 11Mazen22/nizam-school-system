@@ -1,4 +1,4 @@
-# Nizam School System - Testing Complete ✅
+# Hadaba Al-Ahram Language School - Testing Complete ✅
 
 ## Test Date
 September 12, 2026
@@ -13,8 +13,8 @@ September 12, 2026
 ### 1. Translation Keys (14/14 Tests Passed)
 
 #### Arabic Translation File (`lang/ar.php`)
-- ✅ `auth.login.welcome_title` → "مرحباً بك في نِظام"
-- ✅ `auth.login.system_subtitle` → "نظام إدارة مدرسي متكامل"
+- ✅ `auth.login.welcome_title` → "مرحباً بك في هضبة الأهرام الثانوية"
+- ✅ `auth.login.system_subtitle` → "منصة إدارة مدرسية متكاملة"
 - ✅ `auth.login.feature1_title` through `feature4_title` → All feature titles
 - ✅ `teachers.empty_title` → "لا يوجد معلمون بعد"
 - ✅ `students.empty_title` → "لا يوجد طلاب بعد"

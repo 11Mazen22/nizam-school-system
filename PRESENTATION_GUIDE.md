@@ -1,4 +1,4 @@
-# 🎥 Nizam School System - Complete Presentation Guide
+# 🎥 Hadaba Al-Ahram Language School - Complete Presentation Guide
 ## Full Website Walkthrough Script for Video Recording
 
 **Target Audience:** School Administration (هضبة الأهرام الثانوية)  
@@ -1145,7 +1145,7 @@ Settings (complete admin tour)
 - **File Size:** Large schools (10,000+ students) may have 50MB+ backups
 - **Download Required:** Always download backups locally as extra protection
 - **Upload Limit:** 100MB max backup file size
-- **Version Matching:** Can only restore backups from same Nizam version
+- **Version Matching:** Can only restore backups from the same Hadaba Al-Ahram Language School version
 - **Verification:** System checks backup file integrity before restore
 - **Emergency Backup:** If restore fails, emergency backup can be manually restored
 - **Cloud vs Local:** Cloud backups stored in Supabase, local in `storage/backups/`
@@ -1570,4 +1570,3 @@ Before recording:
 **Total Pages:** 13,500+ words  
 **Estimated Video Length:** 40-45 minutes  
 **Target Audience:** School Administration (هضبة الأهرام الثانوية)
-

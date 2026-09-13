@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /** @var array $stats */
 $pageTitle = __('dashboard.title');
 $activeNav = 'dashboard';
@@ -99,3 +99,4 @@ require __DIR__ . '/layout/start.php';
 <?php endif; ?>
 
 <?php require __DIR__ . '/layout/end.php'; ?>
+

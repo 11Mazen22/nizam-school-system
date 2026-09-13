@@ -44,7 +44,7 @@ final class EmailService
         
         $this->enabled = $config['email']['enabled'] ?? false;
         $this->fromEmail = $config['email']['from_email'] ?? 'noreply@school.local';
-        $this->fromName = $config['email']['from_name'] ?? 'Hadaba Al-Ahram School';
+        $this->fromName = $config['email']['from_name'] ?? 'Hadaba Al-Ahram Language School';
         $this->smtpHost = $config['email']['smtp_host'] ?? null;
         $this->smtpPort = $config['email']['smtp_port'] ?? null;
         $this->smtpUser = $config['email']['smtp_user'] ?? null;
@@ -236,7 +236,7 @@ final class EmailService
                 ";
 
             default:
-                return "Notification from Hadaba Al-Ahram School";
+                return "Notification from Hadaba Al-Ahram Language School";
         }
     }
 }
