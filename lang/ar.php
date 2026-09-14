@@ -781,6 +781,11 @@ return [
     'timetable.day_thu'               => 'الخميس',
     'timetable.error_teacher_conflict'=> 'تعارض: هذا المعلم مكلف بالفعل في هذا الوقت.',
     'timetable.error_class_conflict'  => 'تعارض: هذا الفصل لديه مادة بالفعل في هذا الوقت.',
+    'timetable.subject'               => 'المادة',
+    'timetable.teacher'               => 'المعلم',
+    'timetable.select_subject'        => '— اختر المادة —',
+    'timetable.select_teacher'        => '— اختر المعلم —',
+    'timetable.slot_info'             => 'اليوم: %s | الحصة: %d',
 
     // Notifications
     'notifications.title'        => 'الإشعارات',

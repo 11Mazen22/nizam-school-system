@@ -785,6 +785,11 @@ return [
     'timetable.day_thu'               => 'Thursday',
     'timetable.error_teacher_conflict'=> 'Conflict: this teacher is already assigned at this time slot.',
     'timetable.error_class_conflict'  => 'Conflict: this class already has a subject at this time slot.',
+    'timetable.subject'               => 'Subject',
+    'timetable.teacher'               => 'Teacher',
+    'timetable.select_subject'        => '— Select Subject —',
+    'timetable.select_teacher'        => '— Select Teacher —',
+    'timetable.slot_info'             => 'Day: %s | Period: %d',
 
     // Notifications
     'notifications.title'        => 'Notifications',

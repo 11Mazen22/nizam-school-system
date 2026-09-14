@@ -107,25 +107,38 @@ use App\Middleware\CsrfMiddleware;
 
 <!-- Add Slot Modal -->
 <?php if (hasPermission('timetable.manage')): ?>
-<div class="modal fade" id="addSlotModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="post" action="/timetable" class="modal-content">
+<div class="modal fade" id="addSlotModal" tabindex="-1" aria-labelledby="addSlotModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="post" action="/timetable" class="modal-content border-0 shadow-lg">
       <?= CsrfMiddleware::field() ?>
-      <input type="hidden" name="class_id"     value="<?= $classId ?>">
-      <input type="hidden" name="day_of_week"  id="slotDay">
+      <input type="hidden" name="class_id" value="<?= $classId ?>" id="modalClassId">
+      <input type="hidden" name="day_of_week" id="slotDay">
       <input type="hidden" name="period_number" id="slotPeriod">
-      <div class="modal-header">
-        <h5 class="modal-title"><?= e(__('timetable.add_slot')) ?></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="addSlotModalLabel">
+          <?= icon('plus-circle', 'text-primary') ?>
+          <?= e(__('timetable.add_slot')) ?>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= e(__('common.cancel')) ?>"></button>
       </div>
-      <div class="modal-body row g-3">
-        <div class="col-12">
-          <p class="text-muted mb-2" id="slotInfo"></p>
+      
+      <div class="modal-body pt-3">
+        <!-- Slot Information Banner -->
+        <div class="alert alert-info bg-light border-0 d-flex align-items-center gap-2 mb-4" role="status">
+          <?= icon('calendar', 'text-info') ?>
+          <span id="slotInfo" class="fw-semibold"></span>
         </div>
-        <div class="col-12">
-          <label class="form-label"><?= e(__('exams.subject')) ?></label>
-          <select name="subject_id" class="form-select" required>
-            <option value="">— <?= e(__('exams.subject')) ?> —</option>
+
+        <!-- Subject Selection -->
+        <div class="mb-4">
+          <label for="slotSubject" class="form-label fw-semibold d-flex align-items-center gap-2">
+            <?= icon('book', 'text-muted') ?>
+            <?= e(__('timetable.subject')) ?>
+            <span class="text-danger">*</span>
+          </label>
+          <select name="subject_id" id="slotSubject" class="form-select form-select-lg" required>
+            <option value="" disabled selected><?= e(__('timetable.select_subject')) ?></option>
             <?php foreach ($subjects as $sub): ?>
               <option value="<?= (int)$sub['id'] ?>">
                 <?= e(currentLocale() === 'ar' ? $sub['name_ar'] : $sub['name_en']) ?>
@@ -133,19 +146,39 @@ use App\Middleware\CsrfMiddleware;
             <?php endforeach; ?>
           </select>
         </div>
-        <div class="col-12">
-          <label class="form-label"><?= e(__('assignments.teacher')) ?></label>
-          <select name="teacher_id" class="form-select" required>
-            <option value="">— <?= e(__('assignments.teacher')) ?> —</option>
+
+        <!-- Teacher Selection -->
+        <div class="mb-3">
+          <label for="slotTeacher" class="form-label fw-semibold d-flex align-items-center gap-2">
+            <?= icon('user', 'text-muted') ?>
+            <?= e(__('timetable.teacher')) ?>
+            <span class="text-danger">*</span>
+          </label>
+          <select name="teacher_id" id="slotTeacher" class="form-select form-select-lg" required>
+            <option value="" disabled selected><?= e(__('timetable.select_teacher')) ?></option>
             <?php foreach ($teachers as $tea): ?>
-              <option value="<?= (int)$tea['id'] ?>"><?= e($tea['full_name']) ?></option>
+              <option value="<?= (int)$tea['id'] ?>">
+                <?= e($tea['full_name']) ?>
+              </option>
             <?php endforeach; ?>
           </select>
         </div>
+
+        <div class="text-muted small mt-3">
+          <?= icon('info-circle', 'opacity-75') ?>
+          <?= e(__('timetable.subtitle')) ?>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= e(__('common.cancel')) ?></button>
-        <button type="submit" class="btn btn-primary"><?= e(__('timetable.add_slot')) ?></button>
+      
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <?= icon('x') ?>
+          <?= e(__('common.cancel')) ?>
+        </button>
+        <button type="submit" class="btn btn-primary px-4">
+          <?= icon('check') ?>
+          <?= e(__('timetable.add_slot')) ?>
+        </button>
       </div>
     </form>
   </div>
@@ -165,16 +198,37 @@ use App\Middleware\CsrfMiddleware;
 document.addEventListener('DOMContentLoaded', function () {
   const modal = document.getElementById('addSlotModal');
   if (!modal) return;
+  
+  const dayLabels = <?= json_encode(array_values(array_map('e', $dayLabels))) ?>;
+  const dayLabel = '<?= e(__('timetable.day')) ?>';
+  const periodLabel = '<?= e(__('timetable.period')) ?>';
+  
   modal.addEventListener('show.bs.modal', function (e) {
     const btn = e.relatedTarget;
     const day = btn.dataset.day;
     const period = btn.dataset.period;
+    
+    // Set hidden fields
     document.getElementById('slotDay').value = day;
     document.getElementById('slotPeriod').value = period;
-    const dayLabels = <?= json_encode(array_values(array_map('e', $dayLabels))) ?>;
-    document.getElementById('slotInfo').textContent =
-      '<?= e(__('timetable.day')) ?>: ' + (dayLabels[day-1] || day) +
-      '  |  <?= e(__('timetable.period')) ?>: ' + period;
+    
+    // Format and display slot information
+    const dayName = dayLabels[day - 1] || day;
+    document.getElementById('slotInfo').textContent = `${dayLabel}: ${dayName}  |  ${periodLabel}: ${period}`;
+    
+    // Reset form fields
+    document.getElementById('slotSubject').value = '';
+    document.getElementById('slotTeacher').value = '';
+  });
+  
+  // Add form validation feedback
+  const form = modal.querySelector('form');
+  form.addEventListener('submit', function(e) {
+    if (!form.checkValidity()) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    form.classList.add('was-validated');
   });
 });
 </script>
