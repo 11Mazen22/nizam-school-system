@@ -23,12 +23,23 @@ $canUndo = $currentEnrollment !== null && $currentEnrollment['status'] === 'acti
     <p class="mono mb-0"><?= e($student['student_code']) ?></p>
   </div>
   <div class="n-page-head-actions">
+    <div class="btn-group me-2">
+      <a href="/attendance?q=<?= urlencode($student['student_code']) ?>" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+        <?= icon('calendar') ?>
+        <span class="d-none d-md-inline"><?= e(__('attendance.title') ?? 'Attendance') ?></span>
+      </a>
+      <a href="/welfare?q=<?= urlencode($student['student_code']) ?>" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+        <?= icon('shield') ?>
+        <span class="d-none d-md-inline"><?= e(__('welfare.title') ?? 'Welfare') ?></span>
+      </a>
+    </div>
+    
     <a href="/students/<?= (int) $student['id'] ?>/edit" class="btn btn-outline-secondary d-flex align-items-center gap-2">
       <?= icon('edit') ?>
       <span><?= e(__('common.edit')) ?></span>
     </a>
     <?php if ($student['status'] === 'active'): ?>
-      <form method="post" action="/students/<?= (int) $student['id'] ?>/archive" data-confirm="<?= e(__('students.confirm_archive')) ?>">
+      <form method="post" action="/students/<?= (int) $student['id'] ?>/archive" data-confirm="<?= e(__('students.confirm_archive')) ?>" class="d-inline">
         <?= CsrfMiddleware::field() ?>
         <button type="submit" class="btn btn-outline-danger d-flex align-items-center gap-2">
           <?= icon('archive') ?>

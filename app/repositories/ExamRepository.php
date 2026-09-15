@@ -60,21 +60,22 @@ final class ExamRepository
      * Returns rows keyed by student_id for fast lookup.
      * @return array<int, array<string,mixed>>
      */
-    public function scoresForExamClass(int $examId, int $classId): array
+    public function scoresForExamClass(int $examId, int $classId, ?int $subjectId = null): array
     {
         $stmt = Database::connection()->prepare(
-            "SELECT es.*, s.full_name, s.student_code
+            "SELECT es.*, s.id as actual_student_id, s.full_name, s.student_code
              FROM student_enrollments e
              JOIN students s ON s.id = e.student_id
-             LEFT JOIN exam_scores es ON es.student_id = e.student_id AND es.exam_id = :exam
+             JOIN exams exam ON exam.id = :exam AND exam.academic_year_id = e.academic_year_id
+             LEFT JOIN exam_scores es ON es.student_id = e.student_id AND es.exam_id = exam.id AND es.subject_id = :subject
              WHERE e.class_id = :class AND e.status = 'active'
              ORDER BY s.full_name ASC"
         );
-        $stmt->execute(['exam' => $examId, 'class' => $classId]);
+        $stmt->execute(['exam' => $examId, 'class' => $classId, 'subject' => $subjectId]);
         $rows = $stmt->fetchAll();
         $map = [];
         foreach ($rows as $row) {
-            $map[(int) $row['student_id']] = $row;
+            $map[(int) $row['actual_student_id']] = $row;
         }
         return $map;
     }

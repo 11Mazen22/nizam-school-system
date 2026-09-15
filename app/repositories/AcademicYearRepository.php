@@ -106,4 +106,18 @@ final class AcademicYearRepository
         $year = $this->find($yearId);
         return $year === null || (int) $year['is_closed'] === 1;
     }
+
+    /**
+     * Update the label and date range of an existing academic year.
+     * Does NOT touch is_active or is_closed -- those have dedicated methods.
+     * Uniqueness of label is validated by the caller (excluding this year's
+     * own current label from the duplicate check).
+     */
+    public function update(int $id, string $label, string $startDate, string $endDate): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE academic_years SET label = :label, start_date = :start, end_date = :end WHERE id = :id'
+        );
+        $stmt->execute(['label' => $label, 'start' => $startDate, 'end' => $endDate, 'id' => $id]);
+    }
 }

@@ -16,9 +16,9 @@ final class IntelligenceService
     /**
      * Get students at risk (High absences + Disciplinary issues)
      */
-    public function getAtRiskStudents(int $limit = 5): array
+    public function getAtRiskStudents(int $limit = 5, ?int $yearId = null): array
     {
-        $yearId = AcademicYearContext::activeYearId();
+        $yearId = $yearId ?? AcademicYearContext::activeYearId();
         if (!$yearId) {
             return [];
         }
@@ -29,11 +29,11 @@ final class IntelligenceService
             // Wrapped in a derived table so we can filter/order by the computed aliases in both MySQL and PostgreSQL.
             $stmt = $pdo->prepare("
                 SELECT * FROM (
-                    SELECT s.id, s.full_name, s.national_id, c.name as class_name,
-                           (SELECT COUNT(*) FROM attendance_records ar WHERE ar.student_id = s.id AND ar.status = 'absent') as total_absences,
-                           (SELECT COUNT(*) FROM disciplinary_records dr WHERE dr.student_id = s.id) as total_incidents
+                    SELECT s.id, s.full_name, s.student_code, c.name as class_name,
+                           (SELECT COUNT(*) FROM attendance_records ar WHERE ar.student_id = s.id AND ar.academic_year_id = ? AND ar.status = 'absent') as total_absences,
+                           (SELECT COUNT(*) FROM disciplinary_records dr WHERE dr.student_id = s.id AND dr.academic_year_id = ?) as total_incidents
                     FROM students s
-                    JOIN enrollments e ON e.student_id = s.id
+                    JOIN student_enrollments e ON e.student_id = s.id
                     JOIN classes c ON e.class_id = c.id
                     WHERE e.academic_year_id = ?
                 ) as insights
@@ -43,13 +43,14 @@ final class IntelligenceService
             ");
             
             $stmt->bindValue(1, $yearId, \PDO::PARAM_INT);
-            $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(2, $yearId, \PDO::PARAM_INT);
+            $stmt->bindValue(3, $yearId, \PDO::PARAM_INT);
+            $stmt->bindValue(4, $limit, \PDO::PARAM_INT);
             $stmt->execute();
             
             return $stmt->fetchAll();
         } catch (\PDOException $e) {
-            // Database not initialized yet or tables missing - return empty array
-            return [];
+            die("IntelligenceService Exception: " . $e->getMessage());
         }
     }
 }

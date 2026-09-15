@@ -1,0 +1,858 @@
+app\Controllers\AcademicYearController.php:25:        $this->view('academic-years/index', ['years' => $this->years->all()]);
+app\Controllers\AcademicYearController.php:30:        $this->view('academic-years/create', ['error' => null, 'years' => $this->years->all()]);
+app\Controllers\AcademicYearController.php:35:        $label = $request->post('label', '') ?: '';
+app\Controllers\AcademicYearController.php:36:        $start = $request->post('start_date', '') ?: '';
+app\Controllers\AcademicYearController.php:37:        $end = $request->post('end_date', '') ?: '';
+app\Controllers\AcademicYearController.php:38:        $rolloverFrom = $request->post('rollover_from', '') ?: '';
+app\Controllers\AcademicYearController.php:40:        $error = $this->validate($label, $start, $end);
+app\Controllers\AcademicYearController.php:42:            $this->view('academic-years/create', ['error' => $error, 'years' => $this->years->all()]);
+app\Controllers\AcademicYearController.php:46:        $this->service->create($label, $start, $end, $rolloverFrom !== '' ? (int) $rolloverFrom : null);
+app\Controllers\AcademicYearController.php:48:        $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:53:        $id = $request->paramInt('id');
+app\Controllers\AcademicYearController.php:54:        if ($id === null || $this->years->find($id) === null) {
+app\Controllers\AcademicYearController.php:55:            $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:58:        $this->service->activate($id);
+app\Controllers\AcademicYearController.php:60:        $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:65:        $id = $request->paramInt('id');
+app\Controllers\AcademicYearController.php:66:        if ($id === null || $this->years->find($id) === null) {
+app\Controllers\AcademicYearController.php:67:            $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:71:            $this->service->close($id);
+app\Controllers\AcademicYearController.php:74:            // §Q error catalog: exact remaining-count message, not a generic failure.
+app\Controllers\AcademicYearController.php:75:            Flash::set('danger', __('academic_years.close_blocked', ['count' => $e->getMessage()]));
+app\Controllers\AcademicYearController.php:77:        $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:82:        $id = $request->paramInt('id');
+app\Controllers\AcademicYearController.php:83:        if ($id === null || $this->years->find($id) === null) {
+app\Controllers\AcademicYearController.php:84:            $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:87:        $this->service->reopen($id);
+app\Controllers\AcademicYearController.php:89:        $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:94:        $id = $request->paramInt('id');
+app\Controllers\AcademicYearController.php:95:        $year = $id === null ? null : $this->years->find($id);
+app\Controllers\AcademicYearController.php:97:            $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:100:        $this->view('academic-years/edit', ['year' => $year, 'error' => null]);
+app\Controllers\AcademicYearController.php:105:        $id = $request->paramInt('id');
+app\Controllers\AcademicYearController.php:106:        $year = $id === null ? null : $this->years->find($id);
+app\Controllers\AcademicYearController.php:108:            $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:112:        $label = $request->post('label', '') ?: '';
+app\Controllers\AcademicYearController.php:113:        $start = $request->post('start_date', '') ?: '';
+app\Controllers\AcademicYearController.php:114:        $end   = $request->post('end_date', '') ?: '';
+app\Controllers\AcademicYearController.php:116:        $error = $this->validateUpdate($id, $label, $start, $end);
+app\Controllers\AcademicYearController.php:118:            $this->view('academic-years/edit', ['year' => array_merge($year, ['label' => $label, 'start_date' => $start, 'end_date' => $end]), 'error' => $error]);
+app\Controllers\AcademicYearController.php:122:        $this->years->update($id, $label, $start, $end);
+app\Controllers\AcademicYearController.php:124:        $this->redirect('/academic-years');
+app\Controllers\AcademicYearController.php:136:        $existing = $this->years->findByLabel($label);
+app\Controllers\AcademicYearController.php:140:        $startDt = DateTime::createFromFormat('Y-m-d', $start);
+app\Controllers\AcademicYearController.php:141:        $endDt   = DateTime::createFromFormat('Y-m-d', $end);
+app\Controllers\AcademicYearController.php:151:    /** §Q validation rules: label required/unique/YYYY-YYYY+1 format, dates required, end > start. */
+app\Controllers\AcademicYearController.php:160:        if ($this->years->findByLabel($label) !== null) {
+app\Controllers\AcademicYearController.php:163:        $startDt = DateTime::createFromFormat('Y-m-d', $start);
+app\Controllers\AcademicYearController.php:164:        $endDt = DateTime::createFromFormat('Y-m-d', $end);
+app\Controllers\ActivityLogController.php:12: * Nizam -- §Q screen inventory: "Activity Log | List". Gated on
+app\Controllers\ActivityLogController.php:13: * activity_log.view (§J), which both roles hold -- the scope difference
+app\Controllers\ActivityLogController.php:16: * code with role-dependent scope rather than two codes.
+app\Controllers\ActivityLogController.php:29:        $total = $this->logs->count($onlyUserId);
+app\Controllers\ActivityLogController.php:31:        $page = min(max(1, (int) ($request->query('page', '1') ?: 1)), $lastPage);
+app\Controllers\ActivityLogController.php:33:        $this->view('activity-log/index', [
+app\Controllers\ActivityLogController.php:34:            'entries' => $this->logs->paginate($perPage, ($page - 1) * $perPage, $onlyUserId),
+app\Controllers\AssignmentController.php:34:        $this->view('assignments/index', [
+app\Controllers\AssignmentController.php:35:            'assignments' => $yearId === null ? [] : $this->assignments->allForYear($yearId),
+app\Controllers\AssignmentController.php:37:            'archivedCount' => $yearId === null ? 0 : $this->assignments->countArchivedForYear($yearId),
+app\Controllers\AssignmentController.php:38:            'teachers' => $this->teachers->all('active'),
+app\Controllers\AssignmentController.php:39:            'subjects' => $this->subjects->all(true),
+app\Controllers\AssignmentController.php:40:            'classes' => $yearId === null ? [] : $this->classes->allForYear($yearId),
+app\Controllers\AssignmentController.php:47:        $this->view('assignments/archived', [
+app\Controllers\AssignmentController.php:48:            'assignments' => $yearId === null ? [] : $this->assignments->archivedForYear($yearId),
+app\Controllers\AssignmentController.php:55:        $this->view('assignments/workload', [
+app\Controllers\AssignmentController.php:56:            'summary' => $yearId === null ? null : $this->workload->calculateForYear($yearId),
+app\Controllers\AssignmentController.php:65:            $this->redirect('/assignments');
+app\Controllers\AssignmentController.php:68:        $this->view('assignments/form', [
+app\Controllers\AssignmentController.php:70:            'teachers' => $this->teachers->all('active'),
+app\Controllers\AssignmentController.php:71:            'subjects' => $this->subjects->all(true),
+app\Controllers\AssignmentController.php:72:            'classes' => $this->classes->allForYear($yearId),
+app\Controllers\AssignmentController.php:81:            $this->redirect('/assignments');
+app\Controllers\AssignmentController.php:85:        [$teacherId, $subjectId, $classId, $periods, $error] = $this->fields($request);
+app\Controllers\AssignmentController.php:88:            // happy path as a flash alongside the success message (§O-9 is a
+app\Controllers\AssignmentController.php:90:            // they'd see a form re-render); the checkQualification() call
+app\Controllers\AssignmentController.php:91:            // below the catch block covers the validation-failure re-render.
+app\Controllers\AssignmentController.php:92:            $unqualified = $this->service->checkQualification($teacherId, $subjectId);
+app\Controllers\AssignmentController.php:94:                $this->service->create($teacherId, $subjectId, $classId, $yearId, $periods);
+app\Controllers\AssignmentController.php:99:                $this->redirect('/assignments');
+app\Controllers\AssignmentController.php:102:                $error = match ($e->getMessage()) {
+app\Controllers\AssignmentController.php:110:        $this->view('assignments/form', [
+app\Controllers\AssignmentController.php:112:            'teachers' => $this->teachers->all('active'),
+app\Controllers\AssignmentController.php:113:            'subjects' => $this->subjects->all(true),
+app\Controllers\AssignmentController.php:114:            'classes' => $this->classes->allForYear($yearId),
+app\Controllers\AssignmentController.php:115:            'qualificationWarning' => $teacherId > 0 && $subjectId > 0 && $this->service->checkQualification($teacherId, $subjectId),
+app\Controllers\AssignmentController.php:121:        $id = $request->paramInt('id');
+app\Controllers\AssignmentController.php:122:        $assignment = $id === null ? null : $this->assignments->find($id);
+app\Controllers\AssignmentController.php:124:            $this->redirect('/assignments');
+app\Controllers\AssignmentController.php:128:        $periods = (int) ($request->post('weekly_periods', '') ?: 0);
+app\Controllers\AssignmentController.php:130:            $this->service->update($id, $periods);
+app\Controllers\AssignmentController.php:133:            Flash::set('danger', $e->getMessage() === 'year_closed'
+app\Controllers\AssignmentController.php:137:        $this->redirect('/assignments');
+app\Controllers\AssignmentController.php:142:        $id = $request->paramInt('id');
+app\Controllers\AssignmentController.php:145:                $this->service->archive($id);
+app\Controllers\AssignmentController.php:148:                Flash::set('danger', $e->getMessage() === 'year_closed'
+app\Controllers\AssignmentController.php:153:        $this->redirect('/assignments');
+app\Controllers\AssignmentController.php:158:        $id = $request->paramInt('id');
+app\Controllers\AssignmentController.php:160:            $this->redirect('/assignments/archived');
+app\Controllers\AssignmentController.php:164:            $this->service->restore($id);
+app\Controllers\AssignmentController.php:167:            Flash::set('danger', match ($e->getMessage()) {
+app\Controllers\AssignmentController.php:173:        $this->redirect('/assignments/archived');
+app\Controllers\AssignmentController.php:179:        $teacherId = (int) ($request->post('teacher_id', '') ?: 0);
+app\Controllers\AssignmentController.php:180:        $subjectId = (int) ($request->post('subject_id', '') ?: 0);
+app\Controllers\AssignmentController.php:181:        $classId = (int) ($request->post('class_id', '') ?: 0);
+app\Controllers\AssignmentController.php:182:        $periods = (int) ($request->post('weekly_periods', '') ?: 0);
+app\Controllers\AttendanceController.php:29:        $classes = $yearId ? $this->classes->allForYear($yearId) : [];
+app\Controllers\AttendanceController.php:31:        $classId  = (int) ($request->query('class_id') ?? 0);
+app\Controllers\AttendanceController.php:32:        $date     = $request->query('date') ?? date('Y-m-d');
+app\Controllers\AttendanceController.php:39:            $classRow = $this->classes->find($classId);
+app\Controllers\AttendanceController.php:40:            $students = $this->enrollments->activeStudentsForClass($classId);
+app\Controllers\AttendanceController.php:41:            $existing = $this->service->getSheetForClass($classId, $date);
+app\Controllers\AttendanceController.php:44:        $this->view('attendance/mark', [
+app\Controllers\AttendanceController.php:58:        $classId  = (int) ($request->post('class_id') ?? 0);
+app\Controllers\AttendanceController.php:59:        $date     = $request->post('date') ?? date('Y-m-d');
+app\Controllers\AttendanceController.php:64:            $this->redirect('/attendance');
+app\Controllers\AttendanceController.php:80:            $this->service->saveSheet($classId, $date, $records, $userId ?: null);
+app\Controllers\AttendanceController.php:86:        $this->redirect('/attendance?class_id=' . $classId . '&date=' . urlencode($date));
+app\Controllers\AttendanceController.php:93:        $classes = $yearId ? $this->classes->allForYear($yearId) : [];
+app\Controllers\AttendanceController.php:95:        $classId = (int) ($request->query('class_id') ?? 0);
+app\Controllers\AttendanceController.php:96:        $from    = $request->query('from') ?? date('Y-m-01');
+app\Controllers\AttendanceController.php:97:        $to      = $request->query('to')   ?? date('Y-m-d');
+app\Controllers\AttendanceController.php:104:            $classRow = $this->classes->find($classId);
+app\Controllers\AttendanceController.php:105:            $summary  = $this->service->getSummary($classId, $from, $to);
+app\Controllers\AttendanceController.php:109:            $chronic = $this->service->getChronicAbsentees($yearId);
+app\Controllers\AttendanceController.php:112:        $this->view('attendance/report', [
+app\Controllers\AuthController.php:18:            $this->redirect('/dashboard');
+app\Controllers\AuthController.php:23:        // otherwise calls Flash::consume() -- a message set right before a
+app\Controllers\AuthController.php:24:        // forced-logout redirect here (e.g. Phase 8 restore) would
+app\Controllers\AuthController.php:30:        $this->view('auth/login', ['error' => null, 'notice' => $notice]);
+app\Controllers\AuthController.php:35:        $username = $request->post('username', '') ?? '';
+app\Controllers\AuthController.php:36:        $password = $request->post('password', '') ?? '';
+app\Controllers\AuthController.php:38:        $result = (new AuthService())->attempt($username, $password, $request->ip());
+app\Controllers\AuthController.php:41:            $this->redirect('/dashboard');
+app\Controllers\AuthController.php:46:            'locked' => __('auth.login.locked', ['minutes' => $this->minutesUntil($result['lockedUntil'] ?? null)]),
+app\Controllers\AuthController.php:51:        $this->view('auth/login', ['error' => $error]);
+app\Controllers\AuthController.php:56:        (new AuthService())->logout();
+app\Controllers\AuthController.php:57:        $this->redirect('/login');
+app\Controllers\AuthController.php:65:        return max(1, (int) ceil((strtotime($timestamp) - time()) / 60));
+app\Controllers\BackupController.php:19: * Nizam -- §I.2/§I.3 Backup & Restore. Both actions are admin-only
+app\Controllers\BackupController.php:21: * the route -- nothing here re-checks or substitutes for that.
+app\Controllers\BackupController.php:36:        $page = max(1, (int) $request->query('page', '1'));
+app\Controllers\BackupController.php:39:        $this->view('backups/index', [
+app\Controllers\BackupController.php:40:            'backups' => $this->repo->getPaginated($limit, ($page - 1) * $limit),
+app\Controllers\BackupController.php:43:            'total' => $this->repo->getTotalCount(),
+app\Controllers\BackupController.php:52:            $this->backups->run('manual', $userId, $request->post('notes'));
+app\Controllers\BackupController.php:58:        $this->redirect('/backups');
+app\Controllers\BackupController.php:62:     * Machine-triggered backup (type 'auto', §I.2's schema already reserves
+app\Controllers\BackupController.php:63:     * this value) -- no browser session, so none of the usual session/CSRF/
+app\Controllers\BackupController.php:65:     * (SCHEDULED_BACKUP_TOKEN env var, timing-safe compared) is the entire
+app\Controllers\BackupController.php:66:     * auth story, matching what a machine-to-machine call actually needs.
+app\Controllers\BackupController.php:67:     * Neither deployment target has a built-in scheduler this app can rely
+app\Controllers\BackupController.php:69:     * always-on process beyond Apache/MariaDB themselves) -- the intended
+app\Controllers\BackupController.php:74:     * design -- see packaging-online/README.md for how it's wired up.
+app\Controllers\BackupController.php:80:        // default (apache-nizam.conf's own SetEnvIf works around this at
+app\Controllers\BackupController.php:81:        // the vhost level) -- apache_request_headers() reads it directly
+app\Controllers\BackupController.php:83:        // vhost-level workaround is ever missing (e.g. a differently
+app\Controllers\BackupController.php:96:        header('Content-Type: text/plain');
+app\Controllers\BackupController.php:104:            $this->backups->run('auto', null, 'Automated scheduled backup');
+app\Controllers\BackupController.php:112:    /** §S-10: resolved by database id, never a client-supplied path. */
+app\Controllers\BackupController.php:115:        $id = $request->paramInt('id');
+app\Controllers\BackupController.php:116:        $backup = $id !== null ? $this->repo->findById($id) : null;
+app\Controllers\BackupController.php:123:            $contents = $this->backups->retrieve($backup['filename']);
+app\Controllers\BackupController.php:138:            $this->redirect('/backups');
+app\Controllers\BackupController.php:142:        // §S-16: extension is only ever a first, cheap filter -- the file's
+app\Controllers\BackupController.php:144:        // real authority. Rejecting an obviously-wrong file here just gives
+app\Controllers\BackupController.php:149:            $this->redirect('/backups');
+app\Controllers\BackupController.php:154:        // Checked server-side too -- the view disables the submit button
+app\Controllers\BackupController.php:157:        if ($request->post('confirm_phrase') !== self::CONFIRM_PHRASE) {
+app\Controllers\BackupController.php:159:            $this->redirect('/backups');
+app\Controllers\BackupController.php:164:            $this->restore->execute($_FILES['backup_file']['tmp_name'], $userId);
+app\Controllers\BackupController.php:166:            Flash::set('danger', $this->restoreErrorMessage($e->getMessage()));
+app\Controllers\BackupController.php:167:            $this->redirect('/backups');
+app\Controllers\BackupController.php:171:        // §I.3 step 6: forced re-login. The users table this session was
+app\Controllers\BackupController.php:173:        // did a moment ago -- continuing the session would trust cached
+app\Controllers\BackupController.php:175:        (new AuthService())->logout();
+app\Controllers\BackupController.php:177:        $this->redirect('/login');
+app\Controllers\BackupController.php:180:    /** Maps RestoreService's short reason codes to a specific, translated, non-technical message (§Q error catalog). */
+app\Controllers\ClassController.php:28:        $rows = $yearId === null ? [] : $this->classes->allForYear($yearId);
+app\Controllers\ClassController.php:30:            $row['enrolled'] = $this->classes->activeEnrollmentCount((int) $row['id']);
+app\Controllers\ClassController.php:33:        $this->view('classes/index', [
+app\Controllers\ClassController.php:36:            'grades' => $yearId === null ? [] : $this->grades->all(true),
+app\Controllers\ClassController.php:44:            $this->redirect('/classes');
+app\Controllers\ClassController.php:48:        [$gradeId, $name, $capacity, $error] = $this->fields($request);
+app\Controllers\ClassController.php:51:                $this->service->create($gradeId, $yearId, $name, $capacity);
+app\Controllers\ClassController.php:53:                $error = $e->getMessage() === 'year_closed' ? __('academic_years.year_closed') : __('classes.duplicate_name');
+app\Controllers\ClassController.php:62:        $this->redirect('/classes');
+app\Controllers\ClassController.php:67:        $id = $request->paramInt('id');
+app\Controllers\ClassController.php:68:        $class = $id === null ? null : $this->classes->find($id);
+app\Controllers\ClassController.php:70:            $this->redirect('/classes');
+app\Controllers\ClassController.php:74:        [, $name, $capacity, $error] = $this->fields($request, requireGrade: false);
+app\Controllers\ClassController.php:77:        // FK is built against them) -- edit only ever touches name/capacity.
+app\Controllers\ClassController.php:80:                $this->service->update($id, (int) $class['grade_id'], (int) $class['academic_year_id'], $name, $capacity);
+app\Controllers\ClassController.php:82:                $error = $e->getMessage() === 'year_closed' ? __('academic_years.year_closed') : __('classes.duplicate_name');
+app\Controllers\ClassController.php:91:        $this->redirect('/classes');
+app\Controllers\ClassController.php:96:        $id = $request->paramInt('id');
+app\Controllers\ClassController.php:97:        if ($id !== null && $this->classes->find($id) !== null) {
+app\Controllers\ClassController.php:98:            $this->service->setActive($id, false);
+app\Controllers\ClassController.php:101:        $this->redirect('/classes');
+app\Controllers\ClassController.php:106:        $id = $request->paramInt('id');
+app\Controllers\ClassController.php:107:        if ($id !== null && $this->classes->find($id) !== null) {
+app\Controllers\ClassController.php:108:            $this->service->setActive($id, true);
+app\Controllers\ClassController.php:111:        $this->redirect('/classes');
+app\Controllers\ClassController.php:117:        $gradeId = (int) ($request->post('grade_id', '') ?: 0);
+app\Controllers\ClassController.php:118:        $name = $request->post('name', '') ?: '';
+app\Controllers\ClassController.php:119:        $capacityRaw = $request->post('capacity', '') ?: '';
+app\Controllers\DashboardController.php:16: * NOT the full §K report system, no quick-action links to unbuilt modules
+app\Controllers\DashboardController.php:17: * (Students/Backup/etc.) -- those are Phase 6+.
+app\Controllers\DashboardController.php:24:        $stats = (new DashboardStatsService())->build();
+app\Controllers\DashboardController.php:25:        $insights = (new IntelligenceService())->getAtRiskStudents();
+app\Controllers\DashboardController.php:26:        $this->view('dashboard', ['stats' => $stats, 'insights' => $insights]);
+app\Controllers\ExamController.php:30:        $exams  = $yearId ? $this->service->getExamsForYear($yearId) : [];
+app\Controllers\ExamController.php:31:        $this->view('exams/index', ['exams' => $exams, 'yearId' => $yearId]);
+app\Controllers\ExamController.php:37:        $nameEn   = $request->post('name_en', '') ?? '';
+app\Controllers\ExamController.php:38:        $nameAr   = $request->post('name_ar', '') ?? '';
+app\Controllers\ExamController.php:39:        $term     = (int) ($request->post('term', '1') ?? '1');
+app\Controllers\ExamController.php:40:        $maxScore = (float) ($request->post('max_score', '100') ?? '100');
+app\Controllers\ExamController.php:41:        $weight   = (float) ($request->post('weight', '100') ?? '100');
+app\Controllers\ExamController.php:44:            $this->service->createExam($nameEn, $nameAr, $term, $maxScore, $weight);
+app\Controllers\ExamController.php:47:            Flash::set('danger', $e->getMessage() === 'no_active_year'
+app\Controllers\ExamController.php:51:        $this->redirect('/exams');
+app\Controllers\ExamController.php:57:        $id       = (int) ($request->paramInt('id') ?? 0);
+app\Controllers\ExamController.php:58:        $nameEn   = $request->post('name_en', '') ?? '';
+app\Controllers\ExamController.php:59:        $nameAr   = $request->post('name_ar', '') ?? '';
+app\Controllers\ExamController.php:60:        $term     = (int) ($request->post('term', '1') ?? '1');
+app\Controllers\ExamController.php:61:        $maxScore = (float) ($request->post('max_score', '100') ?? '100');
+app\Controllers\ExamController.php:62:        $weight   = (float) ($request->post('weight', '100') ?? '100');
+app\Controllers\ExamController.php:65:            $this->service->updateExam($id, $nameEn, $nameAr, $term, $maxScore, $weight);
+app\Controllers\ExamController.php:70:        $this->redirect('/exams');
+app\Controllers\ExamController.php:76:        $id = $request->paramInt('id');
+app\Controllers\ExamController.php:78:            $this->service->deleteExam($id);
+app\Controllers\ExamController.php:81:        $this->redirect('/exams');
+app\Controllers\ExamController.php:87:        $examId  = $request->paramInt('id') ?? 0;
+app\Controllers\ExamController.php:88:        $classId = (int) ($request->query('class_id') ?? 0);
+app\Controllers\ExamController.php:91:        $exam    = $this->repo->find($examId);
+app\Controllers\ExamController.php:94:            $this->redirect('/exams');
+app\Controllers\ExamController.php:98:        $classes  = $yearId ? $this->classes->allForYear($yearId) : [];
+app\Controllers\ExamController.php:99:        $subjects = $classId > 0 && $yearId ? $this->repo->subjectsForClass($classId, $yearId) : [];
+app\Controllers\ExamController.php:100:        $subjectId = (int) ($request->query('subject_id') ?? ($subjects[0]['id'] ?? 0));
+app\Controllers\ExamController.php:104:        $sheet = $classId > 0 ? $this->service->getScoreSheet($examId, $classId, $subjectId) : [];
+app\Controllers\ExamController.php:106:        $this->view('exams/scores', [
+app\Controllers\ExamController.php:119:        $examId  = (int) ($request->paramInt('id') ?? 0);
+app\Controllers\ExamController.php:120:        $classId = (int) ($request->post('class_id', '0') ?? '0');
+app\Controllers\ExamController.php:136:            $this->service->saveScores($examId, $classId, $records, $userId ?: null);
+app\Controllers\ExamController.php:141:        $subjectId = (int) ($request->post('subject_id', '0') ?? '0');
+app\Controllers\ExamController.php:142:        $this->redirect("/exams/{$examId}/scores?class_id={$classId}&subject_id={$subjectId}");
+app\Controllers\ExamController.php:149:        $classId = (int) ($request->query('class_id') ?? 0);
+app\Controllers\ExamController.php:150:        $classes = $yearId ? $this->classes->allForYear($yearId) : [];
+app\Controllers\ExamController.php:152:            ? $this->service->getClassRanking($classId, $yearId) : [];
+app\Controllers\ExamController.php:154:        $this->view('exams/ranking', [
+app\Controllers\ExamController.php:161:    /** GET /exams/report-card/{studentId} — printable PDF report card. */
+app\Controllers\ExamController.php:164:        $studentId = $request->paramInt('id') ?? 0;
+app\Controllers\ExamController.php:167:        $grid = $this->service->getStudentScoreGrid($studentId, $yearId);
+app\Controllers\ExamController.php:172:            $this->redirect('/exams');
+app\Controllers\ExamController.php:178:            ->prepare('SELECT full_name, student_code FROM students WHERE id = :id');
+app\Controllers\ExamController.php:179:        $studentRow->execute(['id' => $studentId]);
+app\Controllers\ExamController.php:180:        $student = $studentRow->fetch() ?: ['full_name' => "Student #{$studentId}", 'student_code' => ''];
+app\Controllers\ExamController.php:182:        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'default_font' => 'dejavusans']);
+app\Controllers\ExamController.php:183:        $mpdf->SetDirectionality(currentLocale() === 'ar' ? 'rtl' : 'ltr');
+app\Controllers\ExamController.php:189:        $mpdf->WriteHTML($html);
+app\Controllers\ExamController.php:190:        $mpdf->Output("report_card_{$studentId}.pdf", 'I');
+app\Controllers\GradeController.php:13:/** §Q screen inventory: "Grades list" only -- create/edit happen inline (modal) on that one screen, not a separate page. */
+app\Controllers\GradeController.php:24:        $this->view('grades/index', ['grades' => $this->grades->all()]);
+app\Controllers\GradeController.php:29:        $error = $this->save(null, $request);
+app\Controllers\GradeController.php:35:        $this->redirect('/grades');
+app\Controllers\GradeController.php:40:        $id = $request->paramInt('id');
+app\Controllers\GradeController.php:41:        if ($id === null || $this->grades->find($id) === null) {
+app\Controllers\GradeController.php:42:            $this->redirect('/grades');
+app\Controllers\GradeController.php:45:        $error = $this->save($id, $request);
+app\Controllers\GradeController.php:51:        $this->redirect('/grades');
+app\Controllers\GradeController.php:56:        $id = $request->paramInt('id');
+app\Controllers\GradeController.php:57:        if ($id !== null && $this->grades->find($id) !== null) {
+app\Controllers\GradeController.php:58:            $this->service->setActive($id, false);
+app\Controllers\GradeController.php:61:        $this->redirect('/grades');
+app\Controllers\GradeController.php:66:        $id = $request->paramInt('id');
+app\Controllers\GradeController.php:67:        if ($id !== null && $this->grades->find($id) !== null) {
+app\Controllers\GradeController.php:68:            $this->service->setActive($id, true);
+app\Controllers\GradeController.php:71:        $this->redirect('/grades');
+app\Controllers\GradeController.php:76:        $nameEn = $request->post('name_en', '') ?: '';
+app\Controllers\GradeController.php:77:        $nameAr = $request->post('name_ar', '') ?: '';
+app\Controllers\GradeController.php:78:        $sortOrder = (int) ($request->post('sort_order', '') ?: 0);
+app\Controllers\GradeController.php:85:            $this->service->create($nameEn, $nameAr, $sortOrder);
+app\Controllers\GradeController.php:87:            $this->service->update($id, $nameEn, $nameAr, $sortOrder);
+app\Controllers\ImportController.php:34:                    (new GradeService())->create($nameEn, $nameAr, $sortOrder);
+app\Controllers\ImportController.php:48:                    (new ClassService())->create($gradeId, $yearId, $name, $capacity);
+app\Controllers\ImportController.php:60:                    (new SubjectService())->create($code, $nameEn, $nameAr);
+app\Controllers\ImportController.php:72:                    (new TeacherService())->create($fullName, $phone, $email);
+app\Controllers\ImportController.php:78:                "headers" => ["Full Name", "Gender (M/F)", "Date of Birth (YYYY-MM-DD)", "Religion", "Grade ID", "Class ID"],
+app\Controllers\ImportController.php:82:                    $dob = trim((string) ($row["Date of Birth (YYYY-MM-DD)"] ?? ""));
+app\Controllers\ImportController.php:90:                    (new StudentService())->create(
+app\Controllers\ImportController.php:107:                    (new UserService())->create($username, $password, $fullName, $role);
+app\Controllers\ImportController.php:122:                    (new \App\Services\AssignmentService())->create($teacherId, $subjectId, $classId, $yearId, $periods);
+app\Controllers\ImportController.php:133:        $entity = $request->paramString("entity");
+app\Controllers\ImportController.php:134:        $config = $this->getEntityConfig($entity);
+app\Controllers\ImportController.php:136:            $this->redirect("/");
+app\Controllers\ImportController.php:146:        (new ImportService())->generateTemplate($config["headers"], $entity . "_template", currentLocale());
+app\Controllers\ImportController.php:151:        $entity = $request->paramString("entity");
+app\Controllers\ImportController.php:152:        $config = $this->getEntityConfig($entity);
+app\Controllers\ImportController.php:154:            $this->redirect("/");
+app\Controllers\ImportController.php:165:            $this->redirect($config["redirect"]);
+app\Controllers\ImportController.php:170:            $rows = (new ImportService())->parseFile($_FILES["import_file"]["tmp_name"], $config["headers"]);
+app\Controllers\ImportController.php:173:            $this->redirect($config["redirect"]);
+app\Controllers\ImportController.php:179:            $this->redirect($config["redirect"]);
+app\Controllers\ImportController.php:188:        $pdo->beginTransaction();
+app\Controllers\ImportController.php:197:                    error_log("Import row error for {$entity}: " . $e->getMessage());
+app\Controllers\ImportController.php:201:            // Imports are atomic: showing a partly-successful upload is not
+app\Controllers\ImportController.php:206:                $pdo->rollBack();
+app\Controllers\ImportController.php:209:                $pdo->commit();
+app\Controllers\ImportController.php:213:            if ($pdo->inTransaction()) {
+app\Controllers\ImportController.php:214:                $pdo->rollBack();
+app\Controllers\ImportController.php:218:            error_log("Import process error for {$entity}: " . $e->getMessage());
+app\Controllers\ImportController.php:221:        $this->redirect($config["redirect"]);
+app\Controllers\NotificationController.php:23:        $category = $request->query('category');
+app\Controllers\NotificationController.php:25:        $notifications = $this->notif->recent($userId, 50, $category);
+app\Controllers\NotificationController.php:30:        $this->view('notifications/index', [
+app\Controllers\NotificationController.php:39:        $id     = $request->paramInt('id') ?? 0;
+app\Controllers\NotificationController.php:41:        $notification = $this->notif->findForUser($id, $userId);
+app\Controllers\NotificationController.php:43:            $this->redirect('/notifications');
+app\Controllers\NotificationController.php:46:        $this->notif->markRead($id, $userId);
+app\Controllers\NotificationController.php:48:        if ($request->post('follow') === '1') {
+app\Controllers\NotificationController.php:51:                $this->redirect($link);
+app\Controllers\NotificationController.php:60:        $this->redirect($back);
+app\Controllers\NotificationController.php:63:    /** POST /notifications/read-all — mark all unread as read. */
+app\Controllers\NotificationController.php:67:        $this->notif->markAllRead($userId);
+app\Controllers\NotificationController.php:68:        $this->redirect('/notifications');
+app\Controllers\NotificationController.php:79:        $items  = $this->notif->recent($userId, 10);
+app\Controllers\NotificationController.php:94:        header('Content-Type: application/json; charset=utf-8');
+app\Controllers\NotificationController.php:96:            'unread' => $this->notif->unreadCount($userId),
+app\Controllers\PromotionController.php:15:/** §I.1 student promotion -- the workflow-specific route (not plain CRUD), per §Q's route table. */
+app\Controllers\PromotionController.php:25:    /** GET /students/promotion -- year picker first, then (once both are chosen) the actual preview table. */
+app\Controllers\PromotionController.php:28:        $sourceId = (int) ($request->query('source', '') ?: 0);
+app\Controllers\PromotionController.php:29:        $targetId = (int) ($request->query('target', '') ?: 0);
+app\Controllers\PromotionController.php:32:            $this->view('students/promotion-pick', ['error' => null, 'years' => $this->years->all()]);
+app\Controllers\PromotionController.php:36:        $source = $this->years->find($sourceId);
+app\Controllers\PromotionController.php:37:        $target = $this->years->find($targetId);
+app\Controllers\PromotionController.php:39:            $this->view('students/promotion-pick', [
+app\Controllers\PromotionController.php:40:                'error' => __('promotion.invalid_years'), 'years' => $this->years->all(),
+app\Controllers\PromotionController.php:45:        $rows = $this->service->preview($sourceId, $targetId);
+app\Controllers\PromotionController.php:46:        $this->view('students/promotion-preview', [
+app\Controllers\PromotionController.php:51:    /** POST /students/promotion -- the actual batch (§I.1 steps 6-8). */
+app\Controllers\PromotionController.php:54:        $sourceId = (int) ($request->post('source_year_id', '') ?: 0);
+app\Controllers\PromotionController.php:55:        $targetId = (int) ($request->post('target_year_id', '') ?: 0);
+app\Controllers\PromotionController.php:56:        $source = $this->years->find($sourceId);
+app\Controllers\PromotionController.php:57:        $target = $this->years->find($targetId);
+app\Controllers\PromotionController.php:60:            $this->redirect('/students/promotion');
+app\Controllers\PromotionController.php:64:        $decisions = $this->collectDecisions($request);
+app\Controllers\PromotionController.php:67:            $result = $this->service->confirm($sourceId, $targetId, $decisions);
+app\Controllers\PromotionController.php:69:            Flash::set('danger', match ($e->getMessage()) {
+app\Controllers\PromotionController.php:74:            $this->redirect('/students/promotion');
+app\Controllers\PromotionController.php:86:        $this->redirect('/students');
+app\Controllers\PromotionController.php:89:    /** POST /students/{id}/undo-promotion -- {id} here is the STUDENT's current (target-year) enrollment id. */
+app\Controllers\PromotionController.php:92:        $enrollmentId = $request->paramInt('id');
+app\Controllers\PromotionController.php:94:            $this->redirect('/students');
+app\Controllers\PromotionController.php:98:        $enrollment = $this->enrollments->find($enrollmentId);
+app\Controllers\PromotionController.php:100:            $this->service->undoLast($enrollmentId);
+app\Controllers\PromotionController.php:103:            Flash::set('danger', $e->getMessage() === 'year_closed'
+app\Controllers\PromotionController.php:108:        $this->redirect($enrollment !== null ? "/students/{$enrollment['student_id']}" : '/students');
+app\Controllers\PromotionController.php:114:        $enrollmentIds = $request->postArray('enrollment_id');
+app\Controllers\PromotionController.php:115:        $actions = $request->postMap('action');
+app\Controllers\PromotionController.php:116:        $classIds = $request->postMap('class_id');
+app\Controllers\ReportController.php:20: * Nizam -- §K's six reports. GET /reports/{key} shows the filter form +
+app\Controllers\ReportController.php:21: * on-screen table (which doubles as the print view via print.css's @media
+app\Controllers\ReportController.php:22: * print rules -- §K's "shared report conventions" don't ask for a separate
+app\Controllers\ReportController.php:23: * print screen, just print-safe CSS on this same one). GET
+app\Controllers\ReportController.php:25: * "reports.view"/"reports.export" permission check is server-side
+app\Controllers\ReportController.php:26: * (RoleGuardMiddleware on the route) -- nothing here re-implements or
+app\Controllers\ReportController.php:43:        $this->view('reports/index', ['catalog' => $this->reports->catalog()]);
+app\Controllers\ReportController.php:48:        $key = $this->keyFromPath($request);
+app\Controllers\ReportController.php:49:        if ($key === null || !$this->reports->isKnownReport($key)) {
+app\Controllers\ReportController.php:54:        $filters = $this->collectFilters($request);
+app\Controllers\ReportController.php:60:        // year picked) -- that's a normal empty filter form, not an error;
+app\Controllers\ReportController.php:61:        // only an actually-invalid value (a nonexistent or cross-scope id)
+app\Controllers\ReportController.php:65:                $report = $this->reports->build($key, $filters, $locale);
+app\Controllers\ReportController.php:67:                if ($e->getMessage() !== 'missing_filter') {
+app\Controllers\ReportController.php:68:                    $error = $e->getMessage() === 'invalid_filter' ? __('reports.invalid_filter') : __('error.500.title');
+app\Controllers\ReportController.php:73:        $this->view('reports/show', [
+app\Controllers\ReportController.php:78:            'years' => $this->years->all(),
+app\Controllers\ReportController.php:79:            'grades' => $this->grades->all(true),
+app\Controllers\ReportController.php:80:            'subjects' => $this->subjects->all(true),
+app\Controllers\ReportController.php:82:                ? $this->classes->forGradeAndYear((int) $filters['grade'], (int) $filters['year']) : [],
+app\Controllers\ReportController.php:88:        $key = $this->keyFromPath($request);
+app\Controllers\ReportController.php:89:        $format = $request->paramString('format');
+app\Controllers\ReportController.php:90:        if ($key === null || $format === null || !$this->reports->isKnownReport($key)) {
+app\Controllers\ReportController.php:95:        // own §K-specified list is rejected even if the string itself
+app\Controllers\ReportController.php:97:        if (!$this->reports->isValidFormat($key, $format)) {
+app\Controllers\ReportController.php:102:        $filters = $this->collectFilters($request);
+app\Controllers\ReportController.php:106:            $report = $this->reports->build($key, $filters, $locale);
+app\Controllers\ReportController.php:114:            Response::download($this->export->toPdf($report, $locale), "{$filename}.pdf", 'application/pdf');
+app\Controllers\ReportController.php:117:                $this->export->toExcel($report, $locale),
+app\Controllers\ReportController.php:119:                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+app\Controllers\ReportController.php:128:        return $request->paramString('key');
+app\Controllers\ReportController.php:136:            $value = $request->query($name, '');
+app\Controllers\ScheduledController.php:28:        $authHeader = $request->header('Authorization');
+app\Controllers\ScheduledController.php:43:        if (!$this->authenticate($request)) {
+app\Controllers\ScheduledController.php:44:            $this->jsonResponse(['error' => 'Unauthorized'], 401);
+app\Controllers\ScheduledController.php:49:        $count = $notifications->checkBirthdays();
+app\Controllers\ScheduledController.php:51:        $this->jsonResponse([
+app\Controllers\ScheduledController.php:54:            'time' => date('Y-m-d H:i:s'),
+app\Controllers\ScheduledController.php:64:        if (!$this->authenticate($request)) {
+app\Controllers\ScheduledController.php:65:            $this->jsonResponse(['error' => 'Unauthorized'], 401);
+app\Controllers\ScheduledController.php:70:        $sent = $notifications->checkYearRolloverReminders();
+app\Controllers\ScheduledController.php:72:        $this->jsonResponse([
+app\Controllers\ScheduledController.php:75:            'time' => date('Y-m-d H:i:s'),
+app\Controllers\ScheduledController.php:85:        if (!$this->authenticate($request)) {
+app\Controllers\ScheduledController.php:86:            $this->jsonResponse(['error' => 'Unauthorized'], 401);
+app\Controllers\ScheduledController.php:91:        $results = $cleanup->runAllCleanupTasks();
+app\Controllers\ScheduledController.php:93:        $this->jsonResponse([
+app\Controllers\ScheduledController.php:96:            'time' => date('Y-m-d H:i:s'),
+app\Controllers\ScheduledController.php:106:        if (!$this->authenticate($request)) {
+app\Controllers\ScheduledController.php:107:            $this->jsonResponse(['error' => 'Unauthorized'], 401);
+app\Controllers\ScheduledController.php:111:        $email = $request->post('email', '');
+app\Controllers\ScheduledController.php:113:            $this->jsonResponse(['error' => 'Invalid email'], 400);
+app\Controllers\ScheduledController.php:118:        $sent = $notifications->sendTestNotification($email);
+app\Controllers\ScheduledController.php:120:        $this->jsonResponse([
+app\Controllers\ScheduledController.php:132:        header('Content-Type: application/json');
+app\Controllers\SettingsController.php:19: * Nizam -- §Q/§O-21: Settings grouped into five screens (Profile,
+app\Controllers\SettingsController.php:21: * non-technical admin changing the report footer is never sitting next to a
+app\Controllers\SettingsController.php:22: * security-relevant toggle on the same form. Entirely gated on
+app\Controllers\SettingsController.php:23: * settings.manage (§J: Administrator only, no Staff visibility at all --
+app\Controllers\SettingsController.php:24: * the same single-permission shape as Users).
+app\Controllers\SettingsController.php:36:    // ---------------------------------------------------------- Profile
+app\Controllers\SettingsController.php:39:        $this->view('settings/profile', ['error' => null, 'school' => $this->schools->full()]);
+app\Controllers\SettingsController.php:44:        $school = $this->schools->full();
+app\Controllers\SettingsController.php:46:            $this->redirect('/settings/profile');
+app\Controllers\SettingsController.php:50:        $name = $request->post('name', '') ?: '';
+app\Controllers\SettingsController.php:51:        $nameAr = $request->post('name_ar', '') ?: '';
+app\Controllers\SettingsController.php:52:        $address = $request->post('address', '') ?: null;
+app\Controllers\SettingsController.php:53:        $phone = $request->post('phone', '') ?: null;
+app\Controllers\SettingsController.php:54:        $footerText = $request->post('footer_text', '') ?: null;
+app\Controllers\SettingsController.php:57:            $this->view('settings/profile', ['error' => __('validation.required'), 'school' => $school]);
+app\Controllers\SettingsController.php:61:        $this->schools->update($school['id'], $name, $nameAr, $address, $phone);
+app\Controllers\SettingsController.php:64:        if ($request->post('remove_logo') === '1') {
+app\Controllers\SettingsController.php:65:            $this->uploads->delete($school['logo_path']);
+app\Controllers\SettingsController.php:66:            $this->schools->updateLogoPath($school['id'], null);
+app\Controllers\SettingsController.php:68:            $file = $request->file('logo');
+app\Controllers\SettingsController.php:71:                    $newPath = $this->uploads->store($file, 'school');
+app\Controllers\SettingsController.php:72:                    $this->uploads->delete($school['logo_path']);
+app\Controllers\SettingsController.php:73:                    $this->schools->updateLogoPath($school['id'], $newPath);
+app\Controllers\SettingsController.php:75:                    Flash::set('warning', match ($e->getMessage()) {
+app\Controllers\SettingsController.php:86:        $this->redirect('/settings/profile');
+app\Controllers\SettingsController.php:89:    /** GET /logo -- public, including the pre-login screen (a school crest isn't confidential); also shown in the app shell for every authenticated role, not gated on settings.manage. Resolved by the single schools row, never client input (§S-10). */
+app\Controllers\SettingsController.php:92:        $school = $this->schools->full();
+app\Controllers\SettingsController.php:93:        $this->uploads->stream($school['logo_path'] ?? null);
+app\Controllers\SettingsController.php:96:    // ------------------------------------------------------ Localization
+app\Controllers\SettingsController.php:99:        $this->view('settings/localization', [
+app\Controllers\SettingsController.php:106:        $language = $request->post('default_language', '') ?: '';
+app\Controllers\SettingsController.php:109:            $this->redirect('/settings/localization');
+app\Controllers\SettingsController.php:116:        $this->redirect('/settings/localization');
+app\Controllers\SettingsController.php:119:    // -------------------------------------------------------- Academic
+app\Controllers\SettingsController.php:122:        $this->view('settings/academic', [
+app\Controllers\SettingsController.php:125:            'studentIdPattern' => SettingsService::get('academic.student_id_pattern', 'STU-{year}-{seq:6}'),
+app\Controllers\SettingsController.php:126:            'teacherIdPattern' => SettingsService::get('academic.teacher_id_pattern', 'TCH-{seq:6}'),
+app\Controllers\SettingsController.php:132:        $capacity = (int) ($request->post('expected_weekly_capacity', '') ?: 0);
+app\Controllers\SettingsController.php:133:        $studentPattern = $request->post('student_id_pattern', '') ?: '';
+app\Controllers\SettingsController.php:134:        $teacherPattern = $request->post('teacher_id_pattern', '') ?: '';
+app\Controllers\SettingsController.php:140:            // IdPattern::render's whole mechanism depends on a {seq:N} token --
+app\Controllers\SettingsController.php:147:            $this->view('settings/academic', [
+app\Controllers\SettingsController.php:159:        $this->redirect('/settings/academic');
+app\Controllers\SettingsController.php:162:    // -------------------------------------------------------- Security
+app\Controllers\SettingsController.php:165:        $this->view('settings/security', [
+app\Controllers\SettingsController.php:175:        $maxAttempts = (int) ($request->post('login_max_attempts', '') ?: 0);
+app\Controllers\SettingsController.php:176:        $lockoutMinutes = (int) ($request->post('lockout_minutes', '') ?: 0);
+app\Controllers\SettingsController.php:177:        $sessionTimeout = (int) ($request->post('session_timeout_minutes', '') ?: 0);
+app\Controllers\SettingsController.php:180:        // stops being usable (a 1-attempt lockout locks out typos, a 1-minute
+app\Controllers\SettingsController.php:181:        // session logs someone out mid-sentence); above the ceiling and the
+app\Controllers\SettingsController.php:193:            $this->view('settings/security', [
+app\Controllers\SettingsController.php:205:        $this->redirect('/settings/security');
+app\Controllers\SettingsController.php:208:    // ---------------------------------------------------------- Backup
+app\Controllers\SettingsController.php:212:        // (BackupService's own docblock) -- a local-folder config form here
+app\Controllers\SettingsController.php:214:        // zero-gap pass was built to eliminate. Show an informational
+app\Controllers\SettingsController.php:216:        $this->view('settings/backup', [
+app\Controllers\SettingsController.php:229:            $this->redirect('/settings/backup');
+app\Controllers\SettingsController.php:233:        $folder = trim($request->post('default_folder', '') ?: '');
+app\Controllers\SettingsController.php:237:            // Not a client-facing path-serving endpoint (§S-10 doesn't apply
+app\Controllers\SettingsController.php:238:            // the same way here -- this is an admin-only config value, not a
+app\Controllers\SettingsController.php:254:            $this->view('settings/backup', ['error' => $error, 'cloudStorage' => false, 'defaultFolder' => $folder]);
+app\Controllers\SettingsController.php:261:        $this->redirect('/settings/backup');
+app\Controllers\SettingsController.php:266:        return Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
+app\Controllers\SetupController.php:25: * Nizam -- first-run Setup Wizard (§N, hardened by §O-6). One GET entry
+app\Controllers\SetupController.php:27: * is; step-specific POST actions that each re-check they're still the
+app\Controllers\SetupController.php:30: * skip ahead. Every POST goes through the existing CsrfMiddleware -- wired
+app\Controllers\SetupController.php:31: * in public/index.php, not re-implemented here.
+app\Controllers\SetupController.php:38:        $step = $status->currentStep();
+app\Controllers\SetupController.php:46:                    'environment' => (new EnvironmentCheckService())->check(),
+app\Controllers\SetupController.php:48:                $this->view('setup/database', $data);
+app\Controllers\SetupController.php:51:                $pending = (new MigrationService())->pendingCount(Database::connection(), dirname(__DIR__, 2) . '/database/migrations');
+app\Controllers\SetupController.php:52:                $this->view('setup/schema', $data + ['pending' => $pending]);
+app\Controllers\SetupController.php:55:                $this->view('setup/school', $data);
+app\Controllers\SetupController.php:58:                $this->view('setup/year', $data);
+app\Controllers\SetupController.php:61:                $this->view('setup/admin', $data);
+app\Controllers\SetupController.php:64:                $this->view('setup/done', []);
+app\Controllers\SetupController.php:70:        if ((new SetupStatusService())->currentStep() !== SetupStatusService::STEP_DATABASE) {
+app\Controllers\SetupController.php:71:            $this->redirect('/setup');
+app\Controllers\SetupController.php:75:        $environment = (new EnvironmentCheckService())->check();
+app\Controllers\SetupController.php:77:            // Same rule as the view's disabled form, enforced again here --
+app\Controllers\SetupController.php:79:            $this->view('setup/database', [
+app\Controllers\SetupController.php:81:                'host' => $request->post('host', '') ?: '', 'port' => $request->post('port', '3306') ?: '3306',
+app\Controllers\SetupController.php:82:                'database' => $request->post('database', '') ?: '', 'username' => $request->post('username', '') ?: '',
+app\Controllers\SetupController.php:88:        $host = $request->post('host', '') ?: '';
+app\Controllers\SetupController.php:89:        $port = (int) ($request->post('port', '3306') ?: 3306);
+app\Controllers\SetupController.php:90:        $name = $request->post('database', '') ?: '';
+app\Controllers\SetupController.php:91:        $username = $request->post('username', '') ?: '';
+app\Controllers\SetupController.php:92:        $password = $request->post('password', '') ?: '';
+app\Controllers\SetupController.php:95:            $this->view('setup/database', [
+app\Controllers\SetupController.php:107:            $this->view('setup/database', [
+app\Controllers\SetupController.php:108:                'error' => __('setup.database.connect_failed', ['detail' => $e->getMessage()]),
+app\Controllers\SetupController.php:115:        $this->writeConfigFile($host, $port, $name, $username, $password);
+app\Controllers\SetupController.php:117:        $this->redirect('/setup');
+app\Controllers\SetupController.php:122:        if ((new SetupStatusService())->currentStep() !== SetupStatusService::STEP_SCHEMA) {
+app\Controllers\SetupController.php:123:            $this->redirect('/setup');
+app\Controllers\SetupController.php:130:        $migrationResult = (new MigrationService())->run($pdo, $base . '/migrations');
+app\Controllers\SetupController.php:132:            $this->view('setup/schema', [
+app\Controllers\SetupController.php:139:        $seedResult = (new SeedService())->run($pdo, $base . '/seeds');
+app\Controllers\SetupController.php:141:            $this->view('setup/schema', [
+app\Controllers\SetupController.php:149:        $this->redirect('/setup');
+app\Controllers\SetupController.php:154:        if ((new SetupStatusService())->currentStep() !== SetupStatusService::STEP_SCHOOL) {
+app\Controllers\SetupController.php:155:            $this->redirect('/setup');
+app\Controllers\SetupController.php:159:        $name = $request->post('name', '') ?: '';
+app\Controllers\SetupController.php:160:        $nameAr = $request->post('name_ar', '') ?: '';
+app\Controllers\SetupController.php:161:        $address = $request->post('address', '') ?: null;
+app\Controllers\SetupController.php:162:        $phone = $request->post('phone', '') ?: null;
+app\Controllers\SetupController.php:165:            $this->view('setup/school', ['error' => __('validation.required')]);
+app\Controllers\SetupController.php:169:        (new SchoolRepository())->create($name, $nameAr, $address, $phone);
+app\Controllers\SetupController.php:170:        $this->redirect('/setup');
+app\Controllers\SetupController.php:175:        if ((new SetupStatusService())->currentStep() !== SetupStatusService::STEP_YEAR) {
+app\Controllers\SetupController.php:176:            $this->redirect('/setup');
+app\Controllers\SetupController.php:180:        $label = $request->post('label', '') ?: '';
+app\Controllers\SetupController.php:181:        $start = $request->post('start_date', '') ?: '';
+app\Controllers\SetupController.php:182:        $end = $request->post('end_date', '') ?: '';
+app\Controllers\SetupController.php:185:            $this->view('setup/year', ['error' => __('validation.required')]);
+app\Controllers\SetupController.php:189:            $this->view('setup/year', ['error' => __('validation.year_label_format')]);
+app\Controllers\SetupController.php:192:        $startTs = DateTime::createFromFormat('Y-m-d', $start);
+app\Controllers\SetupController.php:193:        $endTs = DateTime::createFromFormat('Y-m-d', $end);
+app\Controllers\SetupController.php:195:            $this->view('setup/year', ['error' => __('validation.required')]);
+app\Controllers\SetupController.php:199:            $this->view('setup/year', ['error' => __('validation.date_order')]);
+app\Controllers\SetupController.php:203:        (new AcademicYearRepository())->createFirst($label, $start, $end);
+app\Controllers\SetupController.php:204:        $this->redirect('/setup');
+app\Controllers\SetupController.php:209:        if ((new SetupStatusService())->currentStep() !== SetupStatusService::STEP_ADMIN) {
+app\Controllers\SetupController.php:210:            $this->redirect('/setup');
+app\Controllers\SetupController.php:214:        $fullName = $request->post('full_name', '') ?: '';
+app\Controllers\SetupController.php:215:        $username = $request->post('username', '') ?: '';
+app\Controllers\SetupController.php:216:        $password = $request->post('password', '') ?: '';
+app\Controllers\SetupController.php:217:        $confirm = $request->post('password_confirm', '') ?: '';
+app\Controllers\SetupController.php:220:            $this->view('setup/admin', ['error' => __('validation.required')]);
+app\Controllers\SetupController.php:224:            $this->view('setup/admin', ['error' => __('validation.password_length')]);
+app\Controllers\SetupController.php:228:            $this->view('setup/admin', ['error' => __('validation.password_mismatch')]);
+app\Controllers\SetupController.php:233:        $exists = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = :u');
+app\Controllers\SetupController.php:234:        $exists->execute(['u' => $username]);
+app\Controllers\SetupController.php:235:        if ((int) $exists->fetchColumn() > 0) {
+app\Controllers\SetupController.php:236:            $this->view('setup/admin', ['error' => __('validation.username_taken')]);
+app\Controllers\SetupController.php:240:        $roleId = (int) $pdo->query("SELECT id FROM roles WHERE code = 'admin'")->fetchColumn();
+app\Controllers\SetupController.php:241:        $stmt = $pdo->prepare(
+app\Controllers\SetupController.php:244:        $stmt->execute([
+app\Controllers\SetupController.php:252:        // immediately, rather than making them re-type credentials they
+app\Controllers\SetupController.php:253:        // just entered -- per this phase's own "use existing authentication
+app\Controllers\SetupController.php:258:        // wizard locks itself -- see complete() below.
+app\Controllers\SetupController.php:259:        (new AuthService())->attempt($username, $password, $request->ip());
+app\Controllers\SetupController.php:261:        $this->redirect('/setup');
+app\Controllers\SetupController.php:265:     * The wizard's actual lock point (§O-6): flips settings.system.setup_completed,
+app\Controllers\SetupController.php:267:     * with no in-app way back in. Separated from saveAdmin() so "Setup
+app\Controllers\SetupController.php:273:        if ((new SetupStatusService())->currentStep() !== SetupStatusService::STEP_DONE) {
+app\Controllers\SetupController.php:274:            $this->redirect('/setup');
+app\Controllers\SetupController.php:279:        $this->redirect('/dashboard');
+app\Controllers\SetupController.php:288:     * does NOT touch setup_completed or re-run schema migrations. This is
+app\Controllers\SetupController.php:290:     * production deployments where setup_completed was force-set via
+app\Controllers\SetupController.php:294:     * (404 or redirect to login) — mirrors §O-6's "no exceptions" spirit.
+app\Controllers\SetupController.php:300:        $userCount = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+app\Controllers\SetupController.php:304:            $this->redirect('/login');
+app\Controllers\SetupController.php:309:        $this->view('setup/recover-admin', ['error' => null]);
+app\Controllers\SetupController.php:314:        // Re-check ground truth on POST (prevent race condition)
+app\Controllers\SetupController.php:316:        $userCount = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+app\Controllers\SetupController.php:320:            $this->redirect('/login');
+app\Controllers\SetupController.php:325:        $fullName = $request->post('full_name', '') ?: '';
+app\Controllers\SetupController.php:326:        $username = $request->post('username', '') ?: '';
+app\Controllers\SetupController.php:327:        $password = $request->post('password', '') ?: '';
+app\Controllers\SetupController.php:328:        $confirm = $request->post('password_confirm', '') ?: '';
+app\Controllers\SetupController.php:331:            $this->view('setup/recover-admin', ['error' => __('validation.required')]);
+app\Controllers\SetupController.php:335:            $this->view('setup/recover-admin', ['error' => __('validation.password_length')]);
+app\Controllers\SetupController.php:339:            $this->view('setup/recover-admin', ['error' => __('validation.password_mismatch')]);
+app\Controllers\SetupController.php:345:        $exists = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = :u');
+app\Controllers\SetupController.php:346:        $exists->execute(['u' => $username]);
+app\Controllers\SetupController.php:347:        if ((int) $exists->fetchColumn() > 0) {
+app\Controllers\SetupController.php:348:            $this->view('setup/recover-admin', ['error' => __('validation.username_taken')]);
+app\Controllers\SetupController.php:352:        $roleId = (int) $pdo->query("SELECT id FROM roles WHERE code = 'admin'")->fetchColumn();
+app\Controllers\SetupController.php:353:        $stmt = $pdo->prepare(
+app\Controllers\SetupController.php:356:        $stmt->execute([
+app\Controllers\SetupController.php:363:        $newUserId = (int) $pdo->lastInsertId();
+app\Controllers\SetupController.php:365:        // Auto-login the new admin first, so the activity log entry below
+app\Controllers\SetupController.php:367:        (new AuthService())->attempt($username, $password, $request->ip());
+app\Controllers\SetupController.php:369:        ActivityLogger::log('admin.recover', 'users', $newUserId, "Emergency admin account '{$username}' created via /setup/recover-admin");
+app\Controllers\SetupController.php:372:        $this->redirect('/dashboard');
+app\Controllers\SetupController.php:386:        $contents = "<?php\n/**\n * Nizam -- generated by the Setup Wizard. Holds real local credentials --\n"
+app\Controllers\StudentController.php:23:    // §Q validation rule: "sanity-checked against a configurable plausible age
+app\Controllers\StudentController.php:26:    // so "configurable" is a code constant here rather than an admin-facing
+app\Controllers\StudentController.php:27:    // toggle -- a K-12-plus-repetition range wide enough never to reject a real
+app\Controllers\StudentController.php:28:    // student, narrow enough to still catch a fat-fingered birth year.
+app\Controllers\StudentController.php:43:        $term = trim($request->query('q', '') ?? '');
+app\Controllers\StudentController.php:44:        $gradeId = (int) $request->query('grade_id', '0');
+app\Controllers\StudentController.php:45:        $classId = (int) $request->query('class_id', '0');
+app\Controllers\StudentController.php:49:        // O-25: read caller-supplied values but cap on the server side before use.
+app\Controllers\StudentController.php:50:        $requestedPerPage = max(1, (int) $request->query('per_page', (string) StudentRepository::MAX_PER_PAGE));
+app\Controllers\StudentController.php:52:        $page    = max(1, (int) $request->query('page', '1'));
+app\Controllers\StudentController.php:54:        $total    = $this->students->countFiltered('active', $term, $yearId, $gradeId, $classId);
+app\Controllers\StudentController.php:58:        $students = $this->students->paginate($page, $perPage, 'active', $term, $yearId, $gradeId, $classId);
+app\Controllers\StudentController.php:60:        $grades = $this->grades->all(true);
+app\Controllers\StudentController.php:61:        $classes = $yearId > 0 ? $this->classes->allForYear($yearId) : [];
+app\Controllers\StudentController.php:63:        $this->view('students/index', [
+app\Controllers\StudentController.php:79:        $this->view('students/archived', ['students' => $this->students->all('archived')]);
+app\Controllers\StudentController.php:84:        $id = $request->paramInt('id');
+app\Controllers\StudentController.php:85:        $student = $id === null ? null : $this->students->find($id);
+app\Controllers\StudentController.php:87:            $this->redirect('/students');
+app\Controllers\StudentController.php:91:        $currentEnrollment = $this->enrollmentService->currentEnrollmentFor($id);
+app\Controllers\StudentController.php:94:            $availableClasses = $this->classes->forGradeAndYear(
+app\Controllers\StudentController.php:99:        $this->view('students/show', [
+app\Controllers\StudentController.php:101:            'history' => $this->enrollmentService->historyFor($id),
+app\Controllers\StudentController.php:112:            $this->redirect('/students');
+app\Controllers\StudentController.php:115:        // Every active class in the active year, not pre-filtered by grade --
+app\Controllers\StudentController.php:116:        // the form has no grade selection yet on first load. students-form.js
+app\Controllers\StudentController.php:117:        // filters the visible options client-side once a grade IS picked;
+app\Controllers\StudentController.php:118:        // StudentService::create() re-validates class/grade/year server-side
+app\Controllers\StudentController.php:120:        $this->view('students/form', [
+app\Controllers\StudentController.php:121:            'error' => null, 'student' => null, 'grades' => $this->grades->all(true),
+app\Controllers\StudentController.php:122:            'classes' => $this->classes->allForYear($yearId),
+app\Controllers\StudentController.php:128:        $fields = $this->fields($request);
+app\Controllers\StudentController.php:129:        $gradeId = (int) ($request->post('grade_id', '') ?: 0);
+app\Controllers\StudentController.php:130:        $classId = $request->post('class_id', '') ?: '';
+app\Controllers\StudentController.php:135:            $this->view('students/form', [
+app\Controllers\StudentController.php:136:                'error' => $error, 'student' => null, 'grades' => $this->grades->all(true),
+app\Controllers\StudentController.php:137:                'classes' => $yearId === null ? [] : $this->classes->allForYear($yearId),
+app\Controllers\StudentController.php:143:            $studentId = $this->service->create(
+app\Controllers\StudentController.php:149:            $message = match ($e->getMessage()) {
+app\Controllers\StudentController.php:154:            $this->view('students/form', [
+app\Controllers\StudentController.php:155:                'error' => $message, 'student' => null, 'grades' => $this->grades->all(true),
+app\Controllers\StudentController.php:156:                'classes' => $yearId === null ? [] : $this->classes->allForYear($yearId),
+app\Controllers\StudentController.php:161:        $this->handlePhotoUpload($request, $studentId);
+app\Controllers\StudentController.php:163:        $this->redirect('/students');
+app\Controllers\StudentController.php:168:        $id = $request->paramInt('id');
+app\Controllers\StudentController.php:169:        $student = $id === null ? null : $this->students->find($id);
+app\Controllers\StudentController.php:171:            $this->redirect('/students');
+app\Controllers\StudentController.php:174:        $this->view('students/form', ['error' => null, 'student' => $student, 'grades' => [], 'classes' => []]);
+app\Controllers\StudentController.php:179:        $id = $request->paramInt('id');
+app\Controllers\StudentController.php:180:        $student = $id === null ? null : $this->students->find($id);
+app\Controllers\StudentController.php:182:            $this->redirect('/students');
+app\Controllers\StudentController.php:186:        $fields = $this->fields($request);
+app\Controllers\StudentController.php:188:            $this->view('students/form', [
+app\Controllers\StudentController.php:194:        $this->service->update(
+app\Controllers\StudentController.php:198:        $this->handlePhotoUpload($request, $id);
+app\Controllers\StudentController.php:200:        $this->redirect('/students');
+app\Controllers\StudentController.php:203:    /** GET /students/{id}/photo -- resolved by database id (§S-10), never a client-supplied path. Gated by students.view on the route, same as viewing the student itself. */
+app\Controllers\StudentController.php:206:        $id = $request->paramInt('id');
+app\Controllers\StudentController.php:207:        $student = $id === null ? null : $this->students->find($id);
+app\Controllers\StudentController.php:208:        $this->uploads->stream($student['photo_path'] ?? null);
+app\Controllers\StudentController.php:213:        $id = $request->paramInt('id');
+app\Controllers\StudentController.php:216:                $this->service->archive($id);
+app\Controllers\StudentController.php:219:                Flash::set('danger', $e->getMessage() === 'year_closed'
+app\Controllers\StudentController.php:224:        $this->redirect('/students');
+app\Controllers\StudentController.php:229:        $id = $request->paramInt('id');
+app\Controllers\StudentController.php:232:                $this->service->restore($id);
+app\Controllers\StudentController.php:238:        $this->redirect('/students/archived');
+app\Controllers\StudentController.php:244:        $id = $request->paramInt('id');
+app\Controllers\StudentController.php:245:        $newClassId = (int) ($request->post('class_id', '') ?: 0);
+app\Controllers\StudentController.php:247:            $this->redirect('/students');
+app\Controllers\StudentController.php:252:            $this->service->reassignClass($id, $newClassId);
+app\Controllers\StudentController.php:255:            Flash::set('danger', $e->getMessage() === 'year_closed'
+app\Controllers\StudentController.php:259:        $this->redirect("/students/{$id}");
+app\Controllers\StudentController.php:262:    /** Optional on every save (§O-18) -- a missing/empty field is not an error. A checked "remove photo" wins over a simultaneously-chosen new file, since a user clearing the photo almost certainly didn't also mean to replace it in the same submission. */
+app\Controllers\StudentController.php:265:        if ($request->post('remove_photo') === '1') {
+app\Controllers\StudentController.php:266:            $this->service->removePhoto($studentId);
+app\Controllers\StudentController.php:270:        $file = $request->file('photo');
+app\Controllers\StudentController.php:276:            $this->service->updatePhoto($studentId, $file);
+app\Controllers\StudentController.php:278:            Flash::set('warning', match ($e->getMessage()) {
+app\Controllers\StudentController.php:289:        $fullName = $request->post('full_name', '') ?: '';
+app\Controllers\StudentController.php:290:        $gender = $request->post('gender', '') ?: '';
+app\Controllers\StudentController.php:291:        $dob = $request->post('date_of_birth', '') ?: '';
+app\Controllers\StudentController.php:292:        $religion = $request->post('religion', '') ?: '';
+app\Controllers\StudentController.php:293:        $phone = $request->post('phone', '') ?: null;
+app\Controllers\StudentController.php:294:        $guardianPhone = $request->post('guardian_phone', '') ?: null;
+app\Controllers\StudentController.php:295:        $address = $request->post('address', '') ?: null;
+app\Controllers\StudentController.php:296:        $notes = $request->post('notes', '') ?: null;
+app\Controllers\StudentController.php:304:            $dobDate = \DateTime::createFromFormat('Y-m-d', $dob);
+app\Controllers\StudentController.php:308:            } elseif ($dobDate < (new \DateTime('-' . self::MAX_PLAUSIBLE_AGE_YEARS . ' years'))) {
+app\Controllers\StudentController.php:310:            } elseif ($phone !== null && !preg_match('/^[\d\s+\-]{7,20}$/', $phone)) {
+app\Controllers\StudentController.php:312:            } elseif ($guardianPhone !== null && !preg_match('/^[\d\s+\-]{7,20}$/', $guardianPhone)) {
+app\Controllers\SubjectController.php:23:        $this->view('subjects/index', ['subjects' => $this->subjects->all()]);
+app\Controllers\SubjectController.php:28:        $this->view('subjects/form', ['error' => null, 'subject' => null]);
+app\Controllers\SubjectController.php:33:        [$code, $nameEn, $nameAr] = $this->fields($request);
+app\Controllers\SubjectController.php:34:        $error = $this->validateFields($code, $nameEn, $nameAr, null);
+app\Controllers\SubjectController.php:36:            $this->view('subjects/form', ['error' => $error, 'subject' => null]);
+app\Controllers\SubjectController.php:39:        $this->service->create($code, $nameEn, $nameAr);
+app\Controllers\SubjectController.php:41:        $this->redirect('/subjects');
+app\Controllers\SubjectController.php:46:        $id = $request->paramInt('id');
+app\Controllers\SubjectController.php:47:        $subject = $id === null ? null : $this->subjects->find($id);
+app\Controllers\SubjectController.php:49:            $this->redirect('/subjects');
+app\Controllers\SubjectController.php:52:        $this->view('subjects/form', ['error' => null, 'subject' => $subject]);
+app\Controllers\SubjectController.php:57:        $id = $request->paramInt('id');
+app\Controllers\SubjectController.php:58:        $subject = $id === null ? null : $this->subjects->find($id);
+app\Controllers\SubjectController.php:60:            $this->redirect('/subjects');
+app\Controllers\SubjectController.php:64:        [$code, $nameEn, $nameAr] = $this->fields($request);
+app\Controllers\SubjectController.php:65:        $error = $this->validateFields($code, $nameEn, $nameAr, $id);
+app\Controllers\SubjectController.php:67:            $this->view('subjects/form', ['error' => $error, 'subject' => array_merge($subject, [
+app\Controllers\SubjectController.php:72:        $this->service->update($id, $code, $nameEn, $nameAr);
+app\Controllers\SubjectController.php:74:        $this->redirect('/subjects');
+app\Controllers\SubjectController.php:79:        $id = $request->paramInt('id');
+app\Controllers\SubjectController.php:80:        if ($id !== null && $this->subjects->find($id) !== null) {
+app\Controllers\SubjectController.php:81:            $this->service->setActive($id, false);
+app\Controllers\SubjectController.php:84:        $this->redirect('/subjects');
+app\Controllers\SubjectController.php:89:        $id = $request->paramInt('id');
+app\Controllers\SubjectController.php:90:        if ($id !== null && $this->subjects->find($id) !== null) {
+app\Controllers\SubjectController.php:91:            $this->service->setActive($id, true);
+app\Controllers\SubjectController.php:94:        $this->redirect('/subjects');
+app\Controllers\SubjectController.php:101:            $request->post('code', '') ?: '',
+app\Controllers\SubjectController.php:102:            $request->post('name_en', '') ?: '',
+app\Controllers\SubjectController.php:103:            $request->post('name_ar', '') ?: '',
+app\Controllers\SubjectController.php:112:        $existing = $this->subjects->findByCode($code);
+app\Controllers\TeacherController.php:28:        $term = $request->query('q', '') ?: '';
+app\Controllers\TeacherController.php:29:        $rows = $term !== '' ? $this->teachers->search($term) : $this->teachers->all('active');
+app\Controllers\TeacherController.php:30:        $this->view('teachers/index', ['teachers' => $rows, 'q' => $term]);
+app\Controllers\TeacherController.php:35:        $this->view('teachers/archived', ['teachers' => $this->teachers->all('archived')]);
+app\Controllers\TeacherController.php:40:        $id = $request->paramInt('id');
+app\Controllers\TeacherController.php:41:        $teacher = $id === null ? null : $this->teachers->find($id);
+app\Controllers\TeacherController.php:43:            $this->redirect('/teachers');
+app\Controllers\TeacherController.php:46:        $this->view('teachers/show', [
+app\Controllers\TeacherController.php:48:            'qualifications' => $this->subjects->qualifiedForTeacher($id),
+app\Controllers\TeacherController.php:54:        $this->view('teachers/form', [
+app\Controllers\TeacherController.php:55:            'error' => null, 'teacher' => null, 'subjects' => $this->subjects->all(true), 'selected' => [],
+app\Controllers\TeacherController.php:61:        [$fullName, $phone, $email, $error] = $this->fields($request);
+app\Controllers\TeacherController.php:62:        $subjectIds = $this->subjectIds($request);
+app\Controllers\TeacherController.php:64:            $this->view('teachers/form', [
+app\Controllers\TeacherController.php:65:                'error' => $error, 'teacher' => null, 'subjects' => $this->subjects->all(true), 'selected' => $subjectIds,
+app\Controllers\TeacherController.php:70:        $id = $this->service->create($fullName, $phone, $email);
+app\Controllers\TeacherController.php:71:        $this->subjects->setTeacherQualifications($id, $subjectIds);
+app\Controllers\TeacherController.php:72:        $this->handlePhotoUpload($request, $id);
+app\Controllers\TeacherController.php:74:        $this->redirect('/teachers');
+app\Controllers\TeacherController.php:79:        $id = $request->paramInt('id');
+app\Controllers\TeacherController.php:80:        $teacher = $id === null ? null : $this->teachers->find($id);
+app\Controllers\TeacherController.php:82:            $this->redirect('/teachers');
+app\Controllers\TeacherController.php:85:        $qualified = array_column($this->subjects->qualifiedForTeacher($id), 'id');
+app\Controllers\TeacherController.php:86:        $this->view('teachers/form', [
+app\Controllers\TeacherController.php:87:            'error' => null, 'teacher' => $teacher, 'subjects' => $this->subjects->all(true), 'selected' => $qualified,
+app\Controllers\TeacherController.php:93:        $id = $request->paramInt('id');
+app\Controllers\TeacherController.php:94:        $teacher = $id === null ? null : $this->teachers->find($id);
+app\Controllers\TeacherController.php:96:            $this->redirect('/teachers');
+app\Controllers\TeacherController.php:100:        [$fullName, $phone, $email, $error] = $this->fields($request);
+app\Controllers\TeacherController.php:101:        $subjectIds = $this->subjectIds($request);
+app\Controllers\TeacherController.php:103:            $this->view('teachers/form', [
+app\Controllers\TeacherController.php:104:                'error' => $error, 'teacher' => $teacher, 'subjects' => $this->subjects->all(true), 'selected' => $subjectIds,
+app\Controllers\TeacherController.php:109:        $this->service->update($id, $fullName, $phone, $email);
+app\Controllers\TeacherController.php:110:        $this->subjects->setTeacherQualifications($id, $subjectIds);
+app\Controllers\TeacherController.php:111:        $this->handlePhotoUpload($request, $id);
+app\Controllers\TeacherController.php:113:        $this->redirect('/teachers');
+app\Controllers\TeacherController.php:116:    /** GET /teachers/{id}/photo -- resolved by database id (§S-10), never a client-supplied path. Gated by teachers.view on the route, same as viewing the teacher itself. */
+app\Controllers\TeacherController.php:119:        $id = $request->paramInt('id');
+app\Controllers\TeacherController.php:120:        $teacher = $id === null ? null : $this->teachers->find($id);
+app\Controllers\TeacherController.php:121:        $this->uploads->stream($teacher['photo_path'] ?? null);
+app\Controllers\TeacherController.php:126:        $id = $request->paramInt('id');
+app\Controllers\TeacherController.php:127:        if ($id !== null && $this->teachers->find($id) !== null) {
+app\Controllers\TeacherController.php:128:            $this->service->archive($id);
+app\Controllers\TeacherController.php:131:        $this->redirect('/teachers');
+app\Controllers\TeacherController.php:136:        $id = $request->paramInt('id');
+app\Controllers\TeacherController.php:137:        if ($id !== null && $this->teachers->find($id) !== null) {
+app\Controllers\TeacherController.php:138:            $this->service->restore($id);
+app\Controllers\TeacherController.php:141:        $this->redirect('/teachers/archived');
+app\Controllers\TeacherController.php:144:    /** Optional on every save (§O-18) -- a missing/empty field is not an error. A checked "remove photo" wins over a simultaneously-chosen new file. */
+app\Controllers\TeacherController.php:147:        if ($request->post('remove_photo') === '1') {
+app\Controllers\TeacherController.php:148:            $this->service->removePhoto($teacherId);
+app\Controllers\TeacherController.php:152:        $file = $request->file('photo');
+app\Controllers\TeacherController.php:158:            $this->service->updatePhoto($teacherId, $file);
+app\Controllers\TeacherController.php:160:            Flash::set('warning', match ($e->getMessage()) {
+app\Controllers\TeacherController.php:171:        $fullName = $request->post('full_name', '') ?: '';
+app\Controllers\TeacherController.php:172:        $phone = $request->post('phone', '') ?: null;
+app\Controllers\TeacherController.php:173:        $email = $request->post('email', '') ?: null;
+app\Controllers\TeacherController.php:178:        if ($phone !== null && !preg_match('/^[\d\s+\-]{7,20}$/', $phone)) {
+app\Controllers\TeacherController.php:190:        return array_values(array_unique(array_map('intval', $request->postArray('subject_ids'))));
+app\Controllers\TimetableController.php:31:        $classes = $yearId ? $this->classes->allForYear($yearId) : [];
+app\Controllers\TimetableController.php:32:        $classId = (int) ($request->query('class_id') ?? 0);
+app\Controllers\TimetableController.php:34:        $grid      = $classId > 0 ? $this->service->getGrid($classId) : [];
+app\Controllers\TimetableController.php:35:        $dayLabels = $this->service->getDayLabels();
+app\Controllers\TimetableController.php:36:        $maxPeriods= $this->service->getMaxPeriods();
+app\Controllers\TimetableController.php:38:        $subjects  = $yearId ? $this->subjects->all(true) : [];
+app\Controllers\TimetableController.php:39:        $teachers  = $this->teachers->all('active');
+app\Controllers\TimetableController.php:41:        $this->view('timetable/index', compact(
+app\Controllers\TimetableController.php:49:        $classId   = (int) ($request->post('class_id', '0') ?? '0');
+app\Controllers\TimetableController.php:50:        $day       = (int) ($request->post('day_of_week', '0') ?? '0');
+app\Controllers\TimetableController.php:51:        $period    = (int) ($request->post('period_number', '0') ?? '0');
+app\Controllers\TimetableController.php:52:        $subjectId = (int) ($request->post('subject_id', '0') ?? '0');
+app\Controllers\TimetableController.php:53:        $teacherId = (int) ($request->post('teacher_id', '0') ?? '0');
+app\Controllers\TimetableController.php:56:            $this->service->addSlot($classId, $day, $period, $subjectId, $teacherId);
+app\Controllers\TimetableController.php:59:            $msg = match ($e->getMessage()) {
+app\Controllers\TimetableController.php:69:        $this->redirect('/timetable?class_id=' . $classId);
+app\Controllers\TimetableController.php:75:        $id      = $request->paramInt('id');
+app\Controllers\TimetableController.php:76:        $classId = (int) ($request->post('class_id', '0') ?? '0');
+app\Controllers\TimetableController.php:79:                $this->service->deleteSlot($id);
+app\Controllers\TimetableController.php:82:                Flash::set('danger', $e->getMessage() === 'year_closed'
+app\Controllers\TimetableController.php:87:        $this->redirect('/timetable?class_id=' . $classId);
+app\Controllers\TimetableController.php:93:        $classId = (int) ($request->post('class_id', '0') ?? '0');
+app\Controllers\TimetableController.php:95:            $this->service->clearClass($classId);
+app\Controllers\TimetableController.php:98:            Flash::set('danger', $e->getMessage() === 'year_closed'
+app\Controllers\TimetableController.php:102:        $this->redirect('/timetable?class_id=' . $classId);
+app\Controllers\UserController.php:14:/** §Q screen inventory: "Users | List, Add/Edit (Administrator only)" -- entirely gated on users.manage, no separate view permission (§J lists only the one code). */
+app\Controllers\UserController.php:27:        $this->view('users/index', ['users' => $this->users->all(), 'roles' => $this->users->allRoles()]);
+app\Controllers\UserController.php:32:        $fields = $this->fields($request, requirePassword: true);
+app\Controllers\UserController.php:35:            $this->redirect('/users');
+app\Controllers\UserController.php:40:            $this->service->create($fields['username'], $fields['password'], $fields['full_name'], $fields['role_code'], $fields['email']);
+app\Controllers\UserController.php:43:            Flash::set('danger', $this->errorMessage($e->getMessage()));
+app\Controllers\UserController.php:45:        $this->redirect('/users');
+app\Controllers\UserController.php:50:        $id = $request->paramInt('id');
+app\Controllers\UserController.php:51:        if ($id === null || $this->users->find($id) === null) {
+app\Controllers\UserController.php:52:            $this->redirect('/users');
+app\Controllers\UserController.php:56:        $fields = $this->fields($request, requirePassword: false);
+app\Controllers\UserController.php:59:            $this->redirect('/users');
+app\Controllers\UserController.php:64:            $this->service->update($id, $fields['username'], $fields['full_name'], $fields['role_code'], $fields['password'], $fields['email']);
+app\Controllers\UserController.php:67:            Flash::set('danger', $this->errorMessage($e->getMessage()));
+app\Controllers\UserController.php:69:        $this->redirect('/users');
+app\Controllers\UserController.php:74:        $id = $request->paramInt('id');
+app\Controllers\UserController.php:75:        if ($id !== null && $this->users->find($id) !== null) {
+app\Controllers\UserController.php:77:                $this->service->archive($id);
+app\Controllers\UserController.php:80:                Flash::set('danger', $this->errorMessage($e->getMessage()));
+app\Controllers\UserController.php:83:        $this->redirect('/users');
+app\Controllers\UserController.php:88:        $id = $request->paramInt('id');
+app\Controllers\UserController.php:89:        if ($id !== null && $this->users->find($id) !== null) {
+app\Controllers\UserController.php:90:            $this->service->restore($id);
+app\Controllers\UserController.php:93:        $this->redirect('/users');
+app\Controllers\UserController.php:99:        $username = $request->post('username', '') ?: '';
+app\Controllers\UserController.php:100:        $password = $request->post('password', '') ?: '';
+app\Controllers\UserController.php:101:        $fullName = $request->post('full_name', '') ?: '';
+app\Controllers\UserController.php:102:        $roleCode = $request->post('role_code', '') ?: '';
+app\Controllers\UserController.php:103:        $email = $request->post('email', '') ?: '';
+app\Controllers\UserController.php:106:        if (!preg_match('/^[a-zA-Z0-9_.\-]{3,50}$/', $username)) {
+app\Controllers\WelfareController.php:22:    /** GET /welfare/discipline — school-wide discipline log. */
+app\Controllers\WelfareController.php:25:        $type     = $request->query('type')     ?: null;
+app\Controllers\WelfareController.php:26:        $severity = $request->query('severity') ?: null;
+app\Controllers\WelfareController.php:27:        $records  = $this->service->getAllDisciplinary($type, $severity);
+app\Controllers\WelfareController.php:28:        $this->view('welfare/discipline', compact('records', 'type', 'severity'));
+app\Controllers\WelfareController.php:34:        $studentId  = (int) ($request->post('student_id', '0') ?? '0');
+app\Controllers\WelfareController.php:35:        $date       = $request->post('incident_date', date('Y-m-d')) ?? date('Y-m-d');
+app\Controllers\WelfareController.php:36:        $type       = $request->post('type', 'infraction') ?? 'infraction';
+app\Controllers\WelfareController.php:37:        $severity   = $request->post('severity', 'low') ?? 'low';
+app\Controllers\WelfareController.php:38:        $title      = $request->post('title', '') ?? '';
+app\Controllers\WelfareController.php:39:        $description= $request->post('description', '') ?? '';
+app\Controllers\WelfareController.php:40:        $action     = $request->post('action_taken', '') ?: null;
+app\Controllers\WelfareController.php:44:            $this->service->logDisciplinary($studentId, $date, $type, $severity,
+app\Controllers\WelfareController.php:48:            Flash::set('danger', $e->getMessage() === 'no_active_year'
+app\Controllers\WelfareController.php:51:        $this->redirect('/welfare/discipline');
+app\Controllers\WelfareController.php:57:        $id = $request->paramInt('id');
+app\Controllers\WelfareController.php:59:            $this->service->deleteDisciplinary($id);
+app\Controllers\WelfareController.php:62:        $this->redirect('/welfare/discipline');
+app\Controllers\WelfareController.php:65:    /** GET /welfare/health — school-wide health log. */
+app\Controllers\WelfareController.php:68:        $type    = $request->query('type') ?: null;
+app\Controllers\WelfareController.php:69:        $records = $this->service->getAllHealth($type);
+app\Controllers\WelfareController.php:70:        $this->view('welfare/health', compact('records', 'type'));
+app\Controllers\WelfareController.php:76:        $studentId  = (int) ($request->post('student_id', '0') ?? '0');
+app\Controllers\WelfareController.php:77:        $recordType = $request->post('record_type', 'clinic_visit') ?? 'clinic_visit';
+app\Controllers\WelfareController.php:78:        $date       = $request->post('date_logged', date('Y-m-d')) ?? date('Y-m-d');
+app\Controllers\WelfareController.php:79:        $title      = $request->post('title', '') ?? '';
+app\Controllers\WelfareController.php:80:        $details    = $request->post('details', '') ?? '';
+app\Controllers\WelfareController.php:84:            $this->service->logHealth($studentId, $recordType, $date, $title, $details, $userId ?: null);
+app\Controllers\WelfareController.php:89:        $this->redirect('/welfare/health');
+app\Controllers\WelfareController.php:95:        $id = $request->paramInt('id');
+app\Controllers\WelfareController.php:97:            $this->service->deleteHealth($id);
+app\Controllers\WelfareController.php:100:        $this->redirect('/welfare/health');

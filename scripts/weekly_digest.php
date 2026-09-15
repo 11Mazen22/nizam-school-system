@@ -1,8 +1,6 @@
 <?php
 
-require __DIR__ . "/../vendor/autoload.php";
-$config = require __DIR__ . "/../config.php";
-\App\Database::init($config["database"]);
+require __DIR__ . "/../app/bootstrap.php";
 
 use App\Database;
 use App\Services\EmailService;
@@ -11,8 +9,9 @@ use App\Services\IntelligenceService;
 echo "Running Automated Weekly Digest...\n";
 
 // Gather intelligence
+$activeYear = (new \App\Repositories\AcademicYearRepository())->findActive();
 $insights = new IntelligenceService();
-$atRisk = $insights->getAtRiskStudents(10);
+$atRisk = $activeYear ? $insights->getAtRiskStudents(10, (int)$activeYear['id']) : [];
 
 $html = "<h2>Weekly School Intelligence Digest</h2>";
 $html .= "<p>Here is your automated report for the week.</p>";
@@ -22,9 +21,9 @@ foreach ($atRisk as $student) {
 }
 $html .= "</ul>";
 
-$emailService = new EmailService($config);
+$emailService = new EmailService();
 $sent = $emailService->send(
-    $config["email"]["from_email"] ?? "admin@hadaba.local",
+    "admin@hadaba.local",
     "Hadaba Al-Ahram School - Weekly Intelligence Digest",
     $html,
     true

@@ -62,7 +62,8 @@ final class StudentService
         // validation message.
         if ($classId !== null) {
             $class = $this->classes->find($classId);
-            if ($class === null || (int) $class['grade_id'] !== $gradeId || (int) $class['academic_year_id'] !== $yearId) {
+            if ($class === null || (int) $class['is_active'] !== 1
+                || (int) $class['grade_id'] !== $gradeId || (int) $class['academic_year_id'] !== $yearId) {
                 throw new RuntimeException('wrong_scope');
             }
         }
@@ -71,16 +72,23 @@ final class StudentService
         $codeYear = substr(AcademicYearContext::label() ?? '', 0, 4) ?: date('Y');
 
         $pdo = Database::connection();
-        $pdo->beginTransaction();
+        $ownsTransaction = !$pdo->inTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        }
         try {
             $studentId = $this->students->create(
                 $fullName, $gender, $dateOfBirth, $religion, $phone, $guardianPhone, $address, $notes,
                 (string) $pattern, $codeYear
             );
             $this->enrollments->createInitial($studentId, $yearId, $gradeId, $classId, date('Y-m-d'));
-            $pdo->commit();
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
         } catch (\Throwable $e) {
-            $pdo->rollBack();
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             throw $e;
         }
 
@@ -97,10 +105,72 @@ final class StudentService
         ?string $phone,
         ?string $guardianPhone,
         ?string $address,
-        ?string $notes
+        ?string $notes,
+        ?int $classId = null,
+        ?int $gradeId = null
     ): void {
-        $this->students->update($id, $fullName, $gender, $dateOfBirth, $religion, $phone, $guardianPhone, $address, $notes);
+        if ($gradeId !== null) {
+            $yearId = AcademicYearContext::activeYearId();
+            if ($yearId === null || $this->years->isClosed($yearId)) {
+                throw new RuntimeException('year_closed');
+            }
+            if ($this->enrollments->forStudentInYear($id, $yearId) !== null) {
+                throw new RuntimeException('wrong_scope');
+            }
+            if ($classId !== null) {
+                $targetClass = $this->classes->find($classId);
+                if ($targetClass === null || (int) $targetClass['is_active'] !== 1
+                    || (int) $targetClass['grade_id'] !== $gradeId || (int) $targetClass['academic_year_id'] !== $yearId) {
+                    throw new RuntimeException('wrong_scope');
+                }
+            }
+            $pdo = Database::connection();
+            $pdo->beginTransaction();
+            try {
+                $this->students->update($id, $fullName, $gender, $dateOfBirth, $religion, $phone, $guardianPhone, $address, $notes);
+                $this->enrollments->createInitial($id, $yearId, $gradeId, $classId, date('Y-m-d'));
+                $pdo->commit();
+            } catch (\Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+            ActivityLogger::log('student.update', 'students', $id, "Student '{$fullName}' updated and enrolled");
+            return;
+        }
+
+        if ($classId === null) {
+            $this->students->update($id, $fullName, $gender, $dateOfBirth, $religion, $phone, $guardianPhone, $address, $notes);
+            ActivityLogger::log('student.update', 'students', $id, "Student '{$fullName}' updated");
+            return;
+        }
+
+        $yearId = AcademicYearContext::activeYearId();
+        $enrollment = $yearId === null ? null : $this->enrollments->forStudentInYear($id, $yearId);
+        if ($enrollment === null || $enrollment['status'] !== 'active') {
+            throw new RuntimeException('no_active_enrollment');
+        }
+        if ($this->years->isClosed((int) $enrollment['academic_year_id'])) {
+            throw new RuntimeException('year_closed');
+        }
+        $targetClass = $this->classes->find($classId);
+        if ($targetClass === null || (int) $targetClass['is_active'] !== 1
+            || (int) $targetClass['grade_id'] !== (int) $enrollment['grade_id']
+            || (int) $targetClass['academic_year_id'] !== (int) $enrollment['academic_year_id']) {
+            throw new RuntimeException('wrong_scope');
+        }
+
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+        try {
+            $this->students->update($id, $fullName, $gender, $dateOfBirth, $religion, $phone, $guardianPhone, $address, $notes);
+            $this->enrollments->reassignClass((int) $enrollment['id'], $classId);
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
         ActivityLogger::log('student.update', 'students', $id, "Student '{$fullName}' updated");
+        ActivityLogger::log('student.reassign_class', 'students', $id, "Reassigned to class #{$classId}");
     }
 
     /**
@@ -111,12 +181,22 @@ final class StudentService
      */
     public function archive(int $id): void
     {
+        $student = $this->students->find($id);
+        if ($student === null) {
+            throw new RuntimeException('not_found');
+        }
+        if ($student['status'] !== 'active') {
+            throw new RuntimeException('not_active');
+        }
+        $yearId = AcademicYearContext::activeYearId();
+        if ($yearId !== null && $this->years->isClosed($yearId)) {
+            throw new RuntimeException('year_closed');
+        }
         $pdo = Database::connection();
         $pdo->beginTransaction();
         try {
             $this->students->setStatus($id, 'archived');
 
-            $yearId = AcademicYearContext::activeYearId();
             if ($yearId !== null) {
                 $enrollment = $this->enrollments->forStudentInYear($id, $yearId);
                 if ($enrollment !== null && $enrollment['status'] === 'active') {
@@ -131,10 +211,38 @@ final class StudentService
         ActivityLogger::log('student.archive', 'students', $id, null);
     }
 
-    /** Status flip only -- re-admitting an archived student as a new enrollment is a separate, not-yet-built action, matching TeacherService::restore()'s same symmetry. */
+    /** Restore the student and reverse the current enrollment withdrawal made by archive(). */
     public function restore(int $id): void
     {
-        $this->students->setStatus($id, 'active');
+        $student = $this->students->find($id);
+        if ($student === null) {
+            throw new RuntimeException('not_found');
+        }
+        if ($student['status'] !== 'archived') {
+            throw new RuntimeException('not_archived');
+        }
+
+        $yearId = AcademicYearContext::activeYearId();
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+        try {
+            $this->students->setStatus($id, 'active');
+            // Closed years remain historical. In an open year, archive()'s
+            // withdrawal is reversible and must not leave a restored student
+            // missing from their class roster.
+            if ($yearId !== null && !$this->years->isClosed($yearId)) {
+                $enrollment = $this->enrollments->forStudentInYear($id, $yearId);
+                if ($enrollment !== null && $enrollment['status'] === 'withdrawn') {
+                    $this->enrollments->reopenToActive((int) $enrollment['id']);
+                }
+            }
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
         ActivityLogger::log('student.restore', 'students', $id, null);
     }
 

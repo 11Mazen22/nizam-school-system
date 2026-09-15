@@ -1,8 +1,8 @@
 <?php
-/** @var ?string $error @var ?array $student @var array $grades @var array $classes */
+/** @var ?string $error @var ?array $student @var array $grades @var array $classes @var ?array $currentEnrollment */
 $pageTitle = $student === null ? __('students.add') : __('students.edit');
 $activeNav = 'students';
-$pageScripts = $student === null ? ['/assets/js/students-form.js'] : [];
+$pageScripts = $student === null || $grades !== [] ? ['/assets/js/students-form.js'] : [];
 $suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
@@ -112,6 +112,42 @@ use App\Middleware\CsrfMiddleware;
                 <option value="<?= (int) $class['id'] ?>" data-grade-id="<?= (int) $class['grade_id'] ?>"><?= e($class['name']) ?></option>
               <?php endforeach; ?>
             </select>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($student !== null && isset($currentEnrollment) && $currentEnrollment !== null && $currentEnrollment['status'] === 'active'): ?>
+        <hr>
+        <div class="mb-3">
+          <label class="form-label" for="class_id"><?= e(__('students.class')) ?></label>
+          <select class="form-select" id="class_id" name="class_id" required>
+            <?php foreach ($classes as $class): ?>
+              <option value="<?= (int) $class['id'] ?>" <?= (int) $class['id'] === (int) ($currentEnrollment['class_id'] ?? 0) ? 'selected' : '' ?>><?= e($class['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+          <div class="form-text"><?= e(__('students.edit_class_help')) ?></div>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($student !== null && isset($currentEnrollment) && $currentEnrollment === null && $grades !== []): ?>
+        <hr>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="grade_id"><?= e(__('students.grade')) ?></label>
+            <select class="form-select" id="grade_id" name="grade_id" required>
+              <?php foreach ($grades as $grade): ?>
+                <option value="<?= (int) $grade['id'] ?>"><?= e(currentLocale() === 'ar' ? $grade['name_ar'] : $grade['name_en']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="class_id"><?= e(__('students.class')) ?></label>
+            <select class="form-select" id="class_id" name="class_id" required>
+              <?php foreach ($classes as $class): ?>
+                <option value="<?= (int) $class['id'] ?>" data-grade-id="<?= (int) $class['grade_id'] ?>"><?= e($class['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <div class="form-text"><?= e(__('students.edit_class_help')) ?></div>
           </div>
         </div>
       <?php endif; ?>

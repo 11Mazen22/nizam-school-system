@@ -44,16 +44,19 @@ $reportIcons = [
   <?php foreach ($catalog as $key => $meta): ?>
     <div class="col-md-6 col-lg-4">
       <a href="/reports/<?= e($key) ?>" class="text-decoration-none">
-        <div class="card h-100 n-card-hover">
-          <div class="card-body">
+        <div class="card h-100 n-card-hover d-flex flex-column border-0 shadow-sm">
+          <div class="card-body flex-grow-1">
             <div class="mb-3 d-inline-flex align-items-center justify-content-center"
                  style="width: 48px; height: 48px; border-radius: var(--n-radius); background: var(--n-primary-soft); color: var(--n-primary-strong);">
               <?= icon($reportIcons[$key] ?? 'file-text', 'n-icon-lg') ?>
             </div>
-            <h2 class="h5 mb-2"><?= e(__('reports.' . $key)) ?></h2>
+            <h2 class="h5 mb-2 fw-bold text-dark"><?= e(__('reports.' . $key)) ?></h2>
+            <p class="text-muted small mb-0"><?= e(__('reports.' . $key . '_desc')) ?></p>
+          </div>
+          <div class="card-footer bg-transparent border-top-0 pt-0 pb-3">
             <div class="d-flex gap-1 flex-wrap">
               <?php foreach ($meta['formats'] as $format): ?>
-                <span class="badge text-bg-light border"><?= e(ucfirst($format)) ?></span>
+                <span class="badge bg-light text-secondary border border-secondary-subtle"><?= e(ucfirst($format)) ?></span>
               <?php endforeach; ?>
             </div>
           </div>

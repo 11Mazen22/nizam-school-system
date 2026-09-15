@@ -77,7 +77,7 @@ final class TeacherAssignmentRepository
     {
         $stmt = Database::connection()->prepare(
             'SELECT COUNT(*) FROM teacher_assignments
-             WHERE teacher_id = :t AND subject_id = :s AND class_id = :c AND academic_year_id = :y'
+             WHERE teacher_id = :t AND subject_id = :s AND class_id = :c AND academic_year_id = :y AND status = \'active\''
         );
         $stmt->execute(['t' => $teacherId, 's' => $subjectId, 'c' => $classId, 'y' => $academicYearId]);
         return ((int) $stmt->fetchColumn()) > 0;

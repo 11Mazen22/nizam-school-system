@@ -4,7 +4,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_VERSION = 'nizam-v1.0.0';
+const CACHE_VERSION = 'nizam-v1.0.2-navigation';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;

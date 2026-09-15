@@ -3,6 +3,7 @@
 $pageTitle = __('students.title');
 $activeNav = 'students';
 $suppressPageTitle = true;
+$locale = currentLocale();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
@@ -33,21 +34,40 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 </div>
 
-<div class="d-flex justify-content-between mb-3 gap-2 flex-wrap">
-  <form method="get" action="/students" class="d-flex gap-2">
-    <input type="text" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>">
-    <button type="submit" class="btn btn-outline-secondary"><?= icon('search') ?> <?= e(__('common.search')) ?></button>
-  </form>
-  <div class="d-flex gap-2">
-    <a href="/students/archived" class="btn btn-outline-secondary"><?= icon('archive') ?> <?= e(__('common.archived_list')) ?></a>
-    <a href="/students/promotion" class="btn btn-outline-primary"><?= icon('trending-up') ?> <?= e(__('promotion.title')) ?></a>
-    <a href="/students/create" class="btn btn-primary"><?= icon('plus') ?> <?= e(__('students.add')) ?></a>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body d-flex justify-content-between align-items-center gap-3 flex-wrap">
+    <form method="get" action="/students" class="d-flex gap-2 flex-wrap flex-grow-1">
+      <input type="text" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>" style="max-width: 250px;">
+      
+      <select name="grade_id" class="form-select" style="max-width: 150px;" onchange="this.form.submit()">
+        <option value="0"><?= e(__('classes.grade')) ?>...</option>
+        <?php foreach ($grades ?? [] as $g): ?>
+          <option value="<?= $g['id'] ?>" <?= $g['id'] == $gradeId ? 'selected' : '' ?>><?= e($locale === 'ar' ? $g['name_ar'] : $g['name_en']) ?></option>
+        <?php endforeach; ?>
+      </select>
+      
+      <select name="class_id" class="form-select" style="max-width: 150px;" onchange="this.form.submit()">
+        <option value="0"><?= e(__('classes.class')) ?>...</option>
+        <?php foreach ($classes ?? [] as $c): ?>
+          <?php if ($gradeId > 0 && $c['grade_id'] != $gradeId) continue; ?>
+          <option value="<?= $c['id'] ?>" <?= $c['id'] == $classId ? 'selected' : '' ?>><?= e($c['name']) ?></option>
+        <?php endforeach; ?>
+      </select>
+  
+      <button type="submit" class="btn btn-outline-secondary"><?= icon('search') ?></button>
+    </form>
+    
+    <div class="d-flex gap-2">
+      <a href="/students/archived" class="btn btn-outline-secondary d-flex align-items-center gap-1"><?= icon('archive') ?> <span class="d-none d-sm-inline"><?= e(__('common.archived_list')) ?></span></a>
+      <a href="/students/promotion" class="btn btn-outline-primary d-flex align-items-center gap-1"><?= icon('trending-up') ?> <span class="d-none d-sm-inline"><?= e(__('promotion.title')) ?></span></a>
+      <a href="/students/create" class="btn btn-primary d-flex align-items-center gap-1"><?= icon('plus') ?> <span><?= e(__('students.add')) ?></span></a>
+    </div>
   </div>
 </div>
 
 <?php if (empty($students)): ?>
   <div class="n-empty-state">
-    <div class="n-empty-icon" style="background: linear-gradient(135deg, var(--n-primary) 0%, var(--n-primary-strong) 100%);">
+    <div class="n-empty-icon">
       <?= icon('users', 'n-icon-xl') ?>
     </div>
     <h3 class="n-empty-title"><?= e(__('students.empty_title')) ?></h3>
@@ -63,6 +83,7 @@ require dirname(__DIR__) . '/layout/start.php';
         <tr>
           <th><?= e(__('students.code')) ?></th>
           <th><?= e(__('students.full_name')) ?></th>
+          <th><?= e(__('classes.grade')) ?> / <?= e(__('classes.class')) ?></th>
           <th><?= e(__('students.religion')) ?></th>
           <th><?= e(__('common.actions')) ?></th>
         </tr>
@@ -79,6 +100,15 @@ require dirname(__DIR__) . '/layout/start.php';
                 <?= e($student['full_name']) ?>
               </a>
             </td>
+            <td>
+              <?php if (!empty($student['grade_name_en'])): ?>
+                <span class="badge bg-light text-dark border">
+                  <?= e($locale === 'ar' ? $student['grade_name_ar'] : $student['grade_name_en']) ?> - <?= e($student['class_name']) ?>
+                </span>
+              <?php else: ?>
+                <span class="text-muted small">&mdash;</span>
+              <?php endif; ?>
+            </td>
             <td><?= e(__('students.religion_' . $student['religion'])) ?></td>
             <td class="text-nowrap">
               <a href="/students/<?= (int) $student['id'] ?>" class="btn btn-sm btn-outline-secondary"><?= e(__('common.view')) ?></a>
@@ -92,8 +122,10 @@ require dirname(__DIR__) . '/layout/start.php';
 
   <?php if ($lastPage > 1): ?>
     <?php
-      // Build base query string preserving search term
+      // Build base query string preserving search term and filters
       $qs = $q !== '' ? '&q=' . urlencode($q) : '';
+      if ($gradeId > 0) $qs .= '&grade_id=' . $gradeId;
+      if ($classId > 0) $qs .= '&class_id=' . $classId;
     ?>
     <nav aria-label="Students pagination">
       <ul class="pagination justify-content-center mt-3">

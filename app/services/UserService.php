@@ -51,6 +51,9 @@ final class UserService
      */
     public function update(int $id, string $username, string $fullName, string $roleCode, string $newPassword, ?string $email = null): void
     {
+        if ($newPassword !== '' && mb_strlen($newPassword) < self::MIN_PASSWORD_LENGTH) {
+            throw new RuntimeException('password_too_short');
+        }
         if ($this->users->usernameExists($username, $id)) {
             throw new RuntimeException('username_taken');
         }
@@ -65,9 +68,6 @@ final class UserService
         $this->users->update($id, $username, $fullName, $roleId, $email);
 
         if ($newPassword !== '') {
-            if (mb_strlen($newPassword) < self::MIN_PASSWORD_LENGTH) {
-                throw new RuntimeException('password_too_short');
-            }
             $this->users->updatePassword($id, password_hash($newPassword, PASSWORD_BCRYPT));
         }
 

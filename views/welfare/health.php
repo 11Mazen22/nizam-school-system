@@ -16,7 +16,7 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
   <div class="n-grades-header-content">
     <div class="n-grades-header-text">
       <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('inbox', 'n-grades-icon') ?></div>
+        <div class="n-grades-icon-wrapper"><?= icon('heart', 'n-grades-icon') ?></div>
         <?= e(__('welfare.health_title')) ?>
       </h1>
       <p class="n-grades-subtitle"><?= e(__('welfare.health_subtitle')) ?></p>

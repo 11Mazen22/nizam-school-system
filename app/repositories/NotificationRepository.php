@@ -10,15 +10,17 @@ use PDO;
 final class NotificationRepository
 {
     /** Insert one notification row for a single user. Returns new id. */
-    public function create(int $userId, string $titleEn, string $titleAr, string $bodyEn, string $bodyAr, ?string $link): int
+    public function create(int $userId, string $titleEn, string $titleAr, string $bodyEn, string $bodyAr, ?string $link, string $category = 'system', string $priority = 'normal'): int
     {
         $pdo  = Database::connection();
         $stmt = $pdo->prepare(
-            'INSERT INTO notifications (user_id, title_en, title_ar, body_en, body_ar, link)
-             VALUES (:uid, :ten, :tar, :ben, :bar, :lnk)'
+            'INSERT INTO notifications (user_id, category, priority, title_en, title_ar, body_en, body_ar, link)
+             VALUES (:uid, :cat, :pri, :ten, :tar, :ben, :bar, :lnk)'
         );
         $stmt->execute([
             'uid' => $userId,
+            'cat' => $category,
+            'pri' => $priority,
             'ten' => $titleEn,
             'tar' => $titleAr,
             'ben' => $bodyEn,
@@ -39,16 +41,22 @@ final class NotificationRepository
     }
 
     /**
-     * Latest N notifications for the dropdown (read + unread).
+     * Latest N notifications for the dropdown or inbox (read + unread).
      * @return array<int, array<string,mixed>>
      */
-    public function recent(int $userId, int $limit = 20): array
+    public function recent(int $userId, int $limit = 20, ?string $category = null): array
     {
-        $stmt = Database::connection()->prepare(
-            'SELECT * FROM notifications WHERE user_id = :uid
-             ORDER BY created_at DESC LIMIT :lim'
-        );
+        $sql = 'SELECT * FROM notifications WHERE user_id = :uid';
+        if ($category !== null) {
+            $sql .= ' AND category = :cat';
+        }
+        $sql .= ' ORDER BY created_at DESC LIMIT :lim';
+        
+        $stmt = Database::connection()->prepare($sql);
         $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);
+        if ($category !== null) {
+            $stmt->bindValue(':cat', $category, PDO::PARAM_STR);
+        }
         $stmt->bindValue(':lim', $limit,  PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -61,6 +69,17 @@ final class NotificationRepository
             'UPDATE notifications SET is_read = 1 WHERE id = :id AND user_id = :uid'
         );
         $stmt->execute(['id' => $id, 'uid' => $userId]);
+    }
+
+    /** Notification detail only when it belongs to the current user. */
+    public function findForUser(int $id, int $userId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT * FROM notifications WHERE id = :id AND user_id = :uid'
+        );
+        $stmt->execute(['id' => $id, 'uid' => $userId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
     }
 
     /** Mark every unread notification for a user as read. */

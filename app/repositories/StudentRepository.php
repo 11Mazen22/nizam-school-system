@@ -27,7 +27,7 @@ final class StudentRepository
      *
      * @return array<int, array<string, mixed>>
      */
-    public function paginate(int $page, int $perPage, string $status = 'active', string $term = ''): array
+    public function paginate(int $page, int $perPage, string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0): array
     {
         // O-25: cap regardless of caller-supplied value.
         $perPage = max(1, min($perPage, self::MAX_PER_PAGE));
@@ -35,31 +35,44 @@ final class StudentRepository
         $offset  = ($page - 1) * $perPage;
 
         $pdo = Database::connection();
-
+        
+        $sql = 'SELECT s.*, c.name as class_name, g.name_en as grade_name_en, g.name_ar as grade_name_ar 
+                FROM students s 
+                LEFT JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = :year_id
+                LEFT JOIN classes c ON c.id = e.class_id
+                LEFT JOIN grades g ON g.id = c.grade_id
+                WHERE s.status = :status';
+        
         if ($term !== '') {
-            $stmt = $pdo->prepare(
-                'SELECT * FROM students
-                 WHERE status = :status
-                   AND (full_name LIKE :term1 OR student_code LIKE :term2)
-                 ORDER BY full_name ASC
-                 LIMIT :limit OFFSET :offset'
-            );
+            $sql .= ' AND (s.full_name LIKE :term1 OR s.student_code LIKE :term2)';
+        }
+        if ($gradeId > 0) {
+            $sql .= ' AND c.grade_id = :grade_id';
+        }
+        if ($classId > 0) {
+            $sql .= ' AND e.class_id = :class_id';
+        }
+        
+        $sql .= ' ORDER BY s.full_name ASC LIMIT :limit OFFSET :offset';
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':year_id', $academicYearId, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', $status);
+        if ($term !== '') {
             $like = '%' . $term . '%';
             $stmt->bindValue(':term1', $like);
             $stmt->bindValue(':term2', $like);
-        } else {
-            $stmt = $pdo->prepare(
-                'SELECT * FROM students
-                 WHERE status = :status
-                 ORDER BY full_name ASC
-                 LIMIT :limit OFFSET :offset'
-            );
         }
-
-        $stmt->bindValue(':status', $status);
+        if ($gradeId > 0) {
+            $stmt->bindValue(':grade_id', $gradeId, \PDO::PARAM_INT);
+        }
+        if ($classId > 0) {
+            $stmt->bindValue(':class_id', $classId, \PDO::PARAM_INT);
+        }
         $stmt->bindValue(':limit',  $perPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset,  \PDO::PARAM_INT);
         $stmt->execute();
+        
         return $stmt->fetchAll();
     }
 
@@ -67,26 +80,40 @@ final class StudentRepository
      * Return the total count of students matching the same status + search filter used
      * by paginate() — ensures pagination math stays consistent with the displayed rows.
      */
-    public function countFiltered(string $status = 'active', string $term = ''): int
+    public function countFiltered(string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0): int
     {
         $pdo = Database::connection();
-
+        
+        $sql = 'SELECT COUNT(s.id) 
+                FROM students s 
+                LEFT JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = :year_id
+                LEFT JOIN classes c ON c.id = e.class_id
+                WHERE s.status = :status';
+                
         if ($term !== '') {
-            $stmt = $pdo->prepare(
-                'SELECT COUNT(*) FROM students
-                 WHERE status = :status
-                   AND (full_name LIKE :term1 OR student_code LIKE :term2)'
-            );
+            $sql .= ' AND (s.full_name LIKE :term1 OR s.student_code LIKE :term2)';
+        }
+        if ($gradeId > 0) {
+            $sql .= ' AND c.grade_id = :grade_id';
+        }
+        if ($classId > 0) {
+            $sql .= ' AND e.class_id = :class_id';
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':year_id', $academicYearId, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', $status);
+        if ($term !== '') {
             $like = '%' . $term . '%';
             $stmt->bindValue(':term1', $like);
             $stmt->bindValue(':term2', $like);
-        } else {
-            $stmt = $pdo->prepare(
-                'SELECT COUNT(*) FROM students WHERE status = :status'
-            );
         }
-
-        $stmt->bindValue(':status', $status);
+        if ($gradeId > 0) {
+            $stmt->bindValue(':grade_id', $gradeId, \PDO::PARAM_INT);
+        }
+        if ($classId > 0) {
+            $stmt->bindValue(':class_id', $classId, \PDO::PARAM_INT);
+        }
         $stmt->execute();
         return (int) $stmt->fetchColumn();
     }

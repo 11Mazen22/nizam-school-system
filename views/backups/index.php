@@ -63,7 +63,7 @@ $lastPage = max(1, (int) ceil($total / $limit));
 
   <div class="col-md-6">
     <div class="card h-100 border-danger">
-      <div class="card-header bg-danger text-white fw-bold d-flex align-items-center gap-2">
+      <div class="card-header text-danger fw-bold d-flex align-items-center gap-2">
         <?= icon('upload') ?>
         <span><?= e(__('backups.restore')) ?></span>
       </div>
@@ -106,6 +106,7 @@ $lastPage = max(1, (int) ceil($total / $limit));
           <tr>
             <th><?= e(__('backups.table.created_at')) ?></th>
             <th><?= e(__('backups.table.filename')) ?></th>
+            <th><?= e(__('common.notes')) ?></th>
             <th><?= e(__('backups.table.size')) ?></th>
             <th><?= e(__('backups.table.type')) ?></th>
             <th><?= e(__('backups.table.status')) ?></th>
@@ -116,7 +117,7 @@ $lastPage = max(1, (int) ceil($total / $limit));
         <tbody>
           <?php if (empty($backups)): ?>
             <tr>
-              <td colspan="7" class="p-0">
+              <td colspan="8" class="p-0">
                 <div class="n-empty py-4">
                   <div class="n-empty-icon"><?= icon('database') ?></div>
                   <p class="mb-0"><?= e(__('common.no_results')) ?></p>
@@ -127,7 +128,8 @@ $lastPage = max(1, (int) ceil($total / $limit));
             <?php foreach ($backups as $row): ?>
               <tr>
                 <td class="text-nowrap" dir="ltr"><?= e($row['created_at']) ?></td>
-                <td class="font-monospace small" <?= !empty($row['notes']) ? 'title="' . e($row['notes']) . '"' : '' ?>><?= e($row['filename']) ?></td>
+                <td class="font-monospace small"><?= e($row['filename']) ?></td>
+                <td class="text-muted small"><?= e($row['notes'] ?? '') ?></td>
                 <td dir="ltr">
                   <?php
                     $bytes = (int) $row['file_size'];

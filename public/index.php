@@ -157,6 +157,8 @@ $router->post('/academic-years', [AcademicYearController::class, 'store'], [$ses
 $router->post('/academic-years/{id}/activate', [AcademicYearController::class, 'activate'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('academic_years.manage')]);
 $router->post('/academic-years/{id}/close', [AcademicYearController::class, 'close'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('academic_years.close')]);
 $router->post('/academic-years/{id}/reopen', [AcademicYearController::class, 'reopen'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('academic_years.close')]);
+$router->get('/academic-years/{id}/edit', [AcademicYearController::class, 'edit'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('academic_years.manage')]);
+$router->post('/academic-years/{id}', [AcademicYearController::class, 'update'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('academic_years.manage')]);
 
 // Grades -- grades.view / .manage (§Q screen inventory: "Grades list" only, inline add/edit)
 $router->get('/grades', [GradeController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('grades.view')]);
@@ -220,6 +222,7 @@ $router->get('/assignments/archived', [AssignmentController::class, 'archived'],
 $router->post('/assignments', [AssignmentController::class, 'store'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);
 $router->post('/assignments/{id}', [AssignmentController::class, 'update'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);
 $router->post('/assignments/{id}/archive', [AssignmentController::class, 'archive'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);
+$router->post('/assignments/{id}/restore', [AssignmentController::class, 'restore'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('assignments.manage')]);
 
 // Backups -- backups.run / .restore
 $router->get('/backups', [BackupController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('backups.run')]);
@@ -304,7 +307,7 @@ $router->post('/notifications/{id}/read',  [NotificationController::class, 'mark
 $router->post('/notifications/read-all',   [NotificationController::class, 'markAllRead'],[$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 $router->get('/notifications/api',         [NotificationController::class, 'api'],        [$session, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 
-$router->get('/import/{entity}/template', [ImportController::class, 'template'], [$session, $csrf, $yearContext]);
-$router->post('/import/{entity}', [ImportController::class, 'import'], [$session, $csrf, $yearContext]);
+$router->get('/import/{entity}/template', [ImportController::class, 'template'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->post('/import/{entity}', [ImportController::class, 'import'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 
 $router->dispatch($request);

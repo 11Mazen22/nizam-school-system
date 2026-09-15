@@ -77,7 +77,7 @@ final class Response
         // relaxation -- a data: URI is bytes already inside the CSS file,
         // never a fetch to anywhere -- so it doesn't reopen the "nothing
         // external, ever" guarantee the rest of this policy protects.
-        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'");
+        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'");
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('Referrer-Policy: same-origin');

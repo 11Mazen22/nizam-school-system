@@ -82,37 +82,44 @@ use App\Middleware\CsrfMiddleware;
                       <?php endif; ?>
                     </td>
                   </tr>
-                  <!-- Edit modal -->
-                  <div class="modal fade" id="editExam<?= (int)$ex['id'] ?>" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <form method="post" action="/exams/<?= (int)$ex['id'] ?>/update" class="modal-content">
-                        <?= CsrfMiddleware::field() ?>
-                        <div class="modal-header"><h5 class="modal-title"><?= e(__('exams.edit')) ?></h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                        <div class="modal-body row g-3">
-                          <div class="col-12"><label class="form-label"><?= e(__('exams.name_en')) ?></label>
-                            <input name="name_en" class="form-control" value="<?= e($ex['name_en']) ?>" required></div>
-                          <div class="col-12"><label class="form-label"><?= e(__('exams.name_ar')) ?></label>
-                            <input name="name_ar" class="form-control" value="<?= e($ex['name_ar']) ?>" required></div>
-                          <div class="col-4"><label class="form-label"><?= e(__('exams.term')) ?></label>
-                            <input type="number" name="term" class="form-control" value="<?= (int)$ex['term'] ?>" min="1" max="6"></div>
-                          <div class="col-4"><label class="form-label"><?= e(__('exams.max_score')) ?></label>
-                            <input type="number" name="max_score" class="form-control" value="<?= e($ex['max_score']) ?>" step="0.01" min="1"></div>
-                          <div class="col-4"><label class="form-label"><?= e(__('exams.weight')) ?> %</label>
-                            <input type="number" name="weight" class="form-control" value="<?= e($ex['weight']) ?>" step="0.01" min="0" max="100"></div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= e(__('common.cancel')) ?></button>
-                          <button type="submit" class="btn btn-primary"><?= e(__('common.save')) ?></button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
+
                 <?php endforeach; ?>
               </tbody>
             </table>
           </div>
+          </div>
         </div>
+        
+        <!-- Edit modals for this term -->
+        <?php foreach ($termExams as $ex): ?>
+          <div class="modal fade" id="editExam<?= (int)$ex['id'] ?>" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+              <form method="post" action="/exams/<?= (int)$ex['id'] ?>/update" class="modal-content bg-white">
+                <?= CsrfMiddleware::field() ?>
+                <div class="modal-header border-bottom">
+                  <h5 class="modal-title"><?= e(__('exams.edit')) ?></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body row g-3">
+                  <div class="col-12"><label class="form-label"><?= e(__('exams.name_en')) ?></label>
+                    <input name="name_en" class="form-control" value="<?= e($ex['name_en']) ?>" required></div>
+                  <div class="col-12"><label class="form-label"><?= e(__('exams.name_ar')) ?></label>
+                    <input name="name_ar" class="form-control" value="<?= e($ex['name_ar']) ?>" required></div>
+                  <div class="col-4"><label class="form-label"><?= e(__('exams.term')) ?></label>
+                    <input type="number" name="term" class="form-control" value="<?= (int)$ex['term'] ?>" min="1" max="6"></div>
+                  <div class="col-4"><label class="form-label"><?= e(__('exams.max_score')) ?></label>
+                    <input type="number" name="max_score" class="form-control" value="<?= e($ex['max_score']) ?>" step="0.01" min="1"></div>
+                  <div class="col-4"><label class="form-label"><?= e(__('exams.weight')) ?> %</label>
+                    <input type="number" name="weight" class="form-control" value="<?= e($ex['weight']) ?>" step="0.01" min="0" max="100"></div>
+                </div>
+                <div class="modal-footer border-top">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= e(__('common.cancel')) ?></button>
+                  <button type="submit" class="btn btn-primary"><?= e(__('common.save')) ?></button>
+                </div>
+              </form>
+            </div>
+          </div>
+        <?php endforeach; ?>
       <?php endforeach; ?>
     <?php endif; ?>
   </div>

@@ -121,7 +121,7 @@ final class SetupStatusService
             // is missing, which is exactly the state this method must be
             // able to report on instead of crashing over.
             $pdo = \App\Database::connection();
-        } catch (PDOException $e) {
+        } catch (\Throwable $e) {
             $pdo = null;
         }
 

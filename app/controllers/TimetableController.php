@@ -60,6 +60,8 @@ final class TimetableController extends Controller
                 'teacher_conflict' => __('timetable.error_teacher_conflict'),
                 'class_conflict'   => __('timetable.error_class_conflict'),
                 'no_active_year'   => __('students.no_active_year'),
+                'year_closed'      => __('academic_years.year_closed'),
+                'validation_error' => __('timetable.error_invalid_assignment'),
                 default            => __('validation.required'),
             };
             Flash::set('danger', $msg);
@@ -73,8 +75,14 @@ final class TimetableController extends Controller
         $id      = $request->paramInt('id');
         $classId = (int) ($request->post('class_id', '0') ?? '0');
         if ($id !== null) {
-            $this->service->deleteSlot($id);
-            Flash::set('success', __('timetable.slot_deleted'));
+            try {
+                $this->service->deleteSlot($id);
+                Flash::set('success', __('timetable.slot_deleted'));
+            } catch (RuntimeException $e) {
+                Flash::set('danger', $e->getMessage() === 'year_closed'
+                    ? __('academic_years.year_closed')
+                    : __('validation.required'));
+            }
         }
         $this->redirect('/timetable?class_id=' . $classId);
     }
@@ -86,8 +94,10 @@ final class TimetableController extends Controller
         try {
             $this->service->clearClass($classId);
             Flash::set('success', __('timetable.cleared'));
-        } catch (RuntimeException) {
-            Flash::set('danger', __('students.no_active_year'));
+        } catch (RuntimeException $e) {
+            Flash::set('danger', $e->getMessage() === 'year_closed'
+                ? __('academic_years.year_closed')
+                : __('students.no_active_year'));
         }
         $this->redirect('/timetable?class_id=' . $classId);
     }

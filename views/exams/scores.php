@@ -44,6 +44,16 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
         <?php endforeach; ?>
       </select>
     </div>
+    <?php if ($subjects !== []): ?>
+    <div class="flex-grow-1">
+      <label class="form-label" for="score-subject"><?= e(__('exams.subject')) ?></label>
+      <select id="score-subject" name="subject_id" class="form-select" onchange="this.form.submit()">
+        <?php foreach ($subjects as $sub): ?>
+        <option value="<?= (int)$sub['id'] ?>" <?= (int)$sub['id'] === $subjectId ? 'selected' : '' ?>><?= e(currentLocale() === 'ar' ? $sub['name_ar'] : $sub['name_en']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+    <?php endif; ?>
   </div>
 </form>
 
@@ -51,6 +61,7 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
 <form method="post" action="/exams/<?= (int)$exam['id'] ?>/scores">
   <?= CsrfMiddleware::field() ?>
   <input type="hidden" name="class_id" value="<?= $classId ?>">
+  <input type="hidden" name="subject_id" value="<?= $subjectId ?>">
 
   <div class="card border-0 shadow-sm">
     <div class="table-responsive">
@@ -75,13 +86,15 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
               <td class="mono small"><?= e($row['student_code']) ?></td>
               <?php if (!empty($subjects)): ?>
                 <td>
-                  <select name="scores[<?= (int)$studentId ?>][subject_id]" class="form-select form-select-sm">
+                  <input type="hidden" name="scores[<?= (int)$studentId ?>][subject_id]" value="<?= $subjectId ?>">
                     <?php foreach ($subjects as $sub): ?>
-                      <option value="<?= (int)$sub['id'] ?>" <?= (int)($row['subject_id'] ?? 0) === (int)$sub['id'] ? 'selected' : '' ?>>
-                        <?= e(currentLocale() === 'ar' ? $sub['name_ar'] : $sub['name_en']) ?>
-                      </option>
+                      <?php if ((int)$sub['id'] === $subjectId): ?>
+                        <span class="badge text-bg-info bg-opacity-10 text-info-emphasis border border-info-subtle fs-6 px-3 py-2 rounded-pill">
+                          <?= icon('book', 'n-icon-sm me-1') ?>
+                          <?= e(currentLocale() === 'ar' ? $sub['name_ar'] : $sub['name_en']) ?>
+                        </span>
+                      <?php endif; ?>
                     <?php endforeach; ?>
-                  </select>
                 </td>
               <?php endif; ?>
               <td>
@@ -103,7 +116,7 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
       </table>
     </div>
     <div class="card-footer bg-white d-flex justify-content-end py-3">
-      <button type="submit" class="btn btn-primary px-5">
+      <button type="submit" class="btn btn-primary px-5" <?= $subjectId > 0 ? '' : 'disabled' ?>>
         <?= icon('check') ?> <?= e(__('exams.save_scores')) ?>
       </button>
     </div>

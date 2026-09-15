@@ -11,10 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---- Flash messages as a toast stack -------------------------------
-  // The server renders each flash as a normal Bootstrap .alert inside
-  // <main> (so it's already correct with zero JS); this only relocates
-  // them into a fixed, top-corner stack so they read as toasts instead of
-  // pushing page content down. Auto-dismiss timing/logic is unchanged.
   var flashes = document.querySelectorAll('main.nizam-content > .alert');
   if (flashes.length) {
     var host = document.createElement('div');
@@ -36,23 +32,14 @@ document.addEventListener('DOMContentLoaded', function () {
         ? window.bootstrap.Alert.getOrCreateInstance(el)
         : null;
       if (alert) {
-        // Trigger fade out animation before closing
         el.classList.remove('show');
-        setTimeout(function() {
-          alert.close();
-        }, 300); // Wait for fade animation to complete
+        setTimeout(function() { alert.close(); }, 300);
       } else {
         el.remove();
       }
     }, 5000);
   });
 
-  // ---- Staggered entrance for repeated content ------------------------
-  // Sets --n-i on siblings sharing a `.n-reveal-group` container so the
-  // CSS animation (.n-reveal-stagger, app.css) delays each one slightly --
-  // a "cards settling into place" feel instead of everything popping at
-  // once. No-op under reduced motion (CSS itself also collapses the
-  // animation duration to ~0, this just skips the extra work).
   if (!reduceMotion) {
     document.querySelectorAll('.n-reveal-group').forEach(function (group) {
       Array.prototype.forEach.call(group.children, function (child, i) {
@@ -62,11 +49,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ---- Animated stat counters ------------------------------------------
-  // Purely cosmetic count-up for .stat-value numbers on first paint --
-  // reads the already-rendered final value from the markup, so the number
-  // is 100% correct even if JS never runs (this only re-animates toward
-  // the same value, never computes it).
   if (!reduceMotion) {
     document.querySelectorAll('[data-count-up]').forEach(function (el) {
       var target = parseInt(el.textContent, 10);
@@ -87,23 +69,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ---- Print-report buttons --------------------------------------------
   document.querySelectorAll('[data-print-report]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      window.print();
-    });
+    btn.addEventListener('click', function () { window.print(); });
   });
 
-  // ---- "Go back" buttons (e.g. the 419 expired-session page) ------------
   document.querySelectorAll('[data-history-back]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      history.back();
-    });
+    btn.addEventListener('click', function () { history.back(); });
   });
 
-  // ---- Generic "switch to this Bootstrap tab" trigger -------------------
-  // Lets a button outside the nav-tabs bar (a cancel button, an empty-state
-  // CTA) activate a tab by id, e.g. data-tab-switch="list-tab".
   document.querySelectorAll('[data-tab-switch]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var target = document.getElementById(btn.getAttribute('data-tab-switch'));
@@ -111,54 +84,31 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // ---- Enhanced modal backdrop click handling ---------------------------
-  // Ensures modals can be properly dismissed by clicking the backdrop or
-  // pressing ESC. This fixes issues where modals become "stuck" with grey
-  // backdrops blocking interaction.
   document.addEventListener('click', function (e) {
-    // Check if click was directly on a modal backdrop
     if (e.target.classList.contains('modal') && e.target.classList.contains('show')) {
       var backdrop = e.target.querySelector('.modal-dialog');
       if (backdrop && !backdrop.contains(e.target)) {
-        // Click was on backdrop, not dialog content
-        var modalInstance = window.bootstrap && window.bootstrap.Modal 
-          ? window.bootstrap.Modal.getInstance(e.target) 
-          : null;
-        if (modalInstance) {
-          modalInstance.hide();
-        }
+        var modalInstance = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getInstance(e.target) : null;
+        if (modalInstance) { modalInstance.hide(); }
       }
     }
   });
 
-  // Handle ESC key for modals
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' || e.keyCode === 27) {
       var openModal = document.querySelector('.modal.show');
       if (openModal) {
-        var modalInstance = window.bootstrap && window.bootstrap.Modal 
-          ? window.bootstrap.Modal.getInstance(openModal) 
-          : null;
-        if (modalInstance) {
-          modalInstance.hide();
-        }
+        var modalInstance = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getInstance(openModal) : null;
+        if (modalInstance) { modalInstance.hide(); }
       }
     }
   });
 
-  // ---- Ensure modal backdrops are properly removed ----------------------
-  // Sometimes Bootstrap leaves orphaned backdrops after closing modals.
-  // This cleanup handler ensures no backdrops are left behind.
   document.addEventListener('hidden.bs.modal', function (e) {
-    // Small delay to ensure Bootstrap has finished its cleanup
     setTimeout(function () {
       var orphanedBackdrops = document.querySelectorAll('.modal-backdrop');
       if (orphanedBackdrops.length > 0 && !document.querySelector('.modal.show')) {
-        // No open modals but backdrops exist - clean them up
-        orphanedBackdrops.forEach(function (backdrop) {
-          backdrop.remove();
-        });
-        // Restore body scroll if it was disabled
+        orphanedBackdrops.forEach(function (backdrop) { backdrop.remove(); });
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
@@ -166,10 +116,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 100);
   });
 
-  // ---- Modal stacking fix -----------------------------------------------
-  // Modals nested inside .nizam-content sit in a transformed stacking
-  // context, so Bootstrap's body-level backdrop renders on top of them.
-  // Reparent every modal to <body> before Bootstrap initialises them.
   document.querySelectorAll('.modal').forEach(function (modalEl) {
     if (modalEl.parentElement !== document.body) {
       document.body.appendChild(modalEl);
@@ -182,8 +128,130 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // ---- Service worker (offline PWA) ------------------------------------
+  // ---- Service worker (offline PWA) and Offline Queue ------------------
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function () {});
   }
+
+  window.addEventListener('submit', function(e) {
+    if (!navigator.onLine && e.target.method && e.target.method.toUpperCase() === 'POST') {
+      e.preventDefault();
+      
+      var form = e.target;
+      var formData = new FormData(form);
+      var dataObj = {};
+      formData.forEach(function(value, key) { dataObj[key] = value; });
+      
+      var payload = {
+        id: Date.now() + Math.random().toString(36).substr(2, 9),
+        url: form.action || window.location.href,
+        method: 'POST',
+        data: dataObj,
+        timestamp: Date.now()
+      };
+      
+      var queue = JSON.parse(localStorage.getItem('nizam_offline_queue') || '[]');
+      queue.push(payload);
+      localStorage.setItem('nizam_offline_queue', JSON.stringify(queue));
+      
+      alert('أنت غير متصل بالشبكة. تم حفظ البيانات محلياً وستتم مزامنتها تلقائياً عند عودة الاتصال.');
+      
+      var modalEl = form.closest('.modal');
+      if (modalEl) {
+        var modalInstance = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getInstance(modalEl) : null;
+        if (modalInstance) modalInstance.hide();
+      }
+    }
+  });
+
+  function refreshCsrfToken() {
+    return fetch(window.location.href, { method: 'GET', headers: { 'Accept': 'text/html' } })
+      .then(function(res) { return res.text(); })
+      .then(function(html) {
+        var match = html.match(/name="_csrf_token" value="([^"]+)"/);
+        return match ? match[1] : null;
+      });
+  }
+
+  // Flush queue when back online or on page load if online
+  function flushOfflineQueue() {
+    if (!navigator.onLine) return;
+    
+    var queue = JSON.parse(localStorage.getItem('nizam_offline_queue') || '[]');
+    if (queue.length === 0) return;
+
+    var host = document.querySelector('.n-toast-host');
+    if (host) {
+      var alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-info alert-dismissible fade show';
+      alertDiv.innerHTML = 'عاد الاتصال. يتم الآن مزامنة البيانات المحفوظة...';
+      host.appendChild(alertDiv);
+    }
+    
+    var syncNext = function() {
+      if (queue.length === 0) {
+        localStorage.removeItem('nizam_offline_queue');
+        alert('تمت مزامنة جميع البيانات المحفوظة بنجاح.');
+        setTimeout(function() { window.location.reload(); }, 500);
+        return;
+      }
+      
+      var item = queue.shift();
+      var formParams = new URLSearchParams();
+      for (var key in item.data) {
+        formParams.append(key, item.data[key]);
+      }
+      
+      fetch(item.url, {
+        method: item.method,
+        body: formParams,
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      }).then(function(res) {
+        if (res.ok) {
+          localStorage.setItem('nizam_offline_queue', JSON.stringify(queue));
+          syncNext();
+          return;
+        }
+        
+        if (res.status === 419 || res.status === 403) {
+          refreshCsrfToken().then(function(newToken) {
+            if (newToken) {
+              item.data['_csrf_token'] = newToken;
+              queue.unshift(item); 
+              localStorage.setItem('nizam_offline_queue', JSON.stringify(queue));
+              syncNext();
+            } else {
+              alert('انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى لمزامنة البيانات.');
+              queue.unshift(item);
+              localStorage.setItem('nizam_offline_queue', JSON.stringify(queue));
+              window.location.href = '/login';
+            }
+          });
+          return;
+        }
+        
+        if (res.status >= 400 && res.status < 500) {
+          // Client error (e.g. 400 Validation, 404 Not Found, 409 Conflict)
+          // It will permanently fail, do not block the queue.
+          alert('فشلت مزامنة إحدى العمليات بسبب خطأ في البيانات. سيتم تخطيها.');
+          localStorage.setItem('nizam_offline_queue', JSON.stringify(queue));
+          syncNext();
+          return;
+        }
+        
+        throw new Error('Server error: ' + res.status);
+      }).catch(function(err) {
+        queue.unshift(item);
+        localStorage.setItem('nizam_offline_queue', JSON.stringify(queue));
+      });
+    };
+    
+    syncNext();
+  }
+
+  window.addEventListener('online', flushOfflineQueue);
+  flushOfflineQueue(); // also try on initial load
 });

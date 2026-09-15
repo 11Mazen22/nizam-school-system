@@ -41,17 +41,24 @@ final class StudentController extends Controller
     public function index(Request $request): void
     {
         $term = trim($request->query('q', '') ?? '');
+        $gradeId = (int) $request->query('grade_id', '0');
+        $classId = (int) $request->query('class_id', '0');
+        
+        $yearId = AcademicYearContext::activeYearId() ?? 0;
 
         // O-25: read caller-supplied values but cap on the server side before use.
         $requestedPerPage = max(1, (int) $request->query('per_page', (string) StudentRepository::MAX_PER_PAGE));
         $perPage = min($requestedPerPage, StudentRepository::MAX_PER_PAGE); // hard cap
         $page    = max(1, (int) $request->query('page', '1'));
 
-        $total    = $this->students->countFiltered('active', $term);
+        $total    = $this->students->countFiltered('active', $term, $yearId, $gradeId, $classId);
         $lastPage = $total > 0 ? (int) ceil($total / $perPage) : 1;
         $page     = min($page, $lastPage); // clamp to valid range
 
-        $students = $this->students->paginate($page, $perPage, 'active', $term);
+        $students = $this->students->paginate($page, $perPage, 'active', $term, $yearId, $gradeId, $classId);
+        
+        $grades = $this->grades->all(true);
+        $classes = $yearId > 0 ? $this->classes->allForYear($yearId) : [];
 
         $this->view('students/index', [
             'students'    => $students,
@@ -60,6 +67,10 @@ final class StudentController extends Controller
             'perPage'     => $perPage,
             'total'       => $total,
             'lastPage'    => $lastPage,
+            'gradeId'     => $gradeId,
+            'classId'     => $classId,
+            'grades'      => $grades,
+            'classes'     => $classes,
         ]);
     }
 
@@ -160,7 +171,16 @@ final class StudentController extends Controller
             $this->redirect('/students');
             return;
         }
-        $this->view('students/form', ['error' => null, 'student' => $student, 'grades' => [], 'classes' => []]);
+        $currentEnrollment = $this->enrollmentService->currentEnrollmentFor($id);
+        $yearId = AcademicYearContext::activeYearId();
+        $classes = $currentEnrollment !== null && $currentEnrollment['status'] === 'active'
+            ? $this->classes->forGradeAndYear((int) $currentEnrollment['grade_id'], (int) $currentEnrollment['academic_year_id'])
+            : ($yearId === null ? [] : $this->classes->allForYear($yearId));
+        $this->view('students/form', [
+            'error' => null, 'student' => $student,
+            'grades' => $currentEnrollment === null ? $this->grades->all(true) : [], 'classes' => $classes,
+            'currentEnrollment' => $currentEnrollment,
+        ]);
     }
 
     public function update(Request $request): void
@@ -176,14 +196,33 @@ final class StudentController extends Controller
         if ($fields['error'] !== null) {
             $this->view('students/form', [
                 'error' => $fields['error'], 'student' => array_merge($student, $fields), 'grades' => [], 'classes' => [],
+                'currentEnrollment' => $this->enrollmentService->currentEnrollmentFor($id),
             ]);
             return;
         }
 
-        $this->service->update(
-            $id, $fields['full_name'], $fields['gender'], $fields['dob'], $fields['religion'],
-            $fields['phone'], $fields['guardian_phone'], $fields['address'], $fields['notes']
-        );
+        $currentEnrollment = $this->enrollmentService->currentEnrollmentFor($id);
+        $classId = $request->post('class_id');
+        $gradeId = $request->post('grade_id');
+        try {
+            $this->service->update(
+                $id, $fields['full_name'], $fields['gender'], $fields['dob'], $fields['religion'],
+                $fields['phone'], $fields['guardian_phone'], $fields['address'], $fields['notes'],
+                $classId === null || $classId === '' ? null : (int) $classId,
+                $currentEnrollment === null && $gradeId !== null && $gradeId !== '' ? (int) $gradeId : null
+            );
+        } catch (RuntimeException $e) {
+            $currentEnrollment = $this->enrollmentService->currentEnrollmentFor($id);
+            $classes = $currentEnrollment !== null && $currentEnrollment['status'] === 'active'
+                ? $this->classes->forGradeAndYear((int) $currentEnrollment['grade_id'], (int) $currentEnrollment['academic_year_id'])
+                : (($yearId = AcademicYearContext::activeYearId()) === null ? [] : $this->classes->allForYear($yearId));
+            $this->view('students/form', [
+                'error' => $e->getMessage() === 'year_closed' ? __('academic_years.year_closed') : __('students.reassign_failed'),
+                'student' => array_merge($student, $fields), 'grades' => $currentEnrollment === null ? $this->grades->all(true) : [], 'classes' => $classes,
+                'currentEnrollment' => $currentEnrollment,
+            ]);
+            return;
+        }
         $this->handlePhotoUpload($request, $id);
         Flash::set('success', __('students.updated'));
         $this->redirect('/students');
@@ -200,9 +239,15 @@ final class StudentController extends Controller
     public function archive(Request $request): void
     {
         $id = $request->paramInt('id');
-        if ($id !== null && $this->students->find($id) !== null) {
-            $this->service->archive($id);
-            Flash::set('success', __('students.archived'));
+        if ($id !== null) {
+            try {
+                $this->service->archive($id);
+                Flash::set('success', __('students.archived'));
+            } catch (RuntimeException $e) {
+                Flash::set('danger', $e->getMessage() === 'year_closed'
+                    ? __('academic_years.year_closed')
+                    : __('students.archive_failed'));
+            }
         }
         $this->redirect('/students');
     }
@@ -210,9 +255,13 @@ final class StudentController extends Controller
     public function restore(Request $request): void
     {
         $id = $request->paramInt('id');
-        if ($id !== null && $this->students->find($id) !== null) {
-            $this->service->restore($id);
-            Flash::set('success', __('students.restored'));
+        if ($id !== null) {
+            try {
+                $this->service->restore($id);
+                Flash::set('success', __('students.restored'));
+            } catch (RuntimeException) {
+                Flash::set('danger', __('students.restore_failed'));
+            }
         }
         $this->redirect('/students/archived');
     }

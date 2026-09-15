@@ -140,11 +140,37 @@ final class AssignmentController extends Controller
     public function archive(Request $request): void
     {
         $id = $request->paramInt('id');
-        if ($id !== null && $this->assignments->find($id) !== null) {
-            $this->service->archive($id);
-            Flash::set('success', __('assignments.archived'));
+        if ($id !== null) {
+            try {
+                $this->service->archive($id);
+                Flash::set('success', __('assignments.archived'));
+            } catch (RuntimeException $e) {
+                Flash::set('danger', $e->getMessage() === 'year_closed'
+                    ? __('academic_years.year_closed')
+                    : __('assignments.archive_failed'));
+            }
         }
         $this->redirect('/assignments');
+    }
+
+    public function restore(Request $request): void
+    {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            $this->redirect('/assignments/archived');
+            return;
+        }
+        try {
+            $this->service->restore($id);
+            Flash::set('success', __('assignments.restored'));
+        } catch (RuntimeException $e) {
+            Flash::set('danger', match ($e->getMessage()) {
+                'year_closed' => __('academic_years.year_closed'),
+                'duplicate'   => __('assignments.duplicate'),
+                default       => __('assignments.restore_failed'),
+            });
+        }
+        $this->redirect('/assignments/archived');
     }
 
     /** @return array{0:int,1:int,2:int,3:int,4:?string} */

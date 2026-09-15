@@ -73,7 +73,49 @@ final class AssignmentService
     /** §O-13: archiving is the only deletion path exposed for assignments. */
     public function archive(int $id): void
     {
+        $assignment = $this->assignments->find($id);
+        if ($assignment === null) {
+            throw new RuntimeException('not_found');
+        }
+        if ($this->years->isClosed((int) $assignment['academic_year_id'])) {
+            throw new RuntimeException('year_closed');
+        }
+        if ($assignment['status'] !== 'active') {
+            throw new RuntimeException('not_active');
+        }
         $this->assignments->setStatus($id, 'archived');
         ActivityLogger::log('assignment.archive', 'teacher_assignments', $id, null);
+    }
+
+    /**
+     * Restore a previously archived assignment back to active status.
+     * Guards against restoring into a closed year — the same safety rule as archive().
+     * Duplicate-check: if an identical active assignment already exists
+     * (same teacher+subject+class+year tuple), restoration is blocked to avoid conflicts.
+     * @throws RuntimeException 'not_found'|'year_closed'|'duplicate'
+     */
+    public function restore(int $id): void
+    {
+        $assignment = $this->assignments->find($id);
+        if ($assignment === null) {
+            throw new RuntimeException('not_found');
+        }
+        if ($assignment['status'] !== 'archived') {
+            throw new RuntimeException('not_archived');
+        }
+        if ($this->years->isClosed((int) $assignment['academic_year_id'])) {
+            throw new RuntimeException('year_closed');
+        }
+        // Prevent creating a duplicate active assignment for the same tuple
+        if ($this->assignments->existsForTuple(
+            (int) $assignment['teacher_id'],
+            (int) $assignment['subject_id'],
+            (int) $assignment['class_id'],
+            (int) $assignment['academic_year_id']
+        )) {
+            throw new RuntimeException('duplicate');
+        }
+        $this->assignments->setStatus($id, 'active');
+        ActivityLogger::log('assignment.restore', 'teacher_assignments', $id, null);
     }
 }

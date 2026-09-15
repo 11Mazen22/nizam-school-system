@@ -45,16 +45,19 @@
       const truncatedBody = n.body.length > 80 ? n.body.substring(0, 80) + '...' : n.body;
       const unreadClass = n.is_read ? '' : 'fw-semibold';
       const unreadBadge = n.is_read ? '' : '<span class="badge bg-primary ms-1" style="font-size:0.65rem;"><?= e(__('notifications.new')) ?></span>';
+      const prioBadge = n.priority === 'high' ? '<span class="badge text-bg-danger ms-1" style="font-size:0.65rem;">⚠️ ' + '<?= e(__('notifications.priority_high')) ?>' + '</span>' : '';
+      
+      const badgeHtml = unreadBadge + prioBadge;
       
       if (n.link) {
         return '<li><a href="' + escapeHtml(n.link) + '" class="dropdown-item py-2 px-3 ' + unreadClass + '" style="white-space:normal;">' +
-          '<div class="small fw-semibold">' + escapeHtml(n.title) + unreadBadge + '</div>' +
+          '<div class="small fw-semibold">' + escapeHtml(n.title) + badgeHtml + '</div>' +
           '<div class="text-muted" style="font-size:.75rem;margin-top:0.25rem;">' + escapeHtml(truncatedBody) + '</div>' +
           '<div class="text-muted" style="font-size:.7rem;margin-top:0.35rem;opacity:0.7;"><svg class="n-icon n-icon-sm" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.5 2"/></svg> ' + formatTime(n.created_at) + '</div>' +
           '</a></li>';
       } else {
         return '<li><span class="dropdown-item-text py-2 px-3 ' + unreadClass + '" style="white-space:normal;">' +
-          '<div class="small fw-semibold">' + escapeHtml(n.title) + unreadBadge + '</div>' +
+          '<div class="small fw-semibold">' + escapeHtml(n.title) + badgeHtml + '</div>' +
           '<div class="text-muted" style="font-size:.75rem;margin-top:0.25rem;">' + escapeHtml(truncatedBody) + '</div>' +
           '<div class="text-muted" style="font-size:.7rem;margin-top:0.35rem;opacity:0.7;"><svg class="n-icon n-icon-sm" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.5 2"/></svg> ' + formatTime(n.created_at) + '</div>' +
           '</span></li>';

@@ -89,6 +89,65 @@ final class AcademicYearController extends Controller
         $this->redirect('/academic-years');
     }
 
+    public function edit(Request $request): void
+    {
+        $id = $request->paramInt('id');
+        $year = $id === null ? null : $this->years->find($id);
+        if ($year === null) {
+            $this->redirect('/academic-years');
+            return;
+        }
+        $this->view('academic-years/edit', ['year' => $year, 'error' => null]);
+    }
+
+    public function update(Request $request): void
+    {
+        $id = $request->paramInt('id');
+        $year = $id === null ? null : $this->years->find($id);
+        if ($year === null) {
+            $this->redirect('/academic-years');
+            return;
+        }
+
+        $label = $request->post('label', '') ?: '';
+        $start = $request->post('start_date', '') ?: '';
+        $end   = $request->post('end_date', '') ?: '';
+
+        $error = $this->validateUpdate($id, $label, $start, $end);
+        if ($error !== null) {
+            $this->view('academic-years/edit', ['year' => array_merge($year, ['label' => $label, 'start_date' => $start, 'end_date' => $end]), 'error' => $error]);
+            return;
+        }
+
+        $this->years->update($id, $label, $start, $end);
+        Flash::set('success', __('academic_years.updated'));
+        $this->redirect('/academic-years');
+    }
+
+    /** §Q validation rules: same as create but the label uniqueness check excludes THIS year's own current label (edit case). */
+    private function validateUpdate(int $excludeId, string $label, string $start, string $end): ?string
+    {
+        if ($label === '' || $start === '' || $end === '') {
+            return __('validation.required');
+        }
+        if (!preg_match('/^(\d{4})\/(\d{4})$/', $label, $m) || ((int) $m[2]) !== ((int) $m[1]) + 1) {
+            return __('validation.year_label_format');
+        }
+        $existing = $this->years->findByLabel($label);
+        if ($existing !== null && (int) $existing['id'] !== $excludeId) {
+            return __('academic_years.duplicate_label');
+        }
+        $startDt = DateTime::createFromFormat('Y-m-d', $start);
+        $endDt   = DateTime::createFromFormat('Y-m-d', $end);
+        if ($startDt === false || $endDt === false) {
+            return __('validation.required');
+        }
+        if ($endDt <= $startDt) {
+            return __('validation.date_order');
+        }
+        return null;
+    }
+
     /** §Q validation rules: label required/unique/YYYY-YYYY+1 format, dates required, end > start. */
     private function validate(string $label, string $start, string $end): ?string
     {

@@ -29,3 +29,6 @@ Thumbs.db
 
 # Local Claude Code session-tooling state -- not project source.
 .claude/
+
+# Installed local browser-testing dependencies.
+node_modules/

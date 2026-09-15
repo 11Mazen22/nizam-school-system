@@ -21,11 +21,8 @@ use App\Response;
  * checked "yes" returns false and stops the pipeline (§I.19-equivalent
  * discipline carried from the data layer into the request layer).
  *
- * Permission codes are read from $_SESSION['permissions'], populated once at
- * login (AuthService) by joining role_permissions -- not re-queried on every
- * request. A permission a role never had cannot appear there no matter what
- * the client sends, which is what makes this unbypassable by manipulating
- * the request: nothing about the check reads anything the client controls.
+ * Refresh account status and permissions on each protected request so that
+ * archiving a user or changing their role takes effect in existing sessions.
  */
 final class RoleGuardMiddleware implements MiddlewareInterface
 {
@@ -52,6 +49,16 @@ final class RoleGuardMiddleware implements MiddlewareInterface
             Response::redirect('/login');
             return false;
         }
+
+        $users = new \App\Repositories\UserRepository();
+        $user = $users->find((int) $_SESSION['user_id']);
+        if ($user === null || (int) $user['is_active'] !== 1) {
+            $_SESSION = [];
+            Response::redirect('/login');
+            return false;
+        }
+        $_SESSION['permissions'] = $users->permissionCodesFor((int) $user['id']);
+        $_SESSION['role_code'] = $user['role_code'];
 
         if ($this->requiredPermission === null) {
             return true;

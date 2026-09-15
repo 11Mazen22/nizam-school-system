@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /** @var array $stats */
 $pageTitle = __('dashboard.title');
 $activeNav = 'dashboard';
@@ -95,6 +95,45 @@ require __DIR__ . '/layout/start.php';
       </div>
     </div>
   </div>
+  
+  <?php if (!empty($insights)): ?>
+  <div class="row g-3 mt-1 n-reveal-group">
+    <div class="col-12">
+      <div class="card border-warning">
+        <div class="card-header bg-warning text-dark d-flex align-items-center gap-2">
+          <?= icon('alert-triangle') ?>
+          <span class="fw-bold"><?= e(currentLocale() === 'en' ? 'At-Risk Students (Intelligent Insight)' : 'الطلاب المعرضون للخطر (تحليل ذكي)') ?></span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th><?= e(__('students.full_name')) ?></th>
+                  <th><?= e(__('students.code')) ?></th>
+                  <th><?= e(__('classes.class')) ?></th>
+                  <th><?= e(currentLocale() === 'en' ? 'Absences' : 'الغياب') ?></th>
+                  <th><?= e(currentLocale() === 'en' ? 'Incidents' : 'المخالفات') ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($insights as $student): ?>
+                  <tr>
+                    <td><?= e($student['full_name']) ?></td>
+                    <td><span class="font-variant-numeric-tabular"><?= e($student['student_code']) ?></span></td>
+                    <td><?= e($student['class_name']) ?></td>
+                    <td><span class="badge bg-danger"><?= (int) $student['total_absences'] ?></span></td>
+                    <td><span class="badge bg-warning text-dark"><?= (int) $student['total_incidents'] ?></span></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
 
 <?php endif; ?>
 

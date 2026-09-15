@@ -37,6 +37,32 @@ $locale = currentLocale();
   </div>
 </div>
 
+<!-- Category Navigation -->
+<div class="n-filters-bar mb-4">
+  <ul class="nav nav-pills n-nav-pills">
+    <li class="nav-item">
+      <a class="nav-link <?= empty($currentCategory) ? 'active' : '' ?>" href="/notifications">
+        <?= e(__('notifications.cat_all')) ?>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link <?= $currentCategory === 'system' ? 'active' : '' ?>" href="/notifications?category=system">
+        <?= e(__('notifications.cat_system')) ?>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link <?= $currentCategory === 'academic' ? 'active' : '' ?>" href="/notifications?category=academic">
+        <?= e(__('notifications.cat_academic')) ?>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link <?= $currentCategory === 'welfare' ? 'active' : '' ?>" href="/notifications?category=welfare">
+        <?= e(__('notifications.cat_welfare')) ?>
+      </a>
+    </li>
+  </ul>
+</div>
+
 <?php if (empty($notifications)): ?>
   <!-- Professional Empty State -->
   <div class="n-empty-state">
@@ -76,9 +102,17 @@ $locale = currentLocale();
             <h4 class="notification-title <?= !$isRead ? 'fw-bold' : '' ?>">
               <?= e($title) ?>
             </h4>
-            <?php if (!$isRead): ?>
-              <span class="badge bg-primary notification-new-badge"><?= e(__('notifications.new')) ?></span>
-            <?php endif; ?>
+            <div class="d-flex gap-2 align-items-center">
+              <?php if ($n['priority'] === 'high'): ?>
+                <span class="badge text-bg-danger d-inline-flex align-items-center gap-1">
+                  <?= icon('alert-triangle', 'n-icon-sm') ?>
+                  <?= e(__('notifications.priority_high')) ?>
+                </span>
+              <?php endif; ?>
+              <?php if (!$isRead): ?>
+                <span class="badge bg-primary notification-new-badge"><?= e(__('notifications.new')) ?></span>
+              <?php endif; ?>
+            </div>
           </div>
           <p class="notification-body"><?= e($body) ?></p>
           <div class="notification-footer">
@@ -96,9 +130,13 @@ $locale = currentLocale();
                 </form>
               <?php endif; ?>
               <?php if ($hasLink): ?>
-                <a href="<?= e($n['link']) ?>" class="btn btn-sm btn-primary notification-action-btn">
-                  <?= e(__('notifications.view_details')) ?> <?= icon('arrow-forward', 'n-icon-sm') ?>
-                </a>
+                <form method="post" action="/notifications/<?= (int)$n['id'] ?>/read" class="d-inline">
+                  <?= CsrfMiddleware::field() ?>
+                  <input type="hidden" name="follow" value="1">
+                  <button type="submit" class="btn btn-sm btn-primary notification-action-btn">
+                    <?= e(__('notifications.view_details')) ?> <?= icon('arrow-forward', 'n-icon-sm') ?>
+                  </button>
+                </form>
               <?php endif; ?>
             </div>
           </div>

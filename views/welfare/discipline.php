@@ -25,7 +25,7 @@ use App\Middleware\CsrfMiddleware;
         <span class="n-stat-mini-value"><?= count($records) ?></span>
         <span class="n-stat-mini-label"><?= e(__('welfare.total_records')) ?></span>
       </div>
-      <a href="/welfare/health" class="btn btn-outline-light"><?= icon('inbox') ?> <?= e(__('welfare.health_title')) ?></a>
+      <a href="/welfare/health" class="btn btn-outline-light"><?= icon('heart-pulse') ?> <?= e(__('welfare.health_title')) ?></a>
       <?php if (hasPermission('welfare.manage')): ?>
         <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#addDisciplineModal">
           <?= icon('plus') ?> <?= e(__('welfare.add_record')) ?>

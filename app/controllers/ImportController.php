@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Controller;
+use App\Database;
 use App\Flash;
 use App\Middleware\AcademicYearContext;
 use App\Request;
+use App\Repositories\ClassRepository;
 use App\Services\ImportService;
 use App\Services\GradeService;
 use App\Services\ClassService;
@@ -20,7 +22,7 @@ use Throwable;
 
 final class ImportController extends Controller
 {
-    private function getEntityConfig(string $entity): ?array
+    private function getEntityConfig(?string $entity): ?array
     {
         return match ($entity) {
             "grades" => [
@@ -44,79 +46,74 @@ final class ImportController extends Controller
                     $name = trim((string) ($row["Name"] ?? ""));
                     $capacity = trim((string) ($row["Capacity Override"] ?? "")) !== "" ? (int) $row["Capacity Override"] : null;
                     if ($gradeId <= 0 || $name === "") throw new RuntimeException("Missing data");
-                    (new ClassService())->create($yearId, $gradeId, $name, $capacity);
+                    (new ClassService())->create($gradeId, $yearId, $name, $capacity);
                 },
                 "permission" => "classes.manage",
                 "redirect" => "/classes"
             ],
             "subjects" => [
-                "headers" => ["Name (English)", "Name (Arabic)", "Code", "Weekly Periods", "Sort Order"],
+                "headers" => ["Code", "Name (English)", "Name (Arabic)"],
                 "process" => function (array $row) {
+                    $code = trim((string) ($row["Code"] ?? ""));
                     $nameEn = trim((string) ($row["Name (English)"] ?? ""));
                     $nameAr = trim((string) ($row["Name (Arabic)"] ?? ""));
-                    $code = trim((string) ($row["Code"] ?? ""));
-                    $periods = (int) ($row["Weekly Periods"] ?? 0);
-                    $sortOrder = (int) ($row["Sort Order"] ?? 0);
-                    if ($nameEn === "" || $nameAr === "" || $code === "" || $periods <= 0) throw new RuntimeException("Missing data");
-                    (new SubjectService())->create($nameEn, $nameAr, $code, $periods, $sortOrder);
+                    if ($nameEn === "" || $nameAr === "" || $code === "") throw new RuntimeException("Missing data");
+                    (new SubjectService())->create($code, $nameEn, $nameAr);
                 },
                 "permission" => "subjects.manage",
                 "redirect" => "/subjects"
             ],
             "teachers" => [
-                "headers" => ["Name (English)", "Name (Arabic)", "Email", "Phone", "Max Weekly Periods"],
+                "headers" => ["Full Name", "Email", "Phone"],
                 "process" => function (array $row) {
-                    $nameEn = trim((string) ($row["Name (English)"] ?? ""));
-                    $nameAr = trim((string) ($row["Name (Arabic)"] ?? ""));
+                    $fullName = trim((string) ($row["Full Name"] ?? ""));
                     $email = trim((string) ($row["Email"] ?? "")) ?: null;
                     $phone = trim((string) ($row["Phone"] ?? "")) ?: null;
-                    $maxPeriods = trim((string) ($row["Max Weekly Periods"] ?? "")) !== "" ? (int) $row["Max Weekly Periods"] : null;
-                    if ($nameEn === "" || $nameAr === "") throw new RuntimeException("Missing data");
-                    (new TeacherService())->create($nameEn, $nameAr, $email, $phone, $maxPeriods);
+                    if ($fullName === "") throw new RuntimeException("Missing data");
+                    (new TeacherService())->create($fullName, $phone, $email);
                 },
                 "permission" => "teachers.create",
                 "redirect" => "/teachers"
             ],
             "students" => [
-                "headers" => ["Name (English)", "Name (Arabic)", "National ID", "Gender (M/F)", "Date of Birth (YYYY-MM-DD)", "Enrollment Grade ID"],
+                "headers" => ["Full Name", "Gender (M/F)", "Date of Birth (YYYY-MM-DD)", "Religion", "Grade ID", "Class Name"],
                 "process" => function (array $row) {
-                    $nameEn = trim((string) ($row["Name (English)"] ?? ""));
-                    $nameAr = trim((string) ($row["Name (Arabic)"] ?? ""));
-                    $nationalId = trim((string) ($row["National ID"] ?? "")) ?: null;
-                    $gender = strtoupper(trim((string) ($row["Gender (M/F)"] ?? "")));
-                    if (!in_array($gender, ["M", "F"])) $gender = "M"; // fallback
+                    $fullName = trim((string) ($row["Full Name"] ?? ""));
+                    $gender = strtolower(trim((string) ($row["Gender (M/F)"] ?? "")));
                     $dob = trim((string) ($row["Date of Birth (YYYY-MM-DD)"] ?? ""));
-                    if (!$dob) $dob = null;
-                    
-                    $gradeId = (int) ($row["Enrollment Grade ID"] ?? 0);
+                    $religion = strtolower(trim((string) ($row["Religion"] ?? "")));
+                    $gradeId = (int) ($row["Grade ID"] ?? 0);
+                    $className = trim((string) ($row["Class Name"] ?? ""));
+                    if ($fullName === "" || !in_array($gender, ['m', 'f'], true)
+                        || !in_array($religion, ['muslim', 'christian', 'other'], true)
+                        || $dob === "" || $gradeId <= 0) throw new RuntimeException("Missing data");
                     $yearId = AcademicYearContext::activeYearId();
+                    if ($yearId === null) throw new RuntimeException("No active year");
+                    $classId = null;
+                    if ($className !== '') {
+                        $class = (new ClassRepository())->findByName($gradeId, $yearId, $className);
+                        if ($class === null || (int) $class['is_active'] !== 1) throw new RuntimeException("Unknown class");
+                        $classId = (int) $class['id'];
+                    }
                     
-                    if ($nameEn === "" || $nameAr === "") throw new RuntimeException("Missing data");
-                    
-                    $studentService = new StudentService();
-                    // We only have create for student. 
-                    // Actually let us just construct the array ClassController requires or call StudentService directly.
-                    // The service layer might need more fields. We pass basic ones.
-                    // Wait, StudentService::create requires many params.
-                    // create(string $nameEn, string $nameAr, ?string $nationalId, string $gender, ?string $dob, ?string $bloodType, ?string $address, ?string $medicalNotes, ?int $enrollmentYearId, ?int $enrollmentGradeId): int
-                    $studentService->create($nameEn, $nameAr, $nationalId, $gender, $dob, null, null, null, $yearId, $gradeId > 0 ? $gradeId : null);
+                    (new StudentService())->create(
+                        $fullName, $gender, $dob, $religion,
+                        null, null, null, null,
+                        $gradeId, $classId
+                    );
                 },
                 "permission" => "students.create",
                 "redirect" => "/students"
             ],
-                        "users" => [
-                "headers" => ["Name", "Email", "Password", "Role"],
+            "users" => [
+                "headers" => ["Username", "Password", "Full Name", "Role"],
                 "process" => function (array $row) {
-                    $name = trim((string) ($row["Name"] ?? ""));
-                    $email = trim((string) ($row["Email"] ?? ""));
-                    $password = trim((string) ($row["Password"] ?? ""));
+                    $username = trim((string) ($row["Username"] ?? ""));
+                    $password = (string) ($row["Password"] ?? "");
+                    $fullName = trim((string) ($row["Full Name"] ?? ""));
                     $role = trim((string) ($row["Role"] ?? ""));
-                    if ($name === "" || $email === "" || $password === "" || $role === "") throw new RuntimeException("Missing data");
-                    
-                    // Generate a username from email or name
-                    $username = explode("@", $email)[0] ?: strtolower(str_replace(" ", ".", $name)) . rand(100,999);
-                    (new UserService())->create($username, $password, $name, $role, $email);
-    
+                    if ($username === "" || $fullName === "" || $role === "") throw new RuntimeException("Missing data");
+                    (new UserService())->create($username, $password, $fullName, $role);
                 },
                 "permission" => "users.manage",
                 "redirect" => "/users"
@@ -142,7 +139,7 @@ final class ImportController extends Controller
 
     public function template(Request $request): void
     {
-        $entity = $request->param("entity");
+        $entity = $request->paramString("entity");
         $config = $this->getEntityConfig($entity);
         if (!$config) {
             $this->redirect("/");
@@ -155,12 +152,28 @@ final class ImportController extends Controller
             return;
         }
 
-        (new ImportService())->generateTemplate($config["headers"], $entity . "_template", currentLocale());
+        $referenceRows = [];
+        if ($entity === 'students') {
+            $yearId = AcademicYearContext::activeYearId();
+            if ($yearId !== null) {
+                foreach ((new ClassRepository())->allForYear($yearId) as $class) {
+                    if ((int) $class['is_active'] === 1) {
+                        $referenceRows[] = [
+                            'Grade ID' => $class['grade_id'],
+                            'Class Name' => $class['name'],
+                            'Grade' => currentLocale() === 'ar' ? $class['grade_name_ar'] : $class['grade_name_en'],
+                        ];
+                    }
+                }
+            }
+        }
+
+        (new ImportService())->generateTemplate($config["headers"], $entity . "_template", currentLocale(), $referenceRows);
     }
 
     public function import(Request $request): void
     {
-        $entity = $request->param("entity");
+        $entity = $request->paramString("entity");
         $config = $this->getEntityConfig($entity);
         if (!$config) {
             $this->redirect("/");
@@ -179,7 +192,7 @@ final class ImportController extends Controller
         }
 
         try {
-            $rows = (new ImportService())->parseFile($_FILES["import_file"]["tmp_name"]);
+            $rows = (new ImportService())->parseFile($_FILES["import_file"]["tmp_name"], $config["headers"]);
         } catch (Throwable $e) {
             Flash::set("danger", __("import.invalid_format"));
             $this->redirect($config["redirect"]);
@@ -196,6 +209,8 @@ final class ImportController extends Controller
         $errors = 0;
         $process = $config["process"];
 
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
         try {
             foreach ($rows as $row) {
                 try {
@@ -208,14 +223,21 @@ final class ImportController extends Controller
                 }
             }
 
-            if ($success > 0) {
-                Flash::set("success", strtr(__("app.import_success"), ["{success}" => $success, "{errors}" => $errors]));
-            } elseif ($errors > 0) {
+            // Imports are atomic: showing a partly-successful upload is not
+            // acceptable when later rows can invalidate the batch's intended
+            // relationships. Keep individual errors in the server log, but
+            // commit only a completely valid source file.
+            if ($errors > 0) {
+                $pdo->rollBack();
                 Flash::set("danger", __("import.failed"));
             } else {
-                Flash::set("warning", __("import.no_data"));
+                $pdo->commit();
+                Flash::set("success", strtr(__("app.import_success"), ["{success}" => $success, "{errors}" => $errors]));
             }
         } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             // Catch any unexpected errors during the import process
             Flash::set("danger", __("import.error"));
             error_log("Import process error for {$entity}: " . $e->getMessage());
@@ -224,4 +246,3 @@ final class ImportController extends Controller
         $this->redirect($config["redirect"]);
     }
 }
-

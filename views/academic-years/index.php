@@ -117,18 +117,23 @@ $openYears = array_filter($years, fn($y) => (int)$y['is_closed'] === 0);
               </div>
             </div>
 
-            <!-- Card Body -->
             <div class="n-grade-card-body">
               <div class="n-grade-names">
                 <h3 class="n-grade-name-en"><?= e($year['label']) ?></h3>
                 <p class="n-grade-name-ar" dir="ltr">
-                  <?= e($year['start_date']) ?> → <?= e($year['end_date']) ?>
+                  <?= e($year['start_date']) ?> &mdash; <?= e($year['end_date']) ?>
                 </p>
               </div>
             </div>
 
             <!-- Card Footer -->
             <div class="n-grade-card-footer">
+              <?php if (hasPermission('academic_years.manage')): ?>
+                <a href="/academic-years/<?= (int)$year['id'] ?>/edit" class="btn btn-sm btn-outline-secondary n-btn-card">
+                  <?= icon('edit', 'n-icon-sm') ?>
+                  <span><?= e(__('common.edit')) ?></span>
+                </a>
+              <?php endif; ?>
               <?php if ((int)$year['is_active'] !== 1): ?>
                 <form method="post" action="/academic-years/<?= (int)$year['id'] ?>/activate" class="d-inline"
                       data-confirm="<?= e(__('academic_years.confirm_activate')) ?>">

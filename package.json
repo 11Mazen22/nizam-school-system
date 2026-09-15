@@ -1,0 +1,26 @@
+{
+  "name": "nizam-school-system",
+  "version": "1.0.0",
+  "description": "**Version 1.0.0**",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "php tests/import-contract.php && php tests/exam-integrity.php && php tests/authorization-refresh.php"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/11Mazen22/nizam-school-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/11Mazen22/nizam-school-system/issues"
+  },
+  "homepage": "https://github.com/11Mazen22/nizam-school-system#readme",
+  "dependencies": {
+    "playwright": "^1.63.0"
+  }
+}

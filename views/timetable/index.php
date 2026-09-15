@@ -25,11 +25,16 @@ use App\Middleware\CsrfMiddleware;
       <p class="n-grades-subtitle"><?= e(__('timetable.subtitle')) ?></p>
     </div>
     <div class="n-grades-header-actions">
+      <?php if ($classId > 0): ?>
+        <button type="button" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2 me-2" onclick="window.print()">
+          <?= icon('printer') ?> <?= e(__('common.print') ?? 'Print') ?>
+        </button>
+      <?php endif; ?>
       <?php if ($classId > 0 && hasPermission('timetable.manage')): ?>
         <form method="post" action="/timetable/clear" data-confirm="<?= e(__('timetable.confirm_clear')) ?>">
           <?= CsrfMiddleware::field() ?>
           <input type="hidden" name="class_id" value="<?= $classId ?>">
-          <button class="btn btn-outline-light btn-sm"><?= icon('trash') ?> <?= e(__('timetable.clear')) ?></button>
+          <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"><?= icon('trash') ?> <?= e(__('timetable.clear')) ?></button>
         </form>
       <?php endif; ?>
     </div>
@@ -192,6 +197,20 @@ use App\Middleware\CsrfMiddleware;
   <p class="n-empty-description"><?= e(__('timetable.choose_class_hint')) ?></p>
 </div>
 <?php endif; ?>
+
+<style>
+@media print {
+  body { background: #fff !important; }
+  .n-sidebar, .n-navbar, .n-grades-header, form.card, .btn-link, .modal, .btn-close, .alert { display: none !important; }
+  .n-main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+  .card { border: none !important; box-shadow: none !important; }
+  table.table-bordered { border: 2px solid #000 !important; }
+  table.table-bordered th, table.table-bordered td { border: 1px solid #000 !important; }
+  .table-dark th { color: #000 !important; background-color: #eee !important; }
+  button[data-bs-toggle="modal"] { display: none !important; }
+  .rounded { background: none !important; border: none !important; }
+}
+</style>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
 <script>

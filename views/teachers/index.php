@@ -36,14 +36,16 @@ $totalTeachers = count($teachers);
   </div>
 </div>
 
-<div class="d-flex justify-content-between mb-3 gap-2 flex-wrap">
-  <form method="get" action="/teachers" class="d-flex gap-2">
-    <input type="text" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>">
-    <button type="submit" class="btn btn-outline-secondary"><?= icon('search') ?> <?= e(__('common.search')) ?></button>
-  </form>
-  <div class="d-flex gap-2">
-    <a href="/teachers/archived" class="btn btn-outline-secondary"><?= icon('archive') ?> <?= e(__('common.archived_list')) ?></a>
-    <a href="/teachers/create" class="btn btn-primary"><?= icon('plus') ?> <?= e(__('teachers.add')) ?></a>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body d-flex justify-content-between align-items-center gap-3 flex-wrap">
+    <form method="get" action="/teachers" class="d-flex gap-2 flex-grow-1">
+      <input type="text" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>" style="max-width: 250px;">
+      <button type="submit" class="btn btn-outline-secondary"><?= icon('search') ?></button>
+    </form>
+    <div class="d-flex gap-2">
+      <a href="/teachers/archived" class="btn btn-outline-secondary d-flex align-items-center gap-1"><?= icon('archive') ?> <span class="d-none d-sm-inline"><?= e(__('common.archived_list')) ?></span></a>
+      <a href="/teachers/create" class="btn btn-primary d-flex align-items-center gap-1"><?= icon('plus') ?> <span><?= e(__('teachers.add')) ?></span></a>
+    </div>
   </div>
 </div>
 

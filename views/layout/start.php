@@ -103,7 +103,7 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
           <button class="btn btn-sm btn-icon btn-outline-secondary position-relative"
                   id="notifBellBtn" data-bs-toggle="dropdown" aria-expanded="false"
                   aria-label="<?= e(__('notifications.title')) ?>">
-            <?= icon('inbox') ?>
+            <?= icon('bell') ?>
             <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                   style="font-size:.6rem;display:none;">0</span>
           </button>

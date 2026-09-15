@@ -16,30 +16,42 @@ final class ImportService
      * Expects the first row to be headers.
      * Returns an array of associative arrays: [ ["Header1" => "Value1"], ... ]
      */
-    public function parseFile(string $filePath): array
+    public function parseFile(string $filePath, array $expectedHeaders = []): array
     {
         if (!file_exists($filePath)) {
             throw new RuntimeException("File not found");
         }
 
+        if (filesize($filePath) > 5 * 1024 * 1024) {
+            throw new RuntimeException('Import file is too large');
+        }
         $spreadsheet = IOFactory::load($filePath);
         $sheet = $spreadsheet->getActiveSheet();
         
         $highestRow = $sheet->getHighestDataRow();
         $highestColumn = $sheet->getHighestDataColumn();
+        if ($highestRow > 10001 || \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn) > 50) {
+            throw new RuntimeException('Import exceeds row or column limit');
+        }
         
         $headers = [];
         $data = [];
         
         // Read headers
-        $headerRow = $sheet->rangeToArray("A1:{$highestColumn}1", null, true, false)[0];
+        $headerRow = $sheet->rangeToArray("A1:{$highestColumn}1", null, false, false)[0];
         foreach ($headerRow as $colIndex => $headerText) {
             $headers[$colIndex] = trim((string) $headerText);
+        }
+        if (in_array('', $headers, true) || count(array_unique($headers)) !== count($headers)) {
+            throw new RuntimeException('Import headers must be nonempty and unique');
+        }
+        if ($expectedHeaders !== [] && (array_diff($expectedHeaders, $headers) !== [] || array_diff($headers, $expectedHeaders) !== [])) {
+            throw new RuntimeException('Import headers do not match the template');
         }
         
         // Read data rows
         if ($highestRow > 1) {
-            $dataRows = $sheet->rangeToArray("A2:{$highestColumn}{$highestRow}", null, true, false);
+            $dataRows = $sheet->rangeToArray("A2:{$highestColumn}{$highestRow}", null, false, false);
             foreach ($dataRows as $row) {
                 $rowData = [];
                 $isEmptyRow = true;
@@ -63,7 +75,7 @@ final class ImportService
     /**
      * Generates a blank Excel template with the specified headers.
      */
-    public function generateTemplate(array $headers, string $filename, string $locale): void
+    public function generateTemplate(array $headers, string $filename, string $locale, array $referenceRows = []): void
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -78,6 +90,25 @@ final class ImportService
         }
         
         $sheet->getStyle("A1:" . $sheet->getHighestColumn() . "1")->getFont()->setBold(true);
+
+        if ($referenceRows !== []) {
+            $reference = $spreadsheet->createSheet();
+            $reference->setTitle($locale === 'ar' ? 'الفصول المتاحة' : 'Available Classes');
+            $reference->setRightToLeft($locale === 'ar');
+            $columns = array_keys($referenceRows[0]);
+            foreach ($columns as $index => $header) {
+                $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+                $reference->setCellValue("{$column}1", $header);
+                $reference->getColumnDimension($column)->setAutoSize(true);
+            }
+            foreach ($referenceRows as $rowIndex => $row) {
+                foreach (array_values($row) as $columnIndex => $value) {
+                    $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+                    $reference->setCellValue("{$column}" . ($rowIndex + 2), $value);
+                }
+            }
+            $reference->getStyle('A1:' . $reference->getHighestColumn() . '1')->getFont()->setBold(true);
+        }
         
         $writer = new Xlsx($spreadsheet);
         
