@@ -194,9 +194,15 @@ final class StudentController extends Controller
 
         $fields = $this->fields($request);
         if ($fields['error'] !== null) {
+            $currentEnrollment = $this->enrollmentService->currentEnrollmentFor($id);
+            $yearId = AcademicYearContext::activeYearId();
+            $classes = $currentEnrollment !== null && $currentEnrollment['status'] === 'active'
+                ? $this->classes->forGradeAndYear((int) $currentEnrollment['grade_id'], (int) $currentEnrollment['academic_year_id'])
+                : ($yearId === null ? [] : $this->classes->allForYear($yearId));
             $this->view('students/form', [
-                'error' => $fields['error'], 'student' => array_merge($student, $fields), 'grades' => [], 'classes' => [],
-                'currentEnrollment' => $this->enrollmentService->currentEnrollmentFor($id),
+                'error' => $fields['error'], 'student' => array_merge($student, $fields),
+                'grades' => $currentEnrollment === null ? $this->grades->all(true) : [], 'classes' => $classes,
+                'currentEnrollment' => $currentEnrollment,
             ]);
             return;
         }
