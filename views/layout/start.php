@@ -53,11 +53,7 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
 <div class="nizam-shell">
   <nav class="nizam-sidebar d-none d-md-flex">
     <div class="nizam-brand">
-      <?php if (!empty($school['logo_path'])): ?>
-        <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/logo" alt=""></div>
-      <?php else: ?>
-        <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></div>
-      <?php endif; ?>
+      <div class="school-brand-mark school-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></div>
       <div class="nizam-brand-name"><?= e($schoolName) ?></div>
     </div>
     <ul class="nav flex-column">
@@ -82,9 +78,7 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
                 data-bs-toggle="offcanvas" data-bs-target="#nizamMobileNav" aria-label="<?= e(__('nav.menu')) ?>">
           <?= icon('menu') ?>
         </button>
-        <?php if (!empty($school['logo_path'])): ?>
-          <img src="/logo" alt="" style="height:28px; max-width:90px; object-fit:contain;">
-        <?php endif; ?>
+        <img src="/assets/img/hadaba-logo.png" alt="" class="school-topbar-logo">
         <span class="fw-semibold d-none d-sm-inline"><?= e($schoolName) ?></span>
         <?php if (AcademicYearContext::activeYearId() !== null): ?>
           <span class="badge text-bg-light border d-none d-sm-inline-flex align-items-center gap-1">
@@ -167,11 +161,7 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
     <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="nizamMobileNav">
       <div class="offcanvas-header">
         <div class="nizam-brand mb-0 p-0">
-          <?php if (!empty($school['logo_path'])): ?>
-            <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/logo" alt=""></div>
-      <?php else: ?>
-            <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></div>
-          <?php endif; ?>
+          <div class="school-brand-mark school-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></div>
           <span class="fw-bold text-dark"><?= e($schoolName) ?></span>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="<?= e(__('common.close')) ?>"></button>

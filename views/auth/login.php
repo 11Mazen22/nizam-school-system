@@ -36,23 +36,13 @@ $schoolName = $school === null
       <div class="n-auth-blob n-auth-blob-3"></div>
       
       <div class="n-auth-side-top">
-        <?php if (!empty($school['logo_path'])): ?>
-          <div class="nizam-brand-mark nizam-brand-mark-logo n-auth-mark">
-            <img src="/logo" alt="">
-          </div>
-          <div>
-            <div class="n-auth-app-name-lg"><?= e($schoolName) ?></div>
-            <div class="n-auth-app-subtitle"><?= e(__('app.name')) ?> — <?= e(__('auth.login.system_subtitle')) ?></div>
-          </div>
-        <?php else: ?>
-          <div class="nizam-brand-mark nizam-brand-mark-logo n-auth-mark">
-            <img src="/assets/img/hadaba-logo.png" alt="">
-          </div>
-          <div>
-            <div class="n-auth-app-name-lg"><?= e($schoolName) ?></div>
-            <div class="n-auth-app-subtitle"><?= e(__('auth.login.system_subtitle')) ?></div>
-          </div>
-        <?php endif; ?>
+        <div class="school-brand-mark school-brand-mark-logo auth-school-mark">
+          <img src="/assets/img/hadaba-logo.png" alt="">
+        </div>
+        <div>
+          <div class="n-auth-app-name-lg"><?= e($schoolName) ?></div>
+          <div class="n-auth-app-subtitle"><?= e(__('auth.login.system_subtitle')) ?></div>
+        </div>
       </div>
       
       <div class="n-auth-side-mid">

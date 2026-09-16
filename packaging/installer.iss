@@ -269,16 +269,11 @@ begin
         False);
     end;
 
-    // Upgrade compatibility: migration 012/016 repairs installs whose
-    // database still referenced the former public-assets path. Supply the
-    // matching default only when it is absent; a school-managed file is
-    // never overwritten.
-    if not FileExists(DataDir() + '\storage\uploads\school\hadaba-logo.png') then
-    begin
-      ForceDirectories(DataDir() + '\storage\uploads\school');
-      FileCopy(AppDir() + '\public\assets\img\hadaba-logo.png',
-               DataDir() + '\storage\uploads\school\hadaba-logo.png', True);
-    end;
+    // The bundled default seal is versioned with the application. A school
+    // custom logo is stored under a unique upload filename and is untouched.
+    ForceDirectories(DataDir() + '\storage\uploads\school');
+    FileCopy(AppDir() + '\public\assets\img\hadaba-logo.png',
+             DataDir() + '\storage\uploads\school\hadaba-logo.png', True);
 
     Exec('net.exe', 'start "{#ApacheServiceName}"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;

@@ -38,7 +38,7 @@ $totalSteps = count($steps);
 <body class="n-setup-body">
 <div class="n-setup-wrap">
   <div class="n-setup-brand">
-    <div class="nizam-brand-mark nizam-brand-mark-logo n-setup-mark"><img src="/assets/img/hadaba-logo.png" alt=""></div>
+    <div class="school-brand-mark school-brand-mark-logo setup-school-mark"><img src="/assets/img/hadaba-logo.png" alt=""></div>
     <div class="n-setup-app-name"><?= e(__('app.name')) ?></div>
   </div>
 

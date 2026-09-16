@@ -4,7 +4,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_VERSION = 'nizam-v1.0.2-navigation';
+const CACHE_VERSION = 'nizam-v1.0.3-branding';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   '/login',
   '/dashboard',
   '/assets/css/app.css',
+  '/assets/img/hadaba-logo.png',
   '/assets/js/app.js',
   '/assets/vendor/bootstrap/css/bootstrap.min.css',
   '/assets/vendor/bootstrap/css/bootstrap.rtl.min.css',
@@ -92,8 +93,15 @@ self.addEventListener('fetch', (event) => {
 
   // Different strategies for different resource types
   if (isStaticAsset(url)) {
-    // Static assets: Cache-first strategy
-    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    // JS/CSS: stale-while-revalidate. cacheFirst() would happily serve a
+    // years-old cached app.js/app.css forever if the browser's own SW
+    // update check ever gets delayed (it frequently is -- SW update checks
+    // are throttled and only run on navigation) -- there would be no error,
+    // no console warning, just a site silently stuck on old code after a
+    // real fix has already shipped. This still returns the cached response
+    // instantly (same offline guarantee), but always fires a background
+    // fetch that updates the cache for next time.
+    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
   } else if (isImage(url)) {
     // Images: Cache-first with cleanup
     event.respondWith(cacheFirst(request, IMAGE_CACHE, CACHE_LIMITS.images));
@@ -136,6 +144,35 @@ async function cacheFirst(request, cacheName, limit = null) {
     console.error('[SW] Cache-first failed:', error);
     return createOfflineResponse();
   }
+}
+
+/**
+ * Stale-while-revalidate: return the cached response immediately if one
+ * exists (instant load, works offline), while always kicking off a network
+ * fetch in the background to refresh the cache for the *next* request. A
+ * fetch failure (offline) is silently ignored here -- the cached response
+ * already answered this request either way.
+ */
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cachedResponse = await cache.match(request);
+
+  const networkFetch = fetch(request)
+    .then((networkResponse) => {
+      if (networkResponse.ok) {
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    })
+    .catch(() => null);
+
+  if (cachedResponse) {
+    networkFetch.catch(() => {}); // let it update the cache in the background; ignore errors
+    return cachedResponse;
+  }
+
+  const networkResponse = await networkFetch;
+  return networkResponse || createOfflineResponse();
 }
 
 /**

@@ -20,7 +20,6 @@ final class DashboardController extends Controller
 {
     public function index(Request $request): void
     {
-        error_log("ACTIVE YEAR ID: " . var_export(\App\Middleware\AcademicYearContext::activeYearId(), true));
         $stats = (new DashboardStatsService())->build();
         $insights = (new IntelligenceService())->getAtRiskStudents();
         $this->view('dashboard', ['stats' => $stats, 'insights' => $insights]);

@@ -55,17 +55,31 @@ document.addEventListener('DOMContentLoaded', function () {
       if (isNaN(target)) { return; }
       var start = null;
       var duration = 560;
+      var done = false;
       el.textContent = '0';
+      function finish() {
+        if (done) { return; }
+        done = true;
+        el.textContent = target.toString();
+      }
       function step(ts) {
+        if (done) { return; }
         if (start === null) { start = ts; }
         var progress = Math.min((ts - start) / duration, 1);
         var eased = 1 - Math.pow(1 - progress, 3);
         el.textContent = Math.round(eased * target).toString();
         if (progress < 1) {
           window.requestAnimationFrame(step);
+        } else {
+          finish();
         }
       }
       window.requestAnimationFrame(step);
+      // Failsafe: a backgrounded/inactive tab throttles or fully suspends
+      // requestAnimationFrame, which would otherwise leave this stuck at
+      // "0" forever with no visible error -- snap to the real value once
+      // the animation should clearly be done regardless.
+      setTimeout(finish, duration + 250);
     });
   }
 

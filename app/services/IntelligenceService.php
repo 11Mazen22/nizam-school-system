@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Database;
+use App\Logger;
 use App\Middleware\AcademicYearContext;
 
 /**
@@ -50,7 +51,15 @@ final class IntelligenceService
             
             return $stmt->fetchAll();
         } catch (\PDOException $e) {
-            die("IntelligenceService Exception: " . $e->getMessage());
+            // This is a "nice to have" dashboard widget, not core functionality --
+            // a query failure here (a missing table on an older install, a driver
+            // quirk) must never take down the whole dashboard for every user.
+            // Log it like every other caught exception in this app and degrade
+            // to "no at-risk students to show" rather than crashing the request.
+            Logger::error('IntelligenceService::getAtRiskStudents failed: ' . $e->getMessage(), [
+                'exception' => get_class($e),
+            ]);
+            return [];
         }
     }
 }
