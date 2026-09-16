@@ -45,9 +45,8 @@ $schoolName = $school === null
             <div class="n-auth-app-subtitle"><?= e(__('app.name')) ?> — <?= e(__('auth.login.system_subtitle')) ?></div>
           </div>
         <?php else: ?>
-          <div class="nizam-brand-mark n-auth-mark n-auth-mark-animated">
-            <?= icon('sparkle') ?>
-            <div class="n-auth-mark-glow"></div>
+          <div class="nizam-brand-mark nizam-brand-mark-logo n-auth-mark">
+            <img src="/assets/img/hadaba-logo.png" alt="">
           </div>
           <div>
             <div class="n-auth-app-name-lg"><?= e($schoolName) ?></div>

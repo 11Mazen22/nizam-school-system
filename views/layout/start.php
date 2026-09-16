@@ -56,7 +56,7 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
       <?php if (!empty($school['logo_path'])): ?>
         <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/logo" alt=""></div>
       <?php else: ?>
-        <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
+        <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></div>
       <?php endif; ?>
       <div class="nizam-brand-name"><?= e($schoolName) ?></div>
     </div>
@@ -169,8 +169,8 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
         <div class="nizam-brand mb-0 p-0">
           <?php if (!empty($school['logo_path'])): ?>
             <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/logo" alt=""></div>
-          <?php else: ?>
-            <div class="nizam-brand-mark"><?= icon('sparkle') ?></div>
+      <?php else: ?>
+            <div class="nizam-brand-mark nizam-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></div>
           <?php endif; ?>
           <span class="fw-bold text-dark"><?= e($schoolName) ?></span>
         </div>
