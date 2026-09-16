@@ -174,27 +174,34 @@ a:hover {
   padding: 4px 10px 20px;
   color: #fff;
 }
-.nizam-brand-mark {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--n-radius-sm);
-  background: linear-gradient(145deg, var(--n-primary), #2d9478);
+.school-brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--n-radius-md);
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: var(--n-shadow-xs);
+  box-shadow: var(--n-shadow-sm);
+  padding: 4px;
 }
-.nizam-brand-mark .n-icon { width: 19px; height: 19px; color: #fff; }
-.nizam-brand-mark-logo {
+.school-brand-mark .n-icon { width: 22px; height: 22px; color: var(--n-primary); }
+.school-brand-mark-logo {
   background: #fff;
-  padding: 3px;
+  padding: 0;
 }
-.nizam-brand-mark-logo img {
+.school-brand-mark-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: calc(var(--n-radius-sm) - 2px);
+  border-radius: calc(var(--n-radius-md) - 2px);
+}
+.school-topbar-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: var(--n-radius-sm);
 }
 .nizam-brand-name { font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; }
 
@@ -858,8 +865,12 @@ a.text-decoration-none:hover .card,
 }
 .n-setup-wrap { width: 100%; max-width: 560px; }
 .n-setup-brand { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 24px; }
-.n-setup-mark { width: 44px; height: 44px; }
-.n-setup-mark .n-icon { width: 22px; height: 22px; }
+.setup-school-mark { 
+  width: 80px; 
+  height: 80px;
+  box-shadow: var(--n-shadow-md);
+}
+.setup-school-mark .n-icon { width: 40px; height: 40px; }
 .n-setup-app-name { font-weight: 700; color: var(--n-text-muted); font-size: 0.9rem; }
 
 .n-setup-stepper { display: flex; margin-bottom: 28px; position: relative; }
@@ -990,12 +1001,12 @@ a.text-decoration-none:hover .card,
   z-index: 2;
 }
 
-.n-auth-mark-animated {
+.auth-school-mark-animated {
   position: relative;
   animation: n-mark-pulse 3s ease-in-out infinite;
 }
 
-.n-auth-mark-glow {
+.auth-school-mark-glow {
   position: absolute;
   inset: -4px;
   background: radial-gradient(circle, rgba(45, 148, 120, 0.4), transparent 70%);
@@ -1014,14 +1025,15 @@ a.text-decoration-none:hover .card,
   50% { opacity: 0.7; }
 }
 
-.n-auth-mark { 
-  width: 56px; 
-  height: 56px;
+.auth-school-mark {
+  width: 90px; 
+  height: 90px;
   position: relative;
+  box-shadow: var(--n-shadow-lg);
 }
-.n-auth-mark .n-icon { 
-  width: 28px; 
-  height: 28px;
+.auth-school-mark .n-icon {
+  width: 45px; 
+  height: 45px;
 }
 
 .n-auth-app-name-lg { 
