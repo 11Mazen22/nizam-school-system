@@ -561,6 +561,7 @@ return [
     'settings.logo' => 'شعار المدرسة',
     'settings.logo_remove' => 'إزالة الشعار الحالي',
     'settings.logo_help' => 'JPG أو PNG، بحد أقصى 2 ميجابايت. يظهر في التطبيق وعلى التقارير المطبوعة/المصدَّرة.',
+    'settings.logo_fixed_help' => 'الشعار الرسمي للمدرسة، ثابت ولا يمكن تغييره من هذه الشاشة.',
     'settings.report_footer_text' => 'نص تذييل التقرير',
     'settings.report_footer_help' => 'سطر اختياري مخصص يُطبع أسفل كل تقرير مُصدَّر.',
     'settings.default_language' => 'اللغة الافتراضية',

@@ -58,17 +58,10 @@ use App\Middleware\CsrfMiddleware;
 
       <hr>
       <label class="form-label d-block"><?= e(__('settings.logo')) ?></label>
-      <?php if (!empty($school['logo_path'])): ?>
-        <div class="d-flex align-items-center gap-3 mb-2">
-          <img src="/logo" alt="" style="height:64px; max-width:160px; object-fit:contain;" class="border rounded p-1 bg-white">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="remove_logo" value="1" id="remove_logo">
-            <label class="form-check-label" for="remove_logo"><?= e(__('settings.logo_remove')) ?></label>
-          </div>
-        </div>
-      <?php endif; ?>
-      <input type="file" class="form-control mb-1" name="logo" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
-      <div class="form-text mb-3"><?= e(__('settings.logo_help')) ?></div>
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <img src="/assets/img/hadaba-logo.png" alt="" style="height:64px; max-width:160px; object-fit:contain;" class="border rounded p-1 bg-white">
+        <div class="form-text mb-0"><?= e(__('settings.logo_fixed_help')) ?></div>
+      </div>
 
       <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
         <?= icon('check') ?>

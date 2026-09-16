@@ -562,6 +562,7 @@ return [
     'settings.logo' => 'School Logo',
     'settings.logo_remove' => 'Remove current logo',
     'settings.logo_help' => 'JPG or PNG, 2 MB maximum. Shown in the app and on printed/exported reports.',
+    'settings.logo_fixed_help' => "The school's official seal, fixed and not changeable from this screen.",
     'settings.report_footer_text' => 'Report Footer Text',
     'settings.report_footer_help' => 'An optional custom line printed at the bottom of every exported report.',
     'settings.default_language' => 'Default Language',

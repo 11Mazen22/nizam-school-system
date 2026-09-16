@@ -35,6 +35,17 @@ final class ExportService
      */
     public function toPdf(array $report, string $locale): string
     {
+        // mPDF's header/footer HTML normalization (_puthtmlheaders() ->
+        // AdjustHTML()) is regex-based, and a base64 data: URI has no
+        // whitespace to break on -- even a modest embedded logo image can
+        // hit PHP's default 1,000,000-step pcre.backtrack_limit and hard-fail
+        // every export with "HTML code size is larger than
+        // pcre.backtrack_limit" (found live generating the first export
+        // after the header started actually embedding the school logo).
+        // This is a well-known mPDF limitation with no library-level
+        // workaround other than raising the limit for this request.
+        ini_set('pcre.backtrack_limit', '10000000');
+
         $fontDirs = (new ConfigVariables())->getDefaults()['fontDir'];
         $fontData = (new FontVariables())->getDefaults()['fontdata'];
 
@@ -184,16 +195,40 @@ final class ExportService
             . '</tr></table>';
     }
 
-    /** Embedded as a data: URI rather than a filesystem path -- mPDF resolves relative paths against its own working context, and a data: URI sidesteps that entirely. Returns null (never a broken-image icon) if no logo is configured or the stored file has since gone missing. Retrieval itself (local disk vs Supabase Storage) is UploadService's own driver branch, not duplicated here. */
+    /**
+     * Embedded as a data: URI rather than a filesystem path -- mPDF resolves
+     * relative paths against its own working context, and a data: URI
+     * sidesteps that entirely. Falls back to the bundled official school
+     * seal (the same asset every page shell uses, public/assets/img/hadaba-
+     * logo.png) when no uploaded logo is configured -- matching how the app
+     * shell itself no longer treats a per-install uploaded logo as the
+     * primary source of truth. Returns null (never a broken-image icon)
+     * only if even that bundled asset is somehow missing.
+     */
     private function logoDataUri(?string $logoPath): ?string
     {
         $contents = UploadService::retrieve($logoPath);
-        if ($contents === null) {
-            return null;
-        }
         $extension = strtolower(pathinfo((string) $logoPath, PATHINFO_EXTENSION));
+
+        if ($contents === null) {
+            // A pre-sized 120x120 derivative, not the ~900KB full-resolution
+            // seal used elsewhere in the app: mPDF's HTML processor regex-
+            // matches the whole header string including its inline data:
+            // URI, and the full-size image's base64 length alone blew past
+            // PHP's pcre.backtrack_limit, hard-failing every single PDF
+            // export ("HTML code size is larger than pcre.backtrack_limit"),
+            // found live generating the very first test export after wiring
+            // this fallback in.
+            $fallback = dirname(__DIR__, 2) . '/public/assets/img/hadaba-logo-pdf.png';
+            if (!is_file($fallback)) {
+                return null;
+            }
+            $contents = file_get_contents($fallback);
+            $extension = 'png';
+        }
+
         $mime = $extension === 'png' ? 'image/png' : 'image/jpeg';
-        return 'data:' . $mime . ';base64,' . base64_encode($contents);
+        return 'data:' . $mime . ';base64,' . base64_encode((string) $contents);
     }
 
     private function footerHtml(string $locale): string

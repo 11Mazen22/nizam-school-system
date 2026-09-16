@@ -61,26 +61,6 @@ final class SettingsController extends Controller
         $this->schools->update($school['id'], $name, $nameAr, $address, $phone);
         SettingsService::set('reports.school_footer_text', (string) ($footerText ?? ''), 'string');
 
-        if ($request->post('remove_logo') === '1') {
-            $this->uploads->delete($school['logo_path']);
-            $this->schools->updateLogoPath($school['id'], null);
-        } else {
-            $file = $request->file('logo');
-            if ($file !== null && $file['error'] !== UPLOAD_ERR_NO_FILE) {
-                try {
-                    $newPath = $this->uploads->store($file, 'school');
-                    $this->uploads->delete($school['logo_path']);
-                    $this->schools->updateLogoPath($school['id'], $newPath);
-                } catch (RuntimeException $e) {
-                    Flash::set('warning', match ($e->getMessage()) {
-                        'too_large' => __('uploads.error.too_large'),
-                        'invalid_type', 'not_an_image' => __('uploads.error.invalid_type'),
-                        default => __('uploads.error.generic'),
-                    });
-                }
-            }
-        }
-
         ActivityLogger::log('settings.update', 'settings', null, 'Profile settings updated');
         Flash::set('success', __('settings.saved'));
         $this->redirect('/settings/profile');
