@@ -31,28 +31,24 @@ final class SetupStatusService
     public const STEP_ADMIN = 'admin';
     public const STEP_DONE = 'done';
 
+    /**
+     * Delegates to currentStep() rather than duplicating its logic: an
+     * earlier version of this method re-implemented the "any migrations
+     * pending?" check by itself, always against database/migrations/ (the
+     * MySQL folder) regardless of driver. On the pgsql/online deployment
+     * that check can never pass -- Postgres schema is tracked entirely
+     * under database/migrations-pg/ by the deployment process itself
+     * (currentStep()'s own comment explains why the pgsql branch skips
+     * this check entirely) -- so isCompleted() was permanently returning
+     * false in production, and SetupGateMiddleware (which calls only this
+     * method, not currentStep()) redirected every single request, from
+     * every visitor, authenticated or not, back to the setup wizard.
+     * Found live: /login on production bounced to the "setup complete"
+     * confirmation screen instead of the login form.
+     */
     public function isCompleted(): bool
     {
-        // Hadaba Al-Ahram School: Setup wizard disabled
-        // School data is hardcoded in database migration
-        // But we still need to ensure database exists and migrations ran
-        $pdo = $this->pdo();
-        if ($pdo === null) {
-            return false; // No database connection yet
-        }
-
-        // Check if migrations have been applied
-        try {
-            $migrationService = new MigrationService();
-            $migrationsPath = dirname(__DIR__, 2) . '/database/migrations';
-            if ($migrationService->pendingCount($pdo, $migrationsPath) > 0) {
-                return false; // Migrations not applied yet
-            }
-        } catch (\Exception $e) {
-            return false; // Migration check failed
-        }
-
-        return true; // Database ready, school data exists from migration
+        return $this->currentStep() === self::STEP_DONE;
     }
 
     public function canConnect(): bool
