@@ -27,7 +27,16 @@ final class NotificationService
     {
         $pdo = Database::connection();
         $today = date('m-d'); // Format: 12-25 for December 25
-        
+
+        // DATE_FORMAT() is MySQL-only -- Postgres has no such function and
+        // would fail this query outright with "function date_format does
+        // not exist" on every single run of the production/pgsql
+        // deployment's daily birthday check. TO_CHAR() is the Postgres
+        // equivalent; MySQL has no TO_CHAR(), so this has to branch.
+        $dateMatch = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql'
+            ? "TO_CHAR(s.date_of_birth, 'MM-DD') = :today"
+            : "DATE_FORMAT(s.date_of_birth, '%m-%d') = :today";
+
         $stmt = $pdo->prepare("
             SELECT
                 s.id,
@@ -41,7 +50,7 @@ final class NotificationService
             LEFT JOIN classes c ON e.class_id = c.id
             LEFT JOIN grades g ON c.grade_id = g.id
             WHERE s.status = 'active'
-            AND DATE_FORMAT(s.date_of_birth, '%m-%d') = :today
+            AND {$dateMatch}
         ");
         
         $stmt->execute(['today' => $today]);
