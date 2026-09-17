@@ -768,7 +768,15 @@ return [
     'exams.report_card'     => 'Report Card',
     'exams.pdf_unavailable' => 'PDF generation is not available on this installation.',
     'exams.empty_title'     => 'No Exams Yet',
-    'exams.empty_description'=> 'Create exam terms above to start entering scores.',
+    'exams.empty_description'=> 'Create an exam term to start entering scores.',
+    'exams.tab_list'        => 'List',
+    'exams.tab_add'         => 'New Exam',
+    'exams.tab_edit'        => 'Edit Exam',
+    'exams.form_add_subtitle' => 'Set the exam name, term, maximum score, and its weight in the final average.',
+    'exams.form_edit_subtitle' => 'Update this exam\'s details.',
+    'exams.stat_terms'      => 'Terms',
+    'exams.term_n'          => 'Term :term',
+    'exams.exams_count'     => 'exam(s)',
 
     // Student Welfare
     'welfare.discipline_title'   => 'Discipline Log',

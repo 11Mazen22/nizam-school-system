@@ -762,7 +762,15 @@ return [
     'exams.report_card'     => 'بطاقة التقرير',
     'exams.pdf_unavailable' => 'إنشاء ملفات PDF غير متاح في هذا التثبيت.',
     'exams.empty_title'     => 'لا توجد امتحانات بعد',
-    'exams.empty_description'=> 'أنشئ فترات امتحانية أعلاه للبدء في إدخال الدرجات.',
+    'exams.empty_description'=> 'أنشئ فترة امتحانية للبدء في إدخال الدرجات.',
+    'exams.tab_list'        => 'القائمة',
+    'exams.tab_add'         => 'امتحان جديد',
+    'exams.tab_edit'        => 'تعديل امتحان',
+    'exams.form_add_subtitle' => 'حدد اسم الامتحان والفترة الدراسية والدرجة القصوى ووزنه في المعدل النهائي.',
+    'exams.form_edit_subtitle' => 'تحديث بيانات هذا الامتحان.',
+    'exams.stat_terms'      => 'الفترات الدراسية',
+    'exams.term_n'          => 'الفترة :term',
+    'exams.exams_count'     => 'امتحان',
 
     // Student Welfare
     'welfare.discipline_title'   => 'سجل الانضباط',
