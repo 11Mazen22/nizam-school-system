@@ -96,14 +96,19 @@ require __DIR__ . '/layout/start.php';
     </div>
   </div>
   
-  <?php if (!empty($insights)): ?>
   <div class="row g-3 mt-1 n-reveal-group">
     <div class="col-12">
-      <div class="card border-warning">
-        <div class="card-header bg-warning text-dark d-flex align-items-center gap-2">
-          <?= icon('alert-triangle') ?>
-          <span class="fw-bold"><?= e(currentLocale() === 'en' ? 'At-Risk Students (Intelligent Insight)' : 'الطلاب المعرضون للخطر (تحليل ذكي)') ?></span>
+      <div class="card <?= empty($insights) ? '' : 'border-warning' ?>">
+        <div class="card-header <?= empty($insights) ? '' : 'bg-warning text-dark' ?> d-flex align-items-center gap-2">
+          <?= icon(empty($insights) ? 'shield-check' : 'alert-triangle') ?>
+          <span class="fw-bold"><?= e(__('dashboard.at_risk_title')) ?></span>
         </div>
+        <?php if (empty($insights)): ?>
+          <div class="card-body text-muted small d-flex align-items-center gap-2">
+            <?= icon('check-circle', 'text-success flex-shrink-0') ?>
+            <span><?= e(__('dashboard.at_risk_empty')) ?></span>
+          </div>
+        <?php else: ?>
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -112,8 +117,8 @@ require __DIR__ . '/layout/start.php';
                   <th><?= e(__('students.full_name')) ?></th>
                   <th><?= e(__('students.code')) ?></th>
                   <th><?= e(__('classes.class')) ?></th>
-                  <th><?= e(currentLocale() === 'en' ? 'Absences' : 'الغياب') ?></th>
-                  <th><?= e(currentLocale() === 'en' ? 'Incidents' : 'المخالفات') ?></th>
+                  <th><?= e(__('dashboard.at_risk_absences')) ?></th>
+                  <th><?= e(__('dashboard.at_risk_incidents')) ?></th>
                 </tr>
               </thead>
               <tbody>
@@ -130,10 +135,10 @@ require __DIR__ . '/layout/start.php';
             </table>
           </div>
         </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
-  <?php endif; ?>
 
 <?php endif; ?>
 

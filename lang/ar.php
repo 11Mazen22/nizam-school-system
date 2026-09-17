@@ -514,6 +514,10 @@ return [
     'dashboard.christian' => 'مسيحي',
     'dashboard.other' => 'أخرى',
     'dashboard.view_all_activity' => 'عرض كل النشاطات',
+    'dashboard.at_risk_title' => 'الطلاب المعرضون للخطر (تحليل ذكي)',
+    'dashboard.at_risk_absences' => 'الغياب',
+    'dashboard.at_risk_incidents' => 'المخالفات',
+    'dashboard.at_risk_empty' => 'لا يوجد طلاب معرّضون للخطر حاليًا -- يراقب النظام الغياب المتكرر (3 أيام فأكثر) والمخالفات السلوكية تلقائيًا.',
 
     // رفع الملفات (القرار رقم 11 / O-18)
     'uploads.error.too_large' => 'تعذر حفظ الصورة: حجم الملف كبير جدًا (الحد الأقصى 2 ميجابايت).',

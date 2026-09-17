@@ -515,6 +515,10 @@ return [
     'dashboard.christian' => 'Christian',
     'dashboard.other' => 'Other',
     'dashboard.view_all_activity' => 'View all activity',
+    'dashboard.at_risk_title' => 'At-Risk Students (Intelligent Insight)',
+    'dashboard.at_risk_absences' => 'Absences',
+    'dashboard.at_risk_incidents' => 'Incidents',
+    'dashboard.at_risk_empty' => 'No at-risk students right now -- this automatically watches for repeated absences (3+ days) and disciplinary incidents.',
 
     // Uploads (decision #11 / §O-18)
     'uploads.error.too_large' => 'The photo could not be saved: the file is too large (2 MB maximum).',
