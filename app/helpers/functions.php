@@ -243,6 +243,7 @@ function icon(string $name, string $class = ''): string
         'close' => '<path d="m5 5 14 14M19 5 5 19"/>',
         'check' => '<path d="m4.5 12.5 5 5 10-11"/>',
         'check-circle' => '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.6 2.6L16.5 9"/>',
+        'x-circle' => '<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>',
         'chevron-left' => '<path d="M15 5.5 8.5 12l6.5 6.5"/>',
         'chevron-right' => '<path d="M9 5.5 15.5 12 9 18.5"/>',
         'chevron-down' => '<path d="m5.5 8.5 6.5 6.5 6.5-6.5"/>',

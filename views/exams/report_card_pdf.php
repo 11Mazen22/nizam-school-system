@@ -1,3 +1,19 @@
+<?php
+$reportCardSchool = (new \App\Repositories\SchoolRepository())->full();
+$reportCardSchoolName = $reportCardSchool !== null
+    ? (currentLocale() === 'ar' ? $reportCardSchool['name_ar'] : $reportCardSchool['name'])
+    : __('app.name');
+
+// Same fallback + fixed-size derivative ExportService::logoDataUri() uses --
+// mPDF's header/footer HTML normalization is regex-based, and a full-size
+// embedded image's base64 length alone can blow PHP's pcre.backtrack_limit
+// (found live building this exact style of PDF for the reports module).
+$reportCardLogoPath = dirname(__DIR__, 2) . '/public/assets/img/hadaba-logo-pdf.png';
+$reportCardLogoDataUri = is_file($reportCardLogoPath)
+    ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($reportCardLogoPath))
+    : null;
+ini_set('pcre.backtrack_limit', '10000000');
+?>
 <!DOCTYPE html>
 <html dir="<?= currentLocale() === 'ar' ? 'rtl' : 'ltr' ?>">
 <head>
@@ -7,6 +23,7 @@
   h1   { font-size: 18pt; color: #1f6f5c; text-align: center; margin: 0; }
   h2   { font-size: 13pt; color: #333; text-align: center; margin: 4px 0 20px; }
   .header-box { border: 2px solid #1f6f5c; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 20px; }
+  .header-logo { display: block; margin: 0 auto 8px; height: 60px; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
   th    { background: #1f6f5c; color: #fff; padding: 7px 10px; text-align: center; }
   td    { border: 1px solid #cad6cd; padding: 6px 10px; text-align: center; }
@@ -20,7 +37,10 @@
 </head>
 <body>
 <div class="header-box">
-  <h1><?= e(currentLocale() === 'ar' ? 'هضبة الأهرام الثانوية' : 'Hadaba Al-Ahram Language School') ?></h1>
+  <?php if ($reportCardLogoDataUri !== null): ?>
+    <img class="header-logo" src="<?= e($reportCardLogoDataUri) ?>" alt="">
+  <?php endif; ?>
+  <h1><?= e($reportCardSchoolName) ?></h1>
   <h2><?= e(__('exams.report_card')) ?></h2>
   <p><strong><?= e(__('students.full_name')) ?>:</strong> <?= e($student['full_name']) ?>
      &nbsp;&nbsp; <strong><?= e(__('students.code')) ?>:</strong> <?= e($student['student_code']) ?></p>

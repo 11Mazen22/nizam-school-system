@@ -13,6 +13,17 @@ $activeNav  = 'attendance';
 $suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
+
+// Real, current counts for the header stats -- same default-to-present
+// rule the table body below already uses for an unmarked student, so the
+// two never disagree.
+$statusCounts = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
+foreach ($students as $student) {
+    $status = $existing[$student['id']]['status'] ?? 'present';
+    if (isset($statusCounts[$status])) {
+        $statusCounts[$status]++;
+    }
+}
 ?>
 
 <div class="n-grades-header">
@@ -25,7 +36,34 @@ use App\Middleware\CsrfMiddleware;
       <p class="n-grades-subtitle"><?= e(__('attendance.mark_subtitle')) ?></p>
     </div>
     <div class="n-grades-header-actions">
-      <a href="/attendance/report" class="btn btn-outline-light"><?= icon('chart') ?> <?= e(__('attendance.view_report')) ?></a>
+      <?php if ($classId > 0 && !empty($students)): ?>
+      <div class="n-grades-stats-mini">
+        <div class="n-stat-mini">
+          <span class="n-stat-mini-value" data-count-up><?= $statusCounts['present'] ?></span>
+          <span class="n-stat-mini-label"><?= e(__('attendance.stat_present')) ?></span>
+        </div>
+        <div class="n-stat-mini">
+          <span class="n-stat-mini-value" data-count-up><?= $statusCounts['absent'] ?></span>
+          <span class="n-stat-mini-label"><?= e(__('attendance.stat_absent')) ?></span>
+        </div>
+        <?php if ($statusCounts['late'] > 0): ?>
+        <div class="n-stat-mini">
+          <span class="n-stat-mini-value" data-count-up><?= $statusCounts['late'] ?></span>
+          <span class="n-stat-mini-label"><?= e(__('attendance.stat_late')) ?></span>
+        </div>
+        <?php endif; ?>
+        <?php if ($statusCounts['excused'] > 0): ?>
+        <div class="n-stat-mini">
+          <span class="n-stat-mini-value" data-count-up><?= $statusCounts['excused'] ?></span>
+          <span class="n-stat-mini-label"><?= e(__('attendance.stat_excused')) ?></span>
+        </div>
+        <?php endif; ?>
+      </div>
+      <?php endif; ?>
+      <a href="/attendance/report" class="btn btn-outline-light d-flex align-items-center gap-2">
+        <?= icon('chart') ?>
+        <span><?= e(__('attendance.view_report')) ?></span>
+      </a>
     </div>
   </div>
 </div>
@@ -66,8 +104,14 @@ use App\Middleware\CsrfMiddleware;
       </div>
       <div class="d-flex gap-2">
         <!-- Quick-mark all buttons -->
-        <button type="button" class="btn btn-sm btn-success" onclick="markAll('present')"><?= e(__('attendance.mark_all_present')) ?></button>
-        <button type="button" class="btn btn-sm btn-danger"  onclick="markAll('absent')"><?= e(__('attendance.mark_all_absent')) ?></button>
+        <button type="button" class="btn btn-sm btn-success d-flex align-items-center gap-1" onclick="markAll('present')">
+          <?= icon('check-circle', 'n-icon-sm') ?>
+          <span><?= e(__('attendance.mark_all_present')) ?></span>
+        </button>
+        <button type="button" class="btn btn-sm btn-danger d-flex align-items-center gap-1" onclick="markAll('absent')">
+          <?= icon('x-circle', 'n-icon-sm') ?>
+          <span><?= e(__('attendance.mark_all_absent')) ?></span>
+        </button>
       </div>
     </div>
     <div class="table-responsive">
@@ -126,16 +170,34 @@ use App\Middleware\CsrfMiddleware;
 </form>
 
 <?php elseif ($classId > 0 && empty($students)): ?>
-  <div class="n-empty-state">
-    <div class="n-empty-icon"><?= icon('users', 'n-icon-xl') ?></div>
-    <h3 class="n-empty-title"><?= e(__('attendance.no_students')) ?></h3>
+  <div class="n-empty-powerful">
+    <div class="n-empty-powerful-bg">
+      <div class="n-empty-blob n-empty-blob-1"></div>
+      <div class="n-empty-blob n-empty-blob-2"></div>
+      <div class="n-empty-blob n-empty-blob-3"></div>
+    </div>
+    <div class="n-empty-powerful-content">
+      <div class="n-empty-powerful-icon">
+        <?= icon('users', 'n-icon-massive') ?>
+      </div>
+      <h2 class="n-empty-powerful-title"><?= e(__('attendance.no_students')) ?></h2>
+    </div>
   </div>
 
 <?php else: ?>
-  <div class="n-empty-state">
-    <div class="n-empty-icon"><?= icon('check-circle', 'n-icon-xl') ?></div>
-    <h3 class="n-empty-title"><?= e(__('attendance.choose_class_prompt')) ?></h3>
-    <p class="n-empty-description"><?= e(__('attendance.choose_class_hint')) ?></p>
+  <div class="n-empty-powerful">
+    <div class="n-empty-powerful-bg">
+      <div class="n-empty-blob n-empty-blob-1"></div>
+      <div class="n-empty-blob n-empty-blob-2"></div>
+      <div class="n-empty-blob n-empty-blob-3"></div>
+    </div>
+    <div class="n-empty-powerful-content">
+      <div class="n-empty-powerful-icon">
+        <?= icon('check-circle', 'n-icon-massive') ?>
+      </div>
+      <h2 class="n-empty-powerful-title"><?= e(__('attendance.choose_class_prompt')) ?></h2>
+      <p class="n-empty-powerful-description"><?= e(__('attendance.choose_class_hint')) ?></p>
+    </div>
   </div>
 <?php endif; ?>
 

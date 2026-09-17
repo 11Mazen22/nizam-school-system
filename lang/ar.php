@@ -729,6 +729,12 @@ return [
     'attendance.rate'               => 'النسبة',
     'attendance.absent_days'        => 'أيام الغياب',
     'attendance.chronic_title'      => 'الغياب المزمن (5+ أيام)',
+    'attendance.stat_present'       => 'حاضر',
+    'attendance.stat_absent'        => 'غائب',
+    'attendance.stat_late'          => 'متأخر',
+    'attendance.stat_excused'       => 'غياب بعذر',
+    'attendance.report_empty_title' => 'اختر فصلاً لعرض الملخص',
+    'attendance.report_empty_description' => 'اختر فصلاً ونطاقًا زمنيًا أعلاه لعرض إحصائيات الحضور والغياب.',
 
     // Exams & Grading
     'exams.title'           => 'الامتحانات والدرجات',
@@ -771,6 +777,7 @@ return [
     'exams.stat_terms'      => 'الفترات الدراسية',
     'exams.term_n'          => 'الفترة :term',
     'exams.exams_count'     => 'امتحان',
+    'exams.no_subjects_for_class' => 'لا توجد مواد مسندة لهذا الفصل بعد. أسند مادة من صفحة التكليفات أولاً.',
 
     // Student Welfare
     'welfare.discipline_title'   => 'سجل الانضباط',

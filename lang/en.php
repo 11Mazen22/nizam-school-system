@@ -735,6 +735,12 @@ return [
     'attendance.rate'               => 'Rate',
     'attendance.absent_days'        => 'Absences',
     'attendance.chronic_title'      => 'Chronic Absenteeism (5+ days)',
+    'attendance.stat_present'       => 'Present',
+    'attendance.stat_absent'        => 'Absent',
+    'attendance.stat_late'          => 'Late',
+    'attendance.stat_excused'       => 'Excused',
+    'attendance.report_empty_title' => 'Choose a class to see a summary',
+    'attendance.report_empty_description' => 'Pick a class and a date range above to see attendance statistics.',
 
     // Exams & Grading
     'exams.title'           => 'Exams & Grades',
@@ -777,6 +783,7 @@ return [
     'exams.stat_terms'      => 'Terms',
     'exams.term_n'          => 'Term :term',
     'exams.exams_count'     => 'exam(s)',
+    'exams.no_subjects_for_class' => 'No subject is assigned to this class yet. Assign one from the Assignments page first.',
 
     // Student Welfare
     'welfare.discipline_title'   => 'Discipline Log',

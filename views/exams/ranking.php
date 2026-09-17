@@ -81,14 +81,32 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 </div>
 <?php elseif ($classId > 0): ?>
-  <div class="n-empty-state">
-    <div class="n-empty-icon"><?= icon('trending-up', 'n-icon-xl') ?></div>
-    <h3 class="n-empty-title"><?= e(__('exams.no_scores_yet')) ?></h3>
+  <div class="n-empty-powerful">
+    <div class="n-empty-powerful-bg">
+      <div class="n-empty-blob n-empty-blob-1"></div>
+      <div class="n-empty-blob n-empty-blob-2"></div>
+      <div class="n-empty-blob n-empty-blob-3"></div>
+    </div>
+    <div class="n-empty-powerful-content">
+      <div class="n-empty-powerful-icon">
+        <?= icon('trending-up', 'n-icon-massive') ?>
+      </div>
+      <h2 class="n-empty-powerful-title"><?= e(__('exams.no_scores_yet')) ?></h2>
+    </div>
   </div>
 <?php else: ?>
-  <div class="n-empty-state">
-    <div class="n-empty-icon"><?= icon('trending-up', 'n-icon-xl') ?></div>
-    <h3 class="n-empty-title"><?= e(__('attendance.choose_class_prompt')) ?></h3>
+  <div class="n-empty-powerful">
+    <div class="n-empty-powerful-bg">
+      <div class="n-empty-blob n-empty-blob-1"></div>
+      <div class="n-empty-blob n-empty-blob-2"></div>
+      <div class="n-empty-blob n-empty-blob-3"></div>
+    </div>
+    <div class="n-empty-powerful-content">
+      <div class="n-empty-powerful-icon">
+        <?= icon('trending-up', 'n-icon-massive') ?>
+      </div>
+      <h2 class="n-empty-powerful-title"><?= e(__('attendance.choose_class_prompt')) ?></h2>
+    </div>
   </div>
 <?php endif; ?>
 

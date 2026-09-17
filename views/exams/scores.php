@@ -57,6 +57,13 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
   </div>
 </form>
 
+<?php if ($classId > 0 && $subjects === []): ?>
+  <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+    <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e(__('exams.no_subjects_for_class')) ?></span>
+  </div>
+<?php endif; ?>
+
 <?php if ($classId > 0 && !empty($sheet)): ?>
 <form method="post" action="/exams/<?= (int)$exam['id'] ?>/scores">
   <?= CsrfMiddleware::field() ?>
@@ -124,14 +131,32 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
 </form>
 
 <?php elseif ($classId > 0): ?>
-  <div class="n-empty-state">
-    <div class="n-empty-icon"><?= icon('users', 'n-icon-xl') ?></div>
-    <h3 class="n-empty-title"><?= e(__('attendance.no_students')) ?></h3>
+  <div class="n-empty-powerful">
+    <div class="n-empty-powerful-bg">
+      <div class="n-empty-blob n-empty-blob-1"></div>
+      <div class="n-empty-blob n-empty-blob-2"></div>
+      <div class="n-empty-blob n-empty-blob-3"></div>
+    </div>
+    <div class="n-empty-powerful-content">
+      <div class="n-empty-powerful-icon">
+        <?= icon('users', 'n-icon-massive') ?>
+      </div>
+      <h2 class="n-empty-powerful-title"><?= e(__('attendance.no_students')) ?></h2>
+    </div>
   </div>
 <?php else: ?>
-  <div class="n-empty-state">
-    <div class="n-empty-icon"><?= icon('edit', 'n-icon-xl') ?></div>
-    <h3 class="n-empty-title"><?= e(__('attendance.choose_class_prompt')) ?></h3>
+  <div class="n-empty-powerful">
+    <div class="n-empty-powerful-bg">
+      <div class="n-empty-blob n-empty-blob-1"></div>
+      <div class="n-empty-blob n-empty-blob-2"></div>
+      <div class="n-empty-blob n-empty-blob-3"></div>
+    </div>
+    <div class="n-empty-powerful-content">
+      <div class="n-empty-powerful-icon">
+        <?= icon('edit', 'n-icon-massive') ?>
+      </div>
+      <h2 class="n-empty-powerful-title"><?= e(__('attendance.choose_class_prompt')) ?></h2>
+    </div>
   </div>
 <?php endif; ?>
 

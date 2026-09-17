@@ -135,6 +135,28 @@ require dirname(__DIR__) . '/layout/start.php';
     </table>
   </div>
 </div>
+<?php elseif ($classId > 0 && empty($summary)): ?>
+<div class="alert alert-light border d-flex align-items-center gap-2 mb-4">
+  <?= icon('info', 'n-icon-lg flex-shrink-0 text-muted') ?>
+  <span><?= e(__('reports.no_data')) ?></span>
+</div>
+<?php endif; ?>
+
+<?php if ($classId === 0 && empty($chronic)): ?>
+  <div class="n-empty-powerful">
+    <div class="n-empty-powerful-bg">
+      <div class="n-empty-blob n-empty-blob-1"></div>
+      <div class="n-empty-blob n-empty-blob-2"></div>
+      <div class="n-empty-blob n-empty-blob-3"></div>
+    </div>
+    <div class="n-empty-powerful-content">
+      <div class="n-empty-powerful-icon">
+        <?= icon('chart', 'n-icon-massive') ?>
+      </div>
+      <h2 class="n-empty-powerful-title"><?= e(__('attendance.report_empty_title')) ?></h2>
+      <p class="n-empty-powerful-description"><?= e(__('attendance.report_empty_description')) ?></p>
+    </div>
+  </div>
 <?php endif; ?>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
