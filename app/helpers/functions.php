@@ -267,7 +267,15 @@ function icon(string $name, string $class = ''): string
         'star' => '<path d="m12 3 2.7 5.9 6.3.7-4.7 4.4 1.2 6.3L12 17.2 6.5 20.3l1.2-6.3-4.7-4.4 6.3-.7L12 3Z"/>',
         'home' => '<path d="m3.5 11 8.5-8 8.5 8"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M9.5 21v-6h5v6"/>',
         'arrow-forward' => '<path d="M4.5 12h15M13 5.5 19.5 12 13 18.5"/>',
-        'sparkle' => '<path d="M12 3v3.5M12 17.5V21M3 12h3.5M17.5 12H21M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/>',
+        // A proper closed 4-point star/twinkle outline, not 8 disconnected
+        // radiating lines -- the previous path read as a stuck loading
+        // spinner rather than a sparkle, especially animated (found live,
+        // flagged directly: "the spinning circle... looks like a stuck
+        // loading spinner just sitting there on a page that already
+        // loaded"). A closed star silhouette can't be mistaken for a
+        // spinner regardless of animation, since a spinner has no
+        // continuous outline to begin with.
+        'sparkle' => '<path d="M12 2.5 14 9.5 21 12 14 14.5 12 21.5 10 14.5 3 12 10 9.5Z"/>',
         'building' => '<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 7.5h1.5M8 11h1.5M8 14.5h1.5M14.5 7.5H16M14.5 11H16M14.5 14.5H16M10 21v-4h4v4"/>',
         'trending-up' => '<path d="M3 17 9 11 13 15 21 7"/><path d="M15 7h6v6"/>',
         // Semantically correct additions (previously missing, causing empty SVG)
