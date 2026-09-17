@@ -19,6 +19,31 @@ function e(?string $value): string
 }
 
 /**
+ * Appends a cache-busting ?v=<mtime> to a public/ asset path, e.g.
+ * assetUrl('/assets/css/app.css') -> '/assets/css/app.css?v=1234567890'.
+ *
+ * Found live: production was serving a byte-for-byte stale app.css (dated
+ * three days old) on the plain, un-parameterized URL even under a hard
+ * fetch({cache:'no-store'}) that bypasses the browser's own HTTP cache
+ * entirely -- something in front of or inside the production
+ * infrastructure caches static-looking file extensions by URL alone, no
+ * Cache-Control header we set here would have changed that. Real symptom:
+ * a CSS class renamed weeks ago was simply never defined as far as that
+ * stale copy was concerned, so an <img> with no matching size rule
+ * rendered at its raw 1254x1254 natural size and blew out the whole login
+ * page. Changing the URL itself whenever the file's content changes is
+ * the one fix that bypasses every caching layer, not just the browser's,
+ * because a cache keyed by URL cannot serve an old response for a URL it
+ * has never seen before.
+ */
+function assetUrl(string $path): string
+{
+    $absolute = dirname(__DIR__, 2) . '/public/' . ltrim($path, '/');
+    $version = is_file($absolute) ? (string) filemtime($absolute) : '0';
+    return $path . '?v=' . $version;
+}
+
+/**
  * Translates a key using the active language's array, set on the session by
  * LocaleMiddleware-equivalent logic in the front controller. Falls back to
  * the key itself if missing, so a missing translation is visible/obvious

@@ -26,7 +26,7 @@ $schoolName = $school === null
 <?php else: ?>
   <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
 <?php endif; ?>
-<link rel="stylesheet" href="/assets/css/app.css">
+<link rel="stylesheet" href="<?= e(assetUrl('/assets/css/app.css')) ?>">
 </head>
 <body class="n-auth-body">
   <div class="n-auth-shell">
@@ -176,6 +176,6 @@ $schoolName = $school === null
   
   <script src="/assets/vendor/jquery/jquery.min.js"></script>
   <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="/assets/js/app.js"></script>
+  <script src="<?= e(assetUrl('/assets/js/app.js')) ?>"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/img/favicon-180.png">
   <title><?= e(__('error.404.title')) ?> — <?= e(__('app.name')) ?></title>
-  <link rel="stylesheet" href="/assets/css/app.css">
+  <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/app.css')) ?>">
 </head>
 <body>
   <div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 24px;">

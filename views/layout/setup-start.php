@@ -33,7 +33,7 @@ $totalSteps = count($steps);
   <?php else: ?>
     <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
   <?php endif; ?>
-  <link rel="stylesheet" href="/assets/css/app.css">
+  <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/app.css')) ?>">
 </head>
 <body class="n-setup-body">
 <div class="n-setup-wrap">
