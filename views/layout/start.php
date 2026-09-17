@@ -68,7 +68,7 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
         <?php endif; ?>
       <?php endforeach; ?>
     </ul>
-    <div class="nizam-sidebar-foot"><?= e($schoolName) ?></div>
+    <div class="nizam-sidebar-foot"><?= e(__('app.name')) ?></div>
   </nav>
 
   <div class="nizam-main">
@@ -78,8 +78,8 @@ $pageIcon = $navIconByKey[$activeNav ?? ''] ?? 'dashboard';
                 data-bs-toggle="offcanvas" data-bs-target="#nizamMobileNav" aria-label="<?= e(__('nav.menu')) ?>">
           <?= icon('menu') ?>
         </button>
-        <img src="/assets/img/hadaba-logo.png" alt="" class="school-topbar-logo">
-        <span class="fw-semibold d-none d-sm-inline"><?= e($schoolName) ?></span>
+        <img src="/assets/img/hadaba-logo.png" alt="" class="school-topbar-logo d-md-none">
+        <span class="fw-semibold d-none d-sm-inline d-md-none"><?= e($schoolName) ?></span>
         <?php if (AcademicYearContext::activeYearId() !== null): ?>
           <span class="badge text-bg-light border d-none d-sm-inline-flex align-items-center gap-1">
             <?= icon('calendar') ?><?= e(AcademicYearContext::label() ?? '') ?>

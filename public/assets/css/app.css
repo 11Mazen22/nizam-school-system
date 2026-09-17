@@ -190,18 +190,31 @@ a:hover {
 .school-brand-mark-logo {
   background: #fff;
   padding: 0;
+  /* The seal itself is a circular medallion drawn on a plain white square
+     canvas -- a soft-rounded-square frame around it (the generic icon
+     badge shape every other class here uses) left a visible ring of dead
+     white margin between the circle and the frame's corners, reading as
+     a sticker slapped on a card rather than a deliberate badge. A true
+     circle frame + object-fit: cover crops that margin away entirely, so
+     the badge's own edge IS the seal's edge with nothing showing between
+     them. */
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--n-border);
 }
 .school-brand-mark-logo img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  border-radius: calc(var(--n-radius-md) - 2px);
+  object-fit: cover;
+  border-radius: 50%;
 }
 .school-topbar-logo {
   width: 38px;
   height: 38px;
-  object-fit: contain;
-  border-radius: var(--n-radius-sm);
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--n-border);
+  background: #fff;
 }
 .nizam-brand-name { font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; }
 
