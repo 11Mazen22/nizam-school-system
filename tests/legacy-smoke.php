@@ -42,9 +42,12 @@ test("Database connection", function() use ($pdo) {
     return $pdo !== null;
 });
 
-test("All migrations applied (17)", function() use ($pdo) {
+test("All migrations applied", function() use ($pdo) {
+    // The expected count is derived from the migration SQL files on disk so
+    // this fixture stops going stale every time a new migration is added.
+    $expected = count(glob(dirname(__DIR__) . '/database/migrations/*.sql'));
     $count = $pdo->query("SELECT COUNT(*) FROM migrations")->fetchColumn();
-    return $count == 17;
+    return $count == $expected;
 });
 
 test("Schools table has data", function() use ($pdo) {

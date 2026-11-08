@@ -110,6 +110,43 @@ final class AttendanceRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * Per-student attendance counts for one academic year.
+     *
+     * Same counting rules as summaryForClass() (the absenteeism report), so
+     * a student's presence rate on their profile is the number the school
+     * already sees in the report -- one definition, one answer. Returns
+     * null when the student has no attendance records in that year, so a
+     * caller can tell "no records" apart from "0% present".
+     *
+     * @return null|array{present_count:int,absent_count:int,late_count:int,excused_count:int,total_records:int}
+     */
+    public function summaryForStudent(int $studentId, int $yearId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) AS present_count,
+                    SUM(CASE WHEN status='absent'  THEN 1 ELSE 0 END) AS absent_count,
+                    SUM(CASE WHEN status='late'    THEN 1 ELSE 0 END) AS late_count,
+                    SUM(CASE WHEN status='excused' THEN 1 ELSE 0 END) AS excused_count,
+                    COUNT(*) AS total_records
+             FROM attendance_records
+             WHERE student_id = :student AND academic_year_id = :year"
+        );
+        $stmt->execute(['student' => $studentId, 'year' => $yearId]);
+        $row = $stmt->fetch();
+        if ($row === false || (int) $row['total_records'] === 0) {
+            return null;
+        }
+
+        return [
+            'present_count' => (int) $row['present_count'],
+            'absent_count' => (int) $row['absent_count'],
+            'late_count' => (int) $row['late_count'],
+            'excused_count' => (int) $row['excused_count'],
+            'total_records' => (int) $row['total_records'],
+        ];
+    }
+
     /** Daily totals for a class between two dates — used to populate summary table. */
     public function dailyTotalsForClass(int $classId, string $from, string $to): array
     {

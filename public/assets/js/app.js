@@ -18,6 +18,7 @@
     initLoadingForms();
     initHashTabs();
     normalizeModals();
+    initLogoutCachePurge();
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(function () {
@@ -25,6 +26,31 @@
       });
     }
   });
+
+  /**
+   * Sign-out purges the service worker's dynamic page cache. Those cached
+   * pages contain the leaving user's personal data, and on a shared school
+   * computer the next person must never be able to open them -- online or
+   * offline. Static assets stay cached, so the app keeps working offline.
+   */
+  function initLogoutCachePurge() {
+    var form = document.querySelector('form[action="/logout"]');
+    if (!form) return;
+
+    form.addEventListener('submit', function () {
+      try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ action: 'clearDynamic' });
+        } else if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then(function (registration) {
+            if (registration.active) registration.active.postMessage({ action: 'clearDynamic' });
+          }).catch(function () { /* offline sign-out still works */ });
+        }
+      } catch (error) {
+        // Cache purging is a privacy nicety; it must never block sign-out.
+      }
+    });
+  }
 
   function initFlashMessages(reduceMotion) {
     var flashes = document.querySelectorAll('main.nizam-content > .alert');

@@ -3,21 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#315efb">
   <title>غير متصل بالإنترنت — هضبة الأهرام الثانوية</title>
+  <!--
+    Nizam -- offline document.
+    Served by the service worker when a page is unreachable and was never
+    cached. It is a static file on purpose: it must render with no network
+    and no PHP session, so it carries its own styles, its own fonts (both
+    are precached by the worker) and both languages -- Arabic-first like the
+    rest of the school system, with English one click away.
+  -->
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f8f9fa; color: #212529; text-align: center; }
-    .container { max-width: 500px; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    h1 { color: #dc3545; margin-bottom: 1rem; }
-    p { margin-bottom: 2rem; color: #6c757d; }
-    button { background-color: #0d6efd; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-    button:hover { background-color: #0b5ed7; }
+    @font-face { font-family: "Inter"; src: url("/assets/fonts/Inter-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url("/assets/fonts/Inter-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url("/assets/fonts/Inter-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+    @font-face { font-family: "IBM Plex Sans Arabic"; src: url("/assets/fonts/IBMPlexSansArabic-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "IBM Plex Sans Arabic"; src: url("/assets/fonts/IBMPlexSansArabic-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+    @font-face { font-family: "IBM Plex Sans Arabic"; src: url("/assets/fonts/IBMPlexSansArabic-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+    :root {
+      --n-canvas: #f6f8fc;
+      --n-surface: #ffffff;
+      --n-surface-subtle: #f0f3f8;
+      --n-ink: #172033;
+      --n-ink-soft: #334155;
+      --n-muted: #64748b;
+      --n-faint: #94a3b8;
+      --n-border: #e4eaf2;
+      --n-primary: #315efb;
+      --n-primary-hover: #2449d8;
+      --n-primary-soft: #edf2ff;
+      --n-warning: #a76610;
+      --n-warning-soft: #fff6df;
+      --n-radius: 10px;
+      --n-radius-lg: 14px;
+      --n-radius-xl: 18px;
+      --n-shadow: 0 10px 30px rgba(23, 32, 51, .075);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--n-canvas);
+      color: var(--n-ink);
+      font-family: "Inter", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html[lang="ar"] body { font-family: "IBM Plex Sans Arabic", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+    .offline-card {
+      width: 100%;
+      max-width: 470px;
+      padding: 30px 26px;
+      background: var(--n-surface);
+      border: 1px solid var(--n-border);
+      border-radius: var(--n-radius-xl);
+      box-shadow: var(--n-shadow);
+      text-align: center;
+    }
+
+    .offline-mark {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 18px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--n-warning);
+      background: var(--n-warning-soft);
+    }
+    .offline-mark svg { width: 30px; height: 30px; }
+
+    .offline-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-block-end: 16px;
+      color: var(--n-muted);
+      font-size: .78rem;
+      font-weight: 600;
+    }
+    .offline-brand img { width: 26px; height: 26px; object-fit: contain; }
+
+    h1 { margin: 0 0 8px; font-size: 1.32rem; font-weight: 700; letter-spacing: -.01em; }
+    p { margin: 0 0 20px; color: var(--n-muted); font-size: .88rem; }
+
+    .offline-note {
+      margin: 0 0 22px;
+      padding: 12px 14px;
+      border-radius: var(--n-radius);
+      background: var(--n-surface-subtle);
+      color: var(--n-ink-soft);
+      font-size: .8rem;
+      text-align: start;
+    }
+
+    .offline-actions { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 20px;
+      border: 1px solid var(--n-primary);
+      border-radius: var(--n-radius);
+      background: var(--n-primary);
+      color: #fff;
+      font: inherit;
+      font-size: .86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 140ms cubic-bezier(.2, .8, .2, 1), border-color 140ms cubic-bezier(.2, .8, .2, 1), transform 140ms cubic-bezier(.2, .8, .2, 1);
+    }
+    .btn-primary:hover { background: var(--n-primary-hover); border-color: var(--n-primary-hover); }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-primary:focus-visible { outline: 2px solid var(--n-primary); outline-offset: 2px; }
+    .btn-primary svg { width: 16px; height: 16px; }
+
+    .btn-ghost {
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--n-border);
+      border-radius: var(--n-radius);
+      background: var(--n-surface);
+      color: var(--n-ink-soft);
+      font: inherit;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 140ms cubic-bezier(.2, .8, .2, 1), border-color 140ms cubic-bezier(.2, .8, .2, 1);
+    }
+    .btn-ghost:hover { background: var(--n-primary-soft); border-color: #bdcbff; color: var(--n-primary); }
+    .btn-ghost:focus-visible { outline: 2px solid var(--n-primary); outline-offset: 2px; }
+
+    .offline-lang {
+      margin-block-start: 18px;
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border: 1px solid var(--n-border);
+      border-radius: 999px;
+      background: var(--n-surface-subtle);
+    }
+    .offline-lang button {
+      min-width: 46px;
+      padding: 5px 10px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--n-muted);
+      font: inherit;
+      font-size: .74rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .offline-lang button[aria-pressed="true"] { background: var(--n-surface); color: var(--n-primary); box-shadow: 0 1px 2px rgba(23, 32, 51, .06); }
+    .offline-lang button:focus-visible { outline: 2px solid var(--n-primary); outline-offset: 1px; }
+
+    [data-lang] { display: none; }
+    html[lang="ar"] [data-lang="ar"], html[lang="en"] [data-lang="en"] { display: revert; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-primary, .btn-ghost { transition: none; }
+      .btn-primary:active { transform: none; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>أنت غير متصل بالإنترنت</h1>
-    <p>يبدو أن اتصالك بالشبكة قد انقطع. يرجى التحقق من اتصالك والمحاولة مرة أخرى.</p>
-    <button onclick="window.location.reload()">إعادة المحاولة</button>
-  </div>
+  <main class="offline-card" role="main">
+    <div class="offline-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.58 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+      </svg>
+    </div>
+
+    <div class="offline-brand">
+      <img src="/assets/img/hadaba-logo.png" alt="">
+      <span data-lang="ar">هضبة الأهرام الثانوية</span>
+      <span data-lang="en">Hadaba Al-Ahram Language School</span>
+    </div>
+
+    <h1>
+      <span data-lang="ar">أنت غير متصل بالإنترنت</span>
+      <span data-lang="en">You are offline</span>
+    </h1>
+
+    <p>
+      <span data-lang="ar">يبدو أن اتصالك بالشبكة قد انقطع. الصفحات التي زرتها سابقًا ما زالت متاحة، ويمكنك متابعة العمل دون إنترنت.</span>
+      <span data-lang="en">Your connection appears to be down. Pages you have already visited remain available, so you can keep working without internet.</span>
+    </p>
+
+    <div class="offline-note">
+      <span data-lang="ar">لم يتم إرسال أي بيانات. ما تكتبه الآن يبقى محليًا حتى يعود الاتصال.</span>
+      <span data-lang="en">Nothing has been submitted. What you write stays local until the connection returns.</span>
+    </div>
+
+    <div class="offline-actions">
+      <button type="button" class="btn-primary" onclick="window.location.reload()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        <span data-lang="ar">إعادة المحاولة</span>
+        <span data-lang="en">Try again</span>
+      </button>
+    </div>
+
+    <div class="offline-lang" role="group" aria-label="Language">
+      <button type="button" data-set-lang="ar" aria-pressed="true">عربي</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">English</button>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-set-lang]'));
+
+      function apply(lang) {
+        root.setAttribute('lang', lang);
+        root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        document.title = lang === 'ar'
+          ? 'غير متصل بالإنترنت — هضبة الأهرام الثانوية'
+          : 'Offline — Hadaba Al-Ahram Language School';
+        buttons.forEach(function (button) {
+          button.setAttribute('aria-pressed', String(button.getAttribute('data-set-lang') === lang));
+        });
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          apply(button.getAttribute('data-set-lang'));
+        });
+      });
+
+      // Arabic-first, like the rest of the system -- but an English-only
+      // browser gets English straight away.
+      var preferred = (navigator.language || 'ar').toLowerCase().indexOf('en') === 0 ? 'en' : 'ar';
+      apply(preferred);
+
+      // Come back automatically the moment the network returns.
+      window.addEventListener('online', function () { window.location.reload(); });
+    })();
+  </script>
 </body>
 </html>

@@ -4,16 +4,23 @@
  * Version: 1.0.0
  */
 
-const CACHE_VERSION = 'nizam-v1.1.0-premium-light';
+const CACHE_VERSION = 'nizam-v1.1.1-premium-light';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 
-// Assets that should always be cached (offline-first)
+// Assets that should always be cached (offline-first).
+//
+// Only genuinely STATIC, non-personalized files belong here. Role-guarded
+// pages ('/', '/login', '/dashboard') used to be listed here and were
+// prefetched by the install step: an anonymous install fetched them, the
+// role guard answered with a redirect to /login, and the Cache API then
+// stored the LOGIN page under the '/dashboard' key (cache poisoning) while
+// the install also fired a burst of parallel, session-touching requests
+// around every fresh sign-in. Role-gated pages are served by the runtime
+// network-first strategy instead, which is the correct offline architecture
+// for private school data.
 const STATIC_ASSETS = [
-  '/',
-  '/login',
-  '/dashboard',
   '/assets/css/app.css',
   '/assets/img/hadaba-logo.png',
   '/assets/js/app.js',
@@ -44,12 +51,23 @@ const CACHE_LIMITS = {
  */
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
-  
+
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
         console.log('[SW] Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
+        // Added one by one on purpose: cache.addAll() rejects the WHOLE
+        // batch when a single asset is missing or fails, which would leave
+        // the worker with no precached shell at all. One missing file must
+        // never cost the school its offline support.
+        return Promise.allSettled(
+          STATIC_ASSETS.map((asset) => cache.add(asset))
+        ).then((results) => {
+          const failed = results.filter((r) => r.status === 'rejected').length;
+          if (failed > 0) {
+            console.warn(`[SW] ${failed} static asset(s) could not be cached`);
+          }
+        });
       })
       .then(() => {
         console.log('[SW] Static assets cached successfully');
@@ -57,6 +75,7 @@ self.addEventListener('install', (event) => {
       })
       .catch((error) => {
         console.error('[SW] Failed to cache static assets:', error);
+        return self.skipWaiting();
       })
   );
 });
@@ -191,30 +210,39 @@ async function staleWhileRevalidate(request, cacheName) {
 async function networkFirst(request, cacheName, limit = null) {
   try {
     const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
+
+    // A redirect that the role guard answered (private page -> /login) is
+    // FOLLOWED by fetch(), so the response arrives as a normal 200 -- the
+    // login page. Storing it under the private page's URL would hand the
+    // next visitor (or the next offline session) someone else's page, so a
+    // response that arrived via a redirect is never cached.
+    if (networkResponse.ok && !networkResponse.redirected && networkResponse.type !== 'opaqueredirect') {
       const cache = await caches.open(cacheName);
-      
+
       // Apply cache limit if specified
       if (limit) {
         await trimCache(cacheName, limit);
       }
-      
+
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.log('[SW] Network failed, checking cache:', request.url);
-    
+
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       console.log('[SW] Cache fallback used');
       return cachedResponse;
     }
-    
+
     console.error('[SW] Network-first failed:', error);
-    return createOfflineResponse();
+    // The precached offline document is the real offline page; the inline
+    // response below is only the last-resort fallback for the rare case
+    // where even /offline.html is not in the cache.
+    const offlinePage = await caches.match('/offline.html');
+    return offlinePage || createOfflineResponse();
   }
 }
 
@@ -254,18 +282,24 @@ function isAPIRequest(url) {
 
 /**
  * Create offline fallback response
+ *
+ * Last resort only: the precached /offline.html is served first (it is the
+ * real offline document and carries the school's design plus both
+ * languages). This inline copy exists for the rare case where even that
+ * file is not cached, so it must still look like the product rather than
+ * like a browser error page.
  */
 function createOfflineResponse() {
   return new Response(
     `<!DOCTYPE html>
-    <html lang="en">
+    <html lang="ar" dir="rtl">
     <head>
       <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Offline - Hadaba Al-Ahram Language School</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>غير متصل بالإنترنت — هضبة الأهرام الثانوية</title>
       <style>
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          font-family: "IBM Plex Sans Arabic", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -277,35 +311,49 @@ function createOfflineResponse() {
           padding: 20px;
         }
         .offline-container {
-          max-width: 400px;
+          max-width: 460px;
+          padding: 28px 24px;
+          background: #fff;
+          border: 1px solid #e4eaf2;
+          border-radius: 18px;
+          box-shadow: 0 10px 30px rgba(23, 32, 51, .075);
         }
         .offline-icon {
-          width: 80px;
-          height: 80px;
-          margin: 0 auto 20px;
-          opacity: 0.9;
+          width: 64px;
+          height: 64px;
+          margin: 0 auto 18px;
+          padding: 17px;
+          border-radius: 18px;
+          color: #a76610;
+          background: #fff6df;
+          opacity: 1;
         }
         h1 {
-          font-size: 1.5rem;
+          font-size: 1.3rem;
           margin-bottom: 10px;
         }
         p {
-          opacity: 0.9;
+          color: #64748b;
           line-height: 1.6;
         }
         button {
            background: #315efb;
            color: white;
            border: 1px solid #315efb;
-          padding: 12px 24px;
-          border-radius: 8px;
+          padding: 10px 20px;
+          border-radius: 10px;
           font-weight: 600;
           margin-top: 20px;
           cursor: pointer;
           font-size: 0.95rem;
         }
         button:hover {
-          transform: scale(1.05);
+          background: #2449d8;
+          border-color: #2449d8;
+        }
+        button:focus-visible {
+          outline: 2px solid #315efb;
+          outline-offset: 2px;
         }
       </style>
     </head>
@@ -314,9 +362,9 @@ function createOfflineResponse() {
         <svg class="offline-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
         </svg>
-        <h1>Page unavailable offline</h1>
-        <p>This page was not previously cached. Reconnect and try again. No changes have been submitted or queued.</p>
-        <button onclick="window.location.reload()">Try Again</button>
+        <h1>أنت غير متصل بالإنترنت</h1>
+        <p>يبدو أن اتصالك بالشبكة قد انقطع. الصفحات التي زرتها سابقًا ما زالت متاحة.</p>
+        <button onclick="window.location.reload()">إعادة المحاولة</button>
       </div>
     </body>
     </html>`,
@@ -399,6 +447,18 @@ self.addEventListener('message', (event) => {
           cacheNames.map((cacheName) => caches.delete(cacheName))
         );
       })
+    );
+  }
+
+  if (event.data.action === 'clearDynamic') {
+    // Sign-out: the dynamic cache holds rendered pages of the user who just
+    // left -- those are personal data. Dropping them means the next person
+    // to use this machine, online or offline, never sees the previous
+    // user's pages. Static assets and images stay cached.
+    event.waitUntil(
+      caches.delete(DYNAMIC_CACHE)
+        .then(() => console.log('[SW] Dynamic page cache cleared on sign-out'))
+        .catch((error) => console.error('[SW] Could not clear dynamic cache:', error))
     );
   }
 });

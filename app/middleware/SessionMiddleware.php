@@ -41,6 +41,12 @@ final class SessionMiddleware implements MiddlewareInterface
                 'samesite' => 'Lax',
             ]);
             ini_set('session.use_strict_mode', '1');
+            // Lazy write: a request that did not actually change the session
+            // does not rewrite the session file at all. Combined with the
+            // activity-stamp granularity below, this removes the lost-update
+            // window in which a slow, parallel request could write back a
+            // stale copy of the session and wipe a just-established login.
+            ini_set('session.lazy_write', '1');
             session_name('nizam_session');
             session_start();
         }
@@ -49,6 +55,21 @@ final class SessionMiddleware implements MiddlewareInterface
 
         return true;
     }
+
+    /**
+     * Minimum seconds between two activity-stamp writes.
+     *
+     * The idle timeout only needs minute-level resolution, but the stamp
+     * used to be rewritten on EVERY request. With file-backed sessions that
+     * means dozens of parallel requests (page, fonts, notifications poll)
+     * each rewrote the same session file, and a rewrite carrying a stale
+     * snapshot could land after the login write and strip the authenticated
+     * keys -- the user was then bounced back to the login page even though
+     * the sign-in had succeeded. Writing the stamp at most once every 30
+     * seconds keeps the timeout exact to the minute while making ordinary
+     * requests no-ops that lazy_write simply skips.
+     */
+    private const ACTIVITY_STAMP_INTERVAL_SECONDS = 30;
 
     private function enforceIdleTimeout(): void
     {
@@ -68,7 +89,8 @@ final class SessionMiddleware implements MiddlewareInterface
             $timeoutMinutes = 60;
         }
         $now = time();
-        $lastActivity = $_SESSION['_last_activity'] ?? $now;
+        $hasStamp = isset($_SESSION['_last_activity']);
+        $lastActivity = $hasStamp ? (int) $_SESSION['_last_activity'] : $now;
 
         if (($now - $lastActivity) > ($timeoutMinutes * 60)) {
             $_SESSION = [];
@@ -78,8 +100,15 @@ final class SessionMiddleware implements MiddlewareInterface
             }
             session_destroy();
             session_start();
+            $hasStamp = false;
+            $lastActivity = $now;
         }
 
-        $_SESSION['_last_activity'] = $now;
+        // A brand-new session always gets its first stamp (otherwise the
+        // idle timeout could never start counting); after that the stamp is
+        // refreshed at most once every 30 seconds.
+        if (!$hasStamp || ($now - $lastActivity) >= self::ACTIVITY_STAMP_INTERVAL_SECONDS) {
+            $_SESSION['_last_activity'] = $now;
+        }
     }
 }

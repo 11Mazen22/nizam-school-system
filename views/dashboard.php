@@ -38,16 +38,16 @@ $yearLabel = \App\Middleware\AcademicYearContext::label();
     <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 n-reveal-group">
       <?php
       $cards = [
-          ['dashboard.total_students', $stats['students'], 'users'],
-          ['dashboard.total_teachers', $stats['teachers'], 'graduation-cap'],
-          ['dashboard.total_classes', $stats['classes'], 'chalkboard'],
-          ['dashboard.total_subjects', $stats['subjects'], 'book'],
-          ['dashboard.total_grades', $stats['grades'], 'layers'],
+          ['dashboard.total_students', $stats['students'], 'users', 'stat-blue'],
+          ['dashboard.total_teachers', $stats['teachers'], 'graduation-cap', 'stat-teal'],
+          ['dashboard.total_classes', $stats['classes'], 'chalkboard', 'stat-indigo'],
+          ['dashboard.total_subjects', $stats['subjects'], 'book', 'stat-violet'],
+          ['dashboard.total_grades', $stats['grades'], 'layers', 'stat-amber'],
       ];
       ?>
-      <?php foreach ($cards as [$labelKey, $value, $cardIcon]): ?>
+      <?php foreach ($cards as [$labelKey, $value, $cardIcon, $cardAccent]): ?>
         <div class="col">
-          <div class="card stat-card h-100">
+          <div class="card stat-card h-100<?= $cardAccent !== '' ? ' ' . e($cardAccent) : '' ?>">
             <div class="card-body">
               <div><div class="stat-value" data-count-up><?= (int) $value ?></div><div class="stat-label"><?= e(__($labelKey)) ?></div></div>
               <div class="stat-icon"><?= icon($cardIcon) ?></div>
