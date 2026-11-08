@@ -26,7 +26,7 @@ use App\Middleware\CsrfMiddleware;
     </div>
     <div class="n-grades-header-actions">
       <?php if ($classId > 0): ?>
-        <button type="button" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2 me-2" onclick="window.print()">
+        <button type="button" class="btn btn-outline-secondary btn-sm no-print" data-print-report>
           <?= icon('printer') ?> <?= e(__('common.print') ?? 'Print') ?>
         </button>
       <?php endif; ?>
@@ -34,7 +34,7 @@ use App\Middleware\CsrfMiddleware;
         <form method="post" action="/timetable/clear" data-confirm="<?= e(__('timetable.confirm_clear')) ?>">
           <?= CsrfMiddleware::field() ?>
           <input type="hidden" name="class_id" value="<?= $classId ?>">
-          <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"><?= icon('trash') ?> <?= e(__('timetable.clear')) ?></button>
+          <button class="btn btn-outline-danger btn-sm"><?= icon('trash') ?> <?= e(__('timetable.clear')) ?></button>
         </form>
       <?php endif; ?>
     </div>
@@ -42,8 +42,8 @@ use App\Middleware\CsrfMiddleware;
 </div>
 
 <!-- Class selector -->
-<form method="get" class="card border-0 shadow-sm mb-4">
-  <div class="card-body d-flex gap-3 align-items-end flex-wrap">
+<form method="get" class="n-filter-panel no-print">
+  <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:220px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
       <select name="class_id" class="form-select" onchange="this.form.submit()">
@@ -60,11 +60,11 @@ use App\Middleware\CsrfMiddleware;
 
 <?php if ($classId > 0): ?>
 <!-- Timetable grid -->
-<div class="card border-0 shadow-sm mb-4 overflow-auto">
-  <table class="table table-bordered mb-0 text-center" style="min-width:700px;">
-    <thead class="table-dark">
+<div class="card mb-4 overflow-auto">
+  <table class="table table-bordered text-center timetable-grid">
+    <thead>
       <tr>
-        <th style="width:80px;"><?= e(__('timetable.period')) ?></th>
+        <th class="n-timetable-period-head"><?= e(__('timetable.period')) ?></th>
         <?php foreach ($dayLabels as $day => $label): ?>
           <th><?= e($label) ?></th>
         <?php endforeach; ?>
@@ -76,25 +76,25 @@ use App\Middleware\CsrfMiddleware;
           <td class="fw-bold bg-light"><?= $p ?></td>
           <?php foreach ($dayLabels as $day => $label): ?>
             <?php $slot = $grid[$day][$p] ?? null; ?>
-            <td class="p-1" style="min-width:120px;">
+            <td>
               <?php if ($slot): ?>
-                <div class="rounded p-1" style="background:var(--n-primary-soft);border:1px solid var(--n-border);">
-                  <div class="fw-semibold small" style="color:var(--n-primary)">
+                <div class="n-timetable-slot">
+                  <strong>
                     <?= e(currentLocale() === 'ar' ? $slot['subject_ar'] : $slot['subject_en']) ?>
-                  </div>
-                  <div class="text-muted" style="font-size:.75rem;"><?= e($slot['teacher_name']) ?></div>
+                  </strong>
+                  <small><?= e($slot['teacher_name']) ?></small>
                   <?php if (hasPermission('timetable.manage')): ?>
                     <form method="post" action="/timetable/<?= (int)$slot['id'] ?>/delete" class="mt-1">
                       <?= CsrfMiddleware::field() ?>
                       <input type="hidden" name="class_id" value="<?= $classId ?>">
-                      <button class="btn btn-link btn-sm text-danger p-0" style="font-size:.7rem;">
+                      <button class="btn btn-ghost btn-sm text-danger p-0" aria-label="<?= e(__('common.close')) ?>">
                         <?= icon('close') ?>
                       </button>
                     </form>
                   <?php endif; ?>
                 </div>
               <?php elseif (hasPermission('timetable.manage')): ?>
-                <button class="btn btn-sm w-100 h-100" style="border:1px dashed var(--n-border);color:var(--n-text-faint);min-height:56px;"
+                <button class="n-timetable-empty"
                         data-bs-toggle="modal" data-bs-target="#addSlotModal"
                         data-day="<?= $day ?>" data-period="<?= $p ?>">
                   <?= icon('plus') ?>
@@ -114,7 +114,7 @@ use App\Middleware\CsrfMiddleware;
 <?php if (hasPermission('timetable.manage')): ?>
 <div class="modal fade" id="addSlotModal" tabindex="-1" aria-labelledby="addSlotModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form method="post" action="/timetable" class="modal-content border-0 shadow-lg">
+    <form method="post" action="/timetable" class="modal-content" data-unsaved-guard data-loading-submit>
       <?= CsrfMiddleware::field() ?>
       <input type="hidden" name="class_id" value="<?= $classId ?>" id="modalClassId">
       <input type="hidden" name="day_of_week" id="slotDay">
@@ -197,20 +197,6 @@ use App\Middleware\CsrfMiddleware;
   <p class="n-empty-description"><?= e(__('timetable.choose_class_hint')) ?></p>
 </div>
 <?php endif; ?>
-
-<style>
-@media print {
-  body { background: #fff !important; }
-  .n-sidebar, .n-navbar, .n-grades-header, form.card, .btn-link, .modal, .btn-close, .alert { display: none !important; }
-  .n-main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
-  .card { border: none !important; box-shadow: none !important; }
-  table.table-bordered { border: 2px solid #000 !important; }
-  table.table-bordered th, table.table-bordered td { border: 1px solid #000 !important; }
-  .table-dark th { color: #000 !important; background-color: #eee !important; }
-  button[data-bs-toggle="modal"] { display: none !important; }
-  .rounded { background: none !important; border: none !important; }
-}
-</style>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
 <script>

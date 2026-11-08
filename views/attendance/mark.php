@@ -18,6 +18,7 @@ use App\Middleware\CsrfMiddleware;
 // rule the table body below already uses for an unmarked student, so the
 // two never disagree.
 $statusCounts = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
+$canManage = hasPermission('attendance.manage');
 foreach ($students as $student) {
     $status = $existing[$student['id']]['status'] ?? 'present';
     if (isset($statusCounts[$status])) {
@@ -60,7 +61,7 @@ foreach ($students as $student) {
         <?php endif; ?>
       </div>
       <?php endif; ?>
-      <a href="/attendance/report" class="btn btn-outline-light d-flex align-items-center gap-2">
+      <a href="/attendance/report" class="btn btn-outline-secondary d-flex align-items-center gap-2">
         <?= icon('chart') ?>
         <span><?= e(__('attendance.view_report')) ?></span>
       </a>
@@ -69,8 +70,8 @@ foreach ($students as $student) {
 </div>
 
 <!-- Filter bar -->
-<form method="get" action="/attendance" class="card border-0 shadow-sm mb-4">
-  <div class="card-body d-flex flex-wrap gap-3 align-items-end">
+<form method="get" action="/attendance" class="n-filter-panel">
+  <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:200px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
       <select name="class_id" class="form-select" onchange="this.form.submit()">
@@ -91,18 +92,18 @@ foreach ($students as $student) {
 </form>
 
 <?php if ($classId > 0 && !empty($students)): ?>
-<form method="post" action="/attendance">
+<form method="post" action="/attendance" data-loading-submit>
   <?= CsrfMiddleware::field() ?>
   <input type="hidden" name="class_id" value="<?= (int) $classId ?>">
   <input type="hidden" name="date"     value="<?= e($date) ?>">
 
-  <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
       <div class="fw-semibold">
         <?= e($classRow ? (currentLocale() === 'ar' ? $classRow['grade_name_ar'] : $classRow['grade_name_en']) . ' — ' . $classRow['name'] : '') ?>
         <span class="text-muted ms-2"><?= e($date) ?></span>
       </div>
-      <div class="d-flex gap-2">
+      <?php if ($canManage): ?><div class="d-flex gap-2 flex-wrap">
         <!-- Quick-mark all buttons -->
         <button type="button" class="btn btn-sm btn-success d-flex align-items-center gap-1" onclick="markAll('present')">
           <?= icon('check-circle', 'n-icon-sm') ?>
@@ -112,7 +113,7 @@ foreach ($students as $student) {
           <?= icon('x-circle', 'n-icon-sm') ?>
           <span><?= e(__('attendance.mark_all_absent')) ?></span>
         </button>
-      </div>
+      </div><?php endif; ?>
     </div>
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
@@ -142,7 +143,7 @@ foreach ($students as $student) {
                     ?>
                     <input type="radio" class="btn-check" name="statuses[<?= (int)$student['id'] ?>]"
                            id="s<?= (int)$student['id'] ?>_<?= $st ?>"
-                           value="<?= $st ?>" <?= $currentStatus === $st ? 'checked' : '' ?>>
+                            value="<?= $st ?>" <?= $currentStatus === $st ? 'checked' : '' ?> <?= $canManage ? '' : 'disabled' ?>>
                     <label class="btn btn-<?= $active . $colorMap[$st] ?>"
                            for="s<?= (int)$student['id'] ?>_<?= $st ?>">
                       <?= e(__('attendance.status_' . $st)) ?>
@@ -154,28 +155,23 @@ foreach ($students as $student) {
                 <input type="text" class="form-control form-control-sm"
                        name="notes[<?= (int)$student['id'] ?>]"
                        value="<?= e($rec ? ($rec['notes'] ?? '') : '') ?>"
-                       placeholder="<?= e(__('common.optional')) ?>">
+                       placeholder="<?= e(__('common.optional')) ?>" <?= $canManage ? '' : 'disabled' ?>>
               </td>
             </tr>
           <?php endforeach; ?>
         </tbody>
       </table>
     </div>
-    <div class="card-footer bg-white d-flex justify-content-end gap-2 py-3">
+    <?php if ($canManage): ?><div class="card-footer d-flex justify-content-end gap-2 n-attendance-save">
       <button type="submit" class="btn btn-primary px-4">
         <?= icon('check') ?> <?= e(__('attendance.save_sheet')) ?>
       </button>
-    </div>
+    </div><?php endif; ?>
   </div>
 </form>
 
 <?php elseif ($classId > 0 && empty($students)): ?>
   <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
     <div class="n-empty-powerful-content">
       <div class="n-empty-powerful-icon">
         <?= icon('users', 'n-icon-massive') ?>
@@ -186,11 +182,6 @@ foreach ($students as $student) {
 
 <?php else: ?>
   <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
     <div class="n-empty-powerful-content">
       <div class="n-empty-powerful-icon">
         <?= icon('check-circle', 'n-icon-massive') ?>

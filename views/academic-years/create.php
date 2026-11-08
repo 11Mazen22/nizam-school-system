@@ -25,7 +25,7 @@ use App\Middleware\CsrfMiddleware;
 
 <div class="card" style="max-width: 560px;">
   <div class="card-body">
-    <form method="post" action="/academic-years">
+    <form method="post" action="/academic-years" data-unsaved-guard data-loading-submit>
       <?= CsrfMiddleware::field() ?>
       <div class="mb-3">
         <label class="form-label" for="label"><?= e(__('academic_years.label')) ?></label>

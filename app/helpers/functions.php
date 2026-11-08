@@ -171,28 +171,41 @@ function activityLabel(string $action): string
  * check": hasPermission() is never called for that item, matching what the
  * route itself actually requires.
  *
- * @return array<int, array{key:string, href:string, label:string, permission:?string}>
+ * `group` is presentation metadata only. Authorization still lives on the
+ * route and is repeated here solely so inaccessible destinations are not
+ * advertised in either the sidebar or the command palette.
+ *
+ * @return array<int, array{key:string, href:string, label:string, permission:?string,icon:string,group:string}>
  */
 function navItems(): array
 {
     return [
-        ['key' => 'dashboard', 'href' => '/dashboard', 'label' => 'nav.dashboard', 'permission' => null, 'icon' => 'dashboard'],
-        ['key' => 'academic-years', 'href' => '/academic-years', 'label' => 'nav.academic_years', 'permission' => 'academic_years.view', 'icon' => 'calendar'],
-        ['key' => 'grades', 'href' => '/grades', 'label' => 'nav.grades', 'permission' => 'grades.view', 'icon' => 'layers'],
-        ['key' => 'classes', 'href' => '/classes', 'label' => 'nav.classes', 'permission' => 'classes.view', 'icon' => 'chalkboard'],
-        ['key' => 'subjects', 'href' => '/subjects', 'label' => 'nav.subjects', 'permission' => 'subjects.view', 'icon' => 'book'],
-        ['key' => 'teachers', 'href' => '/teachers', 'label' => 'nav.teachers', 'permission' => 'teachers.view', 'icon' => 'graduation-cap'],
-        ['key' => 'students', 'href' => '/students', 'label' => 'nav.students', 'permission' => 'students.view', 'icon' => 'users'],
-        ['key' => 'assignments', 'href' => '/assignments', 'label' => 'nav.assignments', 'permission' => 'assignments.view', 'icon' => 'clipboard-list'],
-        ['key' => 'attendance',  'href' => '/attendance',  'label' => 'nav.attendance',  'permission' => 'attendance.view',  'icon' => 'check-circle'],
-        ['key' => 'exams',       'href' => '/exams',       'label' => 'nav.exams',       'permission' => 'exams.view',       'icon' => 'star'],
-        ['key' => 'welfare',     'href' => '/welfare/discipline', 'label' => 'nav.welfare', 'permission' => 'welfare.view', 'icon' => 'alert-triangle'],
-        ['key' => 'timetable',   'href' => '/timetable',   'label' => 'nav.timetable',   'permission' => 'timetable.view',  'icon' => 'grid'],
-        ['key' => 'reports',     'href' => '/reports',     'label' => 'nav.reports',     'permission' => 'reports.view',    'icon' => 'chart'],
-        ['key' => 'backups', 'href' => '/backups', 'label' => 'nav.backups', 'permission' => 'backups.run', 'icon' => 'shield-check'],
-        ['key' => 'activity-log', 'href' => '/activity-log', 'label' => 'nav.activity_log', 'permission' => 'activity_log.view', 'icon' => 'activity'],
-        ['key' => 'users', 'href' => '/users', 'label' => 'nav.users', 'permission' => 'users.manage', 'icon' => 'users-cog'],
-        ['key' => 'settings', 'href' => '/settings/profile', 'label' => 'nav.settings', 'permission' => 'settings.manage', 'icon' => 'settings'],
+        ['key' => 'dashboard', 'href' => '/dashboard', 'label' => 'nav.dashboard', 'permission' => null, 'icon' => 'dashboard', 'group' => 'main'],
+        ['key' => 'notifications', 'href' => '/notifications', 'label' => 'nav.notifications', 'permission' => null, 'icon' => 'bell', 'group' => 'main'],
+
+        ['key' => 'academic-years', 'href' => '/academic-years', 'label' => 'nav.academic_years', 'permission' => 'academic_years.view', 'icon' => 'calendar', 'group' => 'academic'],
+        ['key' => 'grades', 'href' => '/grades', 'label' => 'nav.grades', 'permission' => 'grades.view', 'icon' => 'layers', 'group' => 'academic'],
+        ['key' => 'subjects', 'href' => '/subjects', 'label' => 'nav.subjects', 'permission' => 'subjects.view', 'icon' => 'book', 'group' => 'academic'],
+        ['key' => 'classes', 'href' => '/classes', 'label' => 'nav.classes', 'permission' => 'classes.view', 'icon' => 'chalkboard', 'group' => 'academic'],
+        ['key' => 'timetable', 'href' => '/timetable', 'label' => 'nav.timetable', 'permission' => 'timetable.view', 'icon' => 'grid', 'group' => 'academic'],
+
+        ['key' => 'students', 'href' => '/students', 'label' => 'nav.students', 'permission' => 'students.view', 'icon' => 'users', 'group' => 'people'],
+        ['key' => 'teachers', 'href' => '/teachers', 'label' => 'nav.teachers', 'permission' => 'teachers.view', 'icon' => 'graduation-cap', 'group' => 'people'],
+        ['key' => 'users', 'href' => '/users', 'label' => 'nav.users', 'permission' => 'users.manage', 'icon' => 'users-cog', 'group' => 'people'],
+
+        ['key' => 'attendance', 'href' => '/attendance', 'label' => 'nav.attendance', 'permission' => 'attendance.view', 'icon' => 'check-circle', 'group' => 'operations'],
+        ['key' => 'assignments', 'href' => '/assignments', 'label' => 'nav.assignments', 'permission' => 'assignments.view', 'icon' => 'clipboard-list', 'group' => 'operations'],
+        ['key' => 'exams', 'href' => '/exams', 'label' => 'nav.exams', 'permission' => 'exams.view', 'icon' => 'star', 'group' => 'operations'],
+        ['key' => 'promotion', 'href' => '/students/promotion', 'label' => 'nav.promotion', 'permission' => 'students.promote', 'icon' => 'trending-up', 'group' => 'operations'],
+
+        ['key' => 'welfare-discipline', 'href' => '/welfare/discipline', 'label' => 'nav.discipline', 'permission' => 'welfare.view', 'icon' => 'alert-triangle', 'group' => 'welfare'],
+        ['key' => 'welfare-health', 'href' => '/welfare/health', 'label' => 'nav.health', 'permission' => 'welfare.view', 'icon' => 'heart-pulse', 'group' => 'welfare'],
+
+        ['key' => 'reports', 'href' => '/reports', 'label' => 'nav.reports', 'permission' => 'reports.view', 'icon' => 'chart', 'group' => 'reports'],
+        ['key' => 'activity-log', 'href' => '/activity-log', 'label' => 'nav.activity_log', 'permission' => 'activity_log.view', 'icon' => 'activity', 'group' => 'reports'],
+
+        ['key' => 'settings', 'href' => '/settings/profile', 'label' => 'nav.settings', 'permission' => 'settings.manage', 'icon' => 'settings', 'group' => 'system'],
+        ['key' => 'backups', 'href' => '/backups', 'label' => 'nav.backups', 'permission' => 'backups.run', 'icon' => 'shield-check', 'group' => 'system'],
     ];
 }
 
@@ -297,6 +310,12 @@ function icon(string $name, string $class = ''): string
         'pie-chart' => '<path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>',
         'flag' => '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
         'copy' => '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+        'user' => '<circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.2 3.35-7 7.5-7s7.5 2.8 7.5 7"/>',
+        'plus-circle' => '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+        'info-circle' => '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6h.01"/>',
+        'x' => '<path d="m5 5 14 14M19 5 5 19"/>',
+        'shield' => '<path d="M12 2.5 4.5 5.5v6c0 5 3.2 8.4 7.5 10 4.3-1.6 7.5-5 7.5-10v-6L12 2.5Z"/>',
+        'shield-alert' => '<path d="M12 2.5 4.5 5.5v6c0 5 3.2 8.4 7.5 10 4.3-1.6 7.5-5 7.5-10v-6L12 2.5Z"/><path d="M12 8v4.5M12 16h.01"/>',
     ];
 
     if (!isset($paths[$name])) {

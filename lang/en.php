@@ -16,6 +16,7 @@ return [
     "backups.history" => "Backup History",
     "backups.upload_prompt" => "Select Backup File (.sql)",
     "backups.restore_warning" => "Warning: The current database will be completely overwritten.",
+    "backups.restore_safety_notice" => "An emergency snapshot of the current database is taken automatically before anything is restored, and the backup file is verified before use.",
     "backups.table.filename" => "Filename",
     "backups.table.size" => "Size",
     "backups.table.type" => "Type",
@@ -48,6 +49,14 @@ return [
     "backups.error.generic" => "Something went wrong during restore. Try again, and tell your administrator if this keeps happening.",
 
     'app.name' => 'Hadaba Al-Ahram Language School',
+    'app.import' => 'Import',
+    'app.import_instructions' => 'Download the template, fill it in without changing the column headers, then upload the file. Rows that fail validation are skipped and reported.',
+    'app.download_template' => 'Download template',
+    'app.select_file' => 'Choose file',
+    'app.upload' => 'Upload',
+    'app.import_step1' => 'Download',
+    'app.import_step2' => 'Fill in',
+    'app.import_step3' => 'Upload',
 
     // Auth
     'auth.login.title' => 'Sign In',
@@ -125,6 +134,33 @@ return [
     'nav.activity_log' => 'Activity Log',
     'nav.users' => 'Users',
     'nav.settings' => 'Settings',
+    'nav.promotion' => 'Student Promotion',
+    'nav.discipline' => 'Discipline',
+    'nav.health' => 'Health Records',
+    'nav.group.main' => 'Main',
+    'nav.group.academic' => 'Academic Management',
+    'nav.group.people' => 'People',
+    'nav.group.operations' => 'Academic Operations',
+    'nav.group.welfare' => 'Student Welfare',
+    'nav.group.reports' => 'Reports & Data',
+    'nav.group.system' => 'System',
+
+    // Product shell
+    'shell.search_placeholder' => 'Search pages and actions',
+    'shell.search_shortcut' => 'Quick navigation',
+    'shell.command_title' => 'Go anywhere in Nizam',
+    'shell.command_hint' => 'Type to find a page or action',
+    'shell.command_empty' => 'No accessible destination matches your search.',
+    'shell.quick_actions' => 'Quick actions',
+    'shell.account' => 'Account',
+    'shell.collapse_sidebar' => 'Collapse sidebar',
+    'shell.expand_sidebar' => 'Expand sidebar',
+    'shell.display_density' => 'Table density',
+    'shell.density_comfortable' => 'Comfortable',
+    'shell.density_compact' => 'Compact',
+    'shell.current_year' => 'Current academic year',
+    'shell.home' => 'Overview',
+    'shell.recent' => 'Recently visited',
 
     // Validation
     'validation.required' => 'This field is required.',
@@ -160,6 +196,10 @@ return [
     'common.language_ar' => 'Arabic',
     'common.language_en' => 'English',
     'common.notes' => 'Notes',
+    'common.filter' => 'Filter',
+    'common.clear_filters' => 'Clear filters',
+    'common.details' => 'Details',
+    'common.today' => 'Today',
 
     // Academic Years (§I.4)
     'academic_years.title' => 'Academic Years',
@@ -299,6 +339,8 @@ return [
     'teachers.restored' => 'Teacher restored.',
     'teachers.confirm_archive_with_assignments' => 'This teacher has :count active assignment(s) this year -- archiving will also archive them. Continue?',
     'teachers.no_qualifications' => 'No subjects listed.',
+    'teachers.profile_overview' => 'Teacher overview',
+    'teachers.contact_information' => 'Contact information',
 
     // Students
     'students.title' => 'Students',
@@ -351,6 +393,10 @@ return [
     'students.enrollment_status_graduated' => 'Graduated',
     'students.enrollment_status_transferred' => 'Transferred',
     'students.enrollment_status_withdrawn' => 'Withdrawn',
+    'students.profile_overview' => 'Student overview',
+    'students.personal_information' => 'Personal information',
+    'students.contact_information' => 'Contact & guardian information',
+    'students.academic_information' => 'Academic information',
 
     // Promotion (§I.1)
     'promotion.title' => 'Student Promotion',
@@ -376,6 +422,11 @@ return [
     'promotion.some_skipped' => ':count student(s) were skipped because they already had an enrollment in the target year.',
     'promotion.undo_done' => 'Promotion undone.',
     'promotion.undo_failed' => 'This promotion can no longer be undone -- it may have already been changed.',
+    'promotion.subtitle' => 'Move every active student from one academic year to the next in one reviewed batch.',
+    'promotion.step1' => 'Choose years',
+    'promotion.step2' => 'Review students',
+    'promotion.students' => 'students',
+    'promotion.back' => 'Change years',
 
     // Assignments
     'assignments.title' => 'Teacher Assignments',
@@ -421,6 +472,8 @@ return [
     'reports.title' => 'Reports',
     'reports.description' => 'Generate and export various reports about students, teachers, and classes.',
     'reports.available_reports' => 'Available Reports',
+    'reports.category_students' => 'Students & classes',
+    'reports.category_staff' => 'Teachers & staffing',
     'reports.religion' => 'Religion Statistics',
     'reports.class-list' => 'Class Student List',
     'reports.density' => 'Class Density',
@@ -501,6 +554,12 @@ return [
 
     // Dashboard
     'dashboard.title' => 'Dashboard',
+    'dashboard.greeting' => 'Good to see you, :name',
+    'dashboard.overview_subtitle' => 'A clear view of the school’s current academic operations.',
+    'dashboard.quick_actions' => 'Quick actions',
+    'dashboard.school_snapshot' => 'School snapshot',
+    'dashboard.student_distribution' => 'Student distribution',
+    'dashboard.operational_review' => 'Operational review',
     'dashboard.total_students' => 'Total Students',
     'dashboard.total_teachers' => 'Total Teachers',
     'dashboard.total_classes' => 'Total Classes',
@@ -515,15 +574,17 @@ return [
     'dashboard.christian' => 'Christian',
     'dashboard.other' => 'Other',
     'dashboard.view_all_activity' => 'View all activity',
-    'dashboard.at_risk_title' => 'At-Risk Students (Intelligent Insight)',
+    'dashboard.at_risk_title' => 'Students needing review',
     'dashboard.at_risk_absences' => 'Absences',
     'dashboard.at_risk_incidents' => 'Incidents',
-    'dashboard.at_risk_empty' => 'No at-risk students right now -- this automatically watches for repeated absences (3+ days) and disciplinary incidents.',
+    'dashboard.at_risk_empty' => 'No students currently meet the review thresholds for repeated absence or recorded incidents.',
+    'dashboard.at_risk_disclaimer' => 'This is an administrative review signal based only on recorded absences and incidents. It is not a diagnosis or a judgment about a student.',
 
     // Uploads (decision #11 / §O-18)
     'uploads.error.too_large' => 'The photo could not be saved: the file is too large (2 MB maximum).',
     'uploads.error.invalid_type' => 'The photo could not be saved: only JPG and PNG images are allowed.',
     'uploads.error.generic' => 'The photo could not be saved. Please try a different file.',
+    'uploads.photo_help' => 'JPG or PNG, up to 2 MB. Images are validated and safely re-encoded.',
 
     // Users (§Q "Users | List, Add/Edit (Administrator only)")
     'users.title' => 'Users',
@@ -563,6 +624,11 @@ return [
     'settings.tab.academic' => 'Academic Rules',
     'settings.tab.security' => 'Security',
     'settings.tab.backup' => 'Backup',
+    'settings.desc.profile' => 'The school identity shown across the app and on printed reports.',
+    'settings.desc.localization' => 'The default language new sign-in sessions start in.',
+    'settings.desc.academic' => 'Weekly load targets and ID patterns applied to new academic years.',
+    'settings.desc.security' => 'Sign-in protection, lockouts, and session lifetime.',
+    'settings.desc.backup' => 'Where one-click backups are stored.',
     'settings.logo' => 'School Logo',
     'settings.logo_remove' => 'Remove current logo',
     'settings.logo_help' => 'JPG or PNG, 2 MB maximum. Shown in the app and on printed/exported reports.',
@@ -797,6 +863,7 @@ return [
     'welfare.discipline_logged'  => 'Discipline record logged.',
     'welfare.health_logged'      => 'Health record logged.',
     'welfare.deleted'            => 'Record deleted.',
+    'welfare.confirm_delete'     => 'Permanently delete this welfare record? This action cannot be undone.',
     'welfare.no_records'         => 'No records found.',
     'welfare.type'               => 'Type',
     'welfare.all_types'          => 'All Types',

@@ -4,7 +4,7 @@
  * @var string|null $type
  */
 $pageTitle = __('welfare.health_title');
-$activeNav = 'welfare';
+$activeNav = 'welfare-health';
 $suppressPageTitle = true;
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
@@ -26,9 +26,9 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
         <span class="n-stat-mini-value"><?= count($records) ?></span>
         <span class="n-stat-mini-label"><?= e(__('welfare.total_records')) ?></span>
       </div>
-      <a href="/welfare/discipline" class="btn btn-outline-light"><?= icon('alert-triangle') ?> <?= e(__('welfare.discipline_title')) ?></a>
+      <nav class="n-welfare-nav" aria-label="<?= e(__('nav.group.welfare')) ?>"><a href="/welfare/discipline"><?= e(__('welfare.discipline_title')) ?></a><a class="active" href="/welfare/health"><?= e(__('welfare.health_title')) ?></a></nav>
       <?php if (hasPermission('welfare.manage')): ?>
-        <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#addHealthModal">
+        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addHealthModal">
           <?= icon('plus') ?> <?= e(__('welfare.add_health')) ?>
         </button>
       <?php endif; ?>
@@ -37,8 +37,8 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
 </div>
 
 <!-- Filter -->
-<form method="get" class="card border-0 shadow-sm mb-4">
-  <div class="card-body d-flex gap-3 align-items-end flex-wrap">
+<form method="get" class="n-filter-panel">
+  <div class="n-filter-row">
     <div style="min-width: 200px;">
       <label class="form-label fw-semibold small"><?= e(__('welfare.record_type')) ?></label>
       <select name="type" class="form-select">
@@ -58,7 +58,7 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
     <h3 class="n-empty-title"><?= e(__('welfare.no_records')) ?></h3>
   </div>
 <?php else: ?>
-  <div class="card border-0 shadow-sm">
+  <div class="card">
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
@@ -90,7 +90,7 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
               <?php if (hasPermission('welfare.manage')): ?>
                 <td class="text-end">
                   <form method="post" action="/welfare/health/<?= (int)$row['id'] ?>/delete" class="d-inline"
-                        onsubmit="return confirm('<?= e(__('common.confirm_archive')) ?>')">
+                        data-confirm="<?= e(__('welfare.confirm_delete')) ?>">
                     <?= CsrfMiddleware::field() ?>
                     <button type="submit" class="btn btn-sm btn-outline-danger"><?= icon('trash') ?></button>
                   </form>
@@ -109,7 +109,7 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
 <div class="modal fade" id="addHealthModal" tabindex="-1" aria-labelledby="addHealthModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <form method="post" action="/welfare/health">
+      <form method="post" action="/welfare/health" data-unsaved-guard data-loading-submit>
         <?= CsrfMiddleware::field() ?>
         <div class="modal-header">
           <h5 class="modal-title" id="addHealthModalLabel"><?= e(__('welfare.add_health')) ?></h5>

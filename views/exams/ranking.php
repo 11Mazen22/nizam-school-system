@@ -20,13 +20,13 @@ require dirname(__DIR__) . '/layout/start.php';
       <p class="n-grades-subtitle"><?= e(__('exams.ranking_subtitle')) ?></p>
     </div>
     <div class="n-grades-header-actions">
-      <a href="/exams" class="btn btn-outline-light"><?= icon('star') ?> <?= e(__('exams.title')) ?></a>
+      <a href="/exams" class="btn btn-outline-secondary"><?= icon('star') ?> <?= e(__('exams.title')) ?></a>
     </div>
   </div>
 </div>
 
-<form method="get" action="/exams/ranking" class="card border-0 shadow-sm mb-4">
-  <div class="card-body d-flex gap-3 align-items-end flex-wrap">
+<form method="get" action="/exams/ranking" class="n-filter-panel">
+  <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:200px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
       <select name="class_id" class="form-select">
@@ -43,7 +43,7 @@ require dirname(__DIR__) . '/layout/start.php';
 </form>
 
 <?php if (!empty($ranking)): ?>
-<div class="card border-0 shadow-sm">
+<div class="card">
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
       <thead class="table-light">
@@ -59,11 +59,10 @@ require dirname(__DIR__) . '/layout/start.php';
         <?php foreach ($ranking as $row): ?>
           <?php
             $avg = (float) $row['weighted_avg'];
-            $medal = $row['rank'] === 1 ? '🥇' : ($row['rank'] === 2 ? '🥈' : ($row['rank'] === 3 ? '🥉' : ''));
             $badgeClass = $avg >= 85 ? 'bg-success' : ($avg >= 70 ? 'bg-warning text-dark' : 'bg-danger');
           ?>
-          <tr class="<?= $row['rank'] <= 3 ? 'table-warning' : '' ?>">
-            <td class="fw-bold fs-5"><?= $medal ?: '#' . $row['rank'] ?></td>
+          <tr>
+            <td><span class="n-rank-chip <?= $row['rank'] <= 3 ? 'top' : '' ?>"><?= (int) $row['rank'] ?></span></td>
             <td class="fw-semibold"><?= e($row['full_name']) ?></td>
             <td class="mono small"><?= e($row['student_code']) ?></td>
             <td>
@@ -82,11 +81,6 @@ require dirname(__DIR__) . '/layout/start.php';
 </div>
 <?php elseif ($classId > 0): ?>
   <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
     <div class="n-empty-powerful-content">
       <div class="n-empty-powerful-icon">
         <?= icon('trending-up', 'n-icon-massive') ?>
@@ -96,11 +90,6 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 <?php else: ?>
   <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
     <div class="n-empty-powerful-content">
       <div class="n-empty-powerful-icon">
         <?= icon('trending-up', 'n-icon-massive') ?>

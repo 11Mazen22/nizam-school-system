@@ -28,7 +28,7 @@ $locale = currentLocale();
       <?php if (!empty($notifications) && count(array_filter($notifications, fn($n) => !$n['is_read'])) > 0): ?>
         <form method="post" action="/notifications/read-all" class="d-inline">
           <?= CsrfMiddleware::field() ?>
-          <button type="submit" class="btn btn-outline-light">
+          <button type="submit" class="btn btn-outline-secondary">
             <?= icon('check') ?> <?= e(__('notifications.mark_all_read')) ?>
           </button>
         </form>
@@ -64,22 +64,10 @@ $locale = currentLocale();
 </div>
 
 <?php if (empty($notifications)): ?>
-  <!-- Professional Empty State -->
   <div class="n-empty-state">
-    <div class="n-empty-powerful">
-      <div class="n-empty-powerful-bg">
-        <div class="n-empty-blob n-empty-blob-1"></div>
-        <div class="n-empty-blob n-empty-blob-2"></div>
-        <div class="n-empty-blob n-empty-blob-3"></div>
-      </div>
-      <div class="n-empty-powerful-content">
-        <div class="n-empty-powerful-icon">
-          <?= icon('inbox', 'n-icon-massive') ?>
-        </div>
-        <h3 class="n-empty-powerful-title"><?= e(__('notifications.empty')) ?></h3>
-        <p class="n-empty-powerful-text"><?= e(__('notifications.empty_description')) ?></p>
-      </div>
-    </div>
+    <div class="n-empty-icon"><?= icon('inbox', 'n-icon-xl') ?></div>
+    <h2 class="n-empty-title"><?= e(__('notifications.empty')) ?></h2>
+    <p class="n-empty-description"><?= e(__('notifications.empty_description')) ?></p>
   </div>
 <?php else: ?>
   <!-- Notifications List -->
@@ -110,7 +98,7 @@ $locale = currentLocale();
                 </span>
               <?php endif; ?>
               <?php if (!$isRead): ?>
-                <span class="badge bg-primary notification-new-badge"><?= e(__('notifications.new')) ?></span>
+                <span class="badge text-bg-primary"><?= e(__('notifications.new')) ?></span>
               <?php endif; ?>
             </div>
           </div>

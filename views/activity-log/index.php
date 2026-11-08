@@ -37,49 +37,35 @@ require dirname(__DIR__) . '/layout/start.php';
 <?php endif; ?>
 
 <?php if (empty($entries)): ?>
-  <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
-    <div class="n-empty-powerful-content">
-      <div class="n-empty-powerful-icon">
-        <?= icon('activity', 'n-icon-massive') ?>
-      </div>
-      <h2 class="n-empty-powerful-title"><?= e(__('activity_log.empty_title')) ?></h2>
-      <p class="n-empty-powerful-description"><?= e(__('activity_log.empty_description')) ?></p>
-    </div>
+  <div class="n-empty-state">
+    <div class="n-empty-icon"><?= icon('activity', 'n-icon-xl') ?></div>
+    <h2 class="n-empty-title"><?= e(__('activity_log.empty_title')) ?></h2>
+    <p class="n-empty-description"><?= e(__('activity_log.empty_description')) ?></p>
   </div>
 <?php else: ?>
-  <div class="card">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th><?= e(__('activity_log.when')) ?></th>
-              <th><?= e(__('activity_log.who')) ?></th>
-              <th><?= e(__('activity_log.what')) ?></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($entries as $entry): ?>
-              <tr>
-                <td class="text-nowrap mono small text-muted"><?= e($entry['created_at']) ?></td>
-                <td><?= e($entry['full_name'] ?? __('activity_log.unknown_user')) ?></td>
-                <td>
-                  <div class="fw-semibold"><?= e(activityLabel($entry['action'])) ?></div>
-                  <?php if (!empty($entry['description'])): ?>
-                    <div class="text-muted small"><?= e($entry['description']) ?></div>
-                  <?php endif; ?>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+  <div class="n-data-panel">
+    <div class="n-section-head">
+      <?php $logSearchId = 'log-row-search'; ?>
+      <div class="n-search-field" style="max-width: 260px;">
+        <?= icon('search') ?>
+        <label class="visually-hidden" for="<?= $logSearchId ?>"><?= e(__('common.search')) ?></label>
+        <input type="search" id="<?= $logSearchId ?>" class="form-control form-control-sm" data-table-filter="#log-timeline"
+               placeholder="<?= e(__('common.search')) ?>">
       </div>
     </div>
+    <ul class="n-activity-list" id="log-timeline">
+      <?php foreach ($entries as $entry): ?>
+        <li>
+          <span class="n-activity-marker"><?= icon('activity') ?></span>
+          <span class="n-activity-copy">
+            <strong><?= e(activityLabel($entry['action'])) ?></strong>
+            <small><?= e($entry['description'] ?? '') ?></small>
+            <small><?= e($entry['full_name'] ?? __('activity_log.unknown_user')) ?></small>
+          </span>
+          <time class="mono" dir="ltr"><?= e($entry['created_at']) ?></time>
+        </li>
+      <?php endforeach; ?>
+    </ul>
   </div>
 
   <?php if ($lastPage > 1): ?>

@@ -26,9 +26,13 @@ use App\Middleware\CsrfMiddleware;
   </div>
 <?php endif; ?>
 
-<div class="card" style="max-width: 720px;">
-  <div class="card-body">
-    <form method="post" action="/settings/profile" enctype="multipart/form-data">
+<div class="n-settings-card">
+  <div class="n-settings-card-head">
+    <h2><?= e(__('settings.tab.profile')) ?></h2>
+    <p><?= e(__('settings.desc.profile')) ?></p>
+  </div>
+  <div class="n-settings-card-body">
+    <form method="post" action="/settings/profile" enctype="multipart/form-data" data-unsaved-guard data-loading-submit>
       <?= CsrfMiddleware::field() ?>
       <div class="row">
         <div class="col-md-6 mb-3">
@@ -63,12 +67,15 @@ use App\Middleware\CsrfMiddleware;
         <div class="form-text mb-0"><?= e(__('settings.logo_fixed_help')) ?></div>
       </div>
 
-      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-        <?= icon('check') ?>
-        <span><?= e(__('common.save')) ?></span>
-      </button>
+      <div class="n-settings-save">
+        <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+          <?= icon('check') ?>
+          <span><?= e(__('common.save')) ?></span>
+        </button>
+      </div>
     </form>
   </div>
 </div>
 
+<?php require __DIR__ . '/_end.php'; ?>
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

@@ -17,6 +17,7 @@ return [
     "backups.history" => "سجل النسخ الاحتياطي",
     "backups.upload_prompt" => "اختر ملف النسخة الاحتياطية (.sql)",
     "backups.restore_warning" => "تحذير: سيتم استبدال قاعدة البيانات الحالية بالكامل.",
+    "backups.restore_safety_notice" => "تُؤخذ لقطة طوارئ تلقائية لقاعدة البيانات الحالية قبل أي استعادة، ويتم التحقق من ملف النسخة الاحتياطية قبل استخدامه.",
     "backups.table.filename" => "اسم الملف",
     "backups.table.size" => "الحجم",
     "backups.table.type" => "النوع",
@@ -49,6 +50,14 @@ return [
     "backups.error.generic" => "حدث خطأ أثناء الاستعادة. حاول مرة أخرى، وأبلغ مسؤول النظام إذا استمرت المشكلة.",
 
     'app.name' => 'هضبة الأهرام الثانوية',
+    'app.import' => 'استيراد',
+    'app.import_instructions' => 'حمّل القالب واملأه دون تغيير عناوين الأعمدة، ثم ارفع الملف. الصفوف التي تفشل في التحقق تُتخطى ويُعرض تقرير عنها.',
+    'app.download_template' => 'تحميل القالب',
+    'app.select_file' => 'اختر الملف',
+    'app.upload' => 'رفع',
+    'app.import_step1' => 'حمّل',
+    'app.import_step2' => 'املأ',
+    'app.import_step3' => 'ارفع',
 
     // Auth
     'auth.login.title' => 'تسجيل الدخول',
@@ -126,6 +135,33 @@ return [
     'nav.activity_log' => 'سجل النشاط',
     'nav.users' => 'المستخدمون',
     'nav.settings' => 'الإعدادات',
+    'nav.promotion' => 'ترقية الطلاب',
+    'nav.discipline' => 'الانضباط',
+    'nav.health' => 'السجلات الصحية',
+    'nav.group.main' => 'الرئيسية',
+    'nav.group.academic' => 'الإدارة الأكاديمية',
+    'nav.group.people' => 'الأفراد',
+    'nav.group.operations' => 'العمليات الأكاديمية',
+    'nav.group.welfare' => 'رعاية الطلاب',
+    'nav.group.reports' => 'التقارير والبيانات',
+    'nav.group.system' => 'النظام',
+
+    // واجهة المنتج
+    'shell.search_placeholder' => 'ابحث في الصفحات والإجراءات',
+    'shell.search_shortcut' => 'تنقل سريع',
+    'shell.command_title' => 'انتقل إلى أي مكان في نظام',
+    'shell.command_hint' => 'اكتب للبحث عن صفحة أو إجراء',
+    'shell.command_empty' => 'لا توجد وجهة متاحة تطابق بحثك.',
+    'shell.quick_actions' => 'إجراءات سريعة',
+    'shell.account' => 'الحساب',
+    'shell.collapse_sidebar' => 'طي القائمة الجانبية',
+    'shell.expand_sidebar' => 'توسيع القائمة الجانبية',
+    'shell.display_density' => 'كثافة الجداول',
+    'shell.density_comfortable' => 'مريحة',
+    'shell.density_compact' => 'مضغوطة',
+    'shell.current_year' => 'العام الدراسي الحالي',
+    'shell.home' => 'نظرة عامة',
+    'shell.recent' => 'تمت زيارتها مؤخرًا',
 
     // Validation
     'validation.required' => 'هذا الحقل مطلوب.',
@@ -161,6 +197,10 @@ return [
     'common.language_ar' => 'العربية',
     'common.language_en' => 'الإنجليزية',
     'common.notes' => 'ملاحظات',
+    'common.filter' => 'تصفية',
+    'common.clear_filters' => 'مسح عوامل التصفية',
+    'common.details' => 'التفاصيل',
+    'common.today' => 'اليوم',
 
     // Academic Years (§I.4)
     'academic_years.title' => 'الأعوام الدراسية',
@@ -298,6 +338,8 @@ return [
     'teachers.restored' => 'تمت استعادة المعلم.',
     'teachers.confirm_archive_with_assignments' => 'لدى هذا المعلم :count تكليف نشط هذا العام -- ستتم أرشفتها أيضًا. متابعة؟',
     'teachers.no_qualifications' => 'لا توجد مواد مدرجة.',
+    'teachers.profile_overview' => 'نظرة عامة على المعلم',
+    'teachers.contact_information' => 'معلومات التواصل',
 
     // Students
     'students.title' => 'الطلاب',
@@ -350,6 +392,10 @@ return [
     'students.enrollment_status_graduated' => 'تخرّج',
     'students.enrollment_status_transferred' => 'محوَّل',
     'students.enrollment_status_withdrawn' => 'منسحب',
+    'students.profile_overview' => 'نظرة عامة على الطالب',
+    'students.personal_information' => 'المعلومات الشخصية',
+    'students.contact_information' => 'معلومات التواصل وولي الأمر',
+    'students.academic_information' => 'المعلومات الأكاديمية',
 
     // Promotion (§I.1)
     'promotion.title' => 'ترقية الطلاب',
@@ -375,6 +421,11 @@ return [
     'promotion.some_skipped' => 'تم تخطي :count طالب لأن لديهم بالفعل قيدًا في العام الهدف.',
     'promotion.undo_done' => 'تم التراجع عن الترقية.',
     'promotion.undo_failed' => 'لم يعد بالإمكان التراجع عن هذه الترقية -- ربما تم تغييرها بالفعل.',
+    'promotion.subtitle' => 'نقل جميع الطلاب النشطين من عام دراسي إلى عام آخر في دفعة واحدة تمت مراجعتها.',
+    'promotion.step1' => 'اختر العامين',
+    'promotion.step2' => 'راجع الطلاب',
+    'promotion.students' => 'طالبًا',
+    'promotion.back' => 'تغيير العامين',
 
     // Assignments
     'assignments.title' => 'تكليفات المعلمين',
@@ -420,6 +471,8 @@ return [
     'reports.title' => 'التقارير',
     'reports.description' => 'إنشاء وتصدير تقارير متنوعة حول الطلاب والمعلمين والفصول.',
     'reports.available_reports' => 'التقارير المتاحة',
+    'reports.category_students' => 'الطلاب والفصول',
+    'reports.category_staff' => 'المعلمون والاحتياجات',
     'reports.religion' => 'إحصائية الديانة',
     'reports.class-list' => 'قائمة طلاب الفصل',
     'reports.density' => 'كثافة الفصول',
@@ -500,6 +553,12 @@ return [
 
     // Dashboard
     'dashboard.title' => 'لوحة التحكم',
+    'dashboard.greeting' => 'سعداء بعودتك، :name',
+    'dashboard.overview_subtitle' => 'صورة واضحة للعمليات الأكاديمية الحالية في المدرسة.',
+    'dashboard.quick_actions' => 'إجراءات سريعة',
+    'dashboard.school_snapshot' => 'ملخص المدرسة',
+    'dashboard.student_distribution' => 'توزيع الطلاب',
+    'dashboard.operational_review' => 'المراجعة التشغيلية',
     'dashboard.total_students' => 'إجمالي الطلاب',
     'dashboard.total_teachers' => 'إجمالي المعلمين',
     'dashboard.total_classes' => 'إجمالي الفصول',
@@ -514,15 +573,17 @@ return [
     'dashboard.christian' => 'مسيحي',
     'dashboard.other' => 'أخرى',
     'dashboard.view_all_activity' => 'عرض كل النشاطات',
-    'dashboard.at_risk_title' => 'الطلاب المعرضون للخطر (تحليل ذكي)',
+    'dashboard.at_risk_title' => 'طلاب يحتاجون إلى مراجعة',
     'dashboard.at_risk_absences' => 'الغياب',
     'dashboard.at_risk_incidents' => 'المخالفات',
-    'dashboard.at_risk_empty' => 'لا يوجد طلاب معرّضون للخطر حاليًا -- يراقب النظام الغياب المتكرر (3 أيام فأكثر) والمخالفات السلوكية تلقائيًا.',
+    'dashboard.at_risk_empty' => 'لا يوجد طلاب يطابقون حاليًا حدود المراجعة للغياب المتكرر أو الوقائع المسجلة.',
+    'dashboard.at_risk_disclaimer' => 'هذه إشارة للمراجعة الإدارية تعتمد فقط على الغياب والوقائع المسجلة، وليست تشخيصًا أو حكمًا على الطالب.',
 
     // رفع الملفات (القرار رقم 11 / O-18)
     'uploads.error.too_large' => 'تعذر حفظ الصورة: حجم الملف كبير جدًا (الحد الأقصى 2 ميجابايت).',
     'uploads.error.invalid_type' => 'تعذر حفظ الصورة: يُسمح فقط بصور JPG و PNG.',
     'uploads.error.generic' => 'تعذر حفظ الصورة. الرجاء تجربة ملف آخر.',
+    'uploads.photo_help' => 'JPG أو PNG بحد أقصى 2 ميجابايت. يتم التحقق من الصور وإعادة ترميزها بأمان.',
 
     // المستخدمون (§Q "المستخدمون | قائمة، إضافة/تعديل (للمدير فقط)")
     'users.title' => 'المستخدمون',
@@ -562,6 +623,11 @@ return [
     'settings.tab.academic' => 'القواعد الأكاديمية',
     'settings.tab.security' => 'الأمان',
     'settings.tab.backup' => 'النسخ الاحتياطي',
+    'settings.desc.profile' => 'هوية المدرسة الظاهرة في التطبيق وفي التقارير المطبوعة.',
+    'settings.desc.localization' => 'اللغة الافتراضية التي تبدأ بها جلسات الدخول الجديدة.',
+    'settings.desc.academic' => 'الحمل الأسبوعي المستهدف وأنماط المعرّفات للأعوام الدراسية الجديدة.',
+    'settings.desc.security' => 'حماية تسجيل الدخول ومدد القفل ومدة الجلسة.',
+    'settings.desc.backup' => 'المكان الذي تُخزَّن فيه النسخ الاحتياطية السريعة.',
     'settings.logo' => 'شعار المدرسة',
     'settings.logo_remove' => 'إزالة الشعار الحالي',
     'settings.logo_help' => 'JPG أو PNG، بحد أقصى 2 ميجابايت. يظهر في التطبيق وعلى التقارير المطبوعة/المصدَّرة.',
@@ -791,6 +857,7 @@ return [
     'welfare.discipline_logged'  => 'تم تسجيل السجل الانضباطي.',
     'welfare.health_logged'      => 'تم تسجيل السجل الصحي.',
     'welfare.deleted'            => 'تم حذف السجل.',
+    'welfare.confirm_delete'     => 'هل تريد حذف سجل الرعاية نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.',
     'welfare.no_records'         => 'لا توجد سجلات.',
     'welfare.type'               => 'النوع',
     'welfare.all_types'          => 'جميع الأنواع',

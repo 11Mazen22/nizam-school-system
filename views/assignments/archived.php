@@ -21,7 +21,7 @@ use App\Middleware\CsrfMiddleware;
         <span class="n-stat-mini-value"><?= count($assignments) ?></span>
         <span class="n-stat-mini-label"><?= e(__('common.status_archived')) ?></span>
       </div>
-      <a href="/assignments" class="btn btn-outline-light d-flex align-items-center gap-2">
+      <a href="/assignments" class="btn btn-outline-secondary d-flex align-items-center gap-2">
         <?= icon('chevron-right', 'n-flip-rtl') ?>
         <span><?= e(__('assignments.title')) ?></span>
       </a>
@@ -39,7 +39,7 @@ use App\Middleware\CsrfMiddleware;
     </a>
   </div>
 <?php else: ?>
-  <div class="card border-0 shadow-sm">
+  <div class="card">
     <div class="card-header d-flex align-items-center gap-2">
       <?= icon('archive') ?>
       <span><?= e(__('common.archived_list')) ?></span>

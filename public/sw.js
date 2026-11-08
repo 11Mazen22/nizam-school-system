@@ -4,7 +4,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_VERSION = 'nizam-v1.0.3-branding';
+const CACHE_VERSION = 'nizam-v1.1.0-premium-light';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -17,9 +17,19 @@ const STATIC_ASSETS = [
   '/assets/css/app.css',
   '/assets/img/hadaba-logo.png',
   '/assets/js/app.js',
+  '/assets/js/confirm.js',
+  '/assets/vendor/jquery/jquery.min.js',
   '/assets/vendor/bootstrap/css/bootstrap.min.css',
   '/assets/vendor/bootstrap/css/bootstrap.rtl.min.css',
   '/assets/vendor/bootstrap/js/bootstrap.bundle.min.js',
+  '/assets/fonts/Inter-Regular.woff2',
+  '/assets/fonts/Inter-Medium.woff2',
+  '/assets/fonts/Inter-SemiBold.woff2',
+  '/assets/fonts/Inter-Bold.woff2',
+  '/assets/fonts/IBMPlexSansArabic-Regular.woff2',
+  '/assets/fonts/IBMPlexSansArabic-Medium.woff2',
+  '/assets/fonts/IBMPlexSansArabic-SemiBold.woff2',
+  '/assets/fonts/IBMPlexSansArabic-Bold.woff2',
   '/offline.html'
 ];
 
@@ -261,8 +271,8 @@ function createOfflineResponse() {
           justify-content: center;
           min-height: 100vh;
           margin: 0;
-          background: linear-gradient(135deg, #1f6f5c 0%, #14503f 100%);
-          color: white;
+           background: #f6f8fc;
+           color: #172033;
           text-align: center;
           padding: 20px;
         }
@@ -284,9 +294,9 @@ function createOfflineResponse() {
           line-height: 1.6;
         }
         button {
-          background: white;
-          color: #1f6f5c;
-          border: none;
+           background: #315efb;
+           color: white;
+           border: 1px solid #315efb;
           padding: 12px 24px;
           border-radius: 8px;
           font-weight: 600;
@@ -304,8 +314,8 @@ function createOfflineResponse() {
         <svg class="offline-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
         </svg>
-        <h1>You're Offline</h1>
-        <p>No internet connection detected. Some features may be limited. Your work is being saved locally and will sync when you're back online.</p>
+        <h1>Page unavailable offline</h1>
+        <p>This page was not previously cached. Reconnect and try again. No changes have been submitted or queued.</p>
         <button onclick="window.location.reload()">Try Again</button>
       </div>
     </body>
@@ -319,50 +329,6 @@ function createOfflineResponse() {
       })
     }
   );
-}
-
-/**
- * Background Sync Event - Sync queued data when online
- */
-self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync triggered:', event.tag);
-  
-  if (event.tag === 'sync-data') {
-    event.waitUntil(syncQueuedData());
-  }
-});
-
-/**
- * Sync queued data to server
- */
-async function syncQueuedData() {
-  try {
-    console.log('[SW] Syncing queued data...');
-    
-    // Get sync queue from IndexedDB (implementation in separate file)
-    const queue = await getSyncQueue();
-    
-    for (const item of queue) {
-      try {
-        await fetch(item.url, {
-          method: item.method,
-          headers: item.headers,
-          body: item.body
-        });
-        
-        // Remove from queue on success
-        await removeFromQueue(item.id);
-        console.log('[SW] Synced:', item.url);
-      } catch (error) {
-        console.error('[SW] Failed to sync:', item.url, error);
-        // Keep in queue for retry
-      }
-    }
-    
-    console.log('[SW] Sync complete');
-  } catch (error) {
-    console.error('[SW] Sync queue error:', error);
-  }
 }
 
 /**
@@ -436,19 +402,5 @@ self.addEventListener('message', (event) => {
     );
   }
 });
-
-/**
- * Placeholder functions for IndexedDB operations
- * These will be implemented in the sync-queue.js file
- */
-async function getSyncQueue() {
-  // TODO: Implement IndexedDB retrieval
-  return [];
-}
-
-async function removeFromQueue(id) {
-  // TODO: Implement IndexedDB deletion
-  return Promise.resolve();
-}
 
 console.log('[SW] Service Worker loaded successfully');

@@ -4,306 +4,52 @@ $pageTitle = __('grades.title');
 $activeNav = 'grades';
 $pageScripts = ['/assets/js/grades.js'];
 $suppressPageTitle = true;
+$canManage = hasPermission('grades.manage');
+$activeGrades = array_filter($grades, static fn (array $grade): bool => (int) $grade['is_active'] === 1);
+$archivedGrades = array_filter($grades, static fn (array $grade): bool => (int) $grade['is_active'] === 0);
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
-
-$activeGrades = array_filter($grades, fn($g) => (int)$g['is_active'] === 1);
-$archivedGrades = array_filter($grades, fn($g) => (int)$g['is_active'] === 0);
 ?>
 
-<!-- POWERFUL PAGE HEADER -->
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper">
-          <?= icon('layers', 'n-grades-icon') ?>
-        </div>
-        <?= e(__('grades.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('grades.description')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-grades-stats-mini">
-        <div class="n-stat-mini">
-          <span class="n-stat-mini-value"><?= count($activeGrades) ?></span>
-          <span class="n-stat-mini-label"><?= e(__('grades.stat_active')) ?></span>
-        </div>
-        <?php if (count($archivedGrades) > 0): ?>
-        <div class="n-stat-mini archived">
-          <span class="n-stat-mini-value"><?= count($archivedGrades) ?></span>
-          <span class="n-stat-mini-label"><?= e(__('grades.stat_archived')) ?></span>
-        </div>
-        <?php endif; ?>
-      </div>
-      <button type="button" class="btn btn-outline-light d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
-        <?= icon("upload") ?>
-        <span><?= e(__("app.import")) ?></span>
-      </button>
-    </div>
-  </div>
-</div>
+<div class="n-grades-header"><div class="n-grades-header-content">
+  <div class="n-grades-header-text"><h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('layers', 'n-grades-icon') ?></span><?= e(__('grades.title')) ?></h1><p class="n-grades-subtitle"><?= e(__('grades.description')) ?></p></div>
+  <div class="n-grades-header-actions"><div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($activeGrades) ?></span><span class="n-stat-mini-label"><?= e(__('grades.stat_active')) ?></span></div><div class="n-stat-mini archived"><span class="n-stat-mini-value"><?= count($archivedGrades) ?></span><span class="n-stat-mini-label"><?= e(__('grades.stat_archived')) ?></span></div></div><?php if ($canManage): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><?php endif; ?></div>
+</div></div>
 
-<!-- TABS NAVIGATION -->
-<ul class="nav nav-tabs n-tabs-powerful mb-4" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button" role="tab">
-      <?= icon('list', 'n-icon-sm') ?>
-      <span><?= e(__('grades.tab_list')) ?></span>
-      <span class="badge"><?= count($grades) ?></span>
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" type="button" role="tab">
-      <?= icon('plus', 'n-icon-sm') ?>
-      <span><?= e(__('grades.tab_add')) ?></span>
-    </button>
-  </li>
-  <li class="nav-item d-none" role="presentation" id="edit-tab-wrapper">
-    <button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit-panel" type="button" role="tab">
-      <?= icon('edit', 'n-icon-sm') ?>
-      <span><?= e(__('grades.tab_edit')) ?></span>
-    </button>
-  </li>
+<ul class="nav nav-tabs mb-4" role="tablist">
+  <li class="nav-item"><button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button"><?= icon('list') ?><?= e(__('grades.tab_list')) ?><span class="badge"><?= count($grades) ?></span></button></li>
+  <?php if ($canManage): ?><li class="nav-item"><button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" type="button"><?= icon('plus') ?><?= e(__('grades.tab_add')) ?></button></li><li class="nav-item d-none" id="edit-tab-wrapper"><button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit-panel" type="button"><?= icon('edit') ?><?= e(__('grades.tab_edit')) ?></button></li><?php endif; ?>
 </ul>
 
-<!-- TAB CONTENT -->
 <div class="tab-content">
-  
-  <!-- LIST TAB -->
   <div class="tab-pane fade show active" id="list-panel" role="tabpanel">
     <?php if (empty($grades)): ?>
-      <!-- EMPTY STATE -->
-      <div class="n-empty-powerful">
-        <div class="n-empty-powerful-bg">
-          <div class="n-empty-blob n-empty-blob-1"></div>
-          <div class="n-empty-blob n-empty-blob-2"></div>
-          <div class="n-empty-blob n-empty-blob-3"></div>
-        </div>
-        <div class="n-empty-powerful-content">
-          <div class="n-empty-powerful-icon">
-            <?= icon('layers', 'n-icon-massive') ?>
-          </div>
-          <h2 class="n-empty-powerful-title"><?= e(__('grades.empty_title')) ?></h2>
-          <p class="n-empty-powerful-description"><?= e(__('grades.empty_description')) ?></p>
-          <button type="button" class="btn btn-primary btn-lg n-btn-powerful" data-tab-switch="add-tab">
-            <?= icon('plus', 'n-icon-lg') ?>
-            <span><?= e(__('grades.add')) ?></span>
-          </button>
-        </div>
-      </div>
+      <div class="n-empty-state"><div class="n-empty-icon"><?= icon('layers') ?></div><h2 class="n-empty-title"><?= e(__('grades.empty_title')) ?></h2><p class="n-empty-description"><?= e(__('grades.empty_description')) ?></p><?php if ($canManage): ?><button class="btn btn-primary" type="button" data-tab-switch="add-tab"><?= icon('plus') ?><?= e(__('grades.add')) ?></button><?php endif; ?></div>
     <?php else: ?>
-      <!-- GRADES GRID -->
-      <div class="n-grades-grid">
-        <?php foreach ($grades as $index => $grade): ?>
-          <div class="n-grade-card <?= (int)$grade['is_active'] === 0 ? 'archived' : '' ?>" 
-               style="--card-index: <?= $index ?>;" 
-               data-grade-id="<?= (int)$grade['id'] ?>">
-            
-            <!-- Card Header -->
-            <div class="n-grade-card-header">
-              <div class="n-grade-number">
-                <span><?= (int)$grade['sort_order'] ?></span>
-              </div>
-              <div class="n-grade-status">
-                <?php if ((int)$grade['is_active'] === 1): ?>
-                  <span class="badge text-bg-success d-inline-flex align-items-center gap-1">
-                    <?= icon('check-circle', 'n-icon-sm') ?>
-                    <?= e(__('common.status_active')) ?>
-                  </span>
-                <?php else: ?>
-                  <span class="badge text-bg-secondary d-inline-flex align-items-center gap-1">
-                    <?= icon('archive', 'n-icon-sm') ?>
-                    <?= e(__('common.status_archived')) ?>
-                  </span>
-                <?php endif; ?>
-              </div>
-            </div>
-
-            <!-- Card Body -->
-            <div class="n-grade-card-body">
-              <div class="n-grade-names">
-                <h3 class="n-grade-name-en"><?= e($grade['name_en']) ?></h3>
-                <p class="n-grade-name-ar"><?= e($grade['name_ar']) ?></p>
-              </div>
-            </div>
-
-            <!-- Card Footer -->
-            <div class="n-grade-card-footer">
-              <button type="button" class="btn btn-sm btn-outline-primary n-btn-card"
-                 data-grade-edit
-                 data-grade-id="<?= (int)$grade['id'] ?>"
-                 data-grade-name-en="<?= e($grade['name_en']) ?>"
-                 data-grade-name-ar="<?= e($grade['name_ar']) ?>"
-                 data-grade-sort-order="<?= (int)$grade['sort_order'] ?>">
-                <?= icon('edit', 'n-icon-sm') ?>
-                <span><?= e(__('common.edit')) ?></span>
-              </button>
-              
-              <?php if ((int)$grade['is_active'] === 1): ?>
-                <form method="post" action="/grades/<?= (int)$grade['id'] ?>/archive" class="d-inline" 
-                      data-confirm="<?= e(__('common.confirm_archive')) ?>">
-                  <?= CsrfMiddleware::field() ?>
-                  <button type="submit" class="btn btn-sm btn-outline-danger n-btn-card">
-                    <?= icon('archive', 'n-icon-sm') ?>
-                    <span class="d-none d-lg-inline"><?= e(__('common.archive')) ?></span>
-                  </button>
-                </form>
-              <?php else: ?>
-                <form method="post" action="/grades/<?= (int)$grade['id'] ?>/restore" class="d-inline" 
-                      data-confirm="<?= e(__('common.confirm_restore')) ?>">
-                  <?= CsrfMiddleware::field() ?>
-                  <button type="submit" class="btn btn-sm btn-outline-success n-btn-card">
-                    <?= icon('unarchive', 'n-icon-sm') ?>
-                    <span class="d-none d-lg-inline"><?= e(__('common.restore')) ?></span>
-                  </button>
-                </form>
-              <?php endif; ?>
-            </div>
-
-            <!-- Decorative gradient -->
-            <div class="n-grade-card-gradient"></div>
-          </div>
-        <?php endforeach; ?>
-      </div>
+      <div class="n-data-panel"><div class="table-responsive"><table class="table table-hover align-middle n-table-stack">
+        <thead><tr><th><?= e(__('grades.sort_order')) ?></th><th><?= e(__('grades.name_en')) ?></th><th><?= e(__('grades.name_ar')) ?></th><th><?= e(__('academic_years.status')) ?></th><?php if ($canManage): ?><th class="text-end"><?= e(__('common.actions')) ?></th><?php endif; ?></tr></thead>
+        <tbody><?php foreach ($grades as $grade): ?><tr>
+          <td data-label="<?= e(__('grades.sort_order')) ?>"><span class="n-order-chip"><?= (int) $grade['sort_order'] ?></span></td>
+          <td data-label="<?= e(__('grades.name_en')) ?>" lang="en" dir="ltr"><strong><?= e($grade['name_en']) ?></strong></td>
+          <td data-label="<?= e(__('grades.name_ar')) ?>" lang="ar" dir="rtl"><?= e($grade['name_ar']) ?></td>
+          <td data-label="<?= e(__('academic_years.status')) ?>"><span class="badge <?= (int) $grade['is_active'] === 1 ? 'text-bg-success' : 'text-bg-secondary' ?>"><?= e((int) $grade['is_active'] === 1 ? __('common.status_active') : __('common.status_archived')) ?></span></td>
+          <?php if ($canManage): ?><td data-label="<?= e(__('common.actions')) ?>"><div class="n-table-actions"><button type="button" class="btn btn-sm btn-outline-secondary" data-grade-edit data-grade-id="<?= (int) $grade['id'] ?>" data-grade-name-en="<?= e($grade['name_en']) ?>" data-grade-name-ar="<?= e($grade['name_ar']) ?>" data-grade-sort-order="<?= (int) $grade['sort_order'] ?>"><?= icon('edit') ?><?= e(__('common.edit')) ?></button><?php if ((int) $grade['is_active'] === 1): ?><form method="post" action="/grades/<?= (int) $grade['id'] ?>/archive" data-confirm="<?= e(__('common.confirm_archive')) ?>"><?= CsrfMiddleware::field() ?><button class="btn btn-sm btn-ghost text-danger" type="submit" aria-label="<?= e(__('common.archive')) ?>"><?= icon('archive') ?></button></form><?php else: ?><form method="post" action="/grades/<?= (int) $grade['id'] ?>/restore" data-confirm="<?= e(__('common.confirm_restore')) ?>"><?= CsrfMiddleware::field() ?><button class="btn btn-sm btn-outline-success" type="submit"><?= icon('unarchive') ?><?= e(__('common.restore')) ?></button></form><?php endif; ?></div></td><?php endif; ?>
+        </tr><?php endforeach; ?></tbody>
+      </table></div></div>
     <?php endif; ?>
   </div>
-  
-  <!-- ADD NEW TAB -->
+
+  <?php if ($canManage): ?>
   <div class="tab-pane fade" id="add-panel" role="tabpanel">
-    <div class="n-form-card-powerful">
-      <div class="n-form-card-header">
-        <div class="n-form-card-icon">
-          <?= icon('plus', 'n-icon-lg') ?>
-        </div>
-        <div>
-          <h2 class="n-form-card-title"><?= e(__('grades.tab_add')) ?></h2>
-          <p class="n-form-card-subtitle"><?= e(__('grades.form_add_subtitle')) ?></p>
-        </div>
-      </div>
-      
-      <form method="post" action="/grades" class="n-form-powerful">
-        <?= CsrfMiddleware::field() ?>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="name_en_new">
-            <span><?= e(__('grades.name_en')) ?></span>
-          </label>
-          <input type="text" class="form-control n-input-powerful" 
-                 id="name_en_new" 
-                 name="name_en" 
-                 placeholder="First Grade"
-                 required>
-        </div>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="name_ar_new">
-            <span><?= e(__('grades.name_ar')) ?></span>
-          </label>
-          <input type="text" class="form-control n-input-powerful" 
-                 id="name_ar_new" 
-                 name="name_ar" 
-                 dir="rtl" 
-                 placeholder="الصف الأول"
-                 required>
-        </div>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="sort_order_new">
-            <span><?= e(__('grades.sort_order')) ?></span>
-          </label>
-          <input type="number" class="form-control n-input-powerful" 
-                 id="sort_order_new" 
-                 name="sort_order" 
-                 value="<?= count($grades) + 1 ?>" 
-                 min="1" 
-                 required>
-        </div>
-        
-        <div class="n-form-actions">
-          <button type="button" class="btn btn-secondary n-btn-powerful-secondary" data-tab-switch="list-tab">
-            <?= icon('close') ?>
-            <span><?= e(__('common.cancel')) ?></span>
-          </button>
-          <button type="submit" class="btn btn-primary n-btn-powerful">
-            <?= icon('check') ?>
-            <span><?= e(__('common.save')) ?></span>
-          </button>
-        </div>
-      </form>
-    </div>
+    <div class="n-form-card-powerful"><div class="n-form-card-header"><span class="n-form-card-icon"><?= icon('plus') ?></span><div><h2 class="n-form-card-title"><?= e(__('grades.tab_add')) ?></h2><p class="n-form-card-subtitle"><?= e(__('grades.form_add_subtitle')) ?></p></div></div><form method="post" action="/grades" class="n-form-powerful" data-unsaved-guard data-loading-submit><?= CsrfMiddleware::field() ?><div class="row g-3"><div class="col-md-6"><label class="form-label" for="name_en_new"><?= e(__('grades.name_en')) ?></label><input class="form-control" id="name_en_new" name="name_en" lang="en" dir="ltr" required></div><div class="col-md-6"><label class="form-label" for="name_ar_new"><?= e(__('grades.name_ar')) ?></label><input class="form-control" id="name_ar_new" name="name_ar" lang="ar" dir="rtl" required></div><div class="col-md-4"><label class="form-label" for="sort_order_new"><?= e(__('grades.sort_order')) ?></label><input type="number" class="form-control" id="sort_order_new" name="sort_order" value="<?= count($grades) + 1 ?>" min="1" required></div></div><div class="n-form-actions"><button type="button" class="btn btn-secondary" data-tab-switch="list-tab"><?= e(__('common.cancel')) ?></button><button class="btn btn-primary" type="submit"><?= icon('check') ?><?= e(__('common.save')) ?></button></div></form></div>
   </div>
-
   <div class="tab-pane fade" id="edit-panel" role="tabpanel">
-    <div class="n-form-card-powerful">
-      <div class="n-form-card-header">
-        <div class="n-form-card-icon">
-          <?= icon('edit', 'n-icon-lg') ?>
-        </div>
-        <div>
-          <h2 class="n-form-card-title"><?= e(__('grades.tab_edit')) ?></h2>
-          <p class="n-form-card-subtitle"><?= e(__('grades.form_edit_subtitle')) ?></p>
-        </div>
-      </div>
-      
-      <form method="post" action="/grades/" id="editGradeForm" class="n-form-powerful">
-        <?= CsrfMiddleware::field() ?>
-        <input type="hidden" id="edit_grade_id" name="grade_id">
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="name_en_edit">
-            <span><?= e(__('grades.name_en')) ?></span>
-          </label>
-          <input type="text" class="form-control n-input-powerful" 
-                 id="name_en_edit" 
-                 name="name_en" 
-                 required>
-        </div>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="name_ar_edit">
-            <span><?= e(__('grades.name_ar')) ?></span>
-          </label>
-          <input type="text" class="form-control n-input-powerful" 
-                 id="name_ar_edit" 
-                 name="name_ar" 
-                 dir="rtl" 
-                 required>
-        </div>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="sort_order_edit">
-            <span><?= e(__('grades.sort_order')) ?></span>
-          </label>
-          <input type="number" class="form-control n-input-powerful" 
-                 id="sort_order_edit" 
-                 name="sort_order" 
-                 min="1" 
-                 required>
-        </div>
-        
-        <div class="n-form-actions">
-          <button type="button" class="btn btn-secondary n-btn-powerful-secondary" data-tab-switch="list-tab">
-            <?= icon('close') ?>
-            <span><?= e(__('common.cancel')) ?></span>
-          </button>
-          <button type="submit" class="btn btn-primary n-btn-powerful">
-            <?= icon('check') ?>
-            <span><?= e(__('common.update')) ?></span>
-          </button>
-        </div>
-      </form>
-    </div>
+    <div class="n-form-card-powerful"><div class="n-form-card-header"><span class="n-form-card-icon"><?= icon('edit') ?></span><div><h2 class="n-form-card-title"><?= e(__('grades.tab_edit')) ?></h2><p class="n-form-card-subtitle"><?= e(__('grades.form_edit_subtitle')) ?></p></div></div><form method="post" action="/grades/" id="editGradeForm" class="n-form-powerful" data-unsaved-guard data-loading-submit><?= CsrfMiddleware::field() ?><input type="hidden" id="edit_grade_id" name="grade_id"><div class="row g-3"><div class="col-md-6"><label class="form-label" for="name_en_edit"><?= e(__('grades.name_en')) ?></label><input class="form-control" id="name_en_edit" name="name_en" lang="en" dir="ltr" required></div><div class="col-md-6"><label class="form-label" for="name_ar_edit"><?= e(__('grades.name_ar')) ?></label><input class="form-control" id="name_ar_edit" name="name_ar" lang="ar" dir="rtl" required></div><div class="col-md-4"><label class="form-label" for="sort_order_edit"><?= e(__('grades.sort_order')) ?></label><input type="number" class="form-control" id="sort_order_edit" name="sort_order" min="1" required></div></div><div class="n-form-actions"><button type="button" class="btn btn-secondary" data-tab-switch="list-tab"><?= e(__('common.cancel')) ?></button><button class="btn btn-primary" type="submit"><?= icon('check') ?><?= e(__('common.update')) ?></button></div></form></div>
   </div>
-
+  <?php endif; ?>
 </div>
 
 <?php
-ob_start();
-$title = __("app.import") . " - " . __("grades.title");
-$action = "/import/grades";
-$templateUrl = "/import/grades/template";
-require dirname(__DIR__) . "/partials/import_modal.php";
-$pageModals = ob_get_clean();
+if ($canManage) { ob_start(); $title = __('app.import') . ' — ' . __('grades.title'); $action = '/import/grades'; $templateUrl = '/import/grades/template'; require dirname(__DIR__) . '/partials/import_modal.php'; $pageModals = ob_get_clean(); }
 require dirname(__DIR__) . '/layout/end.php';
 ?>

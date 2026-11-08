@@ -25,7 +25,7 @@ use App\Middleware\CsrfMiddleware;
 
 <div class="card" style="max-width: 560px;">
   <div class="card-body">
-    <form method="post" action="<?= $subject === null ? '/subjects' : '/subjects/' . (int) $subject['id'] ?>">
+    <form method="post" action="<?= $subject === null ? '/subjects' : '/subjects/' . (int) $subject['id'] ?>" data-unsaved-guard data-loading-submit>
       <?= CsrfMiddleware::field() ?>
       <div class="mb-3">
         <label class="form-label" for="code"><?= e(__('subjects.code')) ?></label>

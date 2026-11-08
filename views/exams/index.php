@@ -42,7 +42,7 @@ ksort($byTerm);
         </div>
         <?php endif; ?>
       </div>
-      <a href="/exams/ranking" class="btn btn-outline-light d-flex align-items-center gap-2">
+      <a href="/exams/ranking" class="btn btn-outline-secondary d-flex align-items-center gap-2">
         <?= icon('trending-up') ?>
         <span><?= e(__('exams.ranking')) ?></span>
       </a>
@@ -83,11 +83,6 @@ ksort($byTerm);
     <?php if (empty($exams)): ?>
       <!-- EMPTY STATE -->
       <div class="n-empty-powerful">
-        <div class="n-empty-powerful-bg">
-          <div class="n-empty-blob n-empty-blob-1"></div>
-          <div class="n-empty-blob n-empty-blob-2"></div>
-          <div class="n-empty-blob n-empty-blob-3"></div>
-        </div>
         <div class="n-empty-powerful-content">
           <div class="n-empty-powerful-icon">
             <?= icon('star', 'n-icon-massive') ?>
@@ -105,7 +100,7 @@ ksort($byTerm);
     <?php else: ?>
       <div class="n-reveal-group d-flex flex-column gap-3">
         <?php foreach ($byTerm as $term => $termExams): ?>
-          <div class="card border-0 shadow-sm">
+          <section class="card n-exam-term">
             <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
               <div class="d-flex align-items-center gap-2">
                 <span class="badge text-bg-light border d-inline-flex align-items-center justify-content-center"
@@ -165,7 +160,7 @@ ksort($byTerm);
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
@@ -185,7 +180,7 @@ ksort($byTerm);
         </div>
       </div>
 
-      <form method="post" action="/exams" class="n-form-powerful">
+      <form method="post" action="/exams" class="n-form-powerful" data-unsaved-guard data-loading-submit>
         <?= CsrfMiddleware::field() ?>
 
         <div class="n-form-group-powerful">
@@ -252,7 +247,7 @@ ksort($byTerm);
         </div>
       </div>
 
-      <form method="post" action="/exams/" id="editExamForm" class="n-form-powerful">
+      <form method="post" action="/exams/" id="editExamForm" class="n-form-powerful" data-unsaved-guard data-loading-submit>
         <?= CsrfMiddleware::field() ?>
         <input type="hidden" id="edit_exam_id" name="exam_id">
 

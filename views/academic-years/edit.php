@@ -20,7 +20,7 @@ use App\Middleware\CsrfMiddleware;
       <p class="n-grades-subtitle"><?= e($year['label']) ?></p>
     </div>
     <div class="n-grades-header-actions">
-      <a href="/academic-years" class="btn btn-outline-light d-flex align-items-center gap-2">
+      <a href="/academic-years" class="btn btn-outline-secondary d-flex align-items-center gap-2">
         <?= icon('chevron-right', 'n-flip-rtl') ?>
         <span><?= e(__('academic_years.title')) ?></span>
       </a>
@@ -48,7 +48,7 @@ use App\Middleware\CsrfMiddleware;
         </div>
       <?php endif; ?>
 
-      <form method="post" action="/academic-years/<?= (int)$year['id'] ?>" class="n-form-powerful">
+      <form method="post" action="/academic-years/<?= (int)$year['id'] ?>" class="n-form-powerful" data-unsaved-guard data-loading-submit>
         <?= CsrfMiddleware::field() ?>
 
         <div class="n-form-group-powerful">

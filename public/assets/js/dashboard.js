@@ -30,13 +30,27 @@ document.addEventListener('DOMContentLoaded', function () {
       labels: data.labels,
       datasets: [{
         data: data.counts,
-        backgroundColor: ['#2f4b7c', '#b4842a', '#5b6b7a'],
+        backgroundColor: ['#315efb', '#0f9f91', '#94a3b8'],
+        borderRadius: 7,
+        maxBarThickness: 54,
       }],
     },
     options: {
-      animation: false,
+      animation: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? false
+        : { duration: 420, easing: 'easeOutQuart' },
       plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0, color: '#64748b' },
+          grid: { color: '#e4eaf2' },
+        },
+        x: {
+          ticks: { color: '#334155' },
+          grid: { display: false },
+        },
+      },
     },
   });
 });

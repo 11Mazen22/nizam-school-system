@@ -7,66 +7,17 @@ require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?php if (!empty($teacher['photo_path'])): ?>
-        <img src="/teachers/<?= (int) $teacher['id'] ?>/photo" alt="" style="width:40px; height:40px; object-fit:cover;" class="rounded-circle border">
-      <?php else: ?>
-        <span class="n-avatar" style="width:40px; height:40px;"><?= e(mb_substr($teacher['full_name'], 0, 1)) ?></span>
-      <?php endif; ?>
-      <?= e($teacher['full_name']) ?>
-    </h1>
-    <p class="mono mb-0"><?= e($teacher['teacher_code']) ?></p>
+<section class="n-profile-hero" aria-labelledby="teacher-name">
+  <div class="n-profile-identity">
+    <?php if (!empty($teacher['photo_path'])): ?><img src="/teachers/<?= (int) $teacher['id'] ?>/photo" alt="" class="n-profile-photo"><?php else: ?><span class="n-profile-placeholder" aria-hidden="true"><?= e(mb_substr($teacher['full_name'], 0, 1)) ?></span><?php endif; ?>
+    <div><div class="d-flex align-items-center gap-2 flex-wrap"><h1 class="n-profile-title" id="teacher-name"><?= e($teacher['full_name']) ?></h1><span class="badge <?= $teacher['status'] === 'active' ? 'text-bg-success' : 'text-bg-secondary' ?>"><?= e($teacher['status'] === 'active' ? __('common.status_active') : __('common.status_archived')) ?></span></div><div class="n-profile-code mono" dir="ltr"><?= e($teacher['teacher_code']) ?></div></div>
   </div>
-  <div class="n-page-head-actions">
-    <a href="/teachers/<?= (int) $teacher['id'] ?>/edit" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-      <?= icon('edit') ?>
-      <span><?= e(__('common.edit')) ?></span>
-    </a>
-    <?php if ($teacher['status'] === 'active'): ?>
-      <form method="post" action="/teachers/<?= (int) $teacher['id'] ?>/archive" data-confirm="<?= e(__('common.confirm_archive')) ?>">
-        <?= CsrfMiddleware::field() ?>
-        <button type="submit" class="btn btn-outline-danger d-flex align-items-center gap-2">
-          <?= icon('archive') ?>
-          <span><?= e(__('common.archive')) ?></span>
-        </button>
-      </form>
-    <?php endif; ?>
-  </div>
-</div>
+  <div class="n-profile-actions"><a href="/teachers" class="btn btn-ghost"><?= icon('chevron-left', 'n-flip-rtl') ?><?= e(__('teachers.title')) ?></a><?php if (hasPermission('assignments.view')): ?><a href="/assignments" class="btn btn-outline-secondary"><?= icon('clipboard-list') ?><?= e(__('assignments.title')) ?></a><?php endif; ?><?php if (hasPermission('teachers.edit')): ?><a href="/teachers/<?= (int) $teacher['id'] ?>/edit" class="btn btn-primary"><?= icon('edit') ?><?= e(__('common.edit')) ?></a><?php endif; ?><?php if ($teacher['status'] === 'active' && hasPermission('teachers.archive')): ?><form method="post" action="/teachers/<?= (int) $teacher['id'] ?>/archive" data-confirm="<?= e(__('common.confirm_archive')) ?>"><?= CsrfMiddleware::field() ?><button type="submit" class="btn btn-outline-danger"><?= icon('archive') ?><?= e(__('common.archive')) ?></button></form><?php endif; ?></div>
+</section>
 
-<div class="card mb-3">
-  <div class="card-header d-flex align-items-center gap-2">
-    <?= icon('graduation-cap') ?>
-    <span><?= e(__('teachers.full_name')) ?></span>
-  </div>
-  <div class="card-body">
-    <dl class="row mb-0">
-      <dt class="col-sm-3"><?= e(__('teachers.full_name')) ?></dt><dd class="col-sm-9"><?= e($teacher['full_name']) ?></dd>
-      <dt class="col-sm-3"><?= e(__('teachers.phone')) ?></dt><dd class="col-sm-9"><?= e($teacher['phone'] ?? '—') ?></dd>
-      <dt class="col-sm-3"><?= e(__('teachers.email')) ?></dt><dd class="col-sm-9"><?= e($teacher['email'] ?? '—') ?></dd>
-    </dl>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-header d-flex align-items-center gap-2">
-    <?= icon('book') ?>
-    <span><?= e(__('teachers.qualifications')) ?></span>
-  </div>
-  <div class="card-body">
-    <?php if (empty($qualifications)): ?>
-      <div class="n-empty py-3">
-        <div class="n-empty-icon"><?= icon('book') ?></div>
-        <p class="mb-0"><?= e(__('teachers.no_qualifications')) ?></p>
-      </div>
-    <?php else: ?>
-      <?php foreach ($qualifications as $subject): ?>
-        <span class="badge text-bg-light border me-1 mb-1"><?= e(currentLocale() === 'ar' ? $subject['name_ar'] : $subject['name_en']) ?></span>
-      <?php endforeach; ?>
-    <?php endif; ?>
-  </div>
+<div class="row g-3">
+  <div class="col-lg-6"><section class="card h-100" aria-labelledby="teacher-contact-title"><div class="card-header"><?= icon('phone') ?><span id="teacher-contact-title"><?= e(__('teachers.contact_information')) ?></span></div><div class="card-body"><dl class="n-detail-list"><dt><?= e(__('teachers.full_name')) ?></dt><dd><?= e($teacher['full_name']) ?></dd><dt><?= e(__('teachers.phone')) ?></dt><dd dir="ltr"><?= e($teacher['phone'] ?? '—') ?></dd><dt><?= e(__('teachers.email')) ?></dt><dd><?= e($teacher['email'] ?? '—') ?></dd></dl></div></section></div>
+  <div class="col-lg-6"><section class="card h-100" aria-labelledby="teacher-subjects-title"><div class="card-header"><?= icon('book') ?><span id="teacher-subjects-title"><?= e(__('teachers.qualifications')) ?></span><span class="badge text-bg-light ms-auto"><?= count($qualifications) ?></span></div><div class="card-body"><?php if (empty($qualifications)): ?><div class="n-empty border-0 py-3"><div class="n-empty-icon"><?= icon('book') ?></div><p><?= e(__('teachers.no_qualifications')) ?></p></div><?php else: ?><div class="n-tag-list"><?php foreach ($qualifications as $subject): ?><span class="badge text-bg-light border"><?= icon('book') ?><?= e(currentLocale() === 'ar' ? $subject['name_ar'] : $subject['name_en']) ?></span><?php endforeach; ?></div><?php endif; ?></div></section></div>
 </div>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

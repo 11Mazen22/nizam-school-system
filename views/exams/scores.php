@@ -25,14 +25,14 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
       <p class="n-grades-subtitle"><?= e(__('exams.max_score')) ?>: <?= e($exam['max_score']) ?> &nbsp;|&nbsp; <?= e(__('exams.term')) ?> <?= (int)$exam['term'] ?></p>
     </div>
     <div class="n-grades-header-actions">
-      <a href="/exams" class="btn btn-outline-light"><?= icon('chevron-left') ?> <?= e(__('common.back')) ?></a>
+      <a href="/exams" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?> <?= e(__('common.back')) ?></a>
     </div>
   </div>
 </div>
 
 <!-- Class picker -->
-<form method="get" class="card border-0 shadow-sm mb-4">
-  <div class="card-body d-flex gap-3 align-items-end flex-wrap">
+<form method="get" class="n-filter-panel">
+  <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:200px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
       <select name="class_id" class="form-select" onchange="this.form.submit()">
@@ -65,12 +65,12 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
 <?php endif; ?>
 
 <?php if ($classId > 0 && !empty($sheet)): ?>
-<form method="post" action="/exams/<?= (int)$exam['id'] ?>/scores">
+<form method="post" action="/exams/<?= (int)$exam['id'] ?>/scores" data-unsaved-guard data-loading-submit>
   <?= CsrfMiddleware::field() ?>
   <input type="hidden" name="class_id" value="<?= $classId ?>">
   <input type="hidden" name="subject_id" value="<?= $subjectId ?>">
 
-  <div class="card border-0 shadow-sm">
+  <div class="card">
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
@@ -107,7 +107,7 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
               <td>
                 <input type="number" step="0.01" min="0" max="<?= e($exam['max_score']) ?>"
                        name="scores[<?= (int)$studentId ?>][score]"
-                       class="form-control form-control-sm" style="width:100px;"
+                       class="form-control form-control-sm n-score-input"
                        value="<?= isset($row['score']) && $row['score'] !== null ? e($row['score']) : '' ?>"
                        placeholder="—">
               </td>
@@ -132,11 +132,6 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
 
 <?php elseif ($classId > 0): ?>
   <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
     <div class="n-empty-powerful-content">
       <div class="n-empty-powerful-icon">
         <?= icon('users', 'n-icon-massive') ?>
@@ -146,11 +141,6 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
   </div>
 <?php else: ?>
   <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
     <div class="n-empty-powerful-content">
       <div class="n-empty-powerful-icon">
         <?= icon('edit', 'n-icon-massive') ?>

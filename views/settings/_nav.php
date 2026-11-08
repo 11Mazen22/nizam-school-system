@@ -1,25 +1,30 @@
 <?php
 /**
- * Shared sub-nav for the five §O-21 Settings screens. @var string $activeSettingsTab
+ * Shared side-rail for the five §O-21 Settings screens. @var string $activeSettingsTab
  * Deliberately five separate pages, not five panels in one form -- so saving
  * "Localization" can never accidentally also resubmit whatever is sitting in
  * the Security tab, and so each screen's own server-side validation stays
  * scoped to exactly the fields it owns.
+ *
+ * Opens the two-column settings layout (.n-settings-layout) and the rail;
+ * views/settings/_end.php closes them. Between the two requires sits the
+ * tab's own content (usually one .n-settings-card).
  */
 $tabs = [
-    'profile' => 'settings.tab.profile',
-    'localization' => 'settings.tab.localization',
-    'academic' => 'settings.tab.academic',
-    'security' => 'settings.tab.security',
-    'backup' => 'settings.tab.backup',
+    'profile' => ['icon' => 'building', 'label' => 'settings.tab.profile'],
+    'localization' => ['icon' => 'grid', 'label' => 'settings.tab.localization'],
+    'academic' => ['icon' => 'calendar', 'label' => 'settings.tab.academic'],
+    'security' => ['icon' => 'lock', 'label' => 'settings.tab.security'],
+    'backup' => ['icon' => 'database', 'label' => 'settings.tab.backup'],
 ];
 ?>
-<ul class="nav nav-tabs mb-3">
-  <?php foreach ($tabs as $slug => $labelKey): ?>
-    <li class="nav-item">
+<div class="n-settings-layout">
+  <nav class="n-settings-nav" aria-label="<?= e(__('settings.title')) ?>">
+    <?php foreach ($tabs as $slug => $tab): ?>
       <a class="nav-link<?= $activeSettingsTab === $slug ? ' active' : '' ?>" href="/settings/<?= e($slug) ?>">
-        <?= e(__($labelKey)) ?>
+        <?= icon($tab['icon']) ?>
+        <span><?= e(__($tab['label'])) ?></span>
       </a>
-    </li>
-  <?php endforeach; ?>
-</ul>
+    <?php endforeach; ?>
+  </nav>
+  <div class="n-settings-content">

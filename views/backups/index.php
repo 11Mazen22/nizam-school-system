@@ -62,15 +62,19 @@ $lastPage = max(1, (int) ceil($total / $limit));
   </div>
 
   <div class="col-md-6">
-    <div class="card h-100 border-danger">
-      <div class="card-header text-danger fw-bold d-flex align-items-center gap-2">
-        <?= icon('upload') ?>
+    <div class="card h-100 n-danger-zone">
+      <div class="card-header fw-bold d-flex align-items-center gap-2">
+        <?= icon('shield-alert') ?>
         <span><?= e(__('backups.restore')) ?></span>
       </div>
       <div class="card-body">
         <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
           <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
           <strong><?= e(__('backups.restore_warning')) ?></strong>
+        </div>
+        <div class="n-protection-summary mb-3" role="note">
+          <?= icon('shield-check') ?>
+          <span><?= e(__('backups.restore_safety_notice')) ?></span>
         </div>
         <form method="post" action="/backups/restore" enctype="multipart/form-data" id="restoreForm">
           <?= CsrfMiddleware::field() ?>
@@ -101,7 +105,7 @@ $lastPage = max(1, (int) ceil($total / $limit));
   </div>
   <div class="card-body p-0">
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
+      <table class="table table-hover align-middle mb-0 n-table-stack">
         <thead class="table-light">
           <tr>
             <th><?= e(__('backups.table.created_at')) ?></th>
@@ -111,7 +115,7 @@ $lastPage = max(1, (int) ceil($total / $limit));
             <th><?= e(__('backups.table.type')) ?></th>
             <th><?= e(__('backups.table.status')) ?></th>
             <th><?= e(__('backups.table.created_by')) ?></th>
-            <th class="text-end"></th>
+            <th class="text-end n-stack-hide"></th>
           </tr>
         </thead>
         <tbody>
@@ -127,10 +131,10 @@ $lastPage = max(1, (int) ceil($total / $limit));
           <?php else: ?>
             <?php foreach ($backups as $row): ?>
               <tr>
-                <td class="text-nowrap" dir="ltr"><?= e($row['created_at']) ?></td>
-                <td class="font-monospace small"><?= e($row['filename']) ?></td>
-                <td class="text-muted small"><?= e($row['notes'] ?? '') ?></td>
-                <td dir="ltr">
+                <td class="text-nowrap" data-label="<?= e(__('backups.table.created_at')) ?>" dir="ltr"><?= e($row['created_at']) ?></td>
+                <td class="font-monospace small" data-label="<?= e(__('backups.table.filename')) ?>"><?= e($row['filename']) ?></td>
+                <td class="text-muted small" data-label="<?= e(__('common.notes')) ?>"><?= e($row['notes'] ?? '') ?></td>
+                <td data-label="<?= e(__('backups.table.size')) ?>" dir="ltr">
                   <?php
                     $bytes = (int) $row['file_size'];
                     echo $bytes >= 1048576
@@ -138,22 +142,22 @@ $lastPage = max(1, (int) ceil($total / $limit));
                         : ($bytes > 0 ? e(number_format($bytes / 1024, 1)) . ' KB' : '-');
                   ?>
                 </td>
-                <td>
+                <td data-label="<?= e(__('backups.table.type')) ?>">
                   <?php
                     $typeClass = $row['type'] === 'pre_restore' ? 'warning' : 'secondary';
                     if ($row['type'] === 'manual') $typeClass = 'primary';
                   ?>
                   <span class="badge text-bg-<?= $typeClass ?>"><?= e(__('backups.type.' . $row['type'])) ?></span>
                 </td>
-                <td>
+                <td data-label="<?= e(__('backups.table.status')) ?>">
                   <?php if ($row['status'] === 'success'): ?>
                     <span class="badge text-bg-success"><?= e(__('backups.status.success')) ?></span>
                   <?php else: ?>
                     <span class="badge text-bg-danger"><?= e(__('backups.status.failed')) ?></span>
                   <?php endif; ?>
                 </td>
-                <td><?= e($row['created_by_name'] ?? '-') ?></td>
-                <td class="text-end">
+                <td data-label="<?= e(__('backups.table.created_by')) ?>"><?= e($row['created_by_name'] ?? '-') ?></td>
+                <td class="text-end" data-label="<?= e(__('common.actions')) ?>">
                   <?php if ($row['status'] === 'success'): ?>
                     <a href="/backups/<?= e((string)$row['id']) ?>/download" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
                       <?= icon('download', 'n-icon-sm') ?>

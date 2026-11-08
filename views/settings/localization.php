@@ -19,11 +19,15 @@ use App\Middleware\CsrfMiddleware;
 
 <?php require __DIR__ . '/_nav.php'; ?>
 
-<div class="card" style="max-width: 480px;">
-  <div class="card-body">
-    <form method="post" action="/settings/localization">
+<div class="n-settings-card">
+  <div class="n-settings-card-head">
+    <h2><?= e(__('settings.tab.localization')) ?></h2>
+    <p><?= e(__('settings.desc.localization')) ?></p>
+  </div>
+  <div class="n-settings-card-body">
+    <form method="post" action="/settings/localization" data-loading-submit>
       <?= CsrfMiddleware::field() ?>
-      <div class="mb-3">
+      <div class="mb-0">
         <label class="form-label" for="default_language"><?= e(__('settings.default_language')) ?></label>
         <select class="form-select" id="default_language" name="default_language" required>
           <option value="ar" <?= $defaultLanguage === 'ar' ? 'selected' : '' ?>><?= e(__('common.language_ar')) ?></option>
@@ -31,12 +35,15 @@ use App\Middleware\CsrfMiddleware;
         </select>
         <div class="form-text"><?= e(__('settings.default_language_help')) ?></div>
       </div>
-      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-        <?= icon('check') ?>
-        <span><?= e(__('common.save')) ?></span>
-      </button>
+      <div class="n-settings-save">
+        <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+          <?= icon('check') ?>
+          <span><?= e(__('common.save')) ?></span>
+        </button>
+      </div>
     </form>
   </div>
 </div>
 
+<?php require __DIR__ . '/_end.php'; ?>
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

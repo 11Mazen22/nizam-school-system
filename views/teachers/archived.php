@@ -23,13 +23,9 @@ use App\Middleware\CsrfMiddleware;
 </div>
 
 <?php if (empty($teachers)): ?>
-  <div class="card">
-    <div class="card-body">
-      <div class="n-empty py-4">
-        <div class="n-empty-icon"><?= icon('archive') ?></div>
-        <p class="mb-0"><?= e(__('common.no_results')) ?></p>
-      </div>
-    </div>
+  <div class="n-empty py-4">
+    <div class="n-empty-icon"><?= icon('archive') ?></div>
+    <p class="mb-0"><?= e(__('common.no_results')) ?></p>
   </div>
 <?php else: ?>
   <div class="card">

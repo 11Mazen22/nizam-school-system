@@ -31,7 +31,7 @@ use App\Middleware\CsrfMiddleware;
 
 <div class="card" style="max-width: 560px;">
   <div class="card-body">
-    <form method="post" action="/assignments">
+    <form method="post" action="/assignments" data-unsaved-guard data-loading-submit>
       <?= CsrfMiddleware::field() ?>
       <div class="mb-3">
         <label class="form-label" for="teacher_id"><?= e(__('assignments.teacher')) ?></label>

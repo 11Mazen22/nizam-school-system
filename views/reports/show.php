@@ -22,6 +22,7 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
       <?= icon('filter', 'n-icon-lg text-body-secondary') ?>
       <?= e($pageTitle) ?>
     </h1>
+    <p><?= e(__('reports.' . $key . '_desc')) ?></p>
   </div>
   <div class="n-page-head-actions">
     <a href="/reports" class="btn btn-outline-secondary d-flex align-items-center gap-2">
@@ -31,8 +32,7 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
   </div>
 </div>
 
-<div class="card mb-3 no-print">
-  <div class="card-body">
+<div class="n-filter-panel no-print">
     <form method="get" action="/reports/<?= e($key) ?>" class="row g-2 align-items-end" id="reportFilterForm">
       <div class="col-auto">
         <label class="form-label" for="f-year"><?= e(__('reports.year')) ?></label>
@@ -122,7 +122,6 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
         </button>
       </div>
     </form>
-  </div>
 </div>
 
 <?php if ($error !== null): ?>
@@ -140,7 +139,7 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
     </div>
   </div>
 <?php else: ?>
-  <div class="d-flex justify-content-end gap-2 mb-2 no-print">
+  <div class="n-report-toolbar no-print">
     <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" data-print-report>
       <?= icon('printer', 'n-icon-sm') ?>
       <span><?= e(__('reports.print')) ?></span>
@@ -159,8 +158,8 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
     <?php endif; ?>
   </div>
 
-  <div id="reportPrintArea">
-    <div class="mb-3">
+  <div id="reportPrintArea" class="n-report-document">
+    <div class="n-report-document-head">
       <h2 class="h5 mb-1"><?= e($report['title']) ?></h2>
       <div class="text-muted small">
         <?= e(__('reports.year')) ?>: <?= e($report['year_label']) ?>
@@ -172,17 +171,13 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
     </div>
 
     <?php if (empty($report['rows'])): ?>
-      <div class="card">
-        <div class="card-body">
-          <div class="n-empty py-4">
-            <div class="n-empty-icon"><?= icon('inbox') ?></div>
-            <p class="mb-0"><?= e(__('reports.no_data')) ?></p>
-          </div>
-        </div>
+      <div class="n-empty border-0 py-4">
+        <div class="n-empty-icon"><?= icon('inbox') ?></div>
+        <p class="mb-0"><?= e(__('reports.no_data')) ?></p>
       </div>
     <?php else: ?>
-      <div class="table-responsive">
-        <table class="table table-sm table-bordered bg-white">
+      <div class="table-responsive n-report-table-wrap">
+        <table class="table table-sm table-bordered">
           <thead>
             <tr>
               <?php foreach ($report['headers'] as $header): ?>

@@ -12,8 +12,14 @@ require dirname(__DIR__) . '/layout/start.php';
       <?= icon('trending-up', 'n-icon-lg text-body-secondary') ?>
       <?= e($pageTitle) ?>
     </h1>
+    <p class="mb-0"><?= e(__('promotion.subtitle')) ?></p>
   </div>
 </div>
+
+<ul class="n-workflow-steps n-workflow-2">
+  <li class="active" aria-current="step"><?= e(__('promotion.step1')) ?></li>
+  <li><?= e(__('promotion.step2')) ?></li>
+</ul>
 
 <?php if ($error !== null): ?>
   <div class="alert alert-danger d-flex align-items-center gap-2">
@@ -22,30 +28,34 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 <?php endif; ?>
 
-<div class="card" style="max-width: 560px;">
-  <div class="card-body">
-    <form method="get" action="/students/promotion">
-      <div class="mb-3">
-        <label class="form-label" for="source"><?= e(__('promotion.source_year')) ?></label>
-        <select class="form-select" id="source" name="source" required>
-          <?php foreach ($years as $year): ?>
-            <option value="<?= (int) $year['id'] ?>"><?= e($year['label']) ?></option>
-          <?php endforeach; ?>
-        </select>
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <form method="get" action="/students/promotion">
+          <div class="mb-3">
+            <label class="form-label" for="source"><?= e(__('promotion.source_year')) ?></label>
+            <select class="form-select" id="source" name="source" required>
+              <?php foreach ($years as $year): ?>
+                <option value="<?= (int) $year['id'] ?>"><?= e($year['label']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="mb-0">
+            <label class="form-label" for="target"><?= e(__('promotion.target_year')) ?></label>
+            <select class="form-select" id="target" name="target" required>
+              <?php foreach ($years as $year): ?>
+                <option value="<?= (int) $year['id'] ?>"><?= e($year['label']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 mt-4 d-flex align-items-center justify-content-center gap-2">
+            <?= icon('arrow-forward', 'n-flip-rtl') ?>
+            <span><?= e(__('promotion.start')) ?></span>
+          </button>
+        </form>
       </div>
-      <div class="mb-3">
-        <label class="form-label" for="target"><?= e(__('promotion.target_year')) ?></label>
-        <select class="form-select" id="target" name="target" required>
-          <?php foreach ($years as $year): ?>
-            <option value="<?= (int) $year['id'] ?>"><?= e($year['label']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-        <?= icon('arrow-forward', 'n-flip-rtl') ?>
-        <span><?= e(__('promotion.start')) ?></span>
-      </button>
-    </form>
+    </div>
   </div>
 </div>
 

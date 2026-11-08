@@ -31,10 +31,6 @@ $schoolName = $school === null
 <body class="n-auth-body">
   <div class="n-auth-shell">
     <aside class="n-auth-side">
-      <div class="n-auth-blob n-auth-blob-1"></div>
-      <div class="n-auth-blob n-auth-blob-2"></div>
-      <div class="n-auth-blob n-auth-blob-3"></div>
-      
       <div class="n-auth-side-top">
         <div class="school-brand-mark school-brand-mark-logo auth-school-mark">
           <img src="/assets/img/hadaba-logo.png" alt="">

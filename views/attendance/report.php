@@ -24,14 +24,15 @@ require dirname(__DIR__) . '/layout/start.php';
       <p class="n-grades-subtitle"><?= e(__('attendance.report_subtitle')) ?></p>
     </div>
     <div class="n-grades-header-actions">
-      <a href="/attendance" class="btn btn-outline-light"><?= icon('check-circle') ?> <?= e(__('attendance.mark_title')) ?></a>
+      <button type="button" class="btn btn-outline-secondary no-print" data-print-report><?= icon('printer') ?> <?= e(__('common.print')) ?></button>
+      <a href="/attendance" class="btn btn-primary"><?= icon('check-circle') ?> <?= e(__('attendance.mark_title')) ?></a>
     </div>
   </div>
 </div>
 
 <!-- Filter -->
-<form method="get" action="/attendance/report" class="card border-0 shadow-sm mb-4">
-  <div class="card-body d-flex flex-wrap gap-3 align-items-end">
+<form method="get" action="/attendance/report" class="n-filter-panel no-print">
+  <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:200px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
       <select name="class_id" class="form-select" onchange="this.form.submit()">
@@ -56,7 +57,7 @@ require dirname(__DIR__) . '/layout/start.php';
 </form>
 
 <?php if ($classId > 0 && !empty($summary)): ?>
-<div class="card border-0 shadow-sm mb-4">
+<div class="card mb-4">
   <div class="card-header bg-white py-3 fw-semibold">
     <?= e($classRow ? (currentLocale() === 'ar' ? $classRow['grade_name_ar'] : $classRow['grade_name_en']) . ' — ' . $classRow['name'] : '') ?>
     <span class="text-muted ms-2"><?= e($from) ?> → <?= e($to) ?></span>
@@ -106,7 +107,7 @@ require dirname(__DIR__) . '/layout/start.php';
 <?php endif; ?>
 
 <?php if (!empty($chronic)): ?>
-<div class="card border-0 shadow-sm border-start border-danger border-4">
+<div class="card n-review-panel">
   <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
     <?= icon('alert-triangle', 'text-danger') ?>
     <span class="fw-semibold text-danger"><?= e(__('attendance.chronic_title')) ?></span>
@@ -144,11 +145,6 @@ require dirname(__DIR__) . '/layout/start.php';
 
 <?php if ($classId === 0 && empty($chronic)): ?>
   <div class="n-empty-powerful">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
     <div class="n-empty-powerful-content">
       <div class="n-empty-powerful-icon">
         <?= icon('chart', 'n-icon-massive') ?>

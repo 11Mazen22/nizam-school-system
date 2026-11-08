@@ -26,35 +26,40 @@ use App\Middleware\CsrfMiddleware;
   </div>
 <?php endif; ?>
 
-<?php if ($cloudStorage): ?>
-  <div class="card" style="max-width: 640px;">
-    <div class="card-body d-flex align-items-center gap-2">
-      <?= icon('database', 'n-icon-lg text-body-secondary flex-shrink-0') ?>
-      <p class="mb-0"><?= e(__('settings.backup_cloud_storage_notice')) ?></p>
-    </div>
+<div class="n-settings-card">
+  <div class="n-settings-card-head">
+    <h2><?= e(__('settings.tab.backup')) ?></h2>
+    <p><?= e(__('settings.desc.backup')) ?></p>
   </div>
-<?php else: ?>
-  <div class="card" style="max-width: 640px;">
-    <div class="card-body">
-      <form method="post" action="/settings/backup">
+  <div class="n-settings-card-body">
+    <?php if ($cloudStorage): ?>
+      <div class="alert alert-info d-flex align-items-center gap-2 mb-0">
+        <?= icon('database', 'n-icon-lg flex-shrink-0') ?>
+        <span><?= e(__('settings.backup_cloud_storage_notice')) ?></span>
+      </div>
+    <?php else: ?>
+      <form method="post" action="/settings/backup" data-unsaved-guard data-loading-submit>
         <?= CsrfMiddleware::field() ?>
-        <div class="mb-3">
+        <div class="mb-0">
           <label class="form-label" for="default_folder"><?= e(__('settings.default_folder')) ?></label>
           <input type="text" class="form-control mono" id="default_folder" name="default_folder" value="<?= e($defaultFolder) ?>" required>
           <div class="form-text"><?= e(__('settings.default_folder_help')) ?></div>
         </div>
-        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-          <?= icon('check') ?>
-          <span><?= e(__('common.save')) ?></span>
-        </button>
+        <div class="n-settings-save">
+          <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+            <?= icon('check') ?>
+            <span><?= e(__('common.save')) ?></span>
+          </button>
+        </div>
       </form>
-    </div>
+    <?php endif; ?>
   </div>
-<?php endif; ?>
+</div>
 
 <p class="text-muted small mt-3">
   <?= e(__('settings.backup_run_hint')) ?>
   <a href="/backups"><?= e(__('backups.title')) ?></a>.
 </p>
 
+<?php require __DIR__ . '/_end.php'; ?>
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

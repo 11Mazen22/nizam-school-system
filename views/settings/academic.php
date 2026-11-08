@@ -26,9 +26,13 @@ use App\Middleware\CsrfMiddleware;
   </div>
 <?php endif; ?>
 
-<div class="card" style="max-width: 600px;">
-  <div class="card-body">
-    <form method="post" action="/settings/academic">
+<div class="n-settings-card">
+  <div class="n-settings-card-head">
+    <h2><?= e(__('settings.tab.academic')) ?></h2>
+    <p><?= e(__('settings.desc.academic')) ?></p>
+  </div>
+  <div class="n-settings-card-body">
+    <form method="post" action="/settings/academic" data-unsaved-guard data-loading-submit>
       <?= CsrfMiddleware::field() ?>
       <div class="mb-3">
         <label class="form-label" for="expected_weekly_capacity"><?= e(__('settings.expected_weekly_capacity')) ?></label>
@@ -40,17 +44,20 @@ use App\Middleware\CsrfMiddleware;
         <input type="text" class="form-control mono" id="student_id_pattern" name="student_id_pattern" value="<?= e($studentIdPattern) ?>" required>
         <div class="form-text"><?= e(__('settings.pattern_help')) ?></div>
       </div>
-      <div class="mb-3">
+      <div class="mb-0">
         <label class="form-label" for="teacher_id_pattern"><?= e(__('settings.teacher_id_pattern')) ?></label>
         <input type="text" class="form-control mono" id="teacher_id_pattern" name="teacher_id_pattern" value="<?= e($teacherIdPattern) ?>" required>
         <div class="form-text"><?= e(__('settings.pattern_help')) ?></div>
       </div>
-      <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
-        <?= icon('check') ?>
-        <span><?= e(__('common.save')) ?></span>
-      </button>
+      <div class="n-settings-save">
+        <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+          <?= icon('check') ?>
+          <span><?= e(__('common.save')) ?></span>
+        </button>
+      </div>
     </form>
   </div>
 </div>
 
+<?php require __DIR__ . '/_end.php'; ?>
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

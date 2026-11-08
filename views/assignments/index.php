@@ -1,278 +1,34 @@
 <?php
-/** @var array $assignments @var bool $hasActiveYear @var array $archivedCount @var array $teachers @var array $subjects @var array $classes */
+/** @var array $assignments @var bool $hasActiveYear @var int $archivedCount @var array $teachers @var array $subjects @var array $classes */
 $pageTitle = __('assignments.title');
 $activeNav = 'assignments';
 $suppressPageTitle = true;
+$canManage = hasPermission('assignments.manage');
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
 <?php if (!$hasActiveYear): ?>
-  <div class="n-empty-powerful" style="min-height: 400px;">
-    <div class="n-empty-powerful-bg">
-      <div class="n-empty-blob n-empty-blob-1"></div>
-      <div class="n-empty-blob n-empty-blob-2"></div>
-      <div class="n-empty-blob n-empty-blob-3"></div>
-    </div>
-    <div class="n-empty-powerful-content">
-      <div class="n-empty-powerful-icon">
-        <?= icon('calendar', 'n-icon-massive') ?>
-      </div>
-      <h2 class="n-empty-powerful-title"><?= e(__('assignments.no_active_year_title')) ?></h2>
-      <p class="n-empty-powerful-description"><?= e(__('assignments.no_active_year')) ?></p>
-      <a href="/academic-years" class="btn btn-primary btn-lg n-btn-powerful">
-        <?= icon('calendar', 'n-icon-lg') ?>
-        <span><?= e(__('academic_years.title')) ?></span>
-      </a>
-    </div>
-  </div>
+  <div class="n-empty-state"><div class="n-empty-icon"><?= icon('calendar') ?></div><h2 class="n-empty-title"><?= e(__('assignments.no_active_year_title')) ?></h2><p class="n-empty-description"><?= e(__('assignments.no_active_year')) ?></p><?php if (hasPermission('academic_years.view')): ?><a href="/academic-years" class="btn btn-primary"><?= icon('calendar') ?><?= e(__('academic_years.title')) ?></a><?php endif; ?></div>
 <?php else: ?>
+  <div class="n-grades-header"><div class="n-grades-header-content"><div class="n-grades-header-text"><h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('clipboard-list', 'n-grades-icon') ?></span><?= e(__('assignments.title')) ?></h1><p class="n-grades-subtitle"><?= e(__('assignments.description')) ?></p></div><div class="n-grades-header-actions"><div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($assignments) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.total_active')) ?></span></div><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count(array_unique(array_column($assignments, 'teacher_id'))) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.teachers_count')) ?></span></div><div class="n-stat-mini"><span class="n-stat-mini-value"><?= array_sum(array_column($assignments, 'weekly_periods')) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.total_periods')) ?></span></div></div><?php if ($canManage): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><?php endif; ?></div></div></div>
 
-<!-- POWERFUL PAGE HEADER -->
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper">
-          <?= icon('clipboard-list', 'n-grades-icon') ?>
-        </div>
-        <?= e(__('assignments.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('assignments.description')) ?></p>
+  <ul class="nav nav-tabs mb-4" role="tablist"><li class="nav-item"><button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button"><?= icon('list') ?><?= e(__('assignments.tab_list')) ?><span class="badge"><?= count($assignments) ?></span></button></li><?php if ($canManage): ?><li class="nav-item"><button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" type="button"><?= icon('plus') ?><?= e(__('assignments.tab_add')) ?></button></li><?php endif; ?><li class="nav-item"><a href="/assignments/workload" class="nav-link"><?= icon('bar-chart') ?><?= e(__('assignments.workload_summary')) ?></a></li><?php if ($archivedCount > 0): ?><li class="nav-item"><a href="/assignments/archived" class="nav-link"><?= icon('archive') ?><?= e(__('common.archived_list')) ?><span class="badge"><?= (int) $archivedCount ?></span></a></li><?php endif; ?></ul>
+
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="list-panel" role="tabpanel">
+      <?php if (empty($assignments)): ?><div class="n-empty-state"><div class="n-empty-icon"><?= icon('clipboard-list') ?></div><h2 class="n-empty-title"><?= e(__('assignments.empty_title')) ?></h2><p class="n-empty-description"><?= e(__('assignments.empty_description')) ?></p><?php if ($canManage): ?><button class="btn btn-primary" type="button" data-tab-switch="add-tab"><?= icon('plus') ?><?= e(__('assignments.add')) ?></button><?php endif; ?></div>
+      <?php else: ?><div class="n-data-panel"><div class="table-responsive"><table class="table table-hover align-middle n-table-stack"><thead><tr><th><?= e(__('assignments.teacher')) ?></th><th><?= e(__('assignments.subject')) ?></th><th><?= e(__('assignments.class')) ?></th><th><?= e(__('assignments.weekly_periods')) ?></th><?php if ($canManage): ?><th class="text-end"><?= e(__('common.actions')) ?></th><?php endif; ?></tr></thead><tbody><?php foreach ($assignments as $assignment): ?><tr>
+        <td data-label="<?= e(__('assignments.teacher')) ?>"><a class="n-person-cell" href="/teachers/<?= (int) $assignment['teacher_id'] ?>"><span class="n-person-avatar n-person-initial"><?= e(mb_substr($assignment['teacher_name'], 0, 1)) ?></span><span><strong><?= e($assignment['teacher_name']) ?></strong><small><?= e(__('teachers.title')) ?></small></span></a></td>
+        <td data-label="<?= e(__('assignments.subject')) ?>"><span class="badge text-bg-primary"><?= e(currentLocale() === 'ar' ? $assignment['subject_name_ar'] : $assignment['subject_name_en']) ?></span></td>
+        <td data-label="<?= e(__('assignments.class')) ?>"><strong><?= e($assignment['class_name']) ?></strong><small class="d-block text-muted"><?= e(currentLocale() === 'ar' ? $assignment['grade_name_ar'] : $assignment['grade_name_en']) ?></small></td>
+        <td data-label="<?= e(__('assignments.weekly_periods')) ?>"><?php if ($canManage): ?><form method="post" action="/assignments/<?= (int) $assignment['id'] ?>" class="n-inline-edit"><?= CsrfMiddleware::field() ?><label class="visually-hidden" for="periods-<?= (int) $assignment['id'] ?>"><?= e(__('assignments.weekly_periods')) ?></label><input id="periods-<?= (int) $assignment['id'] ?>" type="number" name="weekly_periods" value="<?= (int) $assignment['weekly_periods'] ?>" min="1" max="30" class="form-control form-control-sm"><button class="btn btn-sm btn-ghost" type="submit" aria-label="<?= e(__('common.save')) ?>"><?= icon('check') ?></button></form><?php else: ?><span class="n-order-chip"><?= (int) $assignment['weekly_periods'] ?></span><?php endif; ?></td>
+        <?php if ($canManage): ?><td data-label="<?= e(__('common.actions')) ?>"><div class="n-table-actions"><form method="post" action="/assignments/<?= (int) $assignment['id'] ?>/archive" data-confirm="<?= e(__('assignments.confirm_archive')) ?>"><?= CsrfMiddleware::field() ?><button class="btn btn-sm btn-ghost text-danger" type="submit"><?= icon('archive') ?><?= e(__('common.archive')) ?></button></form></div></td><?php endif; ?>
+      </tr><?php endforeach; ?></tbody></table></div></div><?php endif; ?>
     </div>
-    <div class="n-grades-header-actions">
-      <div class="n-grades-stats-mini">
-        <div class="n-stat-mini">
-          <span class="n-stat-mini-value"><?= count($assignments) ?></span>
-          <span class="n-stat-mini-label"><?= e(__('assignments.total_active')) ?></span>
-        </div>
-        <div class="n-stat-mini">
-          <span class="n-stat-mini-value"><?= count(array_unique(array_column($assignments, 'teacher_id'))) ?></span>
-          <span class="n-stat-mini-label"><?= e(__('assignments.teachers_count')) ?></span>
-        </div>
-        <div class="n-stat-mini">
-          <span class="n-stat-mini-value"><?= array_sum(array_column($assignments, 'weekly_periods')) ?></span>
-          <span class="n-stat-mini-label"><?= e(__('assignments.total_periods')) ?></span>
-        </div>
-      </div>
-      <button type="button" class="btn btn-outline-light d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
-        <?= icon("upload") ?>
-        <span><?= e(__("app.import")) ?></span>
-      </button>
-    </div>
+
+    <?php if ($canManage): ?><div class="tab-pane fade" id="add-panel" role="tabpanel"><div class="n-form-card-powerful"><div class="n-form-card-header"><span class="n-form-card-icon"><?= icon('plus') ?></span><div><h2 class="n-form-card-title"><?= e(__('assignments.tab_add')) ?></h2><p class="n-form-card-subtitle"><?= e(__('assignments.form_add_subtitle')) ?></p></div></div><form method="post" action="/assignments" class="n-form-powerful" data-unsaved-guard data-loading-submit><?= CsrfMiddleware::field() ?><div class="row g-3"><div class="col-md-6"><label class="form-label" for="teacher_id_new"><?= e(__('assignments.teacher')) ?></label><select class="form-select" id="teacher_id_new" name="teacher_id" required><?php foreach ($teachers as $teacher): ?><option value="<?= (int) $teacher['id'] ?>"><?= e($teacher['full_name']) ?></option><?php endforeach; ?></select></div><div class="col-md-6"><label class="form-label" for="subject_id_new"><?= e(__('assignments.subject')) ?></label><select class="form-select" id="subject_id_new" name="subject_id" required><?php foreach ($subjects as $subject): ?><option value="<?= (int) $subject['id'] ?>"><?= e(currentLocale() === 'ar' ? $subject['name_ar'] : $subject['name_en']) ?></option><?php endforeach; ?></select></div><div class="col-md-8"><label class="form-label" for="class_id_new"><?= e(__('assignments.class')) ?></label><select class="form-select" id="class_id_new" name="class_id" required><?php foreach ($classes as $class): ?><option value="<?= (int) $class['id'] ?>"><?= e(currentLocale() === 'ar' ? $class['grade_name_ar'] : $class['grade_name_en']) ?> · <?= e($class['name']) ?></option><?php endforeach; ?></select></div><div class="col-md-4"><label class="form-label" for="weekly_periods_new"><?= e(__('assignments.weekly_periods')) ?></label><input type="number" class="form-control" id="weekly_periods_new" name="weekly_periods" min="1" max="30" value="5" required></div></div><div class="n-form-actions"><button class="btn btn-secondary" type="button" data-tab-switch="list-tab"><?= e(__('common.cancel')) ?></button><button class="btn btn-primary" type="submit"><?= icon('check') ?><?= e(__('common.save')) ?></button></div></form></div></div><?php endif; ?>
   </div>
-</div>
-
-<!-- TABS NAVIGATION -->
-<ul class="nav nav-tabs n-tabs-powerful mb-4" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button" role="tab">
-      <?= icon('list', 'n-icon-sm') ?>
-      <span><?= e(__('assignments.tab_list')) ?></span>
-      <span class="badge"><?= count($assignments) ?></span>
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" type="button" role="tab">
-      <?= icon('plus', 'n-icon-sm') ?>
-      <span><?= e(__('assignments.tab_add')) ?></span>
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a href="/assignments/workload" class="nav-link">
-      <?= icon('chart', 'n-icon-sm') ?>
-      <span><?= e(__('assignments.workload_summary')) ?></span>
-    </a>
-  </li>
-  <?php if ($archivedCount > 0): ?>
-  <li class="nav-item" role="presentation">
-    <a href="/assignments/archived" class="nav-link">
-      <?= icon('archive', 'n-icon-sm') ?>
-      <span><?= e(__('common.archived_list')) ?></span>
-      <span class="badge"><?= $archivedCount ?></span>
-    </a>
-  </li>
-  <?php endif; ?>
-</ul>
-
-<!-- TAB CONTENT -->
-<div class="tab-content">
-  
-  <!-- LIST TAB -->
-  <div class="tab-pane fade show active" id="list-panel" role="tabpanel">
-    <?php if (empty($assignments)): ?>
-      <!-- EMPTY STATE -->
-      <div class="n-empty-powerful">
-        <div class="n-empty-powerful-bg">
-          <div class="n-empty-blob n-empty-blob-1"></div>
-          <div class="n-empty-blob n-empty-blob-2"></div>
-          <div class="n-empty-blob n-empty-blob-3"></div>
-        </div>
-        <div class="n-empty-powerful-content">
-          <div class="n-empty-powerful-icon">
-            <?= icon('clipboard-list', 'n-icon-massive') ?>
-          </div>
-          <h2 class="n-empty-powerful-title"><?= e(__('assignments.empty_title')) ?></h2>
-          <p class="n-empty-powerful-description"><?= e(__('assignments.empty_description')) ?></p>
-          <button type="button" class="btn btn-primary btn-lg n-btn-powerful" data-tab-switch="add-tab">
-            <?= icon('plus', 'n-icon-lg') ?>
-            <span><?= e(__('assignments.add')) ?></span>
-          </button>
-        </div>
-      </div>
-    <?php else: ?>
-      <!-- ASSIGNMENTS GRID -->
-      <div class="n-grades-grid">
-        <?php foreach ($assignments as $index => $a): ?>
-          <div class="n-grade-card" 
-               style="--card-index: <?= $index ?>;" 
-               data-assignment-id="<?= (int)$a['id'] ?>">
-            
-            <!-- Card Header -->
-            <div class="n-grade-card-header">
-              <div class="n-avatar" style="width: 40px; height: 40px;">
-                <?= e(mb_substr($a['teacher_name'], 0, 1)) ?>
-              </div>
-              <div class="n-grade-status">
-                <span class="badge text-bg-primary">
-                  <?= e(currentLocale() === 'ar' ? $a['subject_name_ar'] : $a['subject_name_en']) ?>
-                </span>
-              </div>
-            </div>
-
-            <!-- Card Body -->
-            <div class="n-grade-card-body">
-              <div class="n-grade-names">
-                <h3 class="n-grade-name-en"><?= e($a['teacher_name']) ?></h3>
-                <p class="n-grade-name-ar">
-                  <?= e(currentLocale() === 'ar' ? $a['grade_name_ar'] : $a['grade_name_en']) ?> - <?= e($a['class_name']) ?>
-                </p>
-              </div>
-              
-              <!-- Inline periods editor -->
-              <form method="post" action="/assignments/<?= (int)$a['id'] ?>" class="mt-3">
-                <?= CsrfMiddleware::field() ?>
-                <div class="d-flex align-items-center gap-2">
-                  <label class="form-label mb-0 small text-muted"><?= e(__('assignments.weekly_periods')) ?>:</label>
-                  <input type="number" name="weekly_periods" value="<?= (int)$a['weekly_periods'] ?>" 
-                         min="1" max="30" class="form-control form-control-sm" style="width: 70px;">
-                  <button type="submit" class="btn btn-sm btn-outline-primary" title="<?= e(__('common.save')) ?>">
-                    <?= icon('check', 'n-icon-sm') ?>
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <!-- Card Footer -->
-            <div class="n-grade-card-footer">
-              <form method="post" action="/assignments/<?= (int)$a['id'] ?>/archive" class="w-100" 
-                    data-confirm="<?= e(__('assignments.confirm_archive')) ?>">
-                <?= CsrfMiddleware::field() ?>
-                <button type="submit" class="btn btn-sm btn-outline-danger n-btn-card w-100">
-                  <?= icon('archive', 'n-icon-sm') ?>
-                  <span><?= e(__('common.archive')) ?></span>
-                </button>
-              </form>
-            </div>
-
-            <!-- Decorative gradient -->
-            <div class="n-grade-card-gradient"></div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
-  </div>
-  
-  <!-- ADD NEW TAB -->
-  <div class="tab-pane fade" id="add-panel" role="tabpanel">
-    <div class="n-form-card-powerful">
-      <div class="n-form-card-header">
-        <div class="n-form-card-icon">
-          <?= icon('plus', 'n-icon-lg') ?>
-        </div>
-        <div>
-          <h2 class="n-form-card-title"><?= e(__('assignments.tab_add')) ?></h2>
-          <p class="n-form-card-subtitle"><?= e(__('assignments.form_add_subtitle')) ?></p>
-        </div>
-      </div>
-      
-      <form method="post" action="/assignments" class="n-form-powerful">
-        <?= CsrfMiddleware::field() ?>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="teacher_id_new">
-            <span><?= e(__('assignments.teacher')) ?></span>
-          </label>
-          <select class="form-select n-input-powerful" id="teacher_id_new" name="teacher_id" required>
-            <?php foreach ($teachers as $teacher): ?>
-              <option value="<?= (int)$teacher['id'] ?>"><?= e($teacher['full_name']) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="subject_id_new">
-            <span><?= e(__('assignments.subject')) ?></span>
-          </label>
-          <select class="form-select n-input-powerful" id="subject_id_new" name="subject_id" required>
-            <?php foreach ($subjects as $subject): ?>
-              <option value="<?= (int)$subject['id'] ?>">
-                <?= e(currentLocale() === 'ar' ? $subject['name_ar'] : $subject['name_en']) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="class_id_new">
-            <span><?= e(__('assignments.class')) ?></span>
-          </label>
-          <select class="form-select n-input-powerful" id="class_id_new" name="class_id" required>
-            <?php foreach ($classes as $class): ?>
-              <option value="<?= (int)$class['id'] ?>">
-                <?= e(currentLocale() === 'ar' ? $class['grade_name_ar'] : $class['grade_name_en']) ?> - <?= e($class['name']) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        
-        <div class="n-form-group-powerful">
-          <label class="n-label-powerful" for="weekly_periods_new">
-            <span><?= e(__('assignments.weekly_periods')) ?></span>
-          </label>
-          <input type="number" class="form-control n-input-powerful" 
-                 id="weekly_periods_new" 
-                 name="weekly_periods" 
-                 min="1" 
-                 max="30"
-                 value="5"
-                 required>
-        </div>
-        
-        <div class="n-form-actions">
-          <button type="button" class="btn btn-secondary n-btn-powerful-secondary" data-tab-switch="list-tab">
-            <?= icon('close') ?>
-            <span><?= e(__('common.cancel')) ?></span>
-          </button>
-          <button type="submit" class="btn btn-primary n-btn-powerful">
-            <?= icon('check') ?>
-            <span><?= e(__('common.save')) ?></span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-</div>
-
 <?php endif; ?>
 
-<?php
-ob_start();
-$title = __("app.import");
-$action = "/import/assignments";
-$templateUrl = "/import/assignments/template";
-require dirname(__DIR__) . "/partials/import_modal.php";
-$pageModals = ob_get_clean();
-require dirname(__DIR__) . '/layout/end.php';
-?>
+<?php if ($canManage) { ob_start(); $title = __('app.import') . ' — ' . __('assignments.title'); $action = '/import/assignments'; $templateUrl = '/import/assignments/template'; require dirname(__DIR__) . '/partials/import_modal.php'; $pageModals = ob_get_clean(); } require dirname(__DIR__) . '/layout/end.php'; ?>
