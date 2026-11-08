@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Middleware\AcademicYearContext;
 use App\Repositories\ActivityLogRepository;
+use App\Repositories\ClassRepository;
 use App\Repositories\DashboardRepository;
 
 /**
@@ -35,6 +36,7 @@ final class DashboardStatsService
                 'students' => 0, 'teachers' => 0, 'classes' => 0, 'subjects' => 0, 'grades' => 0,
                 'religion' => ['muslim' => 0, 'christian' => 0, 'other' => 0],
                 'activity' => [],
+                'attendance' => null, 'pendingAttendance' => [], 'capacity' => [],
             ];
         }
 
@@ -52,6 +54,11 @@ final class DashboardStatsService
             'grades' => $this->repository->totalActiveGrades(),
             'religion' => $this->repository->religionBreakdown($yearId),
             'activity' => $this->activityLog->paginate(10, 0, $onlyUserId),
+            // Gated here, not hidden in the view: a role without the permission
+            // never has this data in the rendered page at all.
+            'attendance' => hasPermission('attendance.view') ? $this->repository->attendanceForDate($yearId, date('Y-m-d')) : null,
+            'pendingAttendance' => hasPermission('attendance.view') ? $this->repository->classesWithoutAttendance($yearId, date('Y-m-d')) : [],
+            'capacity' => hasPermission('classes.view') ? (new ClassRepository())->densityForYear($yearId, null) : [],
         ];
     }
 }

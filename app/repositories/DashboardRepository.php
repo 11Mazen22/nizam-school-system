@@ -57,6 +57,50 @@ final class DashboardRepository
             ->fetchColumn();
     }
 
+    /**
+     * Today's attendance tally for the year, one GROUP BY (A§O-24).
+     *
+     * @return array{present:int, absent:int, late:int, excused:int, total:int}
+     */
+    public function attendanceForDate(int $academicYearId, string $date): array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT status, COUNT(*) AS c FROM attendance_records
+             WHERE academic_year_id = :year AND record_date = :d GROUP BY status'
+        );
+        $stmt->execute(['year' => $academicYearId, 'd' => $date]);
+        $out = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0, 'total' => 0];
+        foreach ($stmt->fetchAll() as $row) {
+            if (isset($out[$row['status']])) {
+                $out[$row['status']] = (int) $row['c'];
+                $out['total'] += (int) $row['c'];
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Active classes that have enrolled students but no attendance rows on
+     * the given date -- the real "attendance not yet taken" signal.
+     *
+     * @return array<int, array{class_id:int, class_name:string, grade_name_en:string, grade_name_ar:string}>
+     */
+    public function classesWithoutAttendance(int $academicYearId, string $date): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT c.id AS class_id, c.name AS class_name,
+                    g.name_en AS grade_name_en, g.name_ar AS grade_name_ar
+             FROM classes c
+             JOIN grades g ON g.id = c.grade_id
+             WHERE c.academic_year_id = :year AND c.is_active = 1
+               AND EXISTS (SELECT 1 FROM student_enrollments e WHERE e.class_id = c.id AND e.status = 'active')
+               AND NOT EXISTS (SELECT 1 FROM attendance_records a WHERE a.class_id = c.id AND a.record_date = :d)
+             ORDER BY g.sort_order ASC, c.name ASC"
+        );
+        $stmt->execute(['year' => $academicYearId, 'd' => $date]);
+        return $stmt->fetchAll();
+    }
+
     /** @return array<string, int> e.g. ['muslim' => 12, 'christian' => 3, 'other' => 1] */
     public function religionBreakdown(int $academicYearId): array
     {

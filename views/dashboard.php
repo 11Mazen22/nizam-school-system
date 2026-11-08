@@ -58,6 +58,101 @@ $yearLabel = \App\Middleware\AcademicYearContext::label();
     </div>
   </section>
 
+  <?php
+  $att = $stats['attendance'];
+  $pending = $stats['pendingAttendance'];
+  $capacityRows = $stats['capacity'];
+  $overCapacity = array_values(array_filter($capacityRows, static fn (array $r): bool => $r['capacity'] !== null && $r['enrolled'] > $r['capacity']));
+  $className = static fn (array $r): string => (currentLocale() === 'ar' ? $r['grade_name_ar'] : $r['grade_name_en']) . ' — ' . $r['class_name'];
+  $attRate = $att !== null && $att['total'] > 0 ? (int) round((($att['present'] + $att['late']) / $att['total']) * 100) : null;
+  $showOps = $att !== null || $capacityRows !== [] || hasPermission('classes.view');
+  ?>
+  <?php if ($showOps): ?>
+    <div class="row g-3 mb-3 n-reveal-group">
+      <?php if ($att !== null): ?>
+        <div class="col-xl-5">
+          <section class="card h-100" aria-labelledby="attendance-today-title">
+            <div class="card-header"><span><?= icon('check-circle') ?></span><span id="attendance-today-title"><?= e(__('dashboard.attendance_today')) ?></span></div>
+            <div class="card-body">
+              <?php if ($att['total'] === 0): ?>
+                <div class="n-empty border-0 py-3">
+                  <div class="n-empty-icon"><?= icon('check-circle') ?></div>
+                  <p class="mb-1"><strong><?= e(__('dashboard.attendance_none')) ?></strong></p>
+                  <p class="text-muted small"><?= e(__('dashboard.attendance_none_hint')) ?></p>
+                  <?php if (hasPermission('attendance.manage')): ?><a class="btn btn-sm btn-primary" href="/attendance"><?= e(__('dashboard.attendance_open')) ?></a><?php endif; ?>
+                </div>
+              <?php else: ?>
+                <div class="n-att-rate">
+                  <span class="n-att-rate-value" dir="ltr"><?= (int) $attRate ?>%</span>
+                  <span class="n-att-rate-label"><?= e(__('dashboard.attendance_rate')) ?><small><?= e(__('dashboard.attendance_rate_note')) ?></small></span>
+                </div>
+                <div class="n-att-bar" role="img" aria-label="<?= e(__('dashboard.attendance_today')) ?>">
+                  <?php foreach (['present', 'late', 'excused', 'absent'] as $st): if ($att[$st] > 0): ?>
+                    <span class="n-att-seg n-att-<?= $st ?>" style="flex-grow: <?= (int) $att[$st] ?>"></span>
+                  <?php endif; endforeach; ?>
+                </div>
+                <ul class="n-att-legend">
+                  <?php foreach (['present', 'late', 'excused', 'absent'] as $st): ?>
+                    <li><i class="n-att-dot n-att-<?= $st ?>" aria-hidden="true"></i><span><?= e(__('attendance.status_' . $st)) ?></span><strong dir="ltr"><?= (int) $att[$st] ?></strong></li>
+                  <?php endforeach; ?>
+                </ul>
+              <?php endif; ?>
+            </div>
+          </section>
+        </div>
+        <div class="col-xl-7">
+          <section class="card h-100" aria-labelledby="attention-title">
+            <div class="card-header"><?= icon('alert-triangle') ?><span id="attention-title"><?= e(__('dashboard.attention_title')) ?></span><?php $attentionCount = count($pending) + count($overCapacity); if ($attentionCount > 0): ?><span class="badge text-bg-warning ms-auto"><?= $attentionCount ?></span><?php endif; ?></div>
+            <?php if ($attentionCount === 0): ?>
+              <div class="card-body"><div class="d-flex align-items-start gap-2 text-muted small"><?= icon('check-circle', 'text-success flex-shrink-0') ?><span><?= e(__('dashboard.attention_empty')) ?></span></div></div>
+            <?php else: ?>
+              <ul class="n-attention-list">
+                <?php foreach ($pending as $row): ?>
+                  <li>
+                    <span class="n-attention-tag"><?= icon('clock') ?><?= e(__('dashboard.attention_pending')) ?></span>
+                    <strong><?= e($className($row)) ?></strong>
+                    <?php if (hasPermission('attendance.manage')): ?><a class="ms-auto small" href="/attendance?class_id=<?= (int) $row['class_id'] ?>"><?= e(__('dashboard.attendance_open')) ?></a><?php endif; ?>
+                  </li>
+                <?php endforeach; ?>
+                <?php foreach ($overCapacity as $row): ?>
+                  <li>
+                    <span class="n-attention-tag n-attention-tag-danger"><?= icon('alert-triangle') ?><?= e(__('dashboard.attention_over')) ?></span>
+                    <strong><?= e($className($row)) ?></strong>
+                    <span class="ms-auto small text-muted" dir="ltr"><?= (int) $row['enrolled'] ?> / <?= (int) $row['capacity'] ?></span>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            <?php endif; ?>
+          </section>
+        </div>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if (hasPermission('classes.view')): ?>
+    <section class="card mb-3 n-reveal" aria-labelledby="capacity-title">
+      <div class="card-header"><span><?= icon('chalkboard') ?></span><span id="capacity-title"><?= e(__('dashboard.capacity_title')) ?></span></div>
+      <?php if ($capacityRows === []): ?>
+        <div class="card-body"><div class="n-empty border-0 py-3"><div class="n-empty-icon"><?= icon('chalkboard') ?></div><p><?= e(__('dashboard.capacity_empty')) ?></p></div></div>
+      <?php else: ?>
+        <ul class="n-capacity-grid">
+          <?php foreach ($capacityRows as $row):
+            $pct = $row['capacity'] !== null && $row['capacity'] > 0 ? min(100, (int) round($row['enrolled'] / $row['capacity'] * 100)) : null;
+            $state = $pct === null ? 'unset' : ($row['enrolled'] > $row['capacity'] ? 'over' : ($pct >= 90 ? 'near' : 'ok')); ?>
+            <li class="n-capacity-item n-capacity-<?= $state ?>">
+              <div class="n-capacity-name"><?= e($className($row)) ?></div>
+              <div class="n-capacity-track" aria-hidden="true"><span style="width: <?= (int) ($pct ?? 0) ?>%"></span></div>
+              <div class="n-capacity-meta" dir="ltr">
+                <span><?= (int) $row['enrolled'] ?><?= $row['capacity'] !== null ? ' / ' . (int) $row['capacity'] : '' ?></span>
+                <?php if ($state === 'unset'): ?><em><?= e(__('dashboard.capacity_unset')) ?></em><?php elseif ($state === 'over'): ?><em><?= e(__('dashboard.attention_over')) ?></em><?php endif; ?>
+              </div>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    </section>
+  <?php endif; ?>
+
   <div class="row g-3 mb-3 n-reveal-group">
     <div class="col-xl-8">
       <section class="card h-100" aria-labelledby="distribution-title">
