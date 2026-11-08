@@ -150,21 +150,162 @@
   function initSidebar() {
     var shell = document.getElementById('nizamShell');
     var toggle = document.getElementById('sidebarToggle');
-    if (!shell || !toggle) return;
+    var collapseBtn = document.getElementById('sidebarCollapseBtn');
+    if (!shell) return;
 
     var collapsed = localStorage.getItem('nizam_sidebar_collapsed') === '1';
     setCollapsed(collapsed);
 
-    toggle.addEventListener('click', function () {
-      collapsed = !shell.classList.contains('n-sidebar-collapsed');
-      setCollapsed(collapsed);
-      localStorage.setItem('nizam_sidebar_collapsed', collapsed ? '1' : '0');
-    });
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        collapsed = !shell.classList.contains('n-sidebar-collapsed');
+        setCollapsed(collapsed);
+        localStorage.setItem('nizam_sidebar_collapsed', collapsed ? '1' : '0');
+      });
+    }
+
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', function () {
+        collapsed = !shell.classList.contains('n-sidebar-collapsed');
+        setCollapsed(collapsed);
+        localStorage.setItem('nizam_sidebar_collapsed', collapsed ? '1' : '0');
+      });
+    }
 
     function setCollapsed(value) {
       shell.classList.toggle('n-sidebar-collapsed', value);
-      toggle.setAttribute('aria-expanded', value ? 'false' : 'true');
-      toggle.setAttribute('aria-label', value ? toggle.dataset.labelExpand : toggle.dataset.labelCollapse);
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', value ? 'false' : 'true');
+        toggle.setAttribute('aria-label', value ? toggle.dataset.labelExpand : toggle.dataset.labelCollapse);
+      }
+      if (collapseBtn) {
+        collapseBtn.setAttribute('aria-expanded', value ? 'false' : 'true');
+      }
+    }
+
+    // Group Accordions with persistence
+    var savedGroups = [];
+    try {
+      savedGroups = JSON.parse(localStorage.getItem('nizam_collapsed_groups') || '[]');
+    } catch (e) {
+      savedGroups = [];
+    }
+
+    var navGroups = document.querySelectorAll('.n-nav-group');
+    navGroups.forEach(function (groupEl) {
+      var groupKey = groupEl.getAttribute('data-group');
+      var headerBtn = groupEl.querySelector('.n-nav-group-header');
+      var hasActive = groupEl.classList.contains('n-group-has-active');
+
+      if (!hasActive && groupKey && savedGroups.indexOf(groupKey) !== -1) {
+        groupEl.classList.add('is-collapsed');
+        if (headerBtn) {
+          headerBtn.setAttribute('aria-expanded', 'false');
+          if (headerBtn.dataset.labelExpand) {
+            headerBtn.setAttribute('aria-label', headerBtn.dataset.labelExpand);
+          }
+        }
+      }
+
+      if (headerBtn) {
+        headerBtn.addEventListener('click', function () {
+          var isCollapsed = groupEl.classList.toggle('is-collapsed');
+          headerBtn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+          var label = isCollapsed ? headerBtn.dataset.labelExpand : headerBtn.dataset.labelCollapse;
+          if (label) headerBtn.setAttribute('aria-label', label);
+
+          if (groupKey) {
+            var idx = savedGroups.indexOf(groupKey);
+            if (isCollapsed && idx === -1) {
+              savedGroups.push(groupKey);
+            } else if (!isCollapsed && idx !== -1) {
+              savedGroups.splice(idx, 1);
+            }
+            try {
+              localStorage.setItem('nizam_collapsed_groups', JSON.stringify(savedGroups));
+            } catch (e) {}
+          }
+        });
+      }
+    });
+
+    // Real-time navigation filter
+    var filterInput = document.getElementById('sidebarNavFilter');
+    var filterClear = document.getElementById('sidebarFilterClear');
+    var filterEmpty = document.getElementById('sidebarFilterEmpty');
+    var sidebarNav = document.getElementById('sidebarNavScroll');
+
+    if (filterInput && sidebarNav) {
+      filterInput.addEventListener('input', applyFilter);
+
+      if (filterClear) {
+        filterClear.addEventListener('click', function () {
+          filterInput.value = '';
+          applyFilter();
+          filterInput.focus();
+        });
+      }
+
+      filterInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          filterInput.value = '';
+          applyFilter();
+          filterInput.blur();
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          var activeTag = (document.activeElement && document.activeElement.tagName) || '';
+          if (activeTag !== 'INPUT' && activeTag !== 'TEXTAREA' && !document.activeElement.isContentEditable) {
+            e.preventDefault();
+            filterInput.focus();
+            filterInput.select();
+          }
+        }
+      });
+    }
+
+    function applyFilter() {
+      var query = filterInput.value.trim().toLowerCase();
+      if (filterClear) filterClear.hidden = query === '';
+
+      var totalVisible = 0;
+      navGroups.forEach(function (groupEl) {
+        var groupKey = groupEl.getAttribute('data-group');
+        var links = groupEl.querySelectorAll('.nav-link');
+        var groupMatches = 0;
+
+        links.forEach(function (link) {
+          var searchTxt = link.getAttribute('data-nav-search') || link.textContent.trim().toLowerCase();
+          var item = link.closest('.nav-item');
+          if (query === '' || searchTxt.indexOf(query) !== -1) {
+            if (item) item.style.display = '';
+            groupMatches++;
+          } else {
+            if (item) item.style.display = 'none';
+          }
+        });
+
+        if (query === '') {
+          groupEl.style.display = '';
+          var wasCollapsed = savedGroups.indexOf(groupKey) !== -1 && !groupEl.classList.contains('n-group-has-active');
+          groupEl.classList.toggle('is-collapsed', wasCollapsed);
+          var hBtn = groupEl.querySelector('.n-nav-group-header');
+          if (hBtn) hBtn.setAttribute('aria-expanded', wasCollapsed ? 'false' : 'true');
+        } else if (groupMatches > 0) {
+          groupEl.style.display = '';
+          groupEl.classList.remove('is-collapsed');
+          totalVisible += groupMatches;
+        } else {
+          groupEl.style.display = 'none';
+        }
+      });
+
+      if (filterEmpty) {
+        filterEmpty.hidden = query === '' || totalVisible > 0;
+      }
     }
   }
 

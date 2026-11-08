@@ -67,18 +67,39 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
         if (empty($groups[$groupKey])) {
             continue;
         }
+        $hasActive = false;
+        foreach ($groups[$groupKey] as $it) {
+            if ($active === $it['key']) {
+                $hasActive = true;
+                break;
+            }
+        }
+        $itemCount = count($groups[$groupKey]);
         ?>
-        <div class="n-nav-group">
-          <div class="n-nav-label"><?= e(__($groupLabel)) ?></div>
-          <ul class="nav flex-column">
+        <div class="n-nav-group<?= $hasActive ? ' n-group-has-active' : '' ?>" data-group="<?= e($groupKey) ?>">
+          <button type="button" class="n-nav-group-header" aria-expanded="true"
+                  aria-label="<?= e(__('shell.collapse_group')) ?>"
+                  data-label-collapse="<?= e(__('shell.collapse_group')) ?>"
+                  data-label-expand="<?= e(__('shell.expand_group')) ?>">
+            <span class="n-nav-group-title"><?= e(__($groupLabel)) ?></span>
+            <span class="n-nav-group-meta">
+              <span class="n-nav-group-count" aria-hidden="true"><?= $itemCount ?></span>
+              <span class="n-nav-group-chevron" aria-hidden="true"><?= icon('chevron-down') ?></span>
+            </span>
+          </button>
+          <ul class="nav flex-column n-nav-group-list">
             <?php foreach ($groups[$groupKey] as $item): ?>
               <li class="nav-item">
                 <a class="nav-link<?= $active === $item['key'] ? ' active' : '' ?>"
                    href="<?= e($item['href']) ?>"
                    title="<?= e(__($item['label'])) ?>"
+                   data-nav-search="<?= e(mb_strtolower(__($item['label']))) ?>"
                    <?= $active === $item['key'] ? 'aria-current="page"' : '' ?>>
                   <span class="n-nav-icon"><?= icon($item['icon']) ?></span>
                   <span class="n-nav-text"><?= e(__($item['label'])) ?></span>
+                  <?php if ($active === $item['key']): ?>
+                    <span class="n-nav-active-pip" aria-hidden="true"></span>
+                  <?php endif; ?>
                 </a>
               </li>
             <?php endforeach; ?>
@@ -111,26 +132,74 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 
 <div class="nizam-shell" id="nizamShell">
   <aside class="nizam-sidebar d-none d-lg-flex" id="nizamSidebar" aria-label="<?= e(__('nav.menu')) ?>">
-    <a class="nizam-brand" href="/dashboard" aria-label="<?= e($schoolName) ?>">
-      <span class="school-brand-mark school-brand-mark-logo"><img src="<?= e($logoUrl) ?>" alt=""></span>
-      <span class="nizam-brand-copy">
-        <span class="nizam-brand-name"><?= e($schoolName) ?></span>
-        <span class="nizam-brand-product">Nizam</span>
-      </span>
-    </a>
+    <div class="n-sidebar-brand-box">
+      <a class="nizam-brand" href="/dashboard" aria-label="<?= e($schoolName) ?>">
+        <span class="school-brand-mark school-brand-mark-logo"><img src="<?= e($logoUrl) ?>" alt=""></span>
+        <span class="nizam-brand-copy">
+          <span class="nizam-brand-name"><?= e($schoolName) ?></span>
+          <span class="nizam-brand-product">Nizam</span>
+        </span>
+      </a>
+      <button class="btn btn-icon btn-ghost n-sidebar-collapse-btn" type="button"
+              id="sidebarCollapseBtn" aria-controls="nizamSidebar" aria-expanded="true"
+              aria-label="<?= e(__('shell.collapse_sidebar')) ?>"
+              title="<?= e(__('shell.collapse_sidebar')) ?>">
+        <?= icon('chevron-left', 'n-flip-rtl') ?>
+      </button>
+    </div>
 
-    <nav class="n-sidebar-nav">
+    <?php if (AcademicYearContext::activeYearId() !== null): ?>
+      <div class="n-sidebar-session-bar" title="<?= e(__('shell.active_session')) ?>">
+        <span class="n-session-badge">
+          <span class="n-pulse-dot" aria-hidden="true"></span>
+          <span class="n-session-status"><?= e(__('shell.live')) ?></span>
+        </span>
+        <span class="n-session-label" dir="ltr"><?= e(AcademicYearContext::label() ?? '') ?></span>
+      </div>
+    <?php endif; ?>
+
+    <div class="n-sidebar-search-box">
+      <div class="n-sidebar-search">
+        <span class="n-search-icon" aria-hidden="true"><?= icon('search') ?></span>
+        <input type="search" id="sidebarNavFilter" class="n-filter-input"
+               placeholder="<?= e(__('shell.filter_menu')) ?>"
+               aria-label="<?= e(__('shell.filter_menu')) ?>" autocomplete="off" spellcheck="false">
+        <kbd class="n-filter-kbd" aria-hidden="true">/</kbd>
+        <button type="button" class="n-filter-clear" id="sidebarFilterClear" aria-label="<?= e(__('common.close')) ?>" hidden>
+          <?= icon('x') ?>
+        </button>
+      </div>
+    </div>
+
+    <nav class="n-sidebar-nav" id="sidebarNavScroll">
+      <div class="n-sidebar-empty-filter" id="sidebarFilterEmpty" hidden>
+        <?= icon('search', 'n-icon-lg') ?>
+        <span><?= e(__('shell.command_empty')) ?></span>
+      </div>
       <?php $renderNavGroups($visibleNavGroups, $navGroups, $activeNav ?? ''); ?>
     </nav>
 
-    <div class="n-sidebar-footer">
-      <?php if (AcademicYearContext::activeYearId() !== null): ?>
-        <div class="n-sidebar-year" title="<?= e(__('shell.current_year')) ?>">
-          <?= icon('calendar') ?>
-          <span class="n-nav-text"><?= e(AcademicYearContext::label() ?? '') ?></span>
-        </div>
-      <?php endif; ?>
-      <span class="n-sidebar-version n-nav-text">Nizam 1.0</span>
+    <div class="n-sidebar-user-card">
+      <div class="n-user-avatar-badge" aria-hidden="true">
+        <?= e(mb_substr($_SESSION['full_name'] ?? '?', 0, 1)) ?>
+      </div>
+      <div class="n-user-card-info">
+        <span class="n-user-card-name"><?= e($_SESSION['full_name'] ?? '') ?></span>
+        <span class="n-user-card-role"><?= e(ucfirst((string) ($_SESSION['role_code'] ?? ''))) ?></span>
+      </div>
+      <div class="n-user-card-actions">
+        <?php if (hasPermission('settings.manage')): ?>
+          <a href="/settings/profile" class="btn btn-icon btn-ghost btn-sm"
+             title="<?= e(__('nav.settings')) ?>" aria-label="<?= e(__('nav.settings')) ?>">
+            <?= icon('settings') ?>
+          </a>
+        <?php endif; ?>
+        <button type="button" class="btn btn-icon btn-ghost btn-sm text-danger"
+                data-bs-toggle="modal" data-bs-target="#logoutConfirm"
+                title="<?= e(__('auth.logout.submit')) ?>" aria-label="<?= e(__('auth.logout.submit')) ?>">
+          <?= icon('logout') ?>
+        </button>
+      </div>
     </div>
   </aside>
 
@@ -265,10 +334,35 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="<?= e(__('common.close')) ?>"></button>
       </div>
       <div class="offcanvas-body n-sidebar-nav">
+        <?php if (AcademicYearContext::activeYearId() !== null): ?>
+          <div class="n-sidebar-session-bar mb-3" title="<?= e(__('shell.active_session')) ?>">
+            <span class="n-session-badge">
+              <span class="n-pulse-dot" aria-hidden="true"></span>
+              <span class="n-session-status"><?= e(__('shell.live')) ?></span>
+            </span>
+            <span class="n-session-label" dir="ltr"><?= e(AcademicYearContext::label() ?? '') ?></span>
+          </div>
+        <?php endif; ?>
         <button type="button" class="n-command-trigger w-100 mb-3" data-command-open data-bs-dismiss="offcanvas">
           <?= icon('search') ?><span><?= e(__('shell.search_placeholder')) ?></span>
         </button>
         <?php $renderNavGroups($visibleNavGroups, $navGroups, $activeNav ?? ''); ?>
+      </div>
+      <div class="n-sidebar-user-card">
+        <div class="n-user-avatar-badge" aria-hidden="true">
+          <?= e(mb_substr($_SESSION['full_name'] ?? '?', 0, 1)) ?>
+        </div>
+        <div class="n-user-card-info">
+          <span class="n-user-card-name"><?= e($_SESSION['full_name'] ?? '') ?></span>
+          <span class="n-user-card-role"><?= e(ucfirst((string) ($_SESSION['role_code'] ?? ''))) ?></span>
+        </div>
+        <div class="n-user-card-actions">
+          <button type="button" class="btn btn-icon btn-ghost btn-sm text-danger"
+                  data-bs-toggle="modal" data-bs-target="#logoutConfirm"
+                  title="<?= e(__('auth.logout.submit')) ?>" aria-label="<?= e(__('auth.logout.submit')) ?>">
+            <?= icon('logout') ?>
+          </button>
+        </div>
       </div>
     </div>
 
