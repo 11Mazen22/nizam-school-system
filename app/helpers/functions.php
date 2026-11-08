@@ -179,34 +179,55 @@ function activityLabel(string $action): string
  */
 function navItems(): array
 {
-    return [
-        ['key' => 'dashboard', 'href' => '/dashboard', 'label' => 'nav.dashboard', 'permission' => null, 'icon' => 'dashboard', 'group' => 'main'],
-        ['key' => 'notifications', 'href' => '/notifications', 'label' => 'nav.notifications', 'permission' => null, 'icon' => 'bell', 'group' => 'main'],
+    $moduleManager = new \App\Services\ModuleManager();
 
-        ['key' => 'academic-years', 'href' => '/academic-years', 'label' => 'nav.academic_years', 'permission' => 'academic_years.view', 'icon' => 'calendar', 'group' => 'academic'],
-        ['key' => 'grades', 'href' => '/grades', 'label' => 'nav.grades', 'permission' => 'grades.view', 'icon' => 'layers', 'group' => 'academic'],
-        ['key' => 'subjects', 'href' => '/subjects', 'label' => 'nav.subjects', 'permission' => 'subjects.view', 'icon' => 'book', 'group' => 'academic'],
-        ['key' => 'classes', 'href' => '/classes', 'label' => 'nav.classes', 'permission' => 'classes.view', 'icon' => 'chalkboard', 'group' => 'academic'],
-        ['key' => 'timetable', 'href' => '/timetable', 'label' => 'nav.timetable', 'permission' => 'timetable.view', 'icon' => 'grid', 'group' => 'academic'],
+    $catalog = [
+        ['key' => 'dashboard', 'href' => '/dashboard', 'label' => 'nav.dashboard', 'permission' => null, 'icon' => 'dashboard', 'group' => 'main', 'module' => 'core'],
+        ['key' => 'notifications', 'href' => '/notifications', 'label' => 'nav.notifications', 'permission' => null, 'icon' => 'bell', 'group' => 'main', 'module' => 'communication'],
 
-        ['key' => 'students', 'href' => '/students', 'label' => 'nav.students', 'permission' => 'students.view', 'icon' => 'users', 'group' => 'people'],
-        ['key' => 'teachers', 'href' => '/teachers', 'label' => 'nav.teachers', 'permission' => 'teachers.view', 'icon' => 'graduation-cap', 'group' => 'people'],
-        ['key' => 'users', 'href' => '/users', 'label' => 'nav.users', 'permission' => 'users.manage', 'icon' => 'users-cog', 'group' => 'people'],
+        ['key' => 'academic-years', 'href' => '/academic-years', 'label' => 'nav.academic_years', 'permission' => 'academic_years.view', 'icon' => 'calendar', 'group' => 'academic', 'module' => 'academics'],
+        ['key' => 'grades', 'href' => '/grades', 'label' => 'nav.grades', 'permission' => 'grades.view', 'icon' => 'layers', 'group' => 'academic', 'module' => 'academics'],
+        ['key' => 'subjects', 'href' => '/subjects', 'label' => 'nav.subjects', 'permission' => 'subjects.view', 'icon' => 'book', 'group' => 'academic', 'module' => 'academics'],
+        ['key' => 'classes', 'href' => '/classes', 'label' => 'nav.classes', 'permission' => 'classes.view', 'icon' => 'chalkboard', 'group' => 'academic', 'module' => 'academics'],
+        ['key' => 'timetable', 'href' => '/timetable', 'label' => 'nav.timetable', 'permission' => 'timetable.view', 'icon' => 'grid', 'group' => 'academic', 'module' => 'academics'],
 
-        ['key' => 'attendance', 'href' => '/attendance', 'label' => 'nav.attendance', 'permission' => 'attendance.view', 'icon' => 'check-circle', 'group' => 'operations'],
-        ['key' => 'assignments', 'href' => '/assignments', 'label' => 'nav.assignments', 'permission' => 'assignments.view', 'icon' => 'clipboard-list', 'group' => 'operations'],
-        ['key' => 'exams', 'href' => '/exams', 'label' => 'nav.exams', 'permission' => 'exams.view', 'icon' => 'star', 'group' => 'operations'],
-        ['key' => 'promotion', 'href' => '/students/promotion', 'label' => 'nav.promotion', 'permission' => 'students.promote', 'icon' => 'trending-up', 'group' => 'operations'],
+        ['key' => 'students', 'href' => '/students', 'label' => 'nav.students', 'permission' => 'students.view', 'icon' => 'users', 'group' => 'people', 'module' => 'people'],
+        ['key' => 'guardians', 'href' => '/guardians', 'label' => 'nav.guardians', 'permission' => 'guardians.view', 'icon' => 'users-group', 'group' => 'people', 'module' => 'people'],
+        ['key' => 'teachers', 'href' => '/teachers', 'label' => 'nav.teachers', 'permission' => 'teachers.view', 'icon' => 'graduation-cap', 'group' => 'people', 'module' => 'people'],
+        ['key' => 'users', 'href' => '/users', 'label' => 'nav.users', 'permission' => 'users.manage', 'icon' => 'users-cog', 'group' => 'people', 'module' => 'core'],
 
-        ['key' => 'welfare-discipline', 'href' => '/welfare/discipline', 'label' => 'nav.discipline', 'permission' => 'welfare.view', 'icon' => 'alert-triangle', 'group' => 'welfare'],
-        ['key' => 'welfare-health', 'href' => '/welfare/health', 'label' => 'nav.health', 'permission' => 'welfare.view', 'icon' => 'heart-pulse', 'group' => 'welfare'],
+        ['key' => 'admissions', 'href' => '/admissions', 'label' => 'nav.admissions', 'permission' => 'admissions.view', 'icon' => 'sparkle', 'group' => 'operations', 'module' => 'admissions'],
+        ['key' => 'attendance', 'href' => '/attendance', 'label' => 'nav.attendance', 'permission' => 'attendance.view', 'icon' => 'check-circle', 'group' => 'operations', 'module' => 'attendance'],
+        ['key' => 'assignments', 'href' => '/assignments', 'label' => 'nav.assignments', 'permission' => 'assignments.view', 'icon' => 'clipboard-list', 'group' => 'operations', 'module' => 'academics'],
+        ['key' => 'exams', 'href' => '/exams', 'label' => 'nav.exams', 'permission' => 'exams.view', 'icon' => 'star', 'group' => 'operations', 'module' => 'exams'],
+        ['key' => 'promotion', 'href' => '/students/promotion', 'label' => 'nav.promotion', 'permission' => 'students.promote', 'icon' => 'trending-up', 'group' => 'operations', 'module' => 'academics'],
+        ['key' => 'transport', 'href' => '/transport', 'label' => 'nav.transport', 'permission' => 'transport.view', 'icon' => 'bus', 'group' => 'operations', 'module' => 'transport'],
+        ['key' => 'library', 'href' => '/library', 'label' => 'nav.library', 'permission' => 'library.view', 'icon' => 'book-open', 'group' => 'operations', 'module' => 'library'],
 
-        ['key' => 'reports', 'href' => '/reports', 'label' => 'nav.reports', 'permission' => 'reports.view', 'icon' => 'chart', 'group' => 'reports'],
-        ['key' => 'activity-log', 'href' => '/activity-log', 'label' => 'nav.activity_log', 'permission' => 'activity_log.view', 'icon' => 'activity', 'group' => 'reports'],
+        ['key' => 'welfare-discipline', 'href' => '/welfare/discipline', 'label' => 'nav.discipline', 'permission' => 'welfare.view', 'icon' => 'alert-triangle', 'group' => 'welfare', 'module' => 'welfare'],
+        ['key' => 'welfare-health', 'href' => '/welfare/health', 'label' => 'nav.health', 'permission' => 'welfare.view', 'icon' => 'heart-pulse', 'group' => 'welfare', 'module' => 'welfare'],
 
-        ['key' => 'settings', 'href' => '/settings/profile', 'label' => 'nav.settings', 'permission' => 'settings.manage', 'icon' => 'settings', 'group' => 'system'],
-        ['key' => 'backups', 'href' => '/backups', 'label' => 'nav.backups', 'permission' => 'backups.run', 'icon' => 'shield-check', 'group' => 'system'],
+        ['key' => 'finance', 'href' => '/finance', 'label' => 'nav.finance', 'permission' => 'finance.view', 'icon' => 'wallet', 'group' => 'business', 'module' => 'finance'],
+        ['key' => 'hr', 'href' => '/hr', 'label' => 'nav.hr', 'permission' => 'hr.view', 'icon' => 'briefcase', 'group' => 'business', 'module' => 'hr'],
+
+        ['key' => 'portal-teacher', 'href' => '/portal/teacher', 'label' => 'nav.portal_teacher', 'permission' => 'portal.teacher', 'icon' => 'chalkboard-teacher', 'group' => 'portals', 'module' => 'core'],
+        ['key' => 'portal-family', 'href' => '/portal/family', 'label' => 'nav.portal_family', 'permission' => 'portal.family', 'icon' => 'home', 'group' => 'portals', 'module' => 'core'],
+
+        ['key' => 'reports', 'href' => '/reports', 'label' => 'nav.reports', 'permission' => 'reports.view', 'icon' => 'chart', 'group' => 'reports', 'module' => 'reports'],
+        ['key' => 'activity-log', 'href' => '/activity-log', 'label' => 'nav.activity_log', 'permission' => 'activity_log.view', 'icon' => 'activity', 'group' => 'reports', 'module' => 'core'],
+
+        ['key' => 'settings', 'href' => '/settings/profile', 'label' => 'nav.settings', 'permission' => 'settings.manage', 'icon' => 'settings', 'group' => 'system', 'module' => 'core'],
+        ['key' => 'modules', 'href' => '/settings/modules', 'label' => 'nav.modules', 'permission' => 'modules.manage', 'icon' => 'puzzle', 'group' => 'system', 'module' => 'core'],
+        ['key' => 'backups', 'href' => '/backups', 'label' => 'nav.backups', 'permission' => 'backups.run', 'icon' => 'shield-check', 'group' => 'system', 'module' => 'core'],
     ];
+
+    $items = [];
+    foreach ($catalog as $item) {
+        if ($moduleManager->isEnabled($item['module'])) {
+            $items[] = $item;
+        }
+    }
+    return $items;
 }
 
 /**
@@ -316,6 +337,14 @@ function icon(string $name, string $class = ''): string
         'x' => '<path d="m5 5 14 14M19 5 5 19"/>',
         'shield' => '<path d="M12 2.5 4.5 5.5v6c0 5 3.2 8.4 7.5 10 4.3-1.6 7.5-5 7.5-10v-6L12 2.5Z"/>',
         'shield-alert' => '<path d="M12 2.5 4.5 5.5v6c0 5 3.2 8.4 7.5 10 4.3-1.6 7.5-5 7.5-10v-6L12 2.5Z"/><path d="M12 8v4.5M12 16h.01"/>',
+        // Universal Platform additions
+        'wallet' => '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+        'bus' => '<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z"/><path d="M4 11h16M8 4v7M16 4v7M6 18v2M18 18v2M8 15h.01M16 15h.01"/>',
+        'book-open' => '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+        'briefcase' => '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 12v.01M2 12h20"/>',
+        'puzzle' => '<path d="M19 14v1a2 2 0 0 1-2 2h-1a2 2 0 0 0-2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H6a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H1a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1a2 2 0 0 0 2-2V3a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2z"/>',
+        'users-group' => '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        'chalkboard-teacher' => '<path d="M2 3h20v14H2z"/><path d="M8 21h8M12 17v4M6 8h4M6 12h2"/>',
     ];
 
     if (!isset($paths[$name])) {

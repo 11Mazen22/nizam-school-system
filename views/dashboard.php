@@ -17,8 +17,10 @@ $yearLabel = \App\Middleware\AcademicYearContext::label();
     <p><?= e(__('dashboard.overview_subtitle')) ?></p>
   </div>
   <div class="n-dashboard-context">
+    <span class="n-context-chip"><?= icon('building') ?><span><?= e($schoolName) ?></span></span>
     <span class="n-context-chip"><?= icon('calendar') ?><span dir="ltr"><?= e($yearLabel ?? __('dashboard.no_academic_year')) ?></span></span>
     <span class="n-context-chip"><?= icon('clock') ?><time dir="ltr" datetime="<?= e(date('Y-m-d')) ?>"><?= e(date('Y-m-d')) ?></time></span>
+    <span class="n-context-chip"><span class="badge text-bg-primary text-white"><?= e(__('roles.' . ($_SESSION['role_code'] ?? 'admin'))) ?></span></span>
   </div>
 </section>
 
@@ -102,11 +104,20 @@ $yearLabel = \App\Middleware\AcademicYearContext::label();
         </div>
         <div class="col-xl-7">
           <section class="card h-100" aria-labelledby="attention-title">
-            <div class="card-header"><?= icon('alert-triangle') ?><span id="attention-title"><?= e(__('dashboard.attention_title')) ?></span><?php $attentionCount = count($pending) + count($overCapacity); if ($attentionCount > 0): ?><span class="badge text-bg-warning ms-auto"><?= $attentionCount ?></span><?php endif; ?></div>
+            <div class="card-header"><?= icon('alert-triangle') ?><span id="attention-title"><?= e(__('dashboard.attention_title')) ?></span><?php $attentionCount = count($pending) + count($overCapacity) + count($stats['actionItems'] ?? []); if ($attentionCount > 0): ?><span class="badge text-bg-warning ms-auto"><?= $attentionCount ?></span><?php endif; ?></div>
             <?php if ($attentionCount === 0): ?>
               <div class="card-body"><div class="d-flex align-items-start gap-2 text-muted small"><?= icon('check-circle', 'text-success flex-shrink-0') ?><span><?= e(__('dashboard.attention_empty')) ?></span></div></div>
             <?php else: ?>
               <ul class="n-attention-list">
+                <?php foreach (($stats['actionItems'] ?? []) as $item): ?>
+                  <li>
+                    <span class="n-attention-tag <?= $item['severity'] === 'danger' ? 'n-attention-tag-danger' : '' ?>">
+                      <?= icon('alert-circle') ?><?= e(__($item['title_key'])) ?>
+                    </span>
+                    <strong><?= e($item['description']) ?></strong>
+                    <a class="ms-auto small" href="<?= e($item['url']) ?>"><?= e(__('dashboard.take_action')) ?></a>
+                  </li>
+                <?php endforeach; ?>
                 <?php foreach ($pending as $row): ?>
                   <li>
                     <span class="n-attention-tag"><?= icon('clock') ?><?= e(__('dashboard.attention_pending')) ?></span>
@@ -127,6 +138,67 @@ $yearLabel = \App\Middleware\AcademicYearContext::label();
         </div>
       <?php endif; ?>
     </div>
+  <?php endif; ?>
+
+  <?php if (!empty($stats['qualityIssues'])): ?>
+    <section class="card mb-3 border-warning" aria-labelledby="quality-title">
+      <div class="card-header bg-warning-subtle text-dark d-flex align-items-center justify-content-between">
+        <span class="d-flex align-items-center gap-2 fw-semibold">
+          <?= icon('alert-triangle') ?>
+          <span id="quality-title"><?= e(__('quality.center_title')) ?></span>
+        </span>
+        <span class="badge text-bg-warning"><?= count($stats['qualityIssues']) ?></span>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          <?php foreach ($stats['qualityIssues'] as $qi): ?>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold text-danger"><?= e(__($qi['title_key'])) ?></div>
+                <div class="small text-muted"><?= e($qi['description']) ?></div>
+              </div>
+              <a href="<?= e($qi['action_url']) ?>" class="btn btn-sm btn-outline-warning">
+                <?= e(__($qi['action_label_key'])) ?>
+              </a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+    </section>
+  <?php endif; ?>
+
+  <?php if (!empty($stats['financeSummary']) && ($stats['financeSummary']['invoice_count'] ?? 0) > 0): $fin = $stats['financeSummary']; ?>
+    <section class="card mb-3" aria-labelledby="fin-title">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="d-flex align-items-center gap-2 fw-semibold">
+          <?= icon('wallet') ?>
+          <span id="fin-title"><?= e(__('finance.overview_title')) ?></span>
+        </span>
+        <a href="/finance" class="btn btn-sm btn-link text-decoration-none"><?= e(__('finance.manage')) ?></a>
+      </div>
+      <div class="card-body">
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+          <div class="col">
+            <div class="p-3 border rounded bg-light">
+              <div class="small text-muted"><?= e(__('finance.total_billed')) ?></div>
+              <div class="fs-4 fw-bold" dir="ltr"><?= number_format((float) $fin['total_billed'], 2) ?></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="p-3 border rounded bg-light">
+              <div class="small text-muted"><?= e(__('finance.total_collected')) ?></div>
+              <div class="fs-4 fw-bold text-success" dir="ltr"><?= number_format((float) $fin['total_collected'], 2) ?></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="p-3 border rounded bg-light">
+              <div class="small text-muted"><?= e(__('finance.total_outstanding')) ?></div>
+              <div class="fs-4 fw-bold text-danger" dir="ltr"><?= number_format((float) $fin['total_outstanding'], 2) ?></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   <?php endif; ?>
 
   <?php if (hasPermission('classes.view')): ?>

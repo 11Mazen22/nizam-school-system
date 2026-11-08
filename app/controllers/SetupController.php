@@ -160,13 +160,24 @@ final class SetupController extends Controller
         $nameAr = $request->post('name_ar', '') ?: '';
         $address = $request->post('address', '') ?: null;
         $phone = $request->post('phone', '') ?: null;
+        $schoolType = $request->post('school_type', 'language_school') ?: 'language_school';
+        $schoolStructure = $request->post('school_structure', 'k12_combined') ?: 'k12_combined';
+        $currency = $request->post('currency', 'EGP') ?: 'EGP';
 
         if ($name === '' || $nameAr === '') {
             $this->view('setup/school', ['error' => __('validation.required')]);
             return;
         }
 
-        (new SchoolRepository())->create($name, $nameAr, $address, $phone);
+        (new SchoolRepository())->create(
+            name: $name,
+            nameAr: $nameAr,
+            address: $address,
+            phone: $phone,
+            currency: $currency,
+            schoolType: $schoolType,
+            schoolStructure: $schoolStructure
+        );
         $this->redirect('/setup');
     }
 

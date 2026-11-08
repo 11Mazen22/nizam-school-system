@@ -11,6 +11,7 @@ $school = (new SchoolRepository())->full();
 $schoolName = $school === null
     ? __('app.name')
     : (currentLocale() === 'ar' ? $school['name_ar'] : $school['name']);
+$logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png';
 ?>
 <!DOCTYPE html>
 <html lang="<?= e(currentLocale()) ?>" dir="<?= e(currentDirection()) ?>">
@@ -33,7 +34,7 @@ $schoolName = $school === null
     <aside class="n-auth-side">
       <div class="n-auth-side-top">
         <div class="school-brand-mark school-brand-mark-logo auth-school-mark">
-          <img src="/assets/img/hadaba-logo.png" alt="">
+          <img src="<?= e($logoUrl) ?>" alt="">
         </div>
         <div>
           <div class="n-auth-app-name-lg"><?= e($schoolName) ?></div>

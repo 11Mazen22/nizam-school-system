@@ -43,9 +43,20 @@ final class TeacherController extends Controller
             $this->redirect('/teachers');
             return;
         }
+        $yearId = \App\Middleware\AcademicYearContext::activeYearId();
+        $assignments = [];
+        $totalPeriods = 0;
+        if ($yearId !== null && hasPermission('assignments.view')) {
+            $assignmentRepo = new \App\Repositories\TeacherAssignmentRepository();
+            $assignments = $assignmentRepo->detailForTeacher($id, $yearId);
+            $totalPeriods = $assignmentRepo->totalWeeklyPeriods($id, $yearId);
+        }
+
         $this->view('teachers/show', [
             'teacher' => $teacher,
             'qualifications' => $this->subjects->qualifiedForTeacher($id),
+            'assignments' => $assignments,
+            'totalPeriods' => $totalPeriods,
         ]);
     }
 

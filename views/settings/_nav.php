@@ -12,6 +12,7 @@
  */
 $tabs = [
     'profile' => ['icon' => 'building', 'label' => 'settings.tab.profile'],
+    'modules' => ['icon' => 'puzzle', 'label' => 'settings.tab.modules'],
     'localization' => ['icon' => 'grid', 'label' => 'settings.tab.localization'],
     'academic' => ['icon' => 'calendar', 'label' => 'settings.tab.academic'],
     'security' => ['icon' => 'lock', 'label' => 'settings.tab.security'],

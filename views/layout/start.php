@@ -14,6 +14,7 @@ $school = (new SchoolRepository())->full();
 $schoolName = $school === null
     ? __('app.name')
     : (currentLocale() === 'ar' ? $school['name_ar'] : $school['name']);
+$logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png';
 
 $navItemsList = navItems();
 $navGroups = [
@@ -22,6 +23,8 @@ $navGroups = [
     'people' => 'nav.group.people',
     'operations' => 'nav.group.operations',
     'welfare' => 'nav.group.welfare',
+    'business' => 'nav.group.business',
+    'portals' => 'nav.group.portals',
     'reports' => 'nav.group.reports',
     'system' => 'nav.group.system',
 ];
@@ -109,7 +112,7 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 <div class="nizam-shell" id="nizamShell">
   <aside class="nizam-sidebar d-none d-lg-flex" id="nizamSidebar" aria-label="<?= e(__('nav.menu')) ?>">
     <a class="nizam-brand" href="/dashboard" aria-label="<?= e($schoolName) ?>">
-      <span class="school-brand-mark school-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></span>
+      <span class="school-brand-mark school-brand-mark-logo"><img src="<?= e($logoUrl) ?>" alt=""></span>
       <span class="nizam-brand-copy">
         <span class="nizam-brand-name"><?= e($schoolName) ?></span>
         <span class="nizam-brand-product">Nizam</span>
@@ -256,7 +259,7 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
     <div class="offcanvas offcanvas-start n-mobile-nav d-lg-none" tabindex="-1" id="nizamMobileNav" aria-labelledby="nizamMobileNavLabel">
       <div class="offcanvas-header">
         <a class="nizam-brand" href="/dashboard" id="nizamMobileNavLabel">
-          <span class="school-brand-mark school-brand-mark-logo"><img src="/assets/img/hadaba-logo.png" alt=""></span>
+          <span class="school-brand-mark school-brand-mark-logo"><img src="<?= e($logoUrl) ?>" alt=""></span>
           <span class="nizam-brand-copy"><span class="nizam-brand-name"><?= e($schoolName) ?></span><span class="nizam-brand-product">Nizam</span></span>
         </a>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="<?= e(__('common.close')) ?>"></button>

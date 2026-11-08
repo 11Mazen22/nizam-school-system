@@ -96,11 +96,39 @@ final class StudentController extends Controller
             );
         }
 
+        $yearId = AcademicYearContext::activeYearId();
+        $attendanceSummary = null;
+        if ($yearId !== null && hasPermission('attendance.view')) {
+            $attendanceSummary = (new \App\Repositories\AttendanceRepository())->summaryForStudent($id, $yearId);
+        }
+        $disciplineRecords = [];
+        $healthRecords = [];
+        if (hasPermission('welfare.view')) {
+            $welfareRepo = new \App\Repositories\WelfareRepository();
+            $disciplineRecords = $welfareRepo->disciplinaryForStudent($id);
+            $healthRecords = $welfareRepo->healthForStudent($id);
+        }
+
+        $guardianRepo = new \App\Repositories\GuardianRepository();
+        $studentGuardians = $guardianRepo->getForStudent($id);
+        $allGuardians = hasPermission('guardians.manage') ? $guardianRepo->all() : [];
+
+        $invoices = [];
+        if (hasPermission('finance.view') && (new \App\Services\ModuleManager())->isEnabled('finance')) {
+            $invoices = (new \App\Repositories\FinanceRepository())->allInvoices(null, $id);
+        }
+
         $this->view('students/show', [
             'student' => $student,
             'history' => $this->enrollmentService->historyFor($id),
             'currentEnrollment' => $currentEnrollment,
             'availableClasses' => $availableClasses,
+            'attendanceSummary' => $attendanceSummary,
+            'disciplineRecords' => $disciplineRecords,
+            'healthRecords' => $healthRecords,
+            'studentGuardians' => $studentGuardians,
+            'allGuardians' => $allGuardians,
+            'invoices' => $invoices,
         ]);
     }
 

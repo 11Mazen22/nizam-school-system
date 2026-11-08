@@ -58,7 +58,25 @@ final class SettingsController extends Controller
             return;
         }
 
-        $this->schools->update($school['id'], $name, $nameAr, $address, $phone);
+        $this->schools->update(
+            $school['id'],
+            $name,
+            $nameAr,
+            $address,
+            $phone,
+            $request->post('email', '') ?: null,
+            $request->post('website', '') ?: null,
+            (string) ($request->post('country', 'EG') ?: 'EG'),
+            $request->post('region', '') ?: null,
+            (string) ($request->post('timezone', 'Africa/Cairo') ?: 'Africa/Cairo'),
+            (string) ($request->post('currency', 'EGP') ?: 'EGP'),
+            (string) ($request->post('date_format', 'YYYY-MM-DD') ?: 'YYYY-MM-DD'),
+            (string) ($request->post('school_week', '0,1,2,3,4') ?: '0,1,2,3,4'),
+            (string) ($request->post('school_type', 'language_school') ?: 'language_school'),
+            (string) ($request->post('school_structure', 'k12_combined') ?: 'k12_combined'),
+            $request->post('tax_number', '') ?: null,
+            $request->post('affiliation_code', '') ?: null
+        );
         SettingsService::set('reports.school_footer_text', (string) ($footerText ?? ''), 'string');
 
         ActivityLogger::log('settings.update', 'settings', null, 'Profile settings updated');

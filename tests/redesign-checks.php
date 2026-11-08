@@ -72,7 +72,7 @@ foreach ($iterator as $file) {
         continue;
     }
     $contents = (string) file_get_contents($file->getPathname());
-    preg_match_all('/n-[a-z0-9]+(?:-[a-z0-9]+)*/', $contents, $hits);
+    preg_match_all('/(?<![a-zA-Z0-9_-])n-[a-z0-9]+(?:-[a-z0-9]+)*/', $contents, $hits);
     foreach ($hits[0] as $class) {
         // translation keys and data-name attributes share the n- prefix shape
         if (str_starts_with($class, 'n-grades') || str_starts_with($class, 'n-stat')) {

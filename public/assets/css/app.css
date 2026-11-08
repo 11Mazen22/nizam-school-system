@@ -115,7 +115,9 @@ a:hover { color: var(--n-primary-hover); }
 /* ========================================================================== 
    Shell
    ========================================================================== */
-.nizam-shell { min-height: 100vh; display: flex; }
+html, body.n-app-body { overflow-x: hidden; }
+.nizam-shell { min-height: 100vh; display: flex; overflow-x: hidden; width: 100%; }
+.offcanvas:not(.show) { display: none; }
 .nizam-sidebar {
   width: var(--n-sidebar-width);
   height: 100vh;
@@ -891,4 +893,10 @@ input[type="file"]::file-selector-button { margin-inline-end: 10px; padding: 6px
 .n-capacity-meta { display: flex; justify-content: space-between; gap: 8px; margin-block-start: 5px; font-size: .76rem; color: var(--n-muted); font-variant-numeric: tabular-nums; }
 .n-capacity-meta em { font-style: normal; font-weight: 600; }
 .n-capacity-over .n-capacity-meta em { color: var(--n-danger); }
-@media (prefers-reduced-motion: reduce) { .n-att-seg, .n-capacity-track span { transition: none; } }
+.n-capacity-item { display: flex; flex-direction: column; }
+.n-app-body { background-color: var(--n-canvas); color: var(--n-ink); min-height: 100vh; }
+.n-reveal-group { animation: n-fade-up var(--n-overlay) var(--n-ease) both; }
+.n-auth-stats { display: flex; gap: 16px; margin-block-start: 24px; }
+.n-auth-alert { border-radius: var(--n-radius); }
+.n-btn-text { display: inline-block; }
+@media (prefers-reduced-motion: reduce) { .n-att-seg, .n-capacity-track span, .n-reveal-group { transition: none; animation: none; } }

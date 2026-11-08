@@ -271,7 +271,10 @@ function isStaticAsset(url) {
 }
 
 function isImage(url) {
-  return url.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico)$/);
+  return url.pathname === '/logo' ||
+         url.pathname.includes('/photo') ||
+         url.pathname.includes('/avatar') ||
+         Boolean(url.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico)$/i));
 }
 
 function isAPIRequest(url) {

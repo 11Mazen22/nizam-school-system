@@ -39,6 +39,15 @@
 
     form.addEventListener('submit', function () {
       try {
+        if ('caches' in window) {
+          caches.keys().then(function (keys) {
+            keys.forEach(function (key) {
+              if (key.indexOf('dynamic') !== -1) {
+                caches.delete(key);
+              }
+            });
+          }).catch(function () {});
+        }
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({ action: 'clearDynamic' });
         } else if ('serviceWorker' in navigator) {

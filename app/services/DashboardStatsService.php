@@ -6,17 +6,12 @@ namespace App\Services;
 
 use App\Middleware\AcademicYearContext;
 use App\Repositories\ActivityLogRepository;
+use App\Repositories\AdmissionsRepository;
 use App\Repositories\ClassRepository;
 use App\Repositories\DashboardRepository;
+use App\Repositories\FinanceRepository;
+use App\Repositories\HrRepository;
 
-/**
- * Nizam -- assembles the Phase 5 dashboard's data. Only the statistics
- * already named in the blueprint (§A: total students/teachers/grades/
- * classes/subjects, religion breakdown, recent activity) -- no invented
- * metrics. Everything year-scoped reads AcademicYearContext (populated once
- * per request by Phase 4's middleware), and gracefully returns zeroed/empty
- * data when there is no active year rather than erroring.
- */
 final class DashboardStatsService
 {
     public function __construct(
@@ -25,40 +20,111 @@ final class DashboardStatsService
     ) {
     }
 
-    /** @return array{hasActiveYear: bool, students: int, teachers: int, classes: int, subjects: int, grades: int, religion: array<string,int>, activity: array} */
     public function build(): array
     {
         $yearId = AcademicYearContext::activeYearId();
+        $moduleManager = new ModuleManager();
 
         if ($yearId === null) {
             return [
-                'hasActiveYear' => false,
-                'students' => 0, 'teachers' => 0, 'classes' => 0, 'subjects' => 0, 'grades' => 0,
-                'religion' => ['muslim' => 0, 'christian' => 0, 'other' => 0],
-                'activity' => [],
-                'attendance' => null, 'pendingAttendance' => [], 'capacity' => [],
+                'hasActiveYear'     => false,
+                'students'          => 0,
+                'teachers'          => 0,
+                'classes'           => 0,
+                'subjects'          => 0,
+                'grades'            => 0,
+                'religion'          => ['muslim' => 0, 'christian' => 0, 'other' => 0],
+                'activity'          => [],
+                'attendance'        => null,
+                'pendingAttendance' => [],
+                'capacity'          => [],
+                'actionItems'       => [],
+                'qualityIssues'     => [],
+                'financeSummary'    => null,
+                'admissionsCounts'  => null,
             ];
         }
 
-        // §J: Staff hold activity_log.view "own actions only"; Administrator
-        // sees everything. Enforced here in the query itself, not by hiding
-        // rows client-side.
         $onlyUserId = ($_SESSION['role_code'] ?? null) === 'admin' ? null : (int) ($_SESSION['user_id'] ?? 0);
 
+        // Core attendance and capacity
+        $attendance = hasPermission('attendance.view') ? $this->repository->attendanceForDate($yearId, date('Y-m-d')) : null;
+        $pendingAttendance = hasPermission('attendance.view') ? $this->repository->classesWithoutAttendance($yearId, date('Y-m-d')) : [];
+        $capacity = hasPermission('classes.view') ? (new ClassRepository())->densityForYear($yearId, null) : [];
+
+        // Action Center Items
+        $actionItems = [];
+        foreach ($pendingAttendance as $pa) {
+            $actionItems[] = [
+                'type'        => 'attendance',
+                'severity'    => 'warning',
+                'title_key'   => 'dashboard.action_pending_attendance',
+                'description' => ($pa['class_name'] ?? 'Class'),
+                'url'         => '/attendance?class_id=' . (int) ($pa['class_id'] ?? 0),
+            ];
+        }
+
+        // Admissions pipeline alerts
+        $admissionsCounts = null;
+        if ($moduleManager->isEnabled('admissions') && hasPermission('admissions.view')) {
+            $admRepo = new AdmissionsRepository();
+            $admissionsCounts = $admRepo->countByStatus();
+            $pendingApps = (int) ($admissionsCounts['application'] ?? 0) + (int) ($admissionsCounts['review'] ?? 0);
+            if ($pendingApps > 0) {
+                $actionItems[] = [
+                    'type'        => 'admissions',
+                    'severity'    => 'info',
+                    'title_key'   => 'dashboard.action_pending_admissions',
+                    'description' => "{$pendingApps} " . __('admissions.pending_review'),
+                    'url'         => '/admissions?status=application',
+                ];
+            }
+        }
+
+        // HR staff leave requests
+        if ($moduleManager->isEnabled('hr') && hasPermission('hr.manage')) {
+            $hrRepo = new HrRepository();
+            $pendingLeaves = count($hrRepo->allLeaves('pending'));
+            if ($pendingLeaves > 0) {
+                $actionItems[] = [
+                    'type'        => 'hr',
+                    'severity'    => 'warning',
+                    'title_key'   => 'dashboard.action_pending_leaves',
+                    'description' => "{$pendingLeaves} " . __('hr.status_pending'),
+                    'url'         => '/hr/leaves?status=pending',
+                ];
+            }
+        }
+
+        // Finance summary
+        $financeSummary = null;
+        if ($moduleManager->isEnabled('finance') && hasPermission('finance.view')) {
+            $finRepo = new FinanceRepository();
+            $financeSummary = $finRepo->getSummary($yearId);
+        }
+
+        // Data Quality Auditor (for Admins / Principals)
+        $qualityIssues = [];
+        if (hasPermission('settings.manage') || hasPermission('reports.view')) {
+            $qualityIssues = (new DataQualityService())->audit();
+        }
+
         return [
-            'hasActiveYear' => true,
-            'students' => $this->repository->totalActiveStudents($yearId),
-            'teachers' => $this->repository->totalActiveTeachers(),
-            'classes' => $this->repository->totalActiveClasses($yearId),
-            'subjects' => $this->repository->totalActiveSubjects(),
-            'grades' => $this->repository->totalActiveGrades(),
-            'religion' => $this->repository->religionBreakdown($yearId),
-            'activity' => $this->activityLog->paginate(10, 0, $onlyUserId),
-            // Gated here, not hidden in the view: a role without the permission
-            // never has this data in the rendered page at all.
-            'attendance' => hasPermission('attendance.view') ? $this->repository->attendanceForDate($yearId, date('Y-m-d')) : null,
-            'pendingAttendance' => hasPermission('attendance.view') ? $this->repository->classesWithoutAttendance($yearId, date('Y-m-d')) : [],
-            'capacity' => hasPermission('classes.view') ? (new ClassRepository())->densityForYear($yearId, null) : [],
+            'hasActiveYear'     => true,
+            'students'          => $this->repository->totalActiveStudents($yearId),
+            'teachers'          => $this->repository->totalActiveTeachers(),
+            'classes'           => $this->repository->totalActiveClasses($yearId),
+            'subjects'          => $this->repository->totalActiveSubjects(),
+            'grades'            => $this->repository->totalActiveGrades(),
+            'religion'          => $this->repository->religionBreakdown($yearId),
+            'activity'          => $this->activityLog->paginate(10, 0, $onlyUserId),
+            'attendance'        => $attendance,
+            'pendingAttendance' => $pendingAttendance,
+            'capacity'          => $capacity,
+            'actionItems'       => $actionItems,
+            'qualityIssues'     => $qualityIssues,
+            'financeSummary'    => $financeSummary,
+            'admissionsCounts'  => $admissionsCounts,
         ];
     }
 }
