@@ -116,11 +116,11 @@ a:hover { color: var(--n-primary-hover); }
    Shell & Fixed-Viewport Architecture
    ========================================================================== */
 @media (min-width: 992px) {
-  html, body.n-app-body {
+  body.n-app-body {
     height: 100%;
-    overflow: hidden !important;
+    overflow: hidden;
   }
-  .nizam-shell {
+  body.n-app-body .nizam-shell {
     height: 100vh;
     height: 100dvh;
     max-height: 100dvh;
@@ -128,7 +128,7 @@ a:hover { color: var(--n-primary-hover); }
     overflow: hidden;
     width: 100%;
   }
-  .nizam-sidebar {
+  body.n-app-body .nizam-sidebar {
     height: 100%;
     max-height: 100%;
     position: relative;
@@ -142,7 +142,7 @@ a:hover { color: var(--n-primary-hover); }
     transition: width var(--n-overlay) var(--n-ease), flex-basis var(--n-overlay) var(--n-ease);
     z-index: 30;
   }
-  .nizam-main {
+  body.n-app-body .nizam-main {
     flex: 1 1 0;
     min-width: 0;
     height: 100%;
@@ -154,7 +154,7 @@ a:hover { color: var(--n-primary-hover); }
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
-  .nizam-topbar {
+  body.n-app-body .nizam-topbar {
     position: sticky;
     inset-block-start: 0;
     z-index: 25;
@@ -1193,7 +1193,7 @@ input[type="file"]::file-selector-button { margin-inline-end: 10px; padding: 6px
 .n-auth-security { display: inline-flex; align-items: center; gap: 6px; color: var(--n-muted); font-size: .68rem; }
 .n-auth-security .n-icon { color: var(--n-success); }
 
-.n-setup-body { min-height: 100vh; margin: 0; padding: 32px 16px; display: flex; align-items: center; justify-content: center; background: var(--n-canvas); }
+.n-setup-body { min-height: 100vh; margin: 0; padding: 40px 16px 60px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: var(--n-canvas); overflow-y: auto; }
 .n-setup-wrap { width: min(620px, 100%); }
 .n-setup-brand { margin-block-end: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .setup-school-mark { width: 54px; height: 54px; flex-basis: 54px; }
