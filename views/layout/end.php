@@ -10,6 +10,7 @@
 <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="<?= e(assetUrl('/assets/js/app.js')) ?>"></script>
 <script src="<?= e(assetUrl('/assets/js/confirm.js')) ?>"></script>
+<script src="<?= e(assetUrl('/assets/js/offline-queue.js')) ?>"></script>
 
 <?php if (!empty($pageScripts)): ?>
   <?php foreach ($pageScripts as $script): ?>

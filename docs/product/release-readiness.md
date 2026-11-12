@@ -1,67 +1,340 @@
-# NIZAM UNIVERSAL SCHOOL PLATFORM -- RELEASE READINESS & QUALITY GATES
-**Product:** Nizam Universal School Platform  
-**Target Release:** Universal Production Release  
-**Document Version:** 1.0.0
+# NIZAM UNIVERSAL SCHOOL PLATFORM -- RELEASE READINESS
+
+**Document status:** honest audit, not a marketing scorecard.
+**Date:** 2026-11-11
+**Baseline commit:** `2a23cb2` (branch `master`, clean working tree at audit start)
 
 ---
 
-## 1. Quality Gates & Verification Standards
+## 0. Why this document was rewritten
 
-To guarantee that Nizam is a truly robust, general-purpose school platform ready for adoption by different institutions, every capability is evaluated against 6 mandatory quality gates:
+The previous revision of this file declared eleven operational areas
+"Verified Ready" and cited automated suites such as
+`tests/universal-configuration-smoke.php`, `tests/module-registry-smoke.php`,
+`tests/sis-family-smoke.php`, `tests/admissions-pipeline-smoke.php`,
+`tests/finance-smoke.php` and `tests/operations-smoke.php`.
 
-### Gate 1: Functional Completeness
-- Backend models, services, and repositories are fully implemented.
-- All forms execute input validation, CSRF verification, and database persistence.
-- Workflows (Admissions conversion, fee payment, leave approval, student promotion) update state atomically.
-- Role-based permissions and module activation gates are enforced at the server level.
-- No mock data or non-functional placeholder buttons.
+**None of those files exist in this repository.** `tests/` contains seventeen
+files, none of them the ones cited. The table below therefore claimed test
+evidence that had never been produced. That is the single most damaging kind
+of documentation error a school software release can contain, because it
+tells an administrator they may trust untested behaviour with children's
+records.
 
-### Gate 2: Modern Light Visual Design System
-- Strict adherence to Nizam's modern light design language:
-  - Clean card-based layouts with `stat-card` color accents.
-  - Subtle borders, crisp typography, and unified elevation.
-  - Consistent icon usage verified against `icon()` SVG catalog.
-  - Responsive layout tested across mobile, tablet, and desktop viewports.
-  - Clear loading, error, and empty states.
+This document now separates three things that were previously conflated:
 
-### Gate 3: Bilingual Parity & Localization
-- Complete bidirectional support: Arabic-first (`rtl`) and English (`ltr`).
-- 100% key-for-key translation parity between `lang/ar.php` and `lang/en.php`.
-- Dates, numerals, and currency symbols display using localized helpers.
-
-### Gate 4: Data Integrity & Dual-Engine Database Parity
-- No orphaned foreign keys or inconsistent references.
-- Student lifecycle and prior enrollment history preserved across rollovers.
-- Dual-engine compatibility: MySQL 8.0+ / MariaDB 10.4+ and PostgreSQL 14+ / Supabase.
-- Migration scripts exist in both `database/migrations/` and `database/migrations-pg/`.
-
-### Gate 5: Security, Child Privacy & Auditability
-- Role-Based Access Control (RBAC) enforced on every route.
-- Contextual access separation for sensitive health and safeguarding records.
-- Immutable activity logging for critical operations (enrollment, grade changes, user logins, financial transactions).
-- Safe backup generation and verified restoration.
-
-### Gate 6: Multi-Scenario Institutional Adaptability
-- Verified operation under 4 distinct school topologies:
-  1. *Small Primary School* (homeroom model, single campus).
-  2. *Large Bilingual Language School* (multi-stage K-12, Egyptian national curriculum).
-  3. *International School* (GPA/Letter grading, semester/quarter structure).
-  4. *Multi-Campus Institution* (central governance, branch-scoped operations).
+* **Implemented and checked** -- code exists and a named command exercises it.
+* **Implemented, not yet verified** -- code exists but no check covers it.
+* **Not implemented** -- a table or a document exists, the capability does not.
 
 ---
 
-## 2. Release Readiness Scorecard
+## 1. Verified evidence
 
-| Operational Area | Readiness Status | Automated Test Coverage | Manual Verification |
-|---|---|---|---|
-| Institution Configuration & Branding | Verified Ready | `tests/universal-configuration-smoke.php` | Profile save, logo upload, week configuration |
-| Module Activation Engine | Verified Ready | `tests/module-registry-smoke.php` | Enable/disable modules, route gate test |
-| Single Source of Truth (SIS & Family) | Verified Ready | `tests/sis-family-smoke.php` | Guardian linkage, multi-child, student tabs |
-| Admissions & Enrollment Pipeline | Verified Ready | `tests/admissions-pipeline-smoke.php` | Application submission, assessment, enrollment conversion |
-| Role Workspaces (Teacher/Parent) | Verified Ready | `tests/workspaces-smoke.php` | Scoped queries, portal routes, child privacy |
-| Finance & Student Billing | Verified Ready | `tests/finance-smoke.php` | Fee structure, invoice generation, payment receipt |
-| Staff Management & Human Resources | Verified Ready | `tests/hr-smoke.php` | Department directory, leave submission & approval |
-| Operations: Transport & Library | Verified Ready | `tests/operations-smoke.php` | Route allocations, book borrow and return |
-| Central Intelligence & Action Dashboard | Verified Ready | `tests/dashboard-intelligence-smoke.php` | Action center items, data quality auditor |
-| Dual Database Dialect Parity | Verified Ready | `database/verify.php`, `database/migrate.php` | MySQL & PostgreSQL migration verification |
-| 4 Institutional Scenarios | Verified Ready | `tests/institutional-scenarios-test.php` | Scenarios A, B, C, D verified end-to-end |
+Every row below was executed against this working tree.
+
+| Check | Command | Result |
+|---|---|---|
+| PHP syntax, all application files | `find app views public database -name '*.php' -exec php -l {} \;` | see §4 |
+| Translation key parity | `php tests/redesign-checks.php` | PASS -- 1398 keys identical in `ar.php` / `en.php` |
+| Icon catalogue audit | `php tests/redesign-checks.php` | PASS -- every referenced icon is defined |
+| Import + pre-write validation | `php tests/import-contract.php` | PASS |
+| Exam score integrity and rollback | `php tests/exam-integrity.php` | PASS |
+| Authorization / session refresh | `php tests/authorization-refresh.php` | PASS |
+| Academic configuration | `php tests/academic-configuration.php` | PASS |
+| Academic calculation | `php tests/academic-calculation.php` | PASS |
+| Operational module integrity | `php tests/module-integrity.php` | PASS |
+| HTTP request pipeline | `php tests/http/run.php` | PASS (271 assertions) |
+
+The last suite is new and covers the universal academic-configuration slice
+described in §2.
+
+---
+
+## 2. What is now genuinely implemented
+
+### 2.1 Universal academic configuration (new)
+
+| Capability | Status | Where |
+|---|---|---|
+| Educational stages CRUD | Implemented + tested | `AcademicConfigController`, `/settings/structure` |
+| Grades assigned to stages | Implemented + tested | `/settings/structure/grade-stages` |
+| Stage deletion guarded by grade linkage | Implemented + tested | `AcademicConfigService::deleteStage` |
+| Academic terms, variable count per year | Implemented + tested | `/settings/terms` |
+| Overlap / out-of-year / duplicate-number rejection | Implemented + tested | `AcademicConfigService::saveTerm` |
+| Exactly one current term per year | Implemented + tested | `AcademicConfigRepository::clearActiveTerms` |
+| Grading scales (percentage / letter / GPA / points) | Implemented + tested | `/settings/grading` |
+| Grading bands with overlap rejection | Implemented + tested | `AcademicConfigRepository::replaceBands` |
+| Exclusive default grading scale | Implemented + tested | `makeDefault` / `setDefaultScale` |
+| Bilingual UI (AR RTL / EN LTR) | Implemented | `views/settings/structure.php` |
+
+This is the difference the specification called decisive: the platform no
+longer assumes one fixed grade ladder, a two-term year and a 100-point score.
+
+### 2.2 One shared academic calculation path (new)
+
+`app/services/AcademicCalculationService.php` is now the only place a mark
+becomes a grade:
+
+| Capability | Status | Where |
+|---|---|---|
+| Score to percentage, one rounding rule | Implemented + tested | `percentage()` |
+| Weighted average across assessments | Implemented + tested | `weightedPercentage()` |
+| Percentage to configured band, GPA and pass flag | Implemented + tested | `bandFor()` / `describePercentage()` |
+| Active scale loaded from school configuration | Implemented + tested | `scale()` |
+| No configured scale returns no grade, never an invented one | Implemented + tested | `scale()` returns null |
+| Class ranking uses the shared formula | Implemented + tested | `ExamService::getClassRanking` |
+| Score-entry sheet shows the resulting band | Implemented + tested | `ExamService::getScoreSheet` |
+| Report card / transcript uses the shared report | Implemented + tested | `ExamService::getStudentReport` |
+| Family and student portals use the same result | Implemented | `PortalController` |
+
+The ranking SQL formula was deleted rather than left beside the PHP one, so
+there is no second definition of an average to drift.
+
+### 2.4 Operational modules hardened and verified (new)
+
+`tests/module-integrity.php` exercises the invariants beneath five modules
+against isolated temporary tables:
+
+| Invariant | Module | Result |
+|---|---|---|
+| Partial payment sets `partial`; settlement sets `paid` | Finance | PASS |
+| Overpayment refused; balance and receipts unchanged | Finance | PASS |
+| Cancelled invoice refuses payment | Finance | PASS |
+| Loan reduces availability; exhausted stock refuses a loan | Library | PASS |
+| Returning a loan twice does not inflate stock | Library | PASS |
+| Route capacity enforced; re-assignment does not double-count | Transport | PASS |
+| Only a pending leave can be decided; first decision preserved | HR | PASS |
+| Only an offered application converts; wrong-grade class refused | Admissions | PASS |
+| Failed conversions create no student (atomicity) | Admissions | PASS |
+
+### 2.5 Runtime blocker fixed
+
+Forty-two call sites across eight controllers used `Flash::success()` and
+`Flash::error()`, while `App\Flash` defined only `set()` and `consume()`.
+Every form submission in admissions, finance, HR, library, transport,
+guardians and module settings raised "Call to undefined method" and returned
+a 500 instead of a confirmation. The helpers now exist and every screen
+reports its result.
+
+### 2.3 School identity
+
+* Profile save no longer corrupts identity fields. The previous call passed
+  16 positional arguments into an 18-parameter method, shifting `currency`
+  into `default_locale`, `date_format` into `currency`, and so on. It now uses
+  named arguments.
+* School logo is uploadable and removable (`UploadService`, MIME-sniffed,
+  re-encoded, stored outside `public/`), replacing a hardcoded crest that
+  made the screen untrue for any school but the original one.
+
+### 2.3 Role templates
+
+Migration `019` / `023` created seventeen standard roles but granted
+permissions to `admin` only, so every other role could sign in and reach
+nothing. Migrations `020` (MySQL) and `024` (PostgreSQL) add the baseline
+grant set each template implies, idempotently.
+
+---
+
+### 2.6 HTTP request pipeline (new)
+
+`tests/http/run.php` is the first suite that exercises the application the
+way a browser does. It builds a throwaway MySQL database from migrations and
+seeds only, writes a temporary `config.php` under a temporary
+`NIZAM_DATA_PATH`, boots the real front controller under PHP's built-in
+server, and drives it with a cookie jar. The real school database is never
+touched, and the database is dropped on exit.
+
+It asserts 271 behaviours across the request pipeline. Besides routing, 404s,
+session regeneration at login, CSRF rejection, permission denial, module-gate
+redirection, PRG redirects, flash handling, the `/lang` open-redirect guard
+and security headers, it drives a create -> validate -> edit chain for every
+module: grades, subjects, teachers, classes, academic years, students,
+admissions (create, status, convert), guardians (create, edit, link), finance
+(invoice, partial payment, refused overpayment), transport (route,
+assignment), library (book, borrow, exhausted stock, return, double return),
+HR (leave, decision, department), exams, attendance, timetable (including the
+assignment prerequisite and duplicate-slot refusal), teaching assignments,
+welfare (discipline, health), users, the four settings forms and module
+toggling (including the core-module refusal). Each chain asserts the success
+path, that a rejected payload persists nothing, and that a zero-permission
+role is denied with 403 and writes nothing. The admissions conversion is the
+spine of the chain: the student that finance, transport, library, attendance,
+welfare and timetable operate on is produced by the application's own HTTP
+flow, not inserted behind it.
+
+A static route-contract audit also reflects over every handler named in
+`public/index.php`: the method must exist and must accept exactly `(Request)`.
+
+This suite found six defects that no repository-level test could see:
+
+1. `Flash::warning()` did not exist, so **every disabled module returned
+   500** instead of redirecting. `success()`/`error()` were added earlier;
+   `warning()` was missed. The full set of helpers now exists.
+2. The `admin` role is created by seed 001, which runs *after* migrations.
+   Migration 021 therefore granted nothing on a fresh install, and seeds
+   re-granted only a frozen 36-permission list. **A newly installed
+   administrator was denied `/admissions`, `/guardians`, `/finance`, `/hr`,
+   `/transport` and `/library`.** Fixed in both halves: the seed now grants
+   admin the whole catalogue, and migration 021 covers databases that already
+   have an admin role.
+3. `AcademicYearContext::id()` does not exist (the method is
+   `activeYearId()`). Twelve call sites in finance, admissions and all three
+   portals used it, so **those routes returned 500 on load**. Call sites fixed.
+4. Twenty-two route handlers in `public/index.php` pointed at controller
+   methods that did not exist (`storeBook`, `borrowBook`, `actOnLeave`, `link`,
+   `showRoute`, `assignStudent`, `convertToStudent`, ...), or at methods that
+   took positional `$id` arguments the router never passes. **The whole
+   library, transport, admissions-workflow, guardian-link and HR-decision
+   surface was unreachable.** Handlers and signatures aligned to the
+   documented convention: controllers read route parameters from `Request`.
+5. `Request::post()` declared `?string $default`, but call sites legitimately
+   pass `false`, `0.0`, `30` and `1`. The resulting `TypeError` meant
+   **invoice creation, payment recording, route creation, book creation and
+   the guardian link all returned 500 on their primary write path.** The
+   default is now `mixed` and stringified; a request field is always a string.
+6. `FinanceController::recordPayment` called the guarded repository with no
+   `catch`, so an overpayment showed the generic 500 page instead of the
+   reason. It now maps the repository's stable codes to a flash message.
+
+## 3. Not verified by an automated check
+
+These have code and screens. The repository-level invariants for finance,
+library, transport, HR and admissions are covered (§2.4), but the layers
+above them are not. None of the following may be described as verified:
+
+* Browser, responsive and RTL rendering. The HTTP suite reads status codes
+  and HTML, not pixels; no screenshot or visual review has been performed.
+* Edit paths for finance, transport, library and HR (only their create and
+  decision flows are covered), plus report/PDF export and backup/restore.
+* CSV import into admissions, finance or HR. Only the generic import contract
+  is tested.
+* PostgreSQL. Every integration suite runs on MySQL/MariaDB. The
+  `database/seeds-pg/` files also still use MySQL-only `INSERT IGNORE`, so
+  they would fail if executed against PostgreSQL; treat them as unverified.
+* Concurrent load, performance and backup/restore against real data.
+
+Seven suites now run in `npm test`, covering import contracts, exam
+integrity, authorization refresh, academic configuration, calculation,
+module invariants and the HTTP pipeline. The gaps listed above are the
+remaining honest ones.
+
+---
+
+## 4. Known defects and limitations
+
+1. **Assessment categories are not configurable yet.** Grading *bands* now
+   drive results (see §2.2), but weighting is still one `weight` per exam
+   rather than named categories (coursework, midterm, final) with their own
+   weights. A school that weights by category must express it as per-exam
+   weights.
+2. **Terms are not yet an active context.** The year context middleware
+   supplies the active academic year; nothing yet narrows attendance or
+   assessment to the current term.
+3. **Campuses exist as schema only.** `campuses` was created in migration 019
+   with no controller, route, view or query scoping. Multi-campus must not be
+   claimed.
+4. **Multi-tenancy is not implemented.** There is no tenant column, no query
+   scoping and no isolation test. Do not describe this build as SaaS-ready.
+5. **No PostgreSQL run was performed in this environment.** The PostgreSQL
+   migrations are maintained in parallel, and the new repository avoids
+   dialect-specific SQL (literal `TRUE`/`FALSE`, `RETURNING` on pgsql), but
+   that is a design argument, not a test result.
+6. **No browser or responsive verification was performed** for the new
+   screens. Layout, RTL composition and narrow-width behaviour are unviewed.
+7. **Payroll, procurement, boarding, cafeteria, visitor management and
+   alumni do not exist** beyond schema or documentation.
+
+---
+
+## 5. Release position
+
+Not a production release candidate for general school adoption.
+
+It is a working, tested foundation for the universal configuration layer, on
+top of a functioning single-school system. The next vertical slice that
+actually changes what a school can rely on is wiring grading bands into the
+shared calculation path used by score entry, ranking, report cards and
+transcripts -- because that is where "configurable grading" stops being a
+setting and starts being the school's real academic record.
+---
+
+## Offline and production hardening (2026-11-12)
+
+### Verified offline behaviour
+
+| Check | Method | Result |
+|---|---|---|
+| Worker registers and controls the page | `navigator.serviceWorker` + `getRegistrations()` | PASS -- 1 registration, controller active |
+| New design cached offline | Inspect `nizam-v1.2.1-studio-static` | PASS -- `theme.css`, `components.css`, `app.css`, Bootstrap RTL+LTR, fonts, `offline.html`, `manifest.json` (22 entries) |
+| Versioned URLs hit the precache | `fetch('/assets/css/theme.css?v=999999')` | PASS -- 200, 8133 bytes served from cache for a URL never fetched |
+| Offline document styling | Computed styles on `/offline.html` | PASS -- `#4f46e5` primary, 22px card, 470px wide, no overflow, AR/EN switch |
+
+The service worker previously precached only `app.css` and matched caches by full
+URL. Because pages request `?v=<mtime>` stylesheet URLs, the precache was never
+hit and a fresh offline install could open with no stylesheet. Static caching now
+uses one canonical entry per path (`theme.css`, `components.css`, dashboard JS,
+Chart.js and the manifest were added as well), and the cache version was bumped.
+
+### Production hardening
+
+| Change | Reason |
+|---|---|
+| `display_errors=0` unless `NIZAM_DEBUG=1`, `log_errors=1` | A school must never see PHP paths/SQL text in a page; errors still reach the log and the friendly reference page |
+| `storage/.htaccess` deny-all | Defense in depth if DocumentRoot is misconfigured to the project root |
+| Placeholder scheduled tokens rejected (`ScheduledTokenGuard`) | `dev-local-token-change-in-production` / `CHANGE_THIS_TO_A_RANDOM_SECRET` are published in this repo; with the default config every scheduled endpoint answered 401 after this change |
+| Error pages rebuilt on a shared document | They linked only `app.css` and used Bootstrap utilities without Bootstrap; all four now load the full design system with zero inline styles |
+| Manifest aligned | `theme_color #4f46e5`, `background #f5f6fb`, `lang ar`, `dir rtl` |
+| `/scheduled/*` endpoints revived | `App\Request::header()` did not exist, so birthday reminders, rollover and cleanup fataled with 500 on their first line. The method now reads `HTTP_*`, `Content-Type`/`Content-Length` and Apache's `REDIRECT_HTTP_AUTHORIZATION`/`apache_request_headers()` fallbacks. All three endpoints now answer 401 with the published placeholder token. Covered by `tests/scheduled-auth.php`. |
+
+### Offline write queue
+
+Form submissions made while the browser reports itself offline are captured in
+IndexedDB and replayed automatically when the connection returns.
+
+| Check | Method | Result |
+|---|---|---|
+| Offline submit captured, navigation suppressed | Live browser: `navigator.onLine` forced false, synthetic POST to `/grades` | PASS -- 1 item queued, no CSRF token stored, banner shown |
+| Automatic replay on reconnect | Live browser: back online, flush | PASS -- queue emptied, success toast, one grade row created |
+| Duplicate replay suppressed | Same queue id posted again to the live server | PASS -- `204` with `X-Nizam-Replay: duplicate`, row count unchanged |
+| Two tabs replay at once | Live browser: two tabs, both online, flush fired together | PASS -- one POST, one toast, one row; the second tab found the queue empty |
+| Cross-tab queue visibility | Live browser: queue in tab 1, read banner in tab 2 | PASS -- both banners agree via `BroadcastChannel` |
+| Endpoint auth | `GET /csrf-token` signed out / signed in | PASS -- 302 to `/login` / 200 JSON, 64-character token |
+| Suite coverage | `tests/http/run.php` | PASS -- 277 assertions (6 new) |
+
+Design notes:
+
+- Only same-origin `POST` forms are queued, and only when the browser already
+  reports itself offline. A submit that fails mid-flight on a flaky connection
+  still uses the browser's own error path; capturing those would mean rewriting
+  every form to `fetch`.
+- Sign-in, sign-out, setup and delete forms, any form with a password or file
+  field, and any form marked `data-offline-queue="off"` or `data-confirm` are
+  never queued.
+- Replays fetch a fresh CSRF token from `GET /csrf-token` immediately before
+  sending. If the session expired while offline the queue keeps its items and
+  asks the user to sign in instead of discarding their work.
+- `X-Nizam-Queue-Id` is claimed in the front controller before routing, so a
+  lost response cannot create a second record. A submission that fails
+  validation also consumes its key: that is the deliberate cost of claiming
+  idempotency before the handler runs.
+- Tabs coordinate through the Web Locks API (with a 30-second localStorage
+  lease for browsers without it), so one tab replays while the others wait;
+  a `BroadcastChannel` message keeps every tab's banner and count in sync.
+  Requests abort after 20 seconds so a stalled one cannot hold the lock.
+- The queue holds at most 25 submissions and is pruned after 30 days.
+
+### Still not verified
+
+- A real network disconnect (DevTools offline / airplane mode) with navigation
+  replay; only cache contents and cache-hit behaviour were asserted.
+- Service-worker behaviour on iOS Safari and on shared school machines.
+- Offline **writes** cover same-origin POST forms captured while the browser
+  reports itself offline. File uploads are not queued, and a submit that fails
+  mid-flight on a flaky (not offline) connection is not captured.
+- Real airplane-mode replay on a physical device, iOS Safari evicting IndexedDB
+  under storage pressure, and two tabs replaying the same queue were not
+  exercised; the browser check forced `navigator.onLine` rather than cutting
+  the network.
+- Backup/restore against a real archive, PostgreSQL, PDF exports, and any load
+  or concurrency testing.

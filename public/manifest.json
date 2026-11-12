@@ -4,8 +4,8 @@
   "description": "Hadaba Al-Ahram Language School management platform with offline-ready support",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f3f6f4",
-  "theme_color": "#1f6f5c",
+  "background_color": "#f5f6fb",
+  "theme_color": "#4f46e5",
   "orientation": "any",
   "scope": "/",
   "icons": [
@@ -24,7 +24,7 @@
   ],
   "shortcuts": [],
   "categories": ["education", "productivity", "utilities"],
-  "dir": "auto",
-  "lang": "en",
+  "dir": "rtl",
+  "lang": "ar",
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7"
 }

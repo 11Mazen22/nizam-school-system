@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+// Production error policy for a school server: never print PHP warnings,
+// paths or SQL text into a page staff are using -- log them instead, and let
+// ErrorHandler render the friendly reference page. NIZAM_DEBUG=1 restores
+// on-screen errors for local development only.
+ini_set('display_errors', getenv('NIZAM_DEBUG') === '1' ? '1' : '0');
+ini_set('log_errors', '1');
+
 // Only relevant under `php -S ... public/index.php` (local dev/testing) --
 // PHP's built-in server routes *every* request through this script when
 // invoked this way, unlike Apache/XAMPP (production), whose own
@@ -45,6 +52,7 @@ use App\Controllers\AttendanceController;
 use App\Controllers\AuthController;
 use App\Controllers\BackupController;
 use App\Controllers\ClassController;
+use App\Controllers\CsrfController;
 use App\Controllers\DashboardController;
 use App\Controllers\ExamController;
 use App\Controllers\FinanceController;
@@ -71,6 +79,7 @@ use App\Controllers\WelfareController;
 use App\Middleware\AcademicYearContextMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Middleware\ModuleGateMiddleware;
+use App\Controllers\AcademicConfigController;
 use App\Middleware\RoleGuardMiddleware;
 use App\Middleware\SessionMiddleware;
 use App\Middleware\SetupGateMiddleware;
@@ -277,6 +286,30 @@ $router->get('/settings/security', [SettingsController::class, 'security'], [$se
 $router->post('/settings/security', [SettingsController::class, 'saveSecurity'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->get('/settings/backup', [SettingsController::class, 'backup'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->post('/settings/backup', [SettingsController::class, 'saveBackup'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+
+// Academic configuration -- stages, terms and grading scales. These three
+// screens are what make the academic model configurable per school rather
+// than fixed to the original institution's structure.
+$router->get('/settings/structure', [AcademicConfigController::class, 'stages'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/structure/stages', [AcademicConfigController::class, 'saveStage'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/structure/grade-stages', [AcademicConfigController::class, 'assignGradeStages'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/structure/stages/{id}', [AcademicConfigController::class, 'updateStage'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/structure/stages/{id}/delete', [AcademicConfigController::class, 'deleteStage'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->get('/settings/terms', [AcademicConfigController::class, 'terms'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/terms', [AcademicConfigController::class, 'saveTerm'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/terms/{id}', [AcademicConfigController::class, 'updateTerm'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/terms/{id}/delete', [AcademicConfigController::class, 'deleteTerm'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/terms/{id}/activate', [AcademicConfigController::class, 'activateTerm'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->get('/settings/grading', [AcademicConfigController::class, 'grading'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/grading', [AcademicConfigController::class, 'saveScale'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/grading/{id}', [AcademicConfigController::class, 'updateScale'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/grading/{id}/default', [AcademicConfigController::class, 'makeDefault'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->post('/settings/grading/{id}/delete', [AcademicConfigController::class, 'deleteScale'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+// Current CSRF token for the offline replay queue. Authenticated: the token
+// belongs to the session, and a queued write always belongs to a signed-in
+// user. Never cached.
+$router->get('/csrf-token', [CsrfController::class, 'token'], [$session, $csrf, RoleGuardMiddleware::requiresAuth()]);
+
 // Shown in the app shell for every authenticated role regardless of settings.manage, AND on the pre-login screen itself (a school crest isn't confidential) -- no RoleGuardMiddleware, matching decision #6/§J "shown on the dashboard."
 $router->get('/logo', [SettingsController::class, 'logo'], [$session, $csrf, $yearContext]);
 
@@ -290,8 +323,8 @@ $router->post('/guardians',                         [GuardianController::class, 
 $router->get('/guardians/{id}',                     [GuardianController::class, 'show'],    [$session, $csrf, $yearContext, ModuleGateMiddleware::for('guardians'), RoleGuardMiddleware::requiresPermission('guardians.view')]);
 $router->get('/guardians/{id}/edit',                [GuardianController::class, 'edit'],    [$session, $csrf, $yearContext, ModuleGateMiddleware::for('guardians'), RoleGuardMiddleware::requiresPermission('guardians.manage')]);
 $router->post('/guardians/{id}',                    [GuardianController::class, 'update'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('guardians'), RoleGuardMiddleware::requiresPermission('guardians.manage')]);
-$router->post('/students/{id}/guardians/link',       [GuardianController::class, 'link'],    [$session, $csrf, $yearContext, ModuleGateMiddleware::for('guardians'), RoleGuardMiddleware::requiresPermission('guardians.manage')]);
-$router->post('/students/{id}/guardians/{gid}/unlink', [GuardianController::class, 'unlink'],[$session, $csrf, $yearContext, ModuleGateMiddleware::for('guardians'), RoleGuardMiddleware::requiresPermission('guardians.manage')]);
+$router->post('/students/{id}/guardians/link',       [GuardianController::class, 'linkStudent'],    [$session, $csrf, $yearContext, ModuleGateMiddleware::for('guardians'), RoleGuardMiddleware::requiresPermission('guardians.manage')]);
+$router->post('/students/{id}/guardians/{gid}/unlink', [GuardianController::class, 'unlinkStudent'],[$session, $csrf, $yearContext, ModuleGateMiddleware::for('guardians'), RoleGuardMiddleware::requiresPermission('guardians.manage')]);
 
 // ---------------------------------------------------------------- Admissions & Enrollment
 $router->get('/admissions',                 [AdmissionsController::class, 'index'],            [$session, $csrf, $yearContext, ModuleGateMiddleware::for('admissions'), RoleGuardMiddleware::requiresPermission('admissions.view')]);
@@ -301,7 +334,7 @@ $router->get('/admissions/{id}',            [AdmissionsController::class, 'show'
 $router->post('/admissions/{id}/status',    [AdmissionsController::class, 'updateStatus'],     [$session, $csrf, $yearContext, ModuleGateMiddleware::for('admissions'), RoleGuardMiddleware::requiresPermission('admissions.manage')]);
 $router->post('/admissions/{id}/assessment',[AdmissionsController::class, 'recordAssessment'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('admissions'), RoleGuardMiddleware::requiresPermission('admissions.manage')]);
 $router->post('/admissions/{id}/decision',  [AdmissionsController::class, 'recordDecision'],   [$session, $csrf, $yearContext, ModuleGateMiddleware::for('admissions'), RoleGuardMiddleware::requiresPermission('admissions.manage')]);
-$router->post('/admissions/{id}/convert',   [AdmissionsController::class, 'convertToStudent'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('admissions'), RoleGuardMiddleware::requiresPermission('admissions.manage')]);
+$router->post('/admissions/{id}/convert',   [AdmissionsController::class, 'convert'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('admissions'), RoleGuardMiddleware::requiresPermission('admissions.manage')]);
 
 // ---------------------------------------------------------------- Finance & Billing
 $router->get('/finance',                        [FinanceController::class, 'index'],          [$session, $csrf, $yearContext, ModuleGateMiddleware::for('finance'), RoleGuardMiddleware::requiresPermission('finance.view')]);
@@ -317,22 +350,22 @@ $router->post('/finance/structures',            [FinanceController::class, 'stor
 $router->get('/hr',                     [HrController::class, 'index'],           [$session, $csrf, $yearContext, ModuleGateMiddleware::for('hr'), RoleGuardMiddleware::requiresPermission('hr.view')]);
 $router->get('/hr/leaves',              [HrController::class, 'leaves'],          [$session, $csrf, $yearContext, ModuleGateMiddleware::for('hr'), RoleGuardMiddleware::requiresPermission('hr.view')]);
 $router->post('/hr/leaves',             [HrController::class, 'storeLeave'],      [$session, $csrf, $yearContext, ModuleGateMiddleware::for('hr'), RoleGuardMiddleware::requiresPermission('hr.manage')]);
-$router->post('/hr/leaves/{id}/action', [HrController::class, 'actOnLeave'],      [$session, $csrf, $yearContext, ModuleGateMiddleware::for('hr'), RoleGuardMiddleware::requiresPermission('hr.manage')]);
+$router->post('/hr/leaves/{id}/action', [HrController::class, 'actionLeave'],      [$session, $csrf, $yearContext, ModuleGateMiddleware::for('hr'), RoleGuardMiddleware::requiresPermission('hr.manage')]);
 $router->post('/hr/departments',        [HrController::class, 'storeDepartment'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('hr'), RoleGuardMiddleware::requiresPermission('hr.manage')]);
 
 // ---------------------------------------------------------------- Transport
 $router->get('/transport',              [TransportController::class, 'index'],        [$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.view')]);
-$router->get('/transport/create',       [TransportController::class, 'createRoute'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.manage')]);
-$router->post('/transport',             [TransportController::class, 'storeRoute'],   [$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.manage')]);
-$router->get('/transport/{id}',         [TransportController::class, 'showRoute'],    [$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.view')]);
-$router->post('/transport/{id}/assign',  [TransportController::class, 'assignStudent'],[$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.manage')]);
+$router->get('/transport/create',       [TransportController::class, 'create'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.manage')]);
+$router->post('/transport',             [TransportController::class, 'store'],   [$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.manage')]);
+$router->get('/transport/{id}',         [TransportController::class, 'show'],    [$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.view')]);
+$router->post('/transport/{id}/assign',  [TransportController::class, 'assign'],[$session, $csrf, $yearContext, ModuleGateMiddleware::for('transport'), RoleGuardMiddleware::requiresPermission('transport.manage')]);
 
 // ---------------------------------------------------------------- Library
 $router->get('/library',                    [LibraryController::class, 'index'],       [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.view')]);
-$router->get('/library/create',             [LibraryController::class, 'createBook'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.manage')]);
-$router->post('/library',                   [LibraryController::class, 'storeBook'],   [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.manage')]);
+$router->get('/library/create',             [LibraryController::class, 'create'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.manage')]);
+$router->post('/library',                   [LibraryController::class, 'store'],   [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.manage')]);
 $router->get('/library/borrows',            [LibraryController::class, 'borrows'],     [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.view')]);
-$router->post('/library/borrow',            [LibraryController::class, 'borrowBook'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.manage')]);
+$router->post('/library/borrow',            [LibraryController::class, 'borrow'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.manage')]);
 $router->post('/library/borrows/{id}/return',[LibraryController::class, 'returnBook'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('library'), RoleGuardMiddleware::requiresPermission('library.manage')]);
 
 // ---------------------------------------------------------------- Portals & Role Workspaces
@@ -377,5 +410,22 @@ $router->get('/notifications/api',         [NotificationController::class, 'api'
 
 $router->get('/import/{entity}/template', [ImportController::class, 'template'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 $router->post('/import/{entity}', [ImportController::class, 'import'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+
+// Offline replay protection. A queued submission carries a client-generated
+// idempotency key; the first arrival claims it, a repeat gets 204 without
+// touching the handler again. Runs before dispatch and without a session so
+// it also covers routes that deliberately start no session. Any storage
+// problem is swallowed: data entry must never be blocked by idempotency.
+if ($request->method() === 'POST' && ($replayKey = $request->header('X-Nizam-Queue-Id')) !== null) {
+    try {
+        if (!\App\Services\ReplayGuard::claim(\App\Database::connection(), $replayKey)) {
+            http_response_code(204);
+            header('X-Nizam-Replay: duplicate');
+            exit;
+        }
+    } catch (\Throwable) {
+        // Fail open -- see above.
+    }
+}
 
 $router->dispatch($request);

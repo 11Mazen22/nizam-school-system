@@ -1,0 +1,8 @@
+# Nizam -- defense in depth.
+#
+# The project-root .htaccess already denies everything, and the recommended
+# deployment points Apache's DocumentRoot at public/, which puts this folder
+# outside the web root entirely. This file exists so that a misconfigured
+# DocumentRoot (pointed at the project root) still cannot serve uploaded
+# documents or application logs by URL.
+Require all denied

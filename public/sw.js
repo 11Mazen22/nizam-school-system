@@ -4,7 +4,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_VERSION = 'nizam-v1.1.1-premium-light';
+const CACHE_VERSION = 'nizam-v1.2.1-studio';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -22,9 +22,15 @@ const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 // for private school data.
 const STATIC_ASSETS = [
   '/assets/css/app.css',
+  '/assets/css/theme.css',
+  '/assets/css/components.css',
   '/assets/img/hadaba-logo.png',
   '/assets/js/app.js',
   '/assets/js/confirm.js',
+  '/assets/js/offline-queue.js',
+  '/assets/js/dashboard.js',
+  '/assets/vendor/chartjs/chart.umd.min.js',
+  '/manifest.json',
   '/assets/vendor/jquery/jquery.min.js',
   '/assets/vendor/bootstrap/css/bootstrap.min.css',
   '/assets/vendor/bootstrap/css/bootstrap.rtl.min.css',
@@ -184,12 +190,21 @@ async function cacheFirst(request, cacheName, limit = null) {
  */
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
-  const cachedResponse = await cache.match(request);
+
+  // Pages request versioned URLs (?v=<mtime>) while install precaches the
+  // bare path. Matching by full URL would therefore never hit the precache
+  // and a freshly installed school could open the app offline with NO
+  // stylesheet at all. One canonical entry per path fixes both the offline
+  // hit and unbounded duplicate versions.
+  const url = new URL(request.url);
+  const key = new Request(url.origin + url.pathname);
+
+  const cachedResponse = await cache.match(key) || await cache.match(request, { ignoreSearch: true });
 
   const networkFetch = fetch(request)
     .then((networkResponse) => {
       if (networkResponse.ok) {
-        cache.put(request, networkResponse.clone());
+        cache.put(key, networkResponse.clone());
       }
       return networkResponse;
     })
@@ -308,8 +323,8 @@ function createOfflineResponse() {
           justify-content: center;
           min-height: 100vh;
           margin: 0;
-           background: #f6f8fc;
-           color: #172033;
+           background: #f5f6fb;
+           color: #101828;
           text-align: center;
           padding: 20px;
         }
@@ -328,7 +343,7 @@ function createOfflineResponse() {
           padding: 17px;
           border-radius: 18px;
           color: #a76610;
-          background: #fff6df;
+          background: #fff6e6;
           opacity: 1;
         }
         h1 {
@@ -340,9 +355,9 @@ function createOfflineResponse() {
           line-height: 1.6;
         }
         button {
-           background: #315efb;
+           background: #4f46e5;
            color: white;
-           border: 1px solid #315efb;
+           border: 1px solid #4f46e5;
           padding: 10px 20px;
           border-radius: 10px;
           font-weight: 600;
@@ -351,11 +366,11 @@ function createOfflineResponse() {
           font-size: 0.95rem;
         }
         button:hover {
-          background: #2449d8;
-          border-color: #2449d8;
+          background: #4338ca;
+          border-color: #4338ca;
         }
         button:focus-visible {
-          outline: 2px solid #315efb;
+          outline: 2px solid #4f46e5;
           outline-offset: 2px;
         }
       </style>
