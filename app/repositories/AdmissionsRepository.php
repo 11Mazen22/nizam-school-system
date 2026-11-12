@@ -95,7 +95,7 @@ final class AdmissionsRepository
         $stmt = Database::connection()->prepare(
             'UPDATE admissions_applications
              SET assessment_date = :adate, assessment_score = :score, assessment_notes = :notes,
-                 status = "review", updated_at = :now
+                 status = \'review\', updated_at = :now
              WHERE id = :id'
         );
         $stmt->execute([
@@ -128,7 +128,7 @@ final class AdmissionsRepository
     {
         $stmt = Database::connection()->prepare(
             'UPDATE admissions_applications
-             SET status = "enrolled", enrolled_student_id = :student_id, updated_at = :now
+             SET status = \'enrolled\', enrolled_student_id = :student_id, updated_at = :now
              WHERE id = :id'
         );
         $stmt->execute([

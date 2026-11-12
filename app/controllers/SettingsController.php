@@ -58,26 +58,60 @@ final class SettingsController extends Controller
             return;
         }
 
+        // Named arguments, deliberately: this call used to pass 16 positional
+        // values into an 18-parameter method, which silently wrote currency
+        // into default_locale, date_format into currency, school_week into
+        // date_format and so on. Saving the profile therefore corrupted the
+        // very identity fields the screen exists to configure. Named
+        // arguments make that class of drift impossible to reintroduce.
         $this->schools->update(
-            $school['id'],
-            $name,
-            $nameAr,
-            $address,
-            $phone,
-            $request->post('email', '') ?: null,
-            $request->post('website', '') ?: null,
-            (string) ($request->post('country', 'EG') ?: 'EG'),
-            $request->post('region', '') ?: null,
-            (string) ($request->post('timezone', 'Africa/Cairo') ?: 'Africa/Cairo'),
-            (string) ($request->post('currency', 'EGP') ?: 'EGP'),
-            (string) ($request->post('date_format', 'YYYY-MM-DD') ?: 'YYYY-MM-DD'),
-            (string) ($request->post('school_week', '0,1,2,3,4') ?: '0,1,2,3,4'),
-            (string) ($request->post('school_type', 'language_school') ?: 'language_school'),
-            (string) ($request->post('school_structure', 'k12_combined') ?: 'k12_combined'),
-            $request->post('tax_number', '') ?: null,
-            $request->post('affiliation_code', '') ?: null
+            id: (int) $school['id'],
+            name: $name,
+            nameAr: $nameAr,
+            address: $address,
+            phone: $phone,
+            email: $request->post('email', '') ?: null,
+            website: $request->post('website', '') ?: null,
+            country: (string) ($request->post('country', 'EG') ?: 'EG'),
+            region: $request->post('region', '') ?: null,
+            timezone: (string) ($request->post('timezone', 'Africa/Cairo') ?: 'Africa/Cairo'),
+            // Not present on this form: keep whatever is configured rather
+            // than resetting it to a hardcoded default on every save.
+            defaultLocale: (string) ($school['default_locale'] ?? 'ar'),
+            currency: (string) ($request->post('currency', 'EGP') ?: 'EGP'),
+            dateFormat: (string) ($school['date_format'] ?? 'YYYY-MM-DD'),
+            numberFormat: (string) ($school['number_format'] ?? 'standard'),
+            schoolWeek: (string) ($request->post('school_week', '0,1,2,3,4') ?: '0,1,2,3,4'),
+            schoolType: (string) ($request->post('school_type', 'language_school') ?: 'language_school'),
+            schoolStructure: (string) ($request->post('school_structure', 'k12_combined') ?: 'k12_combined'),
+            taxNumber: $request->post('tax_number', '') ?: null,
+            affiliationCode: $request->post('affiliation_code', '') ?: null
         );
         SettingsService::set('reports.school_footer_text', (string) ($footerText ?? ''), 'string');
+
+        // School logo: previously the shell and this screen both hardcoded the
+        // original institution's crest, which made "configure your school's
+        // identity" untrue for every other school. UploadService already
+        // validates, re-encodes and stores the file outside public/.
+        $logo = $request->file('logo');
+        $hasNewLogo = $logo !== null && ($logo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+
+        if ($hasNewLogo) {
+            try {
+                $logoPath = $this->uploads->store($logo, 'school');
+            } catch (RuntimeException) {
+                $this->view('settings/profile', [
+                    'error' => __('settings.error.logo_invalid'),
+                    'school' => $this->schools->full(),
+                ]);
+                return;
+            }
+            $this->uploads->delete($school['logo_path'] ?? null);
+            $this->schools->updateLogoPath((int) $school['id'], $logoPath);
+        } elseif ($request->post('remove_logo') === '1') {
+            $this->uploads->delete($school['logo_path'] ?? null);
+            $this->schools->updateLogoPath((int) $school['id'], null);
+        }
 
         ActivityLogger::log('settings.update', 'settings', null, 'Profile settings updated');
         Flash::set('success', __('settings.saved'));
@@ -88,7 +122,26 @@ final class SettingsController extends Controller
     public function logo(Request $request): void
     {
         $school = $this->schools->full();
-        $this->uploads->stream($school['logo_path'] ?? null);
+        $path = $school['logo_path'] ?? null;
+
+        // A fresh install's schools row points at the original crest, but no
+        // bytes were ever stored for it, so /logo 404'd and every shell showed
+        // a broken image. Serve the bundled crest when the stored file is
+        // missing -- the same asset the views already fall back to when
+        // logo_path is empty. Found by browser review of a freshly seeded
+        // database, not by any status-code test.
+        if ($path !== null && $path !== '' && \App\Services\UploadService::retrieve($path) !== null) {
+            $this->uploads->stream($path);
+            return;
+        }
+
+        $fallback = dirname(__DIR__, 2) . '/public/assets/img/hadaba-logo.png';
+        if (is_file($fallback)) {
+            \App\Response::inlineFile((string) file_get_contents($fallback), 'image/png');
+            return;
+        }
+
+        \App\ErrorHandler::renderNotFound();
     }
 
     // ------------------------------------------------------ Localization

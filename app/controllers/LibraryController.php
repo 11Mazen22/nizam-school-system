@@ -87,15 +87,32 @@ final class LibraryController extends Controller
             return;
         }
 
-        $this->repository->recordBorrow($bookId, $borrowerType, $studentId, $teacherId, $dueDate);
-        Flash::success(__('library.borrow_recorded'));
+        try {
+            $this->repository->recordBorrow($bookId, $borrowerType, $studentId, $teacherId, $dueDate);
+            Flash::success(__('library.borrow_recorded'));
+        } catch (\RuntimeException $e) {
+            $key = 'library.' . $e->getMessage();
+            $message = __($key);
+            Flash::error($message === $key ? __('library.missing_fields') : $message);
+        }
         Response::redirect('/library/borrows');
     }
 
-    public function returnBook(Request $request, string $id): void
+    public function returnBook(Request $request): void
     {
-        $this->repository->recordReturn((int) $id);
-        Flash::success(__('library.return_recorded'));
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/library/borrows');
+            return;
+        }
+        try {
+            $this->repository->recordReturn($id);
+            Flash::success(__('library.return_recorded'));
+        } catch (\RuntimeException $e) {
+            $key = 'library.' . $e->getMessage();
+            $message = __($key);
+            Flash::error($message === $key ? __('library.missing_book') : $message);
+        }
         Response::redirect('/library/borrows');
     }
 }

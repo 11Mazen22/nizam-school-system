@@ -39,16 +39,21 @@ final class AdmissionsController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $id): void
+    public function show(Request $request): void
     {
-        $app = $this->repository->find((int) $id);
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/admissions');
+            return;
+        }
+        $app = $this->repository->find($id);
         if ($app === null) {
             Flash::error(__('admissions.not_found'));
             Response::redirect('/admissions');
             return;
         }
 
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         $classes = $activeYearId !== null
             ? (new ClassRepository())->forGradeAndYear((int) $app['grade_id'], $activeYearId)
             : [];
@@ -59,13 +64,13 @@ final class AdmissionsController extends Controller
     public function create(Request $request): void
     {
         $grades = (new GradeRepository())->all();
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         $this->view('admissions/create', ['grades' => $grades, 'academicYearId' => $activeYearId]);
     }
 
     public function store(Request $request): void
     {
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         if ($activeYearId === null) {
             Flash::error(__('admissions.no_active_year'));
             Response::redirect('/admissions');
@@ -89,13 +94,18 @@ final class AdmissionsController extends Controller
             Flash::success(__('admissions.created_success', ['number' => $result['application_number']]));
             Response::redirect('/admissions/' . $result['id']);
         } else {
-            Flash::error($result['error'] ?? __('admissions.create_error'));
+            Flash::error(__($result['error'] ?? 'admissions.create_error'));
             Response::redirect('/admissions/create');
         }
     }
 
-    public function updateStatus(Request $request, string $id): void
+    public function updateStatus(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/admissions');
+            return;
+        }
         $status = (string) $request->post('status');
         $notes = trim((string) $request->post('notes')) ?: null;
 
@@ -104,8 +114,13 @@ final class AdmissionsController extends Controller
         Response::redirect('/admissions/' . $id);
     }
 
-    public function recordAssessment(Request $request, string $id): void
+    public function recordAssessment(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/admissions');
+            return;
+        }
         $date = (string) $request->post('assessment_date', date('Y-m-d'));
         $score = (float) $request->post('assessment_score', 0.0);
         $notes = trim((string) $request->post('assessment_notes')) ?: null;
@@ -115,8 +130,13 @@ final class AdmissionsController extends Controller
         Response::redirect('/admissions/' . $id);
     }
 
-    public function recordDecision(Request $request, string $id): void
+    public function recordDecision(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/admissions');
+            return;
+        }
         $decision = (string) $request->post('decision');
         $notes = trim((string) $request->post('decision_notes')) ?: null;
 
@@ -125,8 +145,13 @@ final class AdmissionsController extends Controller
         Response::redirect('/admissions/' . $id);
     }
 
-    public function convert(Request $request, string $id): void
+    public function convert(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/admissions');
+            return;
+        }
         $classId = $request->post('class_id') ? (int) $request->post('class_id') : null;
         $result = $this->service->convertApplicantToStudent((int) $id, $classId);
 
@@ -134,7 +159,7 @@ final class AdmissionsController extends Controller
             Flash::success(__('admissions.convert_success'));
             Response::redirect('/students/' . $result['student_id']);
         } else {
-            Flash::error($result['error'] ?? __('admissions.convert_error'));
+            Flash::error(__($result['error'] ?? 'admissions.convert_error'));
             Response::redirect('/admissions/' . $id);
         }
     }

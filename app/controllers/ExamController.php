@@ -110,6 +110,7 @@ final class ExamController extends Controller
             'subjects' => $subjects,
             'subjectId' => $subjectId,
             'sheet'    => $sheet,
+            'scale'    => $this->service->activeScale(),
         ]);
     }
 
@@ -164,7 +165,7 @@ final class ExamController extends Controller
         $studentId = $request->paramInt('id') ?? 0;
         $yearId    = AcademicYearContext::activeYearId() ?? 0;
 
-        $grid = $this->service->getStudentScoreGrid($studentId, $yearId);
+        $report = $this->service->getStudentReport($studentId, $yearId);
 
         // Check if mPDF is available
         if (!class_exists(Mpdf::class)) {

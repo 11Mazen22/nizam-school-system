@@ -15,6 +15,7 @@ $tabs = [
     'modules' => ['icon' => 'puzzle', 'label' => 'settings.tab.modules'],
     'localization' => ['icon' => 'grid', 'label' => 'settings.tab.localization'],
     'academic' => ['icon' => 'calendar', 'label' => 'settings.tab.academic'],
+    'structure' => ['icon' => 'layers', 'label' => 'settings.tab.structure'],
     'security' => ['icon' => 'lock', 'label' => 'settings.tab.security'],
     'backup' => ['icon' => 'database', 'label' => 'settings.tab.backup'],
 ];

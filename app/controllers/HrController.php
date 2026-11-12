@@ -74,14 +74,22 @@ final class HrController extends Controller
         Response::redirect('/hr/leaves');
     }
 
-    public function actionLeave(Request $request, string $id): void
+    public function actionLeave(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/hr/leaves');
+            return;
+        }
         $status = (string) $request->post('status'); // approved or rejected
         $notes = trim((string) $request->post('action_notes')) ?: null;
         $userId = (int) ($_SESSION['user_id'] ?? 1);
 
-        $this->repository->updateLeaveStatus((int) $id, $status, $userId, $notes);
-        Flash::success(__('hr.leave_status_updated'));
+        if ($this->repository->updateLeaveStatus((int) $id, $status, $userId, $notes)) {
+            Flash::success(__('hr.leave_status_updated'));
+        } else {
+            Flash::error(__('hr.leave_not_pending'));
+        }
         Response::redirect('/hr/leaves');
     }
 

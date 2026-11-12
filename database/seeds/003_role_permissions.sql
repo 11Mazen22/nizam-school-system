@@ -70,3 +70,22 @@ FROM (
 ) AS mapping
 JOIN roles r ON r.code = mapping.role_code
 JOIN permissions p ON p.code = mapping.perm_code;
+
+-- Administrator: every permission in the catalogue, including ones added by
+-- modules that did not exist when the hand-written list above was authored.
+--
+-- This block is load-bearing, not a convenience. The `admin` role is created by
+-- seed 001, which runs AFTER every migration; migration 021 therefore cannot
+-- grant it anything on a fresh install, because at migration time the role does
+-- not exist yet. Found by tests/http/run.php: a fresh database's administrator
+-- could sign in but was denied /admissions, /guardians, /finance, /hr,
+-- /transport and /library, because those 17 permissions post-dated the list at
+-- the top of this file. The cross join makes the grant self-maintaining.
+--
+-- Migration 021 remains the other half of the fix: it covers installations that
+-- already have an admin role and will never re-run this seed.
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+CROSS JOIN permissions p
+WHERE r.code = 'admin';

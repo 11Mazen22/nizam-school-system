@@ -6,7 +6,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "php tests/import-contract.php && php tests/exam-integrity.php && php tests/authorization-refresh.php"
+    "test": "php tests/import-contract.php && php tests/exam-integrity.php && php tests/authorization-refresh.php && php tests/academic-calculation.php && php tests/academic-configuration.php && php tests/module-integrity.php && php tests/scheduled-auth.php && php tests/http/run.php"
   },
   "repository": {
     "type": "git",

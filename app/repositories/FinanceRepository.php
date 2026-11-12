@@ -144,37 +144,84 @@ final class FinanceRepository
         return $stmt->fetchAll() ?: [];
     }
 
+    /**
+     * Record a payment against an invoice.
+     *
+     * Money is the one domain where "mostly right" is not acceptable, so this
+     * is transactional and locks the invoice row before deciding whether the
+     * payment is allowed. The previous version inserted the receipt first and
+     * only then read the balance, which meant a cashier could take a payment
+     * larger than the outstanding amount, pay a cancelled invoice, or pay one
+     * that was already settled -- and a failure between the two statements
+     * left a receipt with no matching balance change.
+     *
+     * @param array<string,mixed> $data
+     * @throws \RuntimeException with a stable code: invoice_not_found,
+     *         invoice_cancelled, invoice_already_paid, payment_exceeds_balance,
+     *         invalid_payment_amount
+     */
     public function recordPayment(array $data): int
     {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare(
-            'INSERT INTO invoice_payments (
-                invoice_id, receipt_number, amount, payment_date, payment_method,
-                reference_number, notes, recorded_by, created_at
-             ) VALUES (
-                :inv_id, :rec_no, :amount, :pdate, :method,
-                :ref_no, :notes, :rec_by, :now
-             )'
-        );
-        $stmt->execute([
-            'inv_id' => $data['invoice_id'],
-            'rec_no' => $data['receipt_number'],
-            'amount' => $data['amount'],
-            'pdate'  => $data['payment_date'],
-            'method' => $data['payment_method'] ?? 'cash',
-            'ref_no' => $data['reference_number'] ?? null,
-            'notes'  => $data['notes'] ?? null,
-            'rec_by' => $data['recorded_by'] ?? null,
-            'now'    => date('Y-m-d H:i:s'),
-        ]);
-        $paymentId = (int) $pdo->lastInsertId();
+        $invoiceId = (int) ($data['invoice_id'] ?? 0);
+        $amount = round((float) ($data['amount'] ?? 0), 2);
 
-        // Update invoice paid amount and status
-        $invoice = $this->findInvoice((int) $data['invoice_id']);
-        if ($invoice !== null) {
-            $newPaid = (float) $invoice['paid_amount'] + (float) $data['amount'];
-            $netDue = (float) $invoice['total_amount'] - (float) $invoice['discount_amount'];
-            $newStatus = ($newPaid >= $netDue) ? 'paid' : ($newPaid > 0 ? 'partial' : 'pending');
+        if ($invoiceId <= 0 || $amount <= 0) {
+            throw new \RuntimeException('invalid_payment_amount');
+        }
+
+        $ownsTransaction = !$pdo->inTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        }
+
+        try {
+            $invoice = $this->lockInvoice($invoiceId);
+            if ($invoice === null) {
+                throw new \RuntimeException('invoice_not_found');
+            }
+            if ((string) $invoice['status'] === 'cancelled') {
+                throw new \RuntimeException('invoice_cancelled');
+            }
+
+            $netDue = round((float) $invoice['total_amount'] - (float) $invoice['discount_amount'], 2);
+            $alreadyPaid = round((float) $invoice['paid_amount'], 2);
+            $remaining = round($netDue - $alreadyPaid, 2);
+
+            if ($remaining <= 0.0) {
+                throw new \RuntimeException('invoice_already_paid');
+            }
+            // A penny of tolerance absorbs decimal rounding at the boundary;
+            // anything more is a genuine overpayment and is refused rather
+            // than silently accepted into the school's books.
+            if ($amount > $remaining + 0.001) {
+                throw new \RuntimeException('payment_exceeds_balance');
+            }
+
+            $paymentId = Database::insert(
+                $pdo,
+                'INSERT INTO invoice_payments (
+                    invoice_id, receipt_number, amount, payment_date, payment_method,
+                    reference_number, notes, recorded_by, created_at
+                 ) VALUES (
+                    :inv_id, :rec_no, :amount, :pdate, :method,
+                    :ref_no, :notes, :rec_by, :now
+                 )',
+                [
+                    'inv_id' => $invoiceId,
+                    'rec_no' => $data['receipt_number'],
+                    'amount' => $amount,
+                    'pdate'  => $data['payment_date'],
+                    'method' => $data['payment_method'] ?? 'cash',
+                    'ref_no' => $data['reference_number'] ?? null,
+                    'notes'  => $data['notes'] ?? null,
+                    'rec_by' => $data['recorded_by'] ?? null,
+                    'now'    => date('Y-m-d H:i:s'),
+                ]
+            );
+
+            $newPaid = round($alreadyPaid + $amount, 2);
+            $newStatus = $newPaid + 0.001 >= $netDue ? 'paid' : 'partial';
 
             $upStmt = $pdo->prepare(
                 'UPDATE student_invoices SET paid_amount = :paid, status = :status, updated_at = :now WHERE id = :id'
@@ -183,11 +230,32 @@ final class FinanceRepository
                 'paid'   => $newPaid,
                 'status' => $newStatus,
                 'now'    => date('Y-m-d H:i:s'),
-                'id'     => $invoice['id'],
+                'id'     => $invoiceId,
             ]);
-        }
 
-        return $paymentId;
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
+
+            return $paymentId;
+        } catch (\Throwable $e) {
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /** Row lock so two cashiers cannot both pass the balance check. @return array<string,mixed>|null */
+    private function lockInvoice(int $invoiceId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT id, total_amount, discount_amount, paid_amount, status
+             FROM student_invoices WHERE id = :id FOR UPDATE'
+        );
+        $stmt->execute(['id' => $invoiceId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
     }
 
     public function getSummary(?int $academicYearId = null): array

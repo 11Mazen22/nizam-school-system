@@ -84,12 +84,26 @@ final class HrRepository
         return (int) $pdo->lastInsertId();
     }
 
-    public function updateLeaveStatus(int $id, string $status, int $approvedBy, ?string $notes = null): void
+    /**
+     * Approve or reject a leave request.
+     *
+     * Only a pending request may be decided, and only to approved/rejected.
+     * Without the status predicate, an already-approved leave could be
+     * flipped to rejected (or re-approved by a different manager) and the
+     * HR record would silently lose the first decision.
+     *
+     * @return bool true when a pending request was actually decided
+     */
+    public function updateLeaveStatus(int $id, string $status, int $approvedBy, ?string $notes = null): bool
     {
+        if (!in_array($status, ['approved', 'rejected'], true)) {
+            return false;
+        }
+
         $stmt = Database::connection()->prepare(
-            'UPDATE staff_leaves
+            "UPDATE staff_leaves
              SET status = :status, approved_by = :approver, action_notes = :notes
-             WHERE id = :id'
+             WHERE id = :id AND status = 'pending'"
         );
         $stmt->execute([
             'status'   => $status,
@@ -97,5 +111,7 @@ final class HrRepository
             'notes'    => $notes,
             'id'       => $id,
         ]);
+
+        return $stmt->rowCount() > 0;
     }
 }

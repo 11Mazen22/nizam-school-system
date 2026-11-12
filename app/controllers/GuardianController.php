@@ -25,9 +25,14 @@ final class GuardianController extends Controller
         $this->view('guardians/index', ['guardians' => $guardians]);
     }
 
-    public function show(Request $request, string $id): void
+    public function show(Request $request): void
     {
-        $guardian = $this->repository->find((int) $id);
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/guardians');
+            return;
+        }
+        $guardian = $this->repository->find($id);
         if ($guardian === null) {
             Flash::error(__('guardians.not_found'));
             Response::redirect('/guardians');
@@ -69,9 +74,14 @@ final class GuardianController extends Controller
         Response::redirect('/guardians/' . $id);
     }
 
-    public function edit(Request $request, string $id): void
+    public function edit(Request $request): void
     {
-        $guardian = $this->repository->find((int) $id);
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/guardians');
+            return;
+        }
+        $guardian = $this->repository->find($id);
         if ($guardian === null) {
             Flash::error(__('guardians.not_found'));
             Response::redirect('/guardians');
@@ -81,8 +91,13 @@ final class GuardianController extends Controller
         $this->view('guardians/edit', ['guardian' => $guardian]);
     }
 
-    public function update(Request $request, string $id): void
+    public function update(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/guardians');
+            return;
+        }
         $fullName = trim((string) $request->post('full_name'));
         $phone = trim((string) $request->post('phone'));
 
@@ -107,8 +122,13 @@ final class GuardianController extends Controller
         Response::redirect('/guardians/' . $id);
     }
 
-    public function linkStudent(Request $request, string $studentId): void
+    public function linkStudent(Request $request): void
     {
+        $studentId = $request->paramInt('id');
+        if ($studentId === null) {
+            Response::redirect('/students');
+            return;
+        }
         $guardianId = (int) $request->post('guardian_id');
         $rel = (string) $request->post('relationship', 'father');
         $isPrimary = (bool) $request->post('is_primary', false);
@@ -122,9 +142,15 @@ final class GuardianController extends Controller
         Response::redirect('/students/' . $studentId . '#guardians');
     }
 
-    public function unlinkStudent(Request $request, string $studentId, string $guardianId): void
+    public function unlinkStudent(Request $request): void
     {
-        $this->repository->unlinkStudent((int) $studentId, (int) $guardianId);
+        $studentId = $request->paramInt('id');
+        $guardianId = $request->paramInt('gid');
+        if ($studentId === null || $guardianId === null) {
+            Response::redirect('/students');
+            return;
+        }
+        $this->repository->unlinkStudent($studentId, $guardianId);
         Flash::success(__('guardians.unlink_success'));
         Response::redirect('/students/' . $studentId . '#guardians');
     }

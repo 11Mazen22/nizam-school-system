@@ -90,4 +90,27 @@ final class Database
 
         return self::$connection;
     }
+
+    /**
+     * Insert a row and return its generated id on both supported engines.
+     *
+     * PostgreSQL needs RETURNING; PDO::lastInsertId() without a sequence name
+     * is not portable to it. Every module that inserted with lastInsertId()
+     * therefore worked on MySQL and failed on PostgreSQL -- this helper is the
+     * single place that difference is handled.
+     *
+     * @param array<string,mixed> $params
+     */
+    public static function insert(PDO $pdo, string $sql, array $params = []): int
+    {
+        if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+            $stmt = $pdo->prepare($sql . ' RETURNING id');
+            $stmt->execute($params);
+            return (int) $stmt->fetchColumn();
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int) $pdo->lastInsertId();
+    }
 }

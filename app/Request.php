@@ -45,6 +45,37 @@ final class Request
     }
 
     /**
+     * A request header, or null when absent.
+     *
+     * PHP exposes headers as HTTP_* server vars; Content-Type and
+     * Content-Length are the two exceptions. Apache commonly strips the
+     * Authorization header unless a vhost maps it, so the REDIRECT_ and
+     * apache_request_headers() fallbacks keep bearer-token endpoints working
+     * on a plain XAMPP install. This method was missing entirely, which made
+     * every /scheduled/* cron endpoint fatal on its first line.
+     */
+    public function header(string $name): ?string
+    {
+        $key = strtoupper(str_replace('-', '_', $name));
+        $serverKey = in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH'], true) ? $key : 'HTTP_' . $key;
+        $value = $_SERVER[$serverKey] ?? null;
+
+        if (($value === null || $value === '') && $key === 'AUTHORIZATION') {
+            $value = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null;
+            if (($value === null || $value === '') && function_exists('apache_request_headers')) {
+                foreach (apache_request_headers() as $headerName => $headerValue) {
+                    if (strcasecmp($headerName, $name) === 0) {
+                        $value = $headerValue;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $value === null || $value === '' ? null : (string) $value;
+    }
+
+    /**
      * POST body only -- deliberately does NOT fall back to the query string.
      * Every current caller (form fields, the CSRF token) is security- or
      * correctness-sensitive precisely because it must not be satisfiable via
@@ -55,10 +86,28 @@ final class Request
      * was removed rather than kept "for convenience" once review showed
      * every real call site actually wanted one specific source, never both.
      */
-    public function post(string $key, ?string $default = null): ?string
+    /**
+     * $default is deliberately `mixed`, not `?string`. Callers legitimately
+     * pass the type they are about to cast to -- 0.0 for an amount, 30 for a
+     * bus capacity, false for a checkbox -- and a request field itself is
+     * always a string, so the fallback is stringified on the way out.
+     * Found live: the strict `?string` default made POST /finance/invoices,
+     * /finance/invoices/{id}/payments, /transport, /library and the guardian
+     * link raise TypeError and return 500 on their primary write path.
+     */
+    public function post(string $key, mixed $default = null): ?string
     {
-        $value = $this->body[$key] ?? $default;
-        return is_string($value) ? trim($value) : $default;
+        $value = $this->body[$key] ?? null;
+        if (is_string($value)) {
+            return trim($value);
+        }
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+        if ($default === null) {
+            return null;
+        }
+        return is_scalar($default) ? (string) $default : null;
     }
 
     /** Query string only -- e.g. the /lang switch, which is a GET-only concern by nature. */

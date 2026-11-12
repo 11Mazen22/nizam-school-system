@@ -68,54 +68,132 @@ final class LibraryRepository
         return $stmt->fetchAll() ?: [];
     }
 
+    /**
+     * Record a loan.
+     *
+     * The previous version clamped the stock with GREATEST(0, ...) and never
+     * checked availability first, so a book with every copy already lent out
+     * could still be borrowed -- the count simply stuck at zero while loans
+     * kept accumulating. Stock is now locked and checked inside a transaction.
+     *
+     * @throws \RuntimeException book_not_found|no_copies_available
+     */
     public function recordBorrow(int $bookId, string $borrowerType, ?int $studentId, ?int $teacherId, string $dueDate): int
     {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare(
-            'INSERT INTO library_borrows (
-                book_id, borrower_type, student_id, teacher_id, borrow_date, due_date, status, created_at
-             ) VALUES (
-                :book_id, :b_type, :s_id, :t_id, :b_date, :due_date, "borrowed", :now
-             )'
-        );
-        $stmt->execute([
-            'book_id'  => $bookId,
-            'b_type'   => $borrowerType,
-            's_id'     => $studentId,
-            't_id'     => $teacherId,
-            'b_date'   => date('Y-m-d'),
-            'due_date' => $dueDate,
-            'now'      => date('Y-m-d H:i:s'),
-        ]);
-        $borrowId = (int) $pdo->lastInsertId();
+        $ownsTransaction = !$pdo->inTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        }
 
-        // Decrement available copies
-        $up = $pdo->prepare('UPDATE library_books SET available_copies = GREATEST(0, available_copies - 1) WHERE id = :id');
-        $up->execute(['id' => $bookId]);
+        try {
+            $lock = $pdo->prepare(
+                'SELECT id, total_copies, available_copies FROM library_books WHERE id = :id FOR UPDATE'
+            );
+            $lock->execute(['id' => $bookId]);
+            $book = $lock->fetch();
 
-        return $borrowId;
+            if ($book === false) {
+                throw new \RuntimeException('book_not_found');
+            }
+            if ((int) $book['available_copies'] < 1) {
+                throw new \RuntimeException('no_copies_available');
+            }
+
+            $borrowId = Database::insert(
+                $pdo,
+                'INSERT INTO library_borrows (
+                    book_id, borrower_type, student_id, teacher_id, borrow_date, due_date, status, created_at
+                 ) VALUES (
+                    :book_id, :b_type, :s_id, :t_id, :b_date, :due_date, :status, :now
+                 )',
+                [
+                    'book_id'  => $bookId,
+                    'b_type'   => $borrowerType,
+                    's_id'     => $studentId,
+                    't_id'     => $teacherId,
+                    'b_date'   => date('Y-m-d'),
+                    'due_date' => $dueDate,
+                    'status'   => 'borrowed',
+                    'now'      => date('Y-m-d H:i:s'),
+                ]
+            );
+
+            $up = $pdo->prepare('UPDATE library_books SET available_copies = available_copies - 1 WHERE id = :id');
+            $up->execute(['id' => $bookId]);
+
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
+
+            return $borrowId;
+        } catch (\Throwable $e) {
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
+    /**
+     * Record a return. Idempotent: returning the same loan twice must not
+     * inflate the shelf count. The previous version incremented the stock on
+     * every call, so a double-click could make a two-copy book report three
+     * copies available.
+     *
+     * @throws \RuntimeException borrow_not_found
+     */
     public function recordReturn(int $borrowId): void
     {
         $pdo = Database::connection();
-        $borrowStmt = $pdo->prepare('SELECT * FROM library_borrows WHERE id = :id LIMIT 1');
-        $borrowStmt->execute(['id' => $borrowId]);
-        $borrow = $borrowStmt->fetch();
-        if ($borrow === false) {
-            return;
+        $ownsTransaction = !$pdo->inTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
         }
 
-        $stmt = $pdo->prepare(
-            'UPDATE library_borrows SET status = "returned", return_date = :rdate WHERE id = :id'
-        );
-        $stmt->execute([
-            'rdate' => date('Y-m-d'),
-            'id'    => $borrowId,
-        ]);
+        try {
+            $borrowStmt = $pdo->prepare(
+                'SELECT id, book_id, status FROM library_borrows WHERE id = :id FOR UPDATE'
+            );
+            $borrowStmt->execute(['id' => $borrowId]);
+            $borrow = $borrowStmt->fetch();
 
-        // Increment available copies
-        $up = $pdo->prepare('UPDATE library_books SET available_copies = LEAST(total_copies, available_copies + 1) WHERE id = :id');
-        $up->execute(['id' => $borrow['book_id']]);
+            if ($borrow === false) {
+                throw new \RuntimeException('borrow_not_found');
+            }
+
+            if ((string) $borrow['status'] === 'returned') {
+                if ($ownsTransaction) {
+                    $pdo->commit();
+                }
+                return;
+            }
+
+            $stmt = $pdo->prepare(
+                'UPDATE library_borrows SET status = :status, return_date = :rdate WHERE id = :id'
+            );
+            $stmt->execute([
+                'status' => 'returned',
+                'rdate'  => date('Y-m-d'),
+                'id'     => $borrowId,
+            ]);
+
+            // The predicate keeps the count inside its own total even if two
+            // librarians return different loans of the same title at once.
+            $up = $pdo->prepare(
+                'UPDATE library_books SET available_copies = available_copies + 1
+                 WHERE id = :id AND available_copies < total_copies'
+            );
+            $up->execute(['id' => $borrow['book_id']]);
+
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
+        } catch (\Throwable $e) {
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 }

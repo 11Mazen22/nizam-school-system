@@ -45,10 +45,14 @@ gantt
 - [x] Multi-campus ADR (`docs/product/multi-campus-and-tenancy-decision.md`).
 - [x] Onboarding guide (`docs/product/school-onboarding-guide.md`).
 - [x] Interoperability strategy (`docs/product/interoperability-strategy.md`).
-- [ ] Database migrations: MySQL (`019_universal_platform_foundation.sql`) & PostgreSQL (`023_universal_platform_foundation.sql`).
-- [ ] `App\Services\ModuleManager` implementation with route gating and nav filtering.
-- [ ] Institution settings expansion in `SchoolRepository` and `SettingsRepository`.
-- [ ] Configurable grading scales (`grading_scales`) and terms (`academic_terms`).
+- [x] Database migrations: MySQL (`019_universal_platform_foundation.sql`) & PostgreSQL (`023_universal_platform_foundation.sql`).
+- [x] `App\Services\ModuleManager` implementation with route gating and nav filtering.
+- [x] Institution settings expansion in `SchoolRepository` and `SettingsRepository`.
+- [x] Configurable grading scales (`grading_scales`) and terms (`academic_terms`) -- CRUD, validation and bilingual screens at `/settings/structure`, `/settings/terms`, `/settings/grading`, covered by `tests/academic-configuration.php`.
+- [x] Role template permissions (migrations `020` MySQL / `024` PostgreSQL).
+- [x] Resolve grading bands inside score entry, ranking, report cards and transcripts via one shared calculation service (`AcademicCalculationService`, covered by `tests/academic-calculation.php`).
+- [ ] Configurable assessment categories (coursework / midterm / final) with their own weights; weighting is currently per exam.
+- [ ] Campus configuration and campus-scoped queries (`campuses` is schema-only).
 
 ### Milestone 1: Professional School Operations (Priority 1)
 - [ ] Action-oriented Dashboard with Context Switcher, Action Center, and Data Quality Auditor.

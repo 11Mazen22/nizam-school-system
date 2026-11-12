@@ -20,18 +20,17 @@ final class ScheduledController extends Controller
     {
         $config = require dirname(__DIR__, 2) . '/config/config.php';
         $expectedToken = $config['scheduled_backup_token'] ?? null;
-        
-        if (!$expectedToken) {
-            return false;
-        }
-        
+
         $authHeader = $request->header('Authorization');
         if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
             return false;
         }
-        
+
         $token = substr($authHeader, 7);
-        return hash_equals($expectedToken, $token);
+        // Rejects empty values AND the placeholders published in this repo,
+        // so a school that never edited config has these endpoints closed
+        // rather than protected by a publicly known string.
+        return \App\Services\ScheduledTokenGuard::isValid(is_string($expectedToken) ? $expectedToken : null, $token);
     }
 
     /**

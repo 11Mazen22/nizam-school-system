@@ -133,22 +133,27 @@ final class ExamRepository
     }
 
     /**
-     * Class ranking: weighted average per student for a given year.
-     * @return array<int, array<string,mixed>>  sorted best first
+     * Raw marked rows for class ranking, one row per exam score.
+     *
+     * Deliberately unaggregated: the weighted-average formula lives in
+     * AcademicCalculationService, never in SQL. A second formula here would
+     * let the ranking screen and the report card disagree about the same
+     * student's average, which is exactly the class of bug this replaced.
+     *
+     * @return array<int, array<string,mixed>>
      */
-    public function classRanking(int $classId, int $yearId): array
+    public function rankingRows(int $classId, int $yearId): array
     {
         $stmt = Database::connection()->prepare(
             "SELECT s.id AS student_id, s.full_name, s.student_code,
-                    ROUND(SUM(es.score * e.weight / e.max_score) / NULLIF(SUM(e.weight),0) * 100, 2) AS weighted_avg
+                    e.id AS exam_id, e.weight, e.max_score, es.score
              FROM student_enrollments en
              JOIN students s ON s.id = en.student_id
              JOIN exam_scores es ON es.student_id = s.id
              JOIN exams e ON e.id = es.exam_id
              WHERE en.class_id = :class AND en.status = 'active'
                AND e.academic_year_id = :year AND es.score IS NOT NULL
-             GROUP BY s.id, s.full_name, s.student_code
-             ORDER BY weighted_avg DESC"
+             ORDER BY s.full_name ASC, e.id ASC"
         );
         $stmt->execute(['class' => $classId, 'year' => $yearId]);
         return $stmt->fetchAll();

@@ -14,16 +14,21 @@ use App\Repositories\GuardianRepository;
 use App\Repositories\StudentRepository;
 use App\Repositories\TeacherRepository;
 use App\Repositories\TimetableRepository;
+use App\Services\AcademicCalculationService;
 
 final class PortalController extends Controller
 {
+    public function __construct(
+        private readonly AcademicCalculationService $calculator = new AcademicCalculationService(),
+    ) {
+    }
     /**
      * Teacher Workspace: Assigned classes, today's timetable periods, recent attendance.
      */
     public function teacher(Request $request): void
     {
         $userId = (int) ($_SESSION['user_id'] ?? 0);
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
 
         // Find teacher row linked to user or email/name
         $teacher = (new TeacherRepository())->all()[0] ?? null; // default to first teacher if not mapped
@@ -85,7 +90,7 @@ final class PortalController extends Controller
 
         if ($selectedStudentId > 0) {
             $student = (new StudentRepository())->find($selectedStudentId);
-            $activeYearId = AcademicYearContext::id();
+            $activeYearId = AcademicYearContext::activeYearId();
 
             if ($activeYearId !== null) {
                 $pdo = Database::connection();
@@ -100,7 +105,9 @@ final class PortalController extends Controller
                      ORDER BY e.created_at DESC'
                 );
                 $scStmt->execute(['s_id' => $selectedStudentId, 'y_id' => $activeYearId]);
-                $scores = $scStmt->fetchAll() ?: [];
+                // Percentage and band come from the one shared calculator, so a
+                // parent sees the same grade their child's report card prints.
+                $scores = $this->calculator->decorateRows($scStmt->fetchAll() ?: []);
 
                 // Attendance summary
                 $attStmt = $pdo->prepare(
@@ -138,7 +145,7 @@ final class PortalController extends Controller
         $selectedStudentId = $request->query('student_id') ? (int) $request->query('student_id') : ($students[0]['id'] ?? 0);
         $student = $selectedStudentId > 0 ? (new StudentRepository())->find($selectedStudentId) : null;
 
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         $scores = [];
         $timetable = [];
 
@@ -154,7 +161,7 @@ final class PortalController extends Controller
                  ORDER BY e.created_at DESC'
             );
             $scStmt->execute(['s_id' => $student['id'], 'y_id' => $activeYearId]);
-            $scores = $scStmt->fetchAll() ?: [];
+            $scores = $this->calculator->decorateRows($scStmt->fetchAll() ?: []);
         }
 
         $this->view('portal/student', [

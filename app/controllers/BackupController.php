@@ -94,7 +94,9 @@ final class BackupController extends Controller
         $provided = str_starts_with($header, 'Bearer ') ? substr($header, 7) : '';
 
         header('Content-Type: text/plain');
-        if ($configured === false || $configured === '' || !hash_equals($configured, $provided)) {
+        // is_string() narrows getenv()'s false, and the guard rejects the
+        // placeholder tokens published in this repository.
+        if (!\App\Services\ScheduledTokenGuard::isValid(is_string($configured) ? $configured : null, $provided)) {
             http_response_code(401);
             echo 'unauthorized';
             return;

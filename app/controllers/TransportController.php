@@ -26,9 +26,14 @@ final class TransportController extends Controller
         $this->view('transport/index', ['routes' => $routes]);
     }
 
-    public function show(Request $request, string $id): void
+    public function show(Request $request): void
     {
-        $route = $this->repository->findRoute((int) $id);
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/transport');
+            return;
+        }
+        $route = $this->repository->findRoute($id);
         if ($route === null) {
             Flash::error(__('transport.not_found'));
             Response::redirect('/transport');
@@ -76,15 +81,26 @@ final class TransportController extends Controller
         Response::redirect('/transport/' . $id);
     }
 
-    public function assign(Request $request, string $id): void
+    public function assign(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/transport');
+            return;
+        }
         $studentId = (int) $request->post('student_id');
         $pickup = trim((string) $request->post('pickup_point')) ?: null;
         $dropoff = trim((string) $request->post('dropoff_point')) ?: null;
 
         if ($studentId > 0) {
-            $this->repository->assignStudent($studentId, (int) $id, $pickup, $dropoff);
-            Flash::success(__('transport.assigned_success'));
+            try {
+                $this->repository->assignStudent($studentId, (int) $id, $pickup, $dropoff);
+                Flash::success(__('transport.assigned_success'));
+            } catch (\RuntimeException $e) {
+                $key = 'transport.' . $e->getMessage();
+                $message = __($key);
+                Flash::error($message === $key ? __('transport.missing_fields') : $message);
+            }
         }
 
         Response::redirect('/transport/' . $id);

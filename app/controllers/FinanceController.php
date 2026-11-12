@@ -24,7 +24,7 @@ final class FinanceController extends Controller
 
     public function index(Request $request): void
     {
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         $summary = $this->repository->getSummary($activeYearId);
         $recentInvoices = $this->repository->allInvoices($activeYearId);
         $this->view('finance/index', [
@@ -35,15 +35,20 @@ final class FinanceController extends Controller
 
     public function invoices(Request $request): void
     {
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         $status = $request->query('status');
         $invoices = $this->repository->allInvoices($activeYearId, null, $status ? (string) $status : null);
         $this->view('finance/invoices', ['invoices' => $invoices, 'activeStatus' => $status]);
     }
 
-    public function showInvoice(Request $request, string $id): void
+    public function showInvoice(Request $request): void
     {
-        $invoice = $this->repository->findInvoice((int) $id);
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/finance/invoices');
+            return;
+        }
+        $invoice = $this->repository->findInvoice($id);
         if ($invoice === null) {
             Flash::error(__('finance.invoice_not_found'));
             Response::redirect('/finance/invoices');
@@ -56,7 +61,7 @@ final class FinanceController extends Controller
 
     public function createInvoice(Request $request): void
     {
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         $students = (new StudentRepository())->all();
         $this->view('finance/create_invoice', [
             'students'       => $students,
@@ -66,7 +71,7 @@ final class FinanceController extends Controller
 
     public function storeInvoice(Request $request): void
     {
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         if ($activeYearId === null) {
             Flash::error(__('finance.no_active_year'));
             Response::redirect('/finance');
@@ -102,8 +107,13 @@ final class FinanceController extends Controller
         Response::redirect('/finance/invoices/' . $id);
     }
 
-    public function recordPayment(Request $request, string $id): void
+    public function recordPayment(Request $request): void
     {
+        $id = $request->paramInt('id');
+        if ($id === null) {
+            Response::redirect('/finance/invoices');
+            return;
+        }
         $amount = (float) $request->post('amount', 0.0);
         if ($amount <= 0) {
             Flash::error(__('finance.invalid_payment_amount'));
@@ -113,16 +123,27 @@ final class FinanceController extends Controller
 
         $receiptNumber = 'REC-' . date('Y') . '-' . str_pad((string) random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
 
-        $this->repository->recordPayment([
-            'invoice_id'       => (int) $id,
-            'receipt_number'   => $receiptNumber,
-            'amount'           => $amount,
-            'payment_date'     => (string) $request->post('payment_date', date('Y-m-d')),
-            'payment_method'   => (string) $request->post('payment_method', 'cash'),
-            'reference_number' => trim((string) $request->post('reference_number')) ?: null,
-            'notes'            => trim((string) $request->post('notes')) ?: null,
-            'recorded_by'      => $_SESSION['user_id'] ?? null,
-        ]);
+        try {
+            $this->repository->recordPayment([
+                'invoice_id'       => (int) $id,
+                'receipt_number'   => $receiptNumber,
+                'amount'           => $amount,
+                'payment_date'     => (string) $request->post('payment_date', date('Y-m-d')),
+                'payment_method'   => (string) $request->post('payment_method', 'cash'),
+                'reference_number' => trim((string) $request->post('reference_number')) ?: null,
+                'notes'            => trim((string) $request->post('notes')) ?: null,
+                'recorded_by'      => $_SESSION['user_id'] ?? null,
+            ]);
+        } catch (\RuntimeException $e) {
+            // The repository refuses an overpayment, a cancelled invoice and an
+            // already-settled one by throwing a stable code. Without this catch
+            // the cashier got the generic 500 error page instead of the reason.
+            $key = 'finance.' . $e->getMessage();
+            $message = __($key);
+            Flash::error($message === $key ? __('finance.invalid_payment_amount') : $message);
+            Response::redirect('/finance/invoices/' . $id);
+            return;
+        }
 
         Flash::success(__('finance.payment_recorded', ['receipt' => $receiptNumber]));
         Response::redirect('/finance/invoices/' . $id);
@@ -130,7 +151,7 @@ final class FinanceController extends Controller
 
     public function structures(Request $request): void
     {
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         $categories = $this->repository->allCategories();
         $structures = $activeYearId !== null ? $this->repository->allStructures($activeYearId) : [];
         $grades = (new GradeRepository())->all();
@@ -144,7 +165,7 @@ final class FinanceController extends Controller
 
     public function storeStructure(Request $request): void
     {
-        $activeYearId = AcademicYearContext::id();
+        $activeYearId = AcademicYearContext::activeYearId();
         if ($activeYearId === null) {
             Flash::error(__('finance.no_active_year'));
             Response::redirect('/finance/structures');

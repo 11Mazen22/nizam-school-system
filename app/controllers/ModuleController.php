@@ -25,8 +25,13 @@ final class ModuleController extends Controller
         $this->view('settings/modules', ['modules' => $modules]);
     }
 
-    public function toggle(Request $request, string $key): void
+    public function toggle(Request $request): void
     {
+        $key = $request->paramString('key');
+        if ($key === null) {
+            Response::redirect('/settings/modules');
+            return;
+        }
         $enable = (bool) $request->post('enable', false);
         $result = $this->manager->setEnabled($key, $enable);
 
