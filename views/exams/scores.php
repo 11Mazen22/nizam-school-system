@@ -23,6 +23,13 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
         <?= e($examLabel) ?> — <?= e(__('exams.enter_scores')) ?>
       </h1>
       <p class="n-grades-subtitle"><?= e(__('exams.max_score')) ?>: <?= e($exam['max_score']) ?> &nbsp;|&nbsp; <?= e(__('exams.term')) ?> <?= (int)$exam['term'] ?></p>
+      <p class="n-grades-subtitle mb-0">
+        <?php if (!empty($scale)): ?>
+          <?= e(__('exams.grade_scale')) ?>: <strong><?= e($scale['name_en']) ?></strong>
+        <?php else: ?>
+          <?= e(__('exams.no_scale')) ?>
+        <?php endif; ?>
+      </p>
     </div>
     <div class="n-grades-header-actions">
       <a href="/exams" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?> <?= e(__('common.back')) ?></a>
@@ -82,6 +89,7 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
               <th><?= e(__('exams.subject')) ?></th>
             <?php endif; ?>
             <th><?= e(__('exams.score')) ?> <small class="text-muted">/ <?= e($exam['max_score']) ?></small></th>
+            <th><?= e(__('exams.grade_band')) ?></th>
             <th><?= e(__('common.notes')) ?></th>
           </tr>
         </thead>
@@ -110,6 +118,14 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
                        class="form-control form-control-sm n-score-input"
                        value="<?= isset($row['score']) && $row['score'] !== null ? e($row['score']) : '' ?>"
                        placeholder="—">
+              </td>
+              <td>
+                <?php if (!empty($row['band_label'])): ?>
+                  <span class="badge <?= $row['is_passing'] === false ? 'text-bg-danger' : 'text-bg-success' ?>"><?= e($row['band_label']) ?></span>
+                  <div class="small text-body-secondary"><?= $row['percentage'] !== null ? number_format((float) $row['percentage'], 1) . '%' : '' ?></div>
+                <?php else: ?>
+                  <span class="text-body-secondary">—</span>
+                <?php endif; ?>
               </td>
               <td>
                 <input type="text" name="scores[<?= (int)$studentId ?>][notes]"

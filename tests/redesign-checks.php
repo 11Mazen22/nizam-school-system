@@ -65,7 +65,13 @@ if ($missing === []) {
 }
 
 // --- CSS class audit --------------------------------------------------------
-$css = (string) file_get_contents(__DIR__ . '/../public/assets/css/app.css');
+// The redesign is split across app.css plus the two Studio layers; the audit
+// must see all of them or it reports false positives for classes that only
+// exist in theme.css/components.css.
+$css = '';
+foreach (['app.css', 'theme.css', 'components.css'] as $cssFile) {
+    $css .= (string) file_get_contents(__DIR__ . '/../public/assets/css/' . $cssFile) . "\n";
+}
 $missingClasses = [];
 foreach ($iterator as $file) {
     if ($file->getExtension() !== 'php') {

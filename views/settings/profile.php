@@ -122,10 +122,19 @@ use App\Middleware\CsrfMiddleware;
       </div>
 
       <hr>
-      <label class="form-label d-block"><?= e(__('settings.logo')) ?></label>
-      <div class="d-flex align-items-center gap-3 mb-3">
-        <img src="/assets/img/hadaba-logo.png" alt="" style="height:64px; max-width:160px; object-fit:contain;" class="border rounded p-1 bg-white">
-        <div class="form-text mb-0"><?= e(__('settings.logo_fixed_help')) ?></div>
+      <label class="form-label d-block" for="logo"><?= e(__('settings.logo')) ?></label>
+      <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+        <img src="<?= !empty($school['logo_path']) ? '/logo?v=' . rawurlencode((string) $school['logo_path']) : '/assets/img/hadaba-logo.png' ?>" alt="" style="height:64px; max-width:160px; object-fit:contain;" class="border rounded p-1 bg-white">
+        <div class="flex-grow-1" style="min-width:240px;">
+          <input type="file" class="form-control" id="logo" name="logo" accept="image/png,image/jpeg">
+          <div class="form-text"><?= e(__('settings.logo_help')) ?></div>
+        </div>
+        <?php if (!empty($school['logo_path'])): ?>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="remove_logo" value="1" id="remove_logo">
+            <label class="form-check-label" for="remove_logo"><?= e(__('settings.logo_remove')) ?></label>
+          </div>
+        <?php endif; ?>
       </div>
 
       <div class="n-settings-save">

@@ -60,7 +60,7 @@ use App\Middleware\CsrfMiddleware;
 
 <?php if ($classId > 0): ?>
 <!-- Timetable grid -->
-<div class="card mb-4 overflow-auto">
+<div class="card mb-4 overflow-auto n-timetable-scroll">
   <table class="table table-bordered text-center timetable-grid">
     <thead>
       <tr>

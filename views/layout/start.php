@@ -114,7 +114,7 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#315efb">
+  <meta name="theme-color" content="#4f46e5">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
@@ -126,6 +126,8 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
     <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
   <?php endif; ?>
   <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/app.css')) ?>">
+  <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/theme.css')) ?>">
+  <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/components.css')) ?>">
 </head>
 <body class="n-app-body">
 <a class="n-skip-link" href="#main-content"><?= e($pageTitle) ?></a>

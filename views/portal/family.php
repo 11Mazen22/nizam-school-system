@@ -124,9 +124,7 @@ require dirname(__DIR__) . '/layout/start.php';
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($scores as $sc):
-                      $pct = (float) $sc['max_score'] > 0 ? round(((float) $sc['score'] / (float) $sc['max_score']) * 100) : 0;
-                    ?>
+                    <?php foreach ($scores as $sc): ?>
                       <tr>
                         <td class="fw-semibold">
                           <?= e(currentLocale() === 'ar' ? $sc['exam_name_ar'] : $sc['exam_name_en']) ?>
@@ -138,9 +136,10 @@ require dirname(__DIR__) . '/layout/start.php';
                           <?= (float) $sc['score'] ?> / <?= (float) $sc['max_score'] ?>
                         </td>
                         <td>
-                          <span class="badge <?= $pct >= 85 ? 'text-bg-success' : ($pct >= 50 ? 'text-bg-primary' : 'text-bg-danger') ?>">
-                            <?= (int) $pct ?>%
-                          </span>
+                          <?php if (!empty($sc['band_label'])): ?>
+                            <span class="badge <?= $sc['is_passing'] === false ? 'text-bg-danger' : 'text-bg-success' ?>"><?= e($sc['band_label']) ?></span>
+                          <?php endif; ?>
+                          <span class="small text-body-secondary"><?= $sc['percentage'] !== null ? number_format((float) $sc['percentage'], 1) . '%' : '—' ?></span>
                         </td>
                       </tr>
                     <?php endforeach; ?>

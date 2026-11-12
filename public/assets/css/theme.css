@@ -1,0 +1,212 @@
+/*
+ * Nizam 2026 — "Studio" art direction.
+ *
+ * Layer 1 of 2: tokens, canvas, shell, page heroes, cards and stat tiles.
+ * Part 2 (components.css) refines buttons, forms, tables, menus, auth and
+ * responsive behaviour. Both files load after app.css on purpose so the new
+ * language wins by order at equal specificity, while every existing class
+ * name, JS hook and layout contract from app.css is preserved.
+ */
+
+:root {
+  --n-canvas: #f5f6fb;
+  --n-surface-subtle: #f4f6fc;
+  --n-surface-muted: #e9edf7;
+  --n-ink: #101828;
+  --n-ink-soft: #344054;
+  --n-muted: #667085;
+  --n-faint: #98a2b3;
+  --n-border: #e7eaf3;
+  --n-border-strong: #d5dbe9;
+
+  --n-primary: #4f46e5;
+  --n-primary-hover: #4338ca;
+  --n-primary-strong: #312e81;
+  --n-primary-soft: #eef0ff;
+  --n-primary-softer: #f7f8ff;
+  --n-teal: #0d9488;
+  --n-teal-soft: #e7f8f5;
+  --n-success: #14804a;
+  --n-success-soft: #e8f7ef;
+  --n-warning: #b45309;
+  --n-warning-soft: #fff6e6;
+  --n-danger: #d92d4b;
+  --n-danger-hover: #b42318;
+  --n-danger-soft: #fff1f3;
+  --n-info: #1570a6;
+  --n-info-soft: #edf7fd;
+
+  --n-radius: 12px;
+  --n-radius-lg: 16px;
+  --n-radius-xl: 22px;
+
+  --n-shadow-xs: 0 1px 2px rgba(16, 24, 40, .04);
+  --n-shadow-sm: 0 1px 3px rgba(16, 24, 40, .06), 0 1px 2px rgba(16, 24, 40, .04);
+  --n-shadow: 0 12px 32px -14px rgba(16, 24, 40, .20);
+  --n-shadow-lg: 0 32px 72px -28px rgba(16, 24, 40, .30);
+  --n-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Canvas depth: two very soft light sources, fixed so scrolling stays calm. */
+body {
+  background-color: var(--n-canvas);
+  background-image:
+    radial-gradient(1100px 520px at 100% -12%, rgba(79, 70, 229, .075), transparent 62%),
+    radial-gradient(860px 460px at -8% 2%, rgba(13, 148, 136, .055), transparent 58%);
+  background-attachment: fixed;
+}
+::selection { background: #dfe3ff; color: var(--n-primary-strong); }
+:focus-visible { outline: 3px solid rgba(79, 70, 229, .30); }
+.btn:focus-visible, .form-control:focus-visible, .form-select:focus-visible, .form-check-input:focus-visible,
+.n-user-trigger:focus-visible, .n-command-trigger:focus-visible { outline: 3px solid rgba(79, 70, 229, .30); }
+
+/* ------------------------------------------------------------------ shell */
+body.n-app-body .nizam-sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcff 62%, #fafbff 100%);
+  border-inline-end: 1px solid rgba(16, 24, 40, .06);
+  box-shadow: 12px 0 32px -32px rgba(16, 24, 40, .45);
+}
+.nizam-topbar {
+  background: rgba(255, 255, 255, .86);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  border-bottom: 1px solid rgba(16, 24, 40, .055);
+}
+.n-sidebar-brand-box { border-bottom: 1px solid rgba(16, 24, 40, .05); }
+.school-brand-mark {
+  border-radius: 14px;
+  border: 1px solid rgba(79, 70, 229, .16);
+  background: linear-gradient(145deg, #f6f7ff 0%, #ffffff 70%);
+  box-shadow: 0 10px 22px -14px rgba(79, 70, 229, .75);
+}
+.nizam-brand-product {
+  background: linear-gradient(90deg, #4f46e5, #0d9488);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: .14em;
+}
+.n-sidebar-session-bar {
+  background: linear-gradient(120deg, #ecfdf3, #f3fdf7);
+  border: 1px solid #c7f0d8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+.n-sidebar-search { background: #f6f7fc; border-color: rgba(16, 24, 40, .07); border-radius: 12px; }
+.n-sidebar-search:focus-within { box-shadow: 0 0 0 4px rgba(79, 70, 229, .12); }
+
+/* Active navigation: gradient pill with a hairline inset, not a heavy border. */
+.nizam-sidebar .nav-link, .n-mobile-nav .nav-link { border-radius: 11px; }
+.nizam-sidebar .nav-link:hover, .n-mobile-nav .nav-link:hover { background: #f4f6fd; }
+.nizam-sidebar .nav-link.active, .n-mobile-nav .nav-link.active {
+  background: linear-gradient(135deg, #eef1ff 0%, #e4e9ff 100%);
+  color: var(--n-primary-strong);
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, .18), 0 8px 16px -14px rgba(79, 70, 229, .9);
+}
+.n-nav-group-title { letter-spacing: .07em; }
+.n-nav-group-count { background: #f1f3fa; color: var(--n-muted); border: 1px solid rgba(16, 24, 40, .05); }
+.n-user-avatar-badge, .n-avatar {
+  background: linear-gradient(145deg, #6366f1, #4338ca);
+  color: #fff;
+  box-shadow: 0 8px 18px -10px rgba(67, 56, 202, .9);
+}
+
+/* ----------------------------------------------------------------- heroes */
+.n-page-head {
+  padding: 18px 22px;
+  border-radius: var(--n-radius-lg);
+  background:
+    radial-gradient(420px 160px at 100% 0%, rgba(79, 70, 229, .10), transparent 70%),
+    linear-gradient(120deg, rgba(79, 70, 229, .07), rgba(13, 148, 136, .05));
+  border: 1px solid rgba(79, 70, 229, .12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+.n-grades-header,
+.n-dashboard-welcome {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--n-radius-xl);
+  border: 1px solid rgba(79, 70, 229, .13);
+  background:
+    radial-gradient(560px 220px at 100% 0%, rgba(99, 102, 241, .16), transparent 70%),
+    radial-gradient(420px 200px at 0% 100%, rgba(13, 148, 136, .10), transparent 70%),
+    linear-gradient(125deg, #ffffff 0%, #f8f9ff 55%, #f6fbfa 100%);
+  box-shadow: 0 18px 40px -30px rgba(16, 24, 40, .45), inset 0 1px 0 #fff;
+}
+.n-grades-header::after,
+.n-dashboard-welcome::after {
+  content: "";
+  position: absolute;
+  inset-block-start: -60px;
+  inset-inline-end: -40px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79, 70, 229, .18), transparent 65%);
+  pointer-events: none;
+}
+.n-dashboard-welcome h1, .n-grades-title { letter-spacing: -.03em; font-weight: 760; }
+[lang="ar"] .n-dashboard-welcome h1, [lang="ar"] .n-grades-title { letter-spacing: 0; }
+.n-context-chip {
+  background: rgba(255, 255, 255, .78);
+  border: 1px solid rgba(16, 24, 40, .07);
+  box-shadow: var(--n-shadow-xs);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.n-grades-icon-wrapper {
+  background: linear-gradient(145deg, #eef1ff, #e3e9ff);
+  color: var(--n-primary);
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, .14);
+}
+
+/* ------------------------------------------------------------------ cards */
+.card {
+  border: 1px solid var(--n-border);
+  border-radius: var(--n-radius-lg);
+  box-shadow: var(--n-shadow-xs);
+  transition: box-shadow .22s var(--n-ease), border-color .22s var(--n-ease);
+}
+.card:hover { box-shadow: var(--n-shadow-sm); }
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--n-border);
+  padding: 14px 18px;
+  font-size: .78rem;
+  font-weight: 650;
+  color: var(--n-ink-soft);
+}
+.card-footer { background: transparent; border-top: 1px solid var(--n-border); }
+.stat-card { position: relative; overflow: hidden; }
+.stat-card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4f46e5, #818cf8 55%, #0d9488);
+  opacity: .85;
+}
+.stat-value { font-size: 1.95rem; font-weight: 760; letter-spacing: -.04em; line-height: 1.05; }
+[lang="ar"] .stat-value { letter-spacing: 0; font-feature-settings: "tnum"; }
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #eef1ff, #e1e7ff);
+  color: var(--n-primary-strong);
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, .12);
+}
+.stat-icon .n-icon { width: 22px; height: 22px; }
+.stat-teal .stat-icon { background: linear-gradient(145deg, #e6fbf7, #d5f6ef); color: #0f766e; box-shadow: inset 0 0 0 1px rgba(13, 148, 136, .16); }
+.stat-violet .stat-icon { background: linear-gradient(145deg, #f4ecff, #ece1ff); color: #6d28d9; box-shadow: inset 0 0 0 1px rgba(109, 40, 217, .14); }
+.stat-amber .stat-icon { background: linear-gradient(145deg, #fff6e6, #ffefd1); color: #b45309; box-shadow: inset 0 0 0 1px rgba(180, 83, 9, .16); }
+.stat-indigo .stat-icon { background: linear-gradient(145deg, #eef1ff, #e0e6ff); color: #3730a3; }
+.n-stat-mini {
+  background: rgba(255, 255, 255, .8);
+  border: 1px solid rgba(16, 24, 40, .07);
+  border-radius: 14px;
+  box-shadow: var(--n-shadow-xs);
+}

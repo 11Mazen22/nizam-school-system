@@ -52,21 +52,33 @@ require dirname(__DIR__) . '/layout/start.php';
           <th><?= e(__('students.full_name')) ?></th>
           <th><?= e(__('students.code')) ?></th>
           <th><?= e(__('exams.weighted_avg')) ?></th>
+          <th><?= e(__('exams.grade_band')) ?></th>
           <th><?= e(__('common.actions')) ?></th>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($ranking as $row): ?>
           <?php
-            $avg = (float) $row['weighted_avg'];
-            $badgeClass = $avg >= 85 ? 'bg-success' : ($avg >= 70 ? 'bg-warning text-dark' : 'bg-danger');
+            $avg = $row['weighted_avg'] !== null ? (float) $row['weighted_avg'] : 0.0;
+            $badgeClass = $row['is_passing'] === false ? 'bg-danger' : ($avg >= 85 ? 'bg-success' : ($avg >= 70 ? 'bg-warning text-dark' : 'bg-primary'));
           ?>
           <tr>
             <td><span class="n-rank-chip <?= $row['rank'] <= 3 ? 'top' : '' ?>"><?= (int) $row['rank'] ?></span></td>
             <td class="fw-semibold"><?= e($row['full_name']) ?></td>
             <td class="mono small"><?= e($row['student_code']) ?></td>
             <td>
-              <span class="badge <?= $badgeClass ?> fs-6"><?= number_format($avg, 1) ?>%</span>
+              <?php if ($row['weighted_avg'] !== null): ?>
+                <span class="badge <?= $badgeClass ?> fs-6"><?= number_format($avg, 1) ?>%</span>
+              <?php else: ?>
+                <span class="text-body-secondary">—</span>
+              <?php endif; ?>
+            </td>
+            <td>
+              <?php if (!empty($row['band_label'])): ?>
+                <span class="badge fs-6 <?= $row['is_passing'] === false ? 'text-bg-danger' : 'text-bg-success' ?>"><?= e($row['band_label']) ?></span>
+              <?php else: ?>
+                <span class="text-body-secondary">—</span>
+              <?php endif; ?>
             </td>
             <td>
               <a href="/exams/report-card/<?= (int)$row['student_id'] ?>" class="btn btn-sm btn-outline-secondary">
