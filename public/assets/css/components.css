@@ -170,6 +170,29 @@ input[type="file"].form-control::file-selector-button:hover { background: #cbe2d
     linear-gradient(155deg, #073a2f 0%, #0a493b 52%, #0d5c4a 100%);
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, .08);
 }
+/* The panel is dark now, so every piece of copy on it needs light ink. The
+   base rules above were written for a pale blue panel and painted near-black
+   text on the emerald background. */
+.n-auth-side { color: rgba(255, 255, 255, .82); }
+.n-auth-side .n-auth-app-name-lg { color: #fff; }
+.n-auth-side .n-auth-app-subtitle { color: rgba(255, 255, 255, .68); }
+.n-auth-side .n-auth-tagline { color: #fff; }
+.n-auth-side .n-auth-tagline-sub { color: rgba(255, 255, 255, .72); }
+.n-auth-side .n-auth-features li {
+  background: rgba(255, 255, 255, .07);
+  border-color: rgba(255, 255, 255, .14);
+}
+.n-auth-side .n-auth-feature-icon {
+  color: #f0d9a4;
+  background: rgba(255, 255, 255, .12);
+  border-color: rgba(255, 255, 255, .18);
+}
+.n-auth-side .n-auth-feature-text strong { color: #fff; }
+.n-auth-side .n-auth-feature-text span { color: rgba(255, 255, 255, .68); }
+.n-auth-side .n-auth-side-foot { border-top-color: rgba(255, 255, 255, .16); }
+.n-auth-side .n-auth-stat-item,
+.n-auth-side .n-auth-stat-icon { color: rgba(255, 255, 255, .72); }
+.n-auth-side::after { border-color: rgba(200, 160, 74, .10); }
 .n-auth-form-wrap {
   border-radius: 24px;
   border: 1px solid rgba(16, 24, 40, .06);
@@ -227,15 +250,23 @@ input[type="file"].form-control::file-selector-button:hover { background: #cbe2d
   .n-hero-compact .n-page-head-icon { margin-inline-end: 0; }
 }
 
-/* Recovery code screen */
-.n-recover-steps { display: grid; gap: 10px; }
-.n-recover-step {
+/* Recovery code screen -- same shell as sign-in, with a soft step list on the
+   dark panel instead of a heavy form straight on a card. */
+.n-recover-steps {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  counter-reset: none;
+}
+.n-recover-steps li {
   display: flex;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px solid var(--n-border);
+  border: 1px solid rgba(255, 255, 255, .14);
   border-radius: 14px;
-  background: var(--n-surface-subtle);
+  background: rgba(255, 255, 255, .07);
 }
 .n-recover-step-num {
   flex: 0 0 26px;
@@ -244,21 +275,41 @@ input[type="file"].form-control::file-selector-button:hover { background: #cbe2d
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--n-primary-soft);
-  color: var(--n-primary-strong);
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
   font-size: .78rem;
   font-weight: 700;
 }
-.n-recover-step-title { font-size: .82rem; font-weight: 650; margin-block-end: 3px; }
+.n-recover-step-title { color: #fff; font-size: .82rem; font-weight: 650; margin-block-end: 4px; }
+.n-recover-step-text { color: rgba(255, 255, 255, .72); font-size: .74rem; line-height: 1.5; }
 .n-recover-code {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 4px 9px;
   border-radius: 8px;
-  background: #fff;
-  border: 1px solid var(--n-border);
-  font-size: .78rem;
+  background: rgba(0, 0, 0, .28);
+  border: 1px solid rgba(255, 255, 255, .16);
+  color: #f3e6c8;
+  font-size: .76rem;
 }
-.n-recover-token-input { font-family: "Manrope", ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; }
+.n-recover-token-input {
+  font-family: "Manrope", ui-monospace, monospace;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.n-recover-token-input::placeholder { letter-spacing: .12em; color: #9aa8a0; }
+.n-auth-form .n-form-label { color: var(--n-ink-soft); font-weight: 600; font-size: .82rem; }
+.n-auth-form .n-form-group { margin-block-end: 16px; }
+.n-auth-sub { color: var(--n-muted); font-size: .86rem; line-height: 1.65; margin: 6px 0 0; }
+.n-recover-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--n-muted);
+  font-size: .82rem;
+  text-decoration: none;
+}
+.n-recover-back:hover { color: var(--n-primary); }
+.n-auth-footer { margin-block-start: 18px; text-align: center; }
 
 /* -------------------------------------------------------------- timetable */
 /* Keep the period column readable while the day grid scrolls on phones. */
