@@ -17,6 +17,7 @@ use App\Services\SeedService;
 use App\Services\SettingsService;
 use App\Services\SetupStatusService;
 use App\Services\ActivityLogger;
+use App\Services\RecoveryTokenService;
 use DateTime;
 use PDO;
 use PDOException;
@@ -311,13 +312,72 @@ final class SetupController extends Controller
         $userCount = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
         
         if ($userCount > 0) {
-            // Users exist — this route is inert, redirect to login
-            $this->redirect('/login');
+            // Users exist: recovery means resetting the existing password with
+            // a token only shell access can mint, not creating another admin.
+            $this->view('setup/recover-admin-token', [
+                'error' => null,
+                'hasPendingToken' => RecoveryTokenService::hasPending(),
+            ]);
             return;
         }
 
-        // Zero users — show the recovery form
+        // Zero users — show the create-first-admin form
         $this->view('setup/recover-admin', ['error' => null]);
+    }
+
+    /**
+     * Complete a password reset for an existing admin using a one-time token.
+     * The token is minted by `php bin/recover-admin.php <username>`, expires
+     * after 20 minutes and is burned on first successful use.
+     */
+    public function resetAdmin(Request $request): void
+    {
+        $pdo = Database::connection();
+        if ((int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn() === 0) {
+            $this->redirect('/setup');
+            return;
+        }
+
+        $token = (string) ($request->post('token', '') ?: '');
+        $password = (string) ($request->post('password', '') ?: '');
+        $confirm = (string) ($request->post('password_confirm', '') ?: '');
+
+        if ($token === '' || $password === '') {
+            $this->recoverTokenError(__('validation.required'));
+            return;
+        }
+        if (strlen($password) < 8) {
+            $this->recoverTokenError(__('validation.password_length'));
+            return;
+        }
+        if ($password !== $confirm) {
+            $this->recoverTokenError(__('validation.password_mismatch'));
+            return;
+        }
+
+        $user = RecoveryTokenService::consume($token);
+        if ($user === null || !RecoveryTokenService::resetPassword($user['user_id'], $password)) {
+            $this->recoverTokenError(__('setup.recover_token_invalid'));
+            return;
+        }
+
+        ActivityLogger::log(
+            'admin.password_reset',
+            'users',
+            $user['user_id'],
+            "Password reset with a recovery token for '{$user['username']}'"
+        );
+
+        Flash::set('success', __('setup.recover_token_success'));
+        $this->redirect('/login');
+    }
+
+    private function recoverTokenError(string $message): void
+    {
+        $this->view('setup/recover-admin-token', [
+            'error' => $message,
+            'hasPendingToken' => RecoveryTokenService::hasPending(),
+        ]);
     }
 
     public function recoverAdmin(Request $request): void

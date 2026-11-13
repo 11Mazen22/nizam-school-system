@@ -186,6 +186,80 @@ input[type="file"].form-control::file-selector-button:hover { background: #cbe2d
 }
 .n-btn-animated { border-radius: 12px; min-height: 48px; font-weight: 650; letter-spacing: .01em; }
 
+/* Brand mark: logos are usually square badges with their own padding, so
+   cropping to a circle cut the artwork. Contain keeps the whole logo visible
+   on every surface (sidebar, auth, setup). */
+.school-brand-mark img { object-fit: contain; padding: 3px; }
+.n-auth-side .school-brand-mark {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, .65);
+}
+.n-auth-side .school-brand-mark img { padding: 5px; }
+.n-auth-side-top { flex-wrap: wrap; row-gap: 10px; }
+.n-auth-app-name-lg,
+.n-auth-app-subtitle { overflow-wrap: anywhere; }
+
+/* Grid children default to min-width:auto, which lets a wide table or a long
+   unbroken string push the whole page sideways. These are the containers that
+   sit directly in the app grid. */
+.nizam-content { min-width: 0; }
+.nizam-content > *,
+.card-body,
+.n-report-card { min-width: 0; }
+.table-responsive { max-width: 100%; }
+
+/* Hero safety net: long school names, long Arabic labels and hero buttons all
+   wrap instead of pushing the page wider than the viewport. */
+.n-hero-title,
+.n-hero-sub,
+.n-hero-eyebrow { overflow-wrap: anywhere; }
+@media (max-width: 575.98px) {
+  .n-hero,
+  .n-hero-compact { padding: 16px; border-radius: 16px; }
+  .n-hero-body { gap: 14px; align-items: flex-start; }
+  .n-hero-actions { width: 100%; gap: 8px; }
+  .n-hero-actions .btn { flex: 1 1 auto; justify-content: center; }
+  .n-hero-stat { flex: 1 1 auto; }
+  .n-hero-compact .n-page-head-icon { margin-inline-end: 0; }
+}
+
+/* Recovery code screen */
+.n-recover-steps { display: grid; gap: 10px; }
+.n-recover-step {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--n-border);
+  border-radius: 14px;
+  background: var(--n-surface-subtle);
+}
+.n-recover-step-num {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--n-primary-soft);
+  color: var(--n-primary-strong);
+  font-size: .78rem;
+  font-weight: 700;
+}
+.n-recover-step-title { font-size: .82rem; font-weight: 650; margin-block-end: 3px; }
+.n-recover-code {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--n-border);
+  font-size: .78rem;
+}
+.n-recover-token-input { font-family: "Manrope", ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; }
+
 /* -------------------------------------------------------------- timetable */
 /* Keep the period column readable while the day grid scrolls on phones. */
 @media (max-width: 991.98px) {

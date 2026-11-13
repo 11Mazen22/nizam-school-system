@@ -149,6 +149,7 @@ $router->post('/setup/complete', [SetupController::class, 'complete'], [$session
 // Emergency admin recovery (NOT gated by SetupGateMiddleware — only accessible when users table is empty)
 $router->get('/setup/recover-admin', [SetupController::class, 'showRecoverAdmin'], [$session, $csrf]);
 $router->post('/setup/recover-admin', [SetupController::class, 'recoverAdmin'], [$session, $csrf]);
+$router->post('/setup/recover-admin/reset', [SetupController::class, 'resetAdmin'], [$session, $csrf]);
 
 // ---------------------------------------------------------------- Auth
 $router->get('/login', [AuthController::class, 'showLogin'], [$session, $csrf]);

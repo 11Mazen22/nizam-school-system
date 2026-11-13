@@ -197,6 +197,40 @@ This suite found six defects that no repository-level test could see:
    `catch`, so an overpayment showed the generic 500 page instead of the
    reason. It now maps the repository's stable codes to a flash message.
 
+### 2.7 Admin password recovery (new)
+
+The login screen's "Recover Admin Access" button used to lead nowhere: the
+recovery route only rendered while the users table was empty and redirected to
+`/login` otherwise, so on every real installation it did nothing at all.
+
+Recovery now has two states on the same screen:
+
+- **No users yet** — the create-first-admin form, unchanged.
+- **Users exist** — a reset form that takes a one-time code plus a new password.
+
+Codes can only be minted from the server shell:
+
+```
+php bin/recover-admin.php <username>
+```
+
+A code is 20 characters in five groups, valid for 20 minutes, stored as a
+`password_hash` in `dataPath()/recovery-token.json` with mode 0600, and burned on
+first successful use (the file is overwritten with an empty payload before it is
+deleted, so a locked file on Windows cannot make the code replayable). The reset
+updates `users.password_hash`, writes an `admin.password_reset` activity entry
+and returns to the login screen with a success message.
+
+The recovery POST also needed a setup-gate fix: `SetupGateMiddleware` exempted the
+exact path `/setup/recover-admin` only, so `POST /setup/recover-admin/reset` was
+redirected to `/login` before the controller ran. The exemption is now a prefix
+match.
+
+Verified end to end against a live database: issue code -> reset -> sign in with
+the new password -> reuse the same code (rejected) -> restore the original
+password. `tests/http/run.php` now covers the screen, the reset, single-use
+rejection and the recovered sign-in.
+
 ## 3. Not verified by an automated check
 
 These have code and screens. The repository-level invariants for finance,

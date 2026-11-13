@@ -560,6 +560,92 @@ try {
         same(0, substr_count($body, 'n-grades-header"'), $screen . ' carries no legacy module header');
     }
 
+    // Both languages must render the same screens with the same structure and
+    // the correct direction. The Arabic build is the primary one, so a screen
+    // that only holds together in English is a regression, not a nice-to-have.
+    foreach (['ar', 'en'] as $locale) {
+        $admin->get('/lang?to=' . $locale);
+        $expectedDir = 'dir="' . ($locale === 'ar' ? 'rtl' : 'ltr') . '"';
+        foreach ($heroScreens as $screen) {
+            $body = $admin->get($screen)['body'];
+            ok(strpos($body, $expectedDir) !== false, $screen . ' (' . $locale . ') declares ' . $expectedDir);
+            same(1, substr_count($body, '<h1'), $screen . ' (' . $locale . ') has exactly one title');
+            same(0, preg_match('/\b(Fatal error|Warning:|Notice:|Undefined variable|Undefined array key)\b/', $body), $screen . ' (' . $locale . ') renders without PHP diagnostics');
+            ok(strpos($body, 'n-hero-compact') !== false, $screen . ' (' . $locale . ') keeps the shared hero');
+        }
+    }
+    $admin->get('/lang?to=en');
+
+    // --- admin recovery ---------------------------------------------------
+    // A shell-issued code must reset an existing admin password, work exactly
+    // once, and be reachable from the login screen on a completed install.
+    $recoveryEnv = $env;
+    $issueRecoveryCode = static function (string $username) use ($root, $recoveryEnv): string {
+        $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+        $process = proc_open(
+            [PHP_BINARY, $root . '/bin/recover-admin.php', $username],
+            $descriptors,
+            $pipes,
+            $root,
+            $recoveryEnv
+        );
+        if (!is_resource($process)) {
+            return '';
+        }
+        $output = (string) stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+
+        return preg_match('/[A-Z2-9]{4}(?:-[A-Z2-9]{4}){4}/', $output, $m) === 1 ? $m[0] : '';
+    };
+
+    $recoverPage = $anon->get('/setup/recover-admin');
+    same(200, $recoverPage['status'], 'Recovery screen is reachable when users already exist');
+    ok(strpos($recoverPage['body'], '/setup/recover-admin/reset') !== false, 'Recovery screen offers the token form');
+
+    $recoveryCode = $issueRecoveryCode('http_admin');
+    ok($recoveryCode !== '', 'CLI issues a one-time recovery code');
+    $newPassword = 'Recovered-Test-2026';
+    $recoveryCsrf = (string) $anon->csrf($recoverPage['body']);
+    $reset = $anon->post('/setup/recover-admin/reset', [
+        'token' => $recoveryCode,
+        'password' => $newPassword,
+        'password_confirm' => $newPassword,
+        '_csrf_token' => $recoveryCsrf,
+    ]);
+    same(302, $reset['status'], 'Recovery reset is accepted');
+    ok(str_contains((string) $reset['location'], '/login'), 'Recovery reset lands on the sign-in page');
+
+    $reuseClient = new Browser($base, 'reuse');
+    $reusePage = $reuseClient->get('/setup/recover-admin');
+    same(200, $reuseClient->post('/setup/recover-admin/reset', [
+        'token' => $recoveryCode,
+        'password' => 'Another-Pass-2026',
+        'password_confirm' => 'Another-Pass-2026',
+        '_csrf_token' => $reuseClient->csrf($reusePage['body']),
+    ])['status'], 'A used recovery code is rejected');
+
+    $recovered = new Browser($base, 'recovered');
+    $recoveredLogin = $recovered->get('/login');
+    $recoveredSignIn = $recovered->post('/login', [
+        'username' => 'http_admin',
+        'password' => $newPassword,
+        '_csrf_token' => $recovered->csrf($recoveredLogin['body']),
+    ]);
+    same(302, $recoveredSignIn['status'], 'The recovered password signs in');
+    ok(str_contains((string) $recoveredSignIn['location'], '/dashboard'), 'Recovered sign-in reaches the dashboard');
+
+    // Put the original password back so later assertions keep working.
+    $restoreClient = new Browser($base, 'restore');
+    $restorePage = $restoreClient->get('/setup/recover-admin');
+    same(302, $restoreClient->post('/setup/recover-admin/reset', [
+        'token' => $issueRecoveryCode('http_admin'),
+        'password' => $password,
+        'password_confirm' => $password,
+        '_csrf_token' => $restoreClient->csrf($restorePage['body']),
+    ])['status'], 'Recovery restores the original password');
+
     // Subjects (create + duplicate rejection)
     $before = $count('subjects');
     same(302, $admin->post('/subjects', ['code' => 'HTTP-S1', 'name_en' => 'HTTP Subject', 'name_ar' => 'مادة اختبار', '_csrf_token' => $formToken])['status'], 'POST /subjects redirects');
