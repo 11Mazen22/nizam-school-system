@@ -27,6 +27,7 @@ $logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png
 <?php else: ?>
   <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
 <?php endif; ?>
+<link rel="stylesheet" href="<?= e(assetUrl('/assets/css/fonts.css')) ?>">
 <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/app.css')) ?>">
 <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/theme.css')) ?>">
 <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/components.css')) ?>">

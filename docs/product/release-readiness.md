@@ -326,6 +326,36 @@ Design notes:
   Requests abort after 20 seconds so a stalled one cannot hold the lock.
 - The queue holds at most 25 submissions and is pruned after 30 days.
 
+## Ink & Saffron redesign (2026-11-13)
+
+The interface was re-skinned end to end on a new art direction: warm paper canvas,
+deep emerald ink for the shell, saffron accents, and a new type pairing —
+**Alexandria** for Arabic and **Manrope** for Latin, both self-hosted and
+precached so typography works offline.
+
+| Check | Method | Result |
+|---|---|---|
+| Fonts applied | Computed `font-family` after load | PASS -- body `Manrope, Alexandria`, Arabic falls through to Alexandria |
+| Fonts offline-ready | Files served locally, added to `STATIC_ASSETS` | PASS -- `fonts.css`, `alexandria-arabic.woff2`, `manrope-latin.woff2` |
+| Arabic + English screens | Browser, `/admissions` | PASS -- both locales, all nine stage labels translated, no raw keys |
+| Shell on phones | Browser, navigation drawer | PASS -- dark ink drawer, gold active state, readable labels |
+| No horizontal overflow | `scrollWidth` vs viewport at 1440px | PASS -- equal |
+
+Admissions fixes shipped with the redesign:
+
+- The stage tiles now match the database enum exactly. The old list invented
+  `review`/`offer`/`waitlisted` while omitting `decision`; three labels rendered
+  as raw translation keys and one real stage was unreachable as a filter.
+- The duplicated heading is gone (the shell renders its own head, and the screen
+  was adding a second one); the screen now suppresses the shell head and uses a
+  purpose-built hero with the total, a stat and the primary action.
+- Stage tiles, hero and table are new components (`.n-hero`, `.n-stage-grid`,
+  `.n-stage-tile`) rather than Bootstrap card grids.
+
+Not verified visually: the fixed desktop sidebar at ≥992px. The browser panel used
+for these checks renders at ~511 CSS px, so only the drawer could be inspected;
+contrast for the desktop rail was confirmed through computed styles.
+
 ### Still not verified
 
 - A real network disconnect (DevTools offline / airplane mode) with navigation

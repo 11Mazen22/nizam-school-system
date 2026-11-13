@@ -1,0 +1,29 @@
+/*
+ * Self-hosted typefaces: Alexandria (Arabic) and Manrope (Latin).
+ *
+ * Both files are the variable builds served by the Google Fonts API, so one
+ * file covers the 400-700 range the interface uses. They are committed with
+ * the app and precached by the service worker, so typography does not depend
+ * on a network font CDN -- which matters for the offline promise.
+ *
+ * The families are stacked as 'Manrope', 'Alexandria': Manrope has no Arabic
+ * glyphs, so Arabic falls through to Alexandria per character, giving correct
+ * shaping and Latin/Arabic harmony without locale-specific font rules.
+ * Both are licensed under the SIL Open Font License.
+ */
+
+@font-face {
+  font-family: 'Alexandria';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/alexandria-arabic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/manrope-latin.woff2') format('woff2');
+}

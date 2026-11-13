@@ -31,6 +31,7 @@ $appName = __('app.name');
   <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/img/favicon-180.png">
   <title><?= e($errorTitle) ?> — <?= e($appName) ?></title>
+  <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/fonts.css')) ?>">
   <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/app.css')) ?>">
   <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/theme.css')) ?>">
   <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/components.css')) ?>">

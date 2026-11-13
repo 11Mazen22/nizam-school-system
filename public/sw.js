@@ -4,7 +4,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_VERSION = 'nizam-v1.2.2-studio';
+const CACHE_VERSION = 'nizam-v1.3.1-studio';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
   '/assets/css/app.css',
   '/assets/css/theme.css',
   '/assets/css/components.css',
+  '/assets/css/fonts.css',
   '/assets/img/hadaba-logo.png',
   '/assets/js/app.js',
   '/assets/js/confirm.js',
@@ -43,6 +44,8 @@ const STATIC_ASSETS = [
   '/assets/fonts/IBMPlexSansArabic-Medium.woff2',
   '/assets/fonts/IBMPlexSansArabic-SemiBold.woff2',
   '/assets/fonts/IBMPlexSansArabic-Bold.woff2',
+  '/assets/fonts/alexandria-arabic.woff2',
+  '/assets/fonts/manrope-latin.woff2',
   '/offline.html'
 ];
 
