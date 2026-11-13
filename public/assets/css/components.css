@@ -343,3 +343,33 @@ body.n-density-compact .table > thead th { padding: 9px 12px; }
 @media (max-width: 575.98px) {
   .n-queue-banner { inset-inline: 12px; inset-block-end: 12px; max-width: none; }
 }
+
+/* ------------------------------------------------- pending sends screen */
+.n-queue-help { font-size: .84rem; color: var(--n-muted); max-width: 70ch; margin-bottom: 16px; }
+.n-queue-panel-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.n-queue-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.n-queue-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px solid var(--n-border);
+  border-radius: var(--n-radius);
+  background: var(--n-surface-muted);
+}
+.n-queue-row-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.n-queue-row-title { font-weight: 650; font-size: .86rem; color: var(--n-ink); direction: ltr; text-align: start; overflow-wrap: anywhere; }
+.n-queue-row-meta { font-size: .76rem; color: var(--n-muted); }
+.n-queue-row-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.n-queue-empty {
+  margin: 0;
+  padding: 22px 16px;
+  text-align: center;
+  font-size: .84rem;
+  color: var(--n-muted);
+  border: 1px dashed var(--n-border-strong);
+  border-radius: var(--n-radius);
+  background: var(--n-surface-subtle);
+}

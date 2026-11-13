@@ -33,6 +33,18 @@ final class SettingsController extends Controller
     ) {
     }
 
+    // -------------------------------------------- Pending offline sends
+    /**
+     * The offline queue lives in this browser's IndexedDB, not in the school
+     * database, so the server renders only the shell and offline-queue.js
+     * fills the list from the device. That keeps the promise the queue makes:
+     * unsent work is visible on the machine holding it, and nowhere else.
+     */
+    public function offlineQueue(Request $request): void
+    {
+        $this->view('settings/offline-queue');
+    }
+
     // ---------------------------------------------------------- Profile
     public function profile(Request $request): void
     {

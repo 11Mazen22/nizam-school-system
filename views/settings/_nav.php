@@ -18,6 +18,7 @@ $tabs = [
     'structure' => ['icon' => 'layers', 'label' => 'settings.tab.structure'],
     'security' => ['icon' => 'lock', 'label' => 'settings.tab.security'],
     'backup' => ['icon' => 'database', 'label' => 'settings.tab.backup'],
+    'offline' => ['icon' => 'inbox', 'label' => 'settings.tab.offline'],
 ];
 ?>
 <div class="n-settings-layout">

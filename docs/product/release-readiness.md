@@ -299,6 +299,8 @@ IndexedDB and replayed automatically when the connection returns.
 | Duplicate replay suppressed | Same queue id posted again to the live server | PASS -- `204` with `X-Nizam-Replay: duplicate`, row count unchanged |
 | Two tabs replay at once | Live browser: two tabs, both online, flush fired together | PASS -- one POST, one toast, one row; the second tab found the queue empty |
 | Cross-tab queue visibility | Live browser: queue in tab 1, read banner in tab 2 | PASS -- both banners agree via `BroadcastChannel` |
+| Pending-sends screen | Live browser: `/settings/offline` with a queued item | PASS -- Arabic RTL row with saved time and field count; Retry and Send all each cleared the row and wrote one grade; Discard removed it with no server write |
+| Screen is device-local | No database table or API backs the list | By design -- rows come from this browser's IndexedDB, and automatic replay is paused while the screen is open |
 | Endpoint auth | `GET /csrf-token` signed out / signed in | PASS -- 302 to `/login` / 200 JSON, 64-character token |
 | Suite coverage | `tests/http/run.php` | PASS -- 277 assertions (6 new) |
 

@@ -284,6 +284,7 @@ $router->get('/settings/academic', [SettingsController::class, 'academic'], [$se
 $router->post('/settings/academic', [SettingsController::class, 'saveAcademic'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->get('/settings/security', [SettingsController::class, 'security'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->post('/settings/security', [SettingsController::class, 'saveSecurity'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->get('/settings/offline', [SettingsController::class, 'offlineQueue'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->get('/settings/backup', [SettingsController::class, 'backup'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->post('/settings/backup', [SettingsController::class, 'saveBackup'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 

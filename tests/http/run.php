@@ -526,6 +526,11 @@ try {
     same(204, $admin->post('/grades', $queuedPayload, ['X-Nizam-Queue-Id: ' . $queueId])['status'], 'Replay with the same queue id is suppressed (204)');
     same(1, (int) $scalar("SELECT COUNT(*) FROM grades WHERE name_en = '{$queuedGrade}'"), 'Replay did not create a duplicate grade');
 
+    $offlineScreen = $admin->get('/settings/offline');
+    same(200, $offlineScreen['status'], 'GET /settings/offline renders the pending-sends screen');
+    ok(strpos($offlineScreen['body'], 'data-queue-list') !== false, 'Pending-sends screen exposes the local queue list');
+    same(302, $anon->get('/settings/offline')['status'], 'GET /settings/offline requires authentication');
+
     // Subjects (create + duplicate rejection)
     $before = $count('subjects');
     same(302, $admin->post('/subjects', ['code' => 'HTTP-S1', 'name_en' => 'HTTP Subject', 'name_ar' => 'مادة اختبار', '_csrf_token' => $formToken])['status'], 'POST /subjects redirects');

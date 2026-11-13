@@ -172,6 +172,7 @@
       } else {
         hideBanner();
       }
+      renderPanel();
     });
   }
 
@@ -301,6 +302,152 @@
       : t('تم إرسال ' + arChanges(sent) + ' بنجاح.', enChanges(sent) + ' sent successfully.');
     host.appendChild(toast);
     window.setTimeout(function () { toast.remove(); }, 6000);
+  }
+
+  // ------------------------------------------------- pending sends screen
+  var panel = null;
+  var panelStrings = null;
+
+  function panelEl() {
+    if (panel === null) {
+      panel = document.getElementById('offline-queue-panel');
+    }
+    return panel;
+  }
+
+  function readPanelStrings() {
+    if (panelStrings === null) {
+      var host = panelEl();
+      try {
+        panelStrings = host ? JSON.parse(host.getAttribute('data-queue-i18n') || '{}') : {};
+      } catch (error) {
+        panelStrings = {};
+      }
+    }
+    return panelStrings;
+  }
+
+  function formatWhen(ms) {
+    try {
+      return new Date(ms).toLocaleString(isEnglish() ? 'en-GB' : 'ar-EG', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
+    } catch (error) {
+      return new Date(ms).toLocaleString();
+    }
+  }
+
+  function renderPanel() {
+    var host = panelEl();
+    if (!host) {
+      return Promise.resolve();
+    }
+    var strings = readPanelStrings();
+
+    return all().then(function (items) {
+      var list = host.querySelector('[data-queue-list]');
+      var empty = host.querySelector('[data-queue-empty]');
+      var sendAll = host.querySelector('[data-queue-send-all]');
+      if (!list) {
+        return;
+      }
+
+      list.textContent = '';
+      if (empty) { empty.hidden = items.length > 0; }
+      if (sendAll) { sendAll.disabled = items.length === 0; }
+
+      items.sort(function (a, b) { return (a.createdAt || 0) - (b.createdAt || 0); }).forEach(function (item) {
+        var row = document.createElement('li');
+        row.className = 'n-queue-row';
+        row.setAttribute('data-id', item.id);
+
+        var main = document.createElement('div');
+        main.className = 'n-queue-row-main';
+
+        var title = document.createElement('span');
+        title.className = 'n-queue-row-title';
+        title.textContent = item.action;
+
+        var meta = document.createElement('span');
+        meta.className = 'n-queue-row-meta';
+        var fieldCount = item.fields ? item.fields.length : 0;
+        meta.textContent = (strings.queuedAt || 'Saved') + ' ' + formatWhen(item.createdAt || Date.now()) +
+          ' · ' + fieldCount + ' ' + (strings.fields || 'fields');
+
+        main.appendChild(title);
+        main.appendChild(meta);
+
+        var actions = document.createElement('div');
+        actions.className = 'n-queue-row-actions';
+
+        var retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'btn btn-sm btn-outline-primary';
+        retry.setAttribute('data-queue-action', 'retry');
+        retry.textContent = strings.retry || 'Retry';
+
+        var discard = document.createElement('button');
+        discard.type = 'button';
+        discard.className = 'btn btn-sm btn-outline-danger';
+        discard.setAttribute('data-queue-action', 'discard');
+        discard.textContent = strings.discard || 'Discard';
+
+        actions.appendChild(retry);
+        actions.appendChild(discard);
+
+        row.appendChild(main);
+        row.appendChild(actions);
+        list.appendChild(row);
+      });
+    });
+  }
+
+  function discard(id) {
+    return remove(id).then(function () {
+      broadcast();
+      renderPanel();
+      refreshBanner();
+    });
+  }
+
+  function sendItem(id) {
+    if (!navigator.onLine) {
+      refreshBanner();
+      return Promise.resolve(false);
+    }
+
+    return withFlushLock(function () {
+      return all().then(function (items) {
+        var item = items.filter(function (candidate) { return candidate.id === id; })[0];
+        if (!item) {
+          return false;
+        }
+        return freshToken().then(function (token) {
+          if (!token) {
+            showBanner(items.length, true);
+            return false;
+          }
+          return send(item, token).then(function (result) {
+            if (result === 'sent') {
+              return remove(id).then(function () { notify(1, 0); broadcast(); return true; });
+            }
+            if (result === 'auth') {
+              showBanner(items.length, true);
+              return false;
+            }
+            if (result === 'network') {
+              return false;
+            }
+            return remove(id).then(function () { notify(0, 1); broadcast(); return true; });
+          });
+        });
+      });
+    }).then(function (result) {
+      renderPanel();
+      refreshBanner();
+      return result;
+    });
   }
 
   function freshToken() {
@@ -454,6 +601,7 @@
       return put(item).then(function () {
         queueCount = existing + 1;
         showBanner(queueCount, false);
+        renderPanel();
         broadcast();
         return true;
       });
@@ -490,6 +638,40 @@
     });
   }, true);
 
+  // Buttons inside the pending-sends screen (rendered rows included).
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!target || !target.closest) {
+      return;
+    }
+
+    var sendAll = target.closest('[data-queue-send-all]');
+    if (sendAll) {
+      flush(true).then(renderPanel);
+      return;
+    }
+
+    var button = target.closest('[data-queue-action]');
+    if (!button) {
+      return;
+    }
+    var row = button.closest('.n-queue-row');
+    var id = row ? row.getAttribute('data-id') : null;
+    if (!id) {
+      return;
+    }
+
+    if (button.getAttribute('data-queue-action') === 'retry') {
+      sendItem(id);
+      return;
+    }
+
+    var strings = readPanelStrings();
+    if (window.confirm(strings.discardConfirm || 'Discard this saved submission? It will never be sent.')) {
+      discard(id);
+    }
+  });
+
   window.addEventListener('online', function () { flush(false); });
   window.addEventListener('offline', function () {
     count().then(function (remaining) { if (remaining > 0) { showBanner(remaining, false); } });
@@ -502,7 +684,7 @@
         return;
       }
       refreshBanner().then(function () {
-        if (navigator.onLine) {
+        if (navigator.onLine && !panelEl()) {
           flush(false);
         }
       });
@@ -522,11 +704,16 @@
       queueCount = remaining;
       if (remaining > 0) {
         showBanner(remaining, false);
-        window.setTimeout(function () { flush(false); }, 800);
+        // On the review screen the admin decides when to send, so nothing is
+        // replayed out from under them.
+        if (!panelEl()) {
+          window.setTimeout(function () { flush(false); }, 800);
+        }
       }
+      renderPanel();
     });
     window.setInterval(function () {
-      if (navigator.onLine) {
+      if (navigator.onLine && !panelEl()) {
         count().then(function (remaining) { if (remaining > 0) { flush(false); } });
       }
     }, 45000);
@@ -537,6 +724,9 @@
     flush: function () { return flush(true); },
     count: count,
     items: all,
+    sendItem: sendItem,
+    discard: discard,
+    renderPanel: renderPanel,
     tabId: TAB_ID
   };
 })();
