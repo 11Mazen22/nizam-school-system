@@ -1,25 +1,17 @@
 <?php
 $pageTitle = __('library.add_book');
-$suppressPageTitle = true;
 $activeNav = 'library';
+ob_start(); ?>
+<a href="/library" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+      <?= icon('chevron-left', 'n-flip-rtl') ?>
+      <span><?= e(__('common.back')) ?></span>
+    </a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('book-open', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('library.add_book')) ?>
-    </h1>
-  </div>
-  <div>
-    <a href="/library" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
-      <?= icon('chevron-left', 'n-flip-rtl') ?>
-      <span><?= e(__('common.back')) ?></span>
-    </a>
-  </div>
-</div>
+
 
 <div class="card col-lg-8 mx-auto">
   <div class="card-body p-4">

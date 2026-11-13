@@ -8,34 +8,19 @@
  */
 $pageTitle = __('exams.enter_scores');
 $activeNav = 'exams';
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('exams.max_score')) ?>: <?= e($exam['max_score']) ?> &nbsp;|&nbsp; <?= e(__('exams.term')) ?> <?= (int)$exam['term'] ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/exams" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?> <?= e(__('common.back')) ?></a>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 
 $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
 ?>
 
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('edit', 'n-grades-icon') ?></div>
-        <?= e($examLabel) ?> — <?= e(__('exams.enter_scores')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('exams.max_score')) ?>: <?= e($exam['max_score']) ?> &nbsp;|&nbsp; <?= e(__('exams.term')) ?> <?= (int)$exam['term'] ?></p>
-      <p class="n-grades-subtitle mb-0">
-        <?php if (!empty($scale)): ?>
-          <?= e(__('exams.grade_scale')) ?>: <strong><?= e($scale['name_en']) ?></strong>
-        <?php else: ?>
-          <?= e(__('exams.no_scale')) ?>
-        <?php endif; ?>
-      </p>
-    </div>
-    <div class="n-grades-header-actions">
-      <a href="/exams" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?> <?= e(__('common.back')) ?></a>
-    </div>
-  </div>
-</div>
+
 
 <!-- Class picker -->
 <form method="get" class="n-filter-panel">

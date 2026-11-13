@@ -1,36 +1,9 @@
 <?php
 /** @var array $invoice @var array $payments */
 $pageTitle = __('finance.invoice_title', ['number' => $invoice['invoice_number']]);
-$suppressPageTitle = true;
 $activeNav = 'finance';
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-
-$netAmount = (float) $invoice['total_amount'] - (float) $invoice['discount_amount'];
-$balance = max(0.0, $netAmount - (float) $invoice['paid_amount']);
-?>
-
-<div class="n-page-head">
-  <div>
-    <div class="d-flex align-items-center gap-2 mb-1">
-      <h1 class="d-flex align-items-center gap-2 mb-0">
-        <?= icon('wallet', 'n-icon-lg text-body-secondary') ?>
-        <?= e($invoice['invoice_number']) ?>
-      </h1>
-      <?php if ($invoice['status'] === 'paid'): ?>
-        <span class="badge text-bg-success fs-6"><?= e(__('finance.status_paid')) ?></span>
-      <?php elseif ($invoice['status'] === 'partial'): ?>
-        <span class="badge text-bg-warning fs-6"><?= e(__('finance.status_partial')) ?></span>
-      <?php else: ?>
-        <span class="badge text-bg-danger fs-6"><?= e(__('finance.status_pending')) ?></span>
-      <?php endif; ?>
-    </div>
-    <div class="text-muted small">
-      <?= e(__('students.name')) ?>: <strong><?= e($invoice['student_name']) ?></strong> (<span dir="ltr" class="font-monospace"><?= e($invoice['student_code']) ?></span>)
-    </div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/finance/invoices" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<a href="/finance/invoices" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
@@ -44,8 +17,15 @@ $balance = max(0.0, $netAmount - (float) $invoice['paid_amount']);
         <span><?= e(__('finance.record_payment')) ?></span>
       </button>
     <?php endif; ?>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+
+$netAmount = (float) $invoice['total_amount'] - (float) $invoice['discount_amount'];
+$balance = max(0.0, $netAmount - (float) $invoice['paid_amount']);
+?>
+
+
 
 <div class="row g-4 mb-4">
   <div class="col-lg-6">

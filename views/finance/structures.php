@@ -1,26 +1,18 @@
 <?php
 /** @var array $categories @var array $structures @var array $grades */
 $pageTitle = __('finance.fee_structures');
-$suppressPageTitle = true;
 $activeNav = 'finance';
+ob_start(); ?>
+<a href="/finance" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+      <?= icon('chevron-left', 'n-flip-rtl') ?>
+      <span><?= e(__('common.back')) ?></span>
+    </a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('layers', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('finance.fee_structures')) ?>
-    </h1>
-  </div>
-  <div>
-    <a href="/finance" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
-      <?= icon('chevron-left', 'n-flip-rtl') ?>
-      <span><?= e(__('common.back')) ?></span>
-    </a>
-  </div>
-</div>
+
 
 <div class="row g-4">
   <div class="col-lg-7">

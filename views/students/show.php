@@ -9,8 +9,8 @@
  * @var array $healthRecords
  */
 $pageTitle = $student['full_name'];
-$activeNav = 'students';
 $suppressPageTitle = true;
+$activeNav = 'students';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 

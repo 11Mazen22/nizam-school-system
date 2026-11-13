@@ -1,28 +1,19 @@
 <?php
 /** @var array $guardians */
 $pageTitle = __('guardians.title');
-$suppressPageTitle = true;
 $activeNav = 'guardians';
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('users-group', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('guardians.title')) ?>
-    </h1>
-    <p class="text-muted small mb-0"><?= e(__('guardians.subtitle')) ?></p>
-  </div>
-  <?php if (hasPermission('guardians.manage')): ?>
-    <div>
-      <a href="/guardians/create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('guardians.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/guardians/create" class="btn btn-primary d-inline-flex align-items-center gap-2">
         <?= icon('plus') ?>
         <span><?= e(__('guardians.add')) ?></span>
       </a>
-    </div>
-  <?php endif; ?>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <div class="card">
   <div class="card-body p-0">

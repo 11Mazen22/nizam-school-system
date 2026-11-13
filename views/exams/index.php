@@ -6,31 +6,15 @@
 $pageTitle = __('exams.title');
 $activeNav = 'exams';
 $pageScripts = ['/assets/js/exams.js'];
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-
 $byTerm = [];
 foreach ($exams as $ex) {
     $byTerm[(int) $ex['term']][] = $ex;
 }
 ksort($byTerm);
-?>
-
-<!-- POWERFUL PAGE HEADER -->
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper">
-          <?= icon('star', 'n-grades-icon') ?>
-        </div>
-        <?= e(__('exams.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('exams.description')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-grades-stats-mini">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('exams.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-grades-stats-mini">
         <div class="n-stat-mini">
           <span class="n-stat-mini-value" data-count-up><?= count($exams) ?></span>
           <span class="n-stat-mini-label"><?= e(__('exams.total')) ?></span>
@@ -46,9 +30,15 @@ ksort($byTerm);
         <?= icon('trending-up') ?>
         <span><?= e(__('exams.ranking')) ?></span>
       </a>
-    </div>
-  </div>
-</div>
+<?php
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+
+?>
+
+<!-- POWERFUL PAGE HEADER -->
+
 
 <!-- TABS NAVIGATION -->
 <ul class="nav nav-tabs n-tabs-powerful mb-4" role="tablist">

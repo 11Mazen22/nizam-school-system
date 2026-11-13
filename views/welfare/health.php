@@ -5,24 +5,10 @@
  */
 $pageTitle = __('welfare.health_title');
 $activeNav = 'welfare-health';
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-
-$typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' => 'info', 'condition' => 'secondary'];
-?>
-
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('heart', 'n-grades-icon') ?></div>
-        <?= e(__('welfare.health_title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('welfare.health_subtitle')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-stat-mini">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('welfare.health_subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-stat-mini">
         <span class="n-stat-mini-value"><?= count($records) ?></span>
         <span class="n-stat-mini-label"><?= e(__('welfare.total_records')) ?></span>
       </div>
@@ -32,9 +18,15 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
           <?= icon('plus') ?> <?= e(__('welfare.add_health')) ?>
         </button>
       <?php endif; ?>
-    </div>
-  </div>
-</div>
+<?php
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+
+$typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' => 'info', 'condition' => 'secondary'];
+?>
+
+
 
 <!-- Filter -->
 <form method="get" class="n-filter-panel">

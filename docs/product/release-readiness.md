@@ -353,16 +353,26 @@ Admissions fixes shipped with the redesign:
   `.n-stage-tile`) rather than Bootstrap card grids.
 
 Consistency is now enforced rather than just applied. The shared layout renders one
-hero for every screen that does not build its own header, and 22 views that did
-build one were given `$suppressPageTitle` so no page can show two titles again.
+hero for the whole application: every module index, list, form, detail and settings
+screen contributes only a subtitle (`$pageSubtitle`/`$pageSubtitleHtml`) and an
+action slot (`$pageActions`), and the layout draws the eyebrow, title and actions.
+The 21 bespoke `.n-grades-header` module heads and the 41 remaining `.n-page-head`
+heads were migrated, so no view builds a page header of its own.
+
+Three screens keep a purpose-built identity header and suppress the shared hero:
+the dashboard greeting, the student profile and the teacher profile. Those headers
+carry an avatar, name and status badge rather than a page title.
+
 `tests/redesign-checks.php` (now part of `npm test`) fails when:
 
 - a view renders its own `<h1>` without suppressing the shared hero;
+- a view still contains `n-page-head` or `n-grades-header` markup;
 - the layout hero disappears from `views/layout/start.php`;
 - any of the 29 navigation links has no matching `GET` route.
 
-The HTTP suite additionally asserts exactly one page title on seven screens, and
-that `/activity-log` renders the shared hero.
+The HTTP suite loads 48 module, form and settings screens and asserts, for each,
+exactly one page title, the shared hero, and no legacy header markup; it also
+asserts `/activity-log` renders the shared hero.
 
 Not verified visually: the fixed desktop sidebar at ≥992px. The browser panel used
 for these checks renders at ~511 CSS px, so only the drawer could be inspected;

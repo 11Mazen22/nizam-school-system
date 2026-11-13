@@ -3,7 +3,9 @@
 $pageTitle = __('promotion.preview_title');
 $activeNav = 'students';
 $pageScripts = ['/assets/js/promotion.js'];
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><span dir="ltr"><?= e($source['label']) ?> &rarr; <?= e($target['label']) ?></span></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
@@ -17,17 +19,7 @@ use App\Middleware\CsrfMiddleware;
      one fragment in its own bidi run so it reads correctly regardless of
      the page's own direction, exactly like a phone number or URL embedded
      in RTL prose. -->
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('trending-up', 'n-icon-lg text-body-secondary') ?>
-      <?= e($pageTitle) ?>
-    </h1>
-    <p class="mb-0">
-      <span dir="ltr"><?= e($source['label']) ?> &rarr; <?= e($target['label']) ?></span>
-    </p>
-  </div>
-</div>
+
 
 <?php if (empty($rows)): ?>
   <div class="n-empty py-4">

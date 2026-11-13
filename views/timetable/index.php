@@ -10,22 +10,10 @@
  */
 $pageTitle = __('timetable.title');
 $activeNav = 'timetable';
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-?>
-
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('grid', 'n-grades-icon') ?></div>
-        <?= e(__('timetable.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('timetable.subtitle')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <?php if ($classId > 0): ?>
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('timetable.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<?php if ($classId > 0): ?>
         <button type="button" class="btn btn-outline-secondary btn-sm no-print" data-print-report>
           <?= icon('printer') ?> <?= e(__('common.print') ?? 'Print') ?>
         </button>
@@ -37,9 +25,13 @@ use App\Middleware\CsrfMiddleware;
           <button class="btn btn-outline-danger btn-sm"><?= icon('trash') ?> <?= e(__('timetable.clear')) ?></button>
         </form>
       <?php endif; ?>
-    </div>
-  </div>
-</div>
+<?php
+use App\Middleware\CsrfMiddleware;
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <!-- Class selector -->
 <form method="get" class="n-filter-panel no-print">

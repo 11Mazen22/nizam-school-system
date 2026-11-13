@@ -3,19 +3,12 @@
 $pageTitle = __('settings.title');
 $activeNav = 'settings';
 $activeSettingsTab = 'localization';
-$suppressPageTitle = true;
+
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('settings', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('settings.title')) ?>
-    </h1>
-  </div>
-</div>
+
 
 <?php require __DIR__ . '/_nav.php'; ?>
 

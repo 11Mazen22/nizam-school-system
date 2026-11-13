@@ -3,27 +3,11 @@
 $pageTitle = __('users.title');
 $activeNav = 'users';
 $pageScripts = ['/assets/js/users.js'];
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-
 $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
-?>
-
-<!-- POWERFUL PAGE HEADER -->
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper">
-          <?= icon('users-cog', 'n-grades-icon') ?>
-        </div>
-        <?= e(__('users.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('users.description')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-grades-stats-mini">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('users.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-grades-stats-mini">
         <div class="n-stat-mini">
           <span class="n-stat-mini-value"><?= count($users) ?></span>
           <span class="n-stat-mini-label"><?= e(__('users.stat_total')) ?></span>
@@ -37,9 +21,15 @@ $activeUsers = array_filter($users, fn ($u) => (int) $u['is_active'] === 1);
         <?= icon("upload") ?>
         <span><?= e(__("app.import")) ?></span>
       </button>
-    </div>
-  </div>
-</div>
+<?php
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+
+?>
+
+<!-- POWERFUL PAGE HEADER -->
+
 
 <!-- TABS NAVIGATION -->
 <ul class="nav nav-tabs n-tabs-powerful mb-4" role="tablist">

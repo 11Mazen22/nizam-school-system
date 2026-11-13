@@ -6,7 +6,14 @@
 $pageTitle = __('reports.' . $key);
 $activeNav = 'reports';
 $pageScripts = ['/assets/js/reports-filter.js'];
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('reports.' . $key . '_desc')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/reports" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+      <?= icon('chevron-right', 'n-flip-rtl') ?>
+      <span><?= e(__('reports.title')) ?></span>
+    </a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 
 $needsGrade = in_array($key, ['religion', 'class-list', 'density'], true);
@@ -16,21 +23,7 @@ $gradeRequired = $key === 'class-list';
 $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
 ?>
 
-<div class="n-page-head no-print">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('filter', 'n-icon-lg text-body-secondary') ?>
-      <?= e($pageTitle) ?>
-    </h1>
-    <p><?= e(__('reports.' . $key . '_desc')) ?></p>
-  </div>
-  <div class="n-page-head-actions">
-    <a href="/reports" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-      <?= icon('chevron-right', 'n-flip-rtl') ?>
-      <span><?= e(__('reports.title')) ?></span>
-    </a>
-  </div>
-</div>
+
 
 <div class="n-filter-panel no-print">
     <form method="get" action="/reports/<?= e($key) ?>" class="row g-2 align-items-end" id="reportFilterForm">

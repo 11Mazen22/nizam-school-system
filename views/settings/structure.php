@@ -18,7 +18,9 @@
 $pageTitle = __('structure.title');
 $activeNav = 'settings';
 $activeSettingsTab = 'structure';
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('structure.intro')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 
@@ -39,15 +41,7 @@ for ($i = 0; $i < 4; $i++) {
 }
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('layers', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('structure.title')) ?>
-    </h1>
-    <p class="text-body-secondary mb-0"><?= e(__('structure.intro')) ?></p>
-  </div>
-</div>
+
 
 <?php require __DIR__ . '/_nav.php'; ?>
 

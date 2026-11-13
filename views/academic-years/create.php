@@ -2,19 +2,12 @@
 /** @var ?string $error @var array $years */
 $pageTitle = __('academic_years.add');
 $activeNav = 'academic-years';
-$suppressPageTitle = true;
+
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('plus', 'n-icon-lg text-body-secondary') ?>
-      <?= e($pageTitle) ?>
-    </h1>
-  </div>
-</div>
+
 
 <?php if ($error !== null): ?>
   <div class="alert alert-danger d-flex align-items-center gap-2">

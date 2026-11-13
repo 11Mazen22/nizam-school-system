@@ -538,6 +538,28 @@ try {
     }
     ok(strpos($admin->get('/activity-log')['body'], 'n-hero-compact') !== false, 'Shared layout hero renders on a screen that does not build its own header');
 
+    // Every module and settings screen must use the one shared header
+    // component, and none may still carry a bespoke page head.
+    $heroScreens = [
+        '/students', '/students/archived', '/students/create', '/teachers', '/teachers/archived',
+        '/teachers/create', '/guardians', '/guardians/create', '/finance', '/finance/invoices',
+        '/finance/invoices/create', '/finance/structures', '/exams', '/exams/ranking',
+        '/attendance', '/timetable', '/reports', '/library', '/library/create', '/library/borrows',
+        '/transport', '/transport/create', '/hr', '/hr/leaves', '/academic-years',
+        '/academic-years/create', '/admissions', '/admissions/create', '/assignments',
+        '/assignments/workload', '/assignments/archived', '/classes', '/subjects', '/subjects/create',
+        '/users', '/notifications', '/backups', '/welfare/health', '/welfare/discipline',
+        '/settings/profile', '/settings/security', '/settings/academic', '/settings/localization',
+        '/settings/modules', '/settings/structure', '/settings/backup', '/settings/offline',
+    ];
+    foreach ($heroScreens as $screen) {
+        $body = $admin->get($screen)['body'];
+        same(1, substr_count($body, '<h1'), $screen . ' uses the shared hero (one title)');
+        ok(strpos($body, 'n-hero-compact') !== false, $screen . ' renders the shared hero');
+        same(0, substr_count($body, 'class="n-page-head"'), $screen . ' carries no legacy page head');
+        same(0, substr_count($body, 'n-grades-header"'), $screen . ' carries no legacy module header');
+    }
+
     // Subjects (create + duplicate rejection)
     $before = $count('subjects');
     same(302, $admin->post('/subjects', ['code' => 'HTTP-S1', 'name_en' => 'HTTP Subject', 'name_ar' => 'مادة اختبار', '_csrf_token' => $formToken])['status'], 'POST /subjects redirects');

@@ -1,25 +1,17 @@
 <?php
 $pageTitle = __('guardians.add');
-$suppressPageTitle = true;
 $activeNav = 'guardians';
+ob_start(); ?>
+<a href="/guardians" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+      <?= icon('chevron-left', 'n-flip-rtl') ?>
+      <span><?= e(__('common.back')) ?></span>
+    </a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('users-group', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('guardians.add')) ?>
-    </h1>
-  </div>
-  <div>
-    <a href="/guardians" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
-      <?= icon('chevron-left', 'n-flip-rtl') ?>
-      <span><?= e(__('common.back')) ?></span>
-    </a>
-  </div>
-</div>
+
 
 <div class="card col-lg-8 mx-auto">
   <div class="card-body p-4">

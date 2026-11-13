@@ -1,26 +1,18 @@
 <?php
 /** @var array $guardian */
 $pageTitle = __('common.edit') . ' ' . $guardian['full_name'];
-$suppressPageTitle = true;
 $activeNav = 'guardians';
+ob_start(); ?>
+<a href="/guardians/<?= (int) $guardian['id'] ?>" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+      <?= icon('chevron-left', 'n-flip-rtl') ?>
+      <span><?= e(__('common.back')) ?></span>
+    </a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('users-group', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('common.edit')) ?>: <?= e($guardian['full_name']) ?>
-    </h1>
-  </div>
-  <div>
-    <a href="/guardians/<?= (int) $guardian['id'] ?>" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
-      <?= icon('chevron-left', 'n-flip-rtl') ?>
-      <span><?= e(__('common.back')) ?></span>
-    </a>
-  </div>
-</div>
+
 
 <div class="card col-lg-8 mx-auto">
   <div class="card-body p-4">

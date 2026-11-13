@@ -1,25 +1,9 @@
 <?php
 /** @var array $route @var array $students @var array $allStudents */
 $pageTitle = $route['route_name'];
-$suppressPageTitle = true;
 $activeNav = 'transport';
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('bus', 'n-icon-lg text-body-secondary') ?>
-      <?= e($route['route_name']) ?>
-    </h1>
-    <div class="text-muted small">
-      <?= e(__('transport.vehicle_no')) ?>: <strong dir="ltr" class="font-monospace"><?= e($route['vehicle_number']) ?></strong> |
-      <?= e(__('transport.driver_name')) ?>: <strong><?= e($route['driver_name']) ?></strong> (<span dir="ltr" class="font-monospace"><?= e($route['driver_phone']) ?></span>)
-    </div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/transport" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<a href="/transport" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
@@ -29,8 +13,12 @@ use App\Middleware\CsrfMiddleware;
         <span><?= e(__('transport.assign_student')) ?></span>
       </button>
     <?php endif; ?>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+?>
+
+
 
 <div class="card mb-4">
   <div class="card-header d-flex justify-content-between align-items-center">

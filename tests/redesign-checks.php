@@ -137,6 +137,32 @@ if (str_contains((string) file_get_contents(__DIR__ . '/../views/layout/start.ph
     echo "FAIL: shared layout hero missing from views/layout/start.php\n";
 }
 
+// --- one header component ---------------------------------------------------
+// Screens must not draw their own page header markup any more: the layouts
+// render the hero, and views only contribute a subtitle and actions.
+$legacyHeads = [];
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/../views')) as $file) {
+    if ($file->getExtension() !== 'php') {
+        continue;
+    }
+    $normalized = str_replace('\\', '/', $file->getPathname());
+    if (str_contains($normalized, '/views/layout/')) {
+        continue;
+    }
+    $contents = (string) file_get_contents($file->getPathname());
+    foreach (['n-page-head', 'n-grades-header'] as $legacy) {
+        if (str_contains($contents, $legacy)) {
+            $legacyHeads[] = str_replace(__DIR__ . '/../', '', $file->getPathname()) . ' (' . $legacy . ')';
+        }
+    }
+}
+if ($legacyHeads === []) {
+    echo "PASS: every view uses the shared hero (no legacy page heads)\n";
+} else {
+    $fail++;
+    echo "FAIL: views still draw their own page head: " . implode(', ', $legacyHeads) . "\n";
+}
+
 // --- navigation coverage ----------------------------------------------------
 // Every sidebar/command-palette link must point at a GET route that exists, so
 // no module can be listed and then 404.

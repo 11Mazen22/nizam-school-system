@@ -2,15 +2,17 @@
 /** @var array $teachers @var string $q */
 $pageTitle = __('teachers.title');
 $activeNav = 'teachers';
-$suppressPageTitle = true;
 $canCreate = hasPermission('teachers.create');
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('teachers.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-stat-mini"><span class="n-stat-mini-value" data-count-up><?= count($teachers) ?></span><span class="n-stat-mini-label"><?= e(__('teachers.total_teachers')) ?></span></div><?php if ($canCreate): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><a href="/teachers/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('teachers.add')) ?></a><?php endif; ?>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
-<div class="n-grades-header"><div class="n-grades-header-content">
-  <div class="n-grades-header-text"><h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('graduation-cap', 'n-grades-icon') ?></span><?= e(__('teachers.title')) ?></h1><p class="n-grades-subtitle"><?= e(__('teachers.description')) ?></p></div>
-  <div class="n-grades-header-actions"><div class="n-stat-mini"><span class="n-stat-mini-value" data-count-up><?= count($teachers) ?></span><span class="n-stat-mini-label"><?= e(__('teachers.total_teachers')) ?></span></div><?php if ($canCreate): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><a href="/teachers/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('teachers.add')) ?></a><?php endif; ?></div>
-</div></div>
+
 
 <form method="get" action="/teachers" class="n-filter-panel"><div class="n-filter-row">
   <div class="n-filter-field n-search-field"><?= icon('search') ?><label class="visually-hidden" for="teacher-search"><?= e(__('common.search')) ?></label><input id="teacher-search" type="search" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>"></div>

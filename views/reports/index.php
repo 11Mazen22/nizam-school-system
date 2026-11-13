@@ -2,7 +2,12 @@
 /** @var array $catalog */
 $pageTitle = __('reports.title');
 $activeNav = 'reports';
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('reports.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($catalog) ?></span><span class="n-stat-mini-label"><?= e(__('reports.available_reports')) ?></span></div>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 
 $reportIcons = ['religion' => 'pie-chart', 'class-list' => 'clipboard-list', 'density' => 'grid', 'teachers-by-subject' => 'book', 'workload' => 'bar-chart', 'shortage' => 'alert-triangle'];
@@ -12,7 +17,7 @@ $groups = [
 ];
 ?>
 
-<div class="n-grades-header"><div class="n-grades-header-content"><div class="n-grades-header-text"><h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('chart', 'n-grades-icon') ?></span><?= e(__('reports.title')) ?></h1><p class="n-grades-subtitle"><?= e(__('reports.description')) ?></p></div><div class="n-grades-header-actions"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($catalog) ?></span><span class="n-stat-mini-label"><?= e(__('reports.available_reports')) ?></span></div></div></div></div>
+
 
 <?php foreach ($groups as $groupLabel => $keys): ?>
   <section class="n-report-group mb-4" aria-labelledby="<?= e(str_replace('.', '-', $groupLabel)) ?>">

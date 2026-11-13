@@ -4,24 +4,10 @@
  */
 $pageTitle = __('notifications.title');
 $activeNav = 'notifications';
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-$locale = currentLocale();
-?>
-
-<!-- Powerful Notifications Header -->
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('inbox', 'n-grades-icon') ?></div>
-        <?= e(__('notifications.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('notifications.subtitle')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-stat-mini">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('notifications.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-stat-mini">
         <span class="n-stat-mini-value"><?= count(array_filter($notifications, fn($n) => !$n['is_read'])) ?></span>
         <span class="n-stat-mini-label"><?= e(__('notifications.unread')) ?></span>
       </div>
@@ -33,9 +19,15 @@ $locale = currentLocale();
           </button>
         </form>
       <?php endif; ?>
-    </div>
-  </div>
-</div>
+<?php
+use App\Middleware\CsrfMiddleware;
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+$locale = currentLocale();
+?>
+
+<!-- Powerful Notifications Header -->
+
 
 <!-- Category Navigation -->
 <div class="n-filters-bar mb-4">

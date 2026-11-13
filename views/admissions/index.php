@@ -14,9 +14,7 @@
  */
 $pageTitle = __('admissions.title');
 $activeNav = 'admissions';
-// The shell renders its own page head; this screen has a hero instead.
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
+$pageSubtitle = __('admissions.subtitle');
 
 $stages = [
     'inquiry'     => ['icon' => 'info', 'tone' => 'muted'],
@@ -46,29 +44,24 @@ $total = 0;
 foreach (array_keys($stages) as $stageKey) {
     $total += (int) ($counts[$stageKey] ?? 0);
 }
-?>
 
-<section class="n-hero mb-4">
-  <div class="n-hero-body">
-    <div>
-      <span class="n-hero-eyebrow"><?= icon('sparkle') ?> <?= e(__('admissions.eyebrow')) ?></span>
-      <h1 class="n-hero-title"><?= e(__('admissions.title')) ?></h1>
-      <p class="n-hero-sub"><?= e(__('admissions.subtitle')) ?></p>
-    </div>
-    <div class="n-hero-actions">
-      <div class="n-hero-stat">
-        <b><?= $total ?></b>
-        <span><?= e(__('admissions.all_applications')) ?></span>
-      </div>
-      <?php if (hasPermission('admissions.manage')): ?>
-        <a href="/admissions/create" class="btn btn-primary d-inline-flex align-items-center gap-2">
-          <?= icon('plus') ?>
-          <span><?= e(__('admissions.new_application')) ?></span>
-        </a>
-      <?php endif; ?>
-    </div>
-  </div>
-</section>
+// Shared hero: this screen contributes its total and primary action, and the
+// layout renders the eyebrow, title and subtitle like every other page.
+ob_start(); ?>
+<div class="n-hero-stat">
+  <b><?= $total ?></b>
+  <span><?= e(__('admissions.all_applications')) ?></span>
+</div>
+<?php if (hasPermission('admissions.manage')): ?>
+  <a href="/admissions/create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+    <?= icon('plus') ?>
+    <span><?= e(__('admissions.new_application')) ?></span>
+  </a>
+<?php endif; ?>
+<?php
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
 
 <div class="n-stage-grid mb-4">
   <?php foreach ($stages as $key => $stage): ?>

@@ -1,21 +1,9 @@
 <?php
 /** @var array $borrows @var array $books @var array $students @var array $teachers @var ?string $activeStatus */
 $pageTitle = __('library.borrows_desk');
-$suppressPageTitle = true;
 $activeNav = 'library';
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('clipboard-list', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('library.borrows_desk')) ?>
-    </h1>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/library" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<a href="/library" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
@@ -25,8 +13,12 @@ use App\Middleware\CsrfMiddleware;
         <span><?= e(__('library.issue_book')) ?></span>
       </button>
     <?php endif; ?>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+?>
+
+
 
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">

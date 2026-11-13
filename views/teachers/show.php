@@ -6,8 +6,8 @@
  * @var int $totalPeriods
  */
 $pageTitle = $teacher['full_name'];
-$activeNav = 'teachers';
 $suppressPageTitle = true;
+$activeNav = 'teachers';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>

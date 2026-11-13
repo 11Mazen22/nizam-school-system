@@ -6,22 +6,10 @@
  */
 $pageTitle = __('welfare.discipline_title');
 $activeNav = 'welfare-discipline';
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-?>
-
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('alert-triangle', 'n-grades-icon') ?></div>
-        <?= e(__('welfare.discipline_title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('welfare.discipline_subtitle')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-stat-mini">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('welfare.discipline_subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-stat-mini">
         <span class="n-stat-mini-value"><?= count($records) ?></span>
         <span class="n-stat-mini-label"><?= e(__('welfare.total_records')) ?></span>
       </div>
@@ -31,9 +19,13 @@ use App\Middleware\CsrfMiddleware;
           <?= icon('plus') ?> <?= e(__('welfare.add_record')) ?>
         </button>
       <?php endif; ?>
-    </div>
-  </div>
-</div>
+<?php
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+?>
+
+
 
 <!-- Filters -->
 <form method="get" class="n-filter-panel">

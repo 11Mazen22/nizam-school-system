@@ -2,8 +2,13 @@
 /** @var array $assignments @var bool $hasActiveYear @var int $archivedCount @var array $teachers @var array $subjects @var array $classes */
 $pageTitle = __('assignments.title');
 $activeNav = 'assignments';
-$suppressPageTitle = true;
 $canManage = hasPermission('assignments.manage');
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('assignments.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($assignments) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.total_active')) ?></span></div><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count(array_unique(array_column($assignments, 'teacher_id'))) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.teachers_count')) ?></span></div><div class="n-stat-mini"><span class="n-stat-mini-value"><?= array_sum(array_column($assignments, 'weekly_periods')) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.total_periods')) ?></span></div></div><?php if ($canManage): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><?php endif; ?>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
@@ -11,7 +16,7 @@ use App\Middleware\CsrfMiddleware;
 <?php if (!$hasActiveYear): ?>
   <div class="n-empty-state"><div class="n-empty-icon"><?= icon('calendar') ?></div><h2 class="n-empty-title"><?= e(__('assignments.no_active_year_title')) ?></h2><p class="n-empty-description"><?= e(__('assignments.no_active_year')) ?></p><?php if (hasPermission('academic_years.view')): ?><a href="/academic-years" class="btn btn-primary"><?= icon('calendar') ?><?= e(__('academic_years.title')) ?></a><?php endif; ?></div>
 <?php else: ?>
-  <div class="n-grades-header"><div class="n-grades-header-content"><div class="n-grades-header-text"><h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('clipboard-list', 'n-grades-icon') ?></span><?= e(__('assignments.title')) ?></h1><p class="n-grades-subtitle"><?= e(__('assignments.description')) ?></p></div><div class="n-grades-header-actions"><div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($assignments) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.total_active')) ?></span></div><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count(array_unique(array_column($assignments, 'teacher_id'))) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.teachers_count')) ?></span></div><div class="n-stat-mini"><span class="n-stat-mini-value"><?= array_sum(array_column($assignments, 'weekly_periods')) ?></span><span class="n-stat-mini-label"><?= e(__('assignments.total_periods')) ?></span></div></div><?php if ($canManage): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><?php endif; ?></div></div></div>
+  
 
   <ul class="nav nav-tabs mb-4" role="tablist"><li class="nav-item"><button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button"><?= icon('list') ?><?= e(__('assignments.tab_list')) ?><span class="badge"><?= count($assignments) ?></span></button></li><?php if ($canManage): ?><li class="nav-item"><button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" type="button"><?= icon('plus') ?><?= e(__('assignments.tab_add')) ?></button></li><?php endif; ?><li class="nav-item"><a href="/assignments/workload" class="nav-link"><?= icon('bar-chart') ?><?= e(__('assignments.workload_summary')) ?></a></li><?php if ($archivedCount > 0): ?><li class="nav-item"><a href="/assignments/archived" class="nav-link"><?= icon('archive') ?><?= e(__('common.archived_list')) ?><span class="badge"><?= (int) $archivedCount ?></span></a></li><?php endif; ?></ul>
 

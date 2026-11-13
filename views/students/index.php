@@ -2,26 +2,21 @@
 /** @var array $students @var string $q @var int $page @var int $perPage @var int $total @var int $lastPage */
 $pageTitle = __('students.title');
 $activeNav = 'students';
-$suppressPageTitle = true;
 $locale = currentLocale();
 $canCreate = hasPermission('students.create');
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('users', 'n-grades-icon') ?></span><?= e(__('students.title')) ?></h1>
-      <p class="n-grades-subtitle"><?= e(__('students.description')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-stat-mini"><span class="n-stat-mini-value" data-count-up><?= (int) $total ?></span><span class="n-stat-mini-label"><?= e(__('students.total_students')) ?></span></div>
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('students.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-stat-mini"><span class="n-stat-mini-value" data-count-up><?= (int) $total ?></span><span class="n-stat-mini-label"><?= e(__('students.total_students')) ?></span></div>
       <?php if ($canCreate): ?><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><span><?= e(__('app.import')) ?></span></button><?php endif; ?>
       <?php if (hasPermission('students.promote')): ?><a href="/students/promotion" class="btn btn-outline-primary"><?= icon('trending-up') ?><span><?= e(__('promotion.title')) ?></span></a><?php endif; ?>
       <?php if ($canCreate): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><span><?= e(__('students.add')) ?></span></a><?php endif; ?>
-    </div>
-  </div>
-</div>
+<?php
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <form method="get" action="/students" class="n-filter-panel" aria-label="<?= e(__('common.filter')) ?>">
   <div class="n-filter-row">

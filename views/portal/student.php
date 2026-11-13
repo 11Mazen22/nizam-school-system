@@ -1,22 +1,14 @@
 <?php
 /** @var array $students @var ?array $student @var array $scores @var array $timetable */
 $pageTitle = __('portal.student_title');
-$suppressPageTitle = true;
 $activeNav = 'portal-student';
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('portal.student_subtitle', ['name' => $student['full_name'] ?? 'Student'])) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('graduation-cap', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('portal.student_title')) ?>
-    </h1>
-    <p class="text-muted small mb-0">
-      <?= e(__('portal.student_subtitle', ['name' => $student['full_name'] ?? 'Student'])) ?>
-    </p>
-  </div>
-</div>
+
 
 <?php if ($student !== null): ?>
   <div class="card mb-4">

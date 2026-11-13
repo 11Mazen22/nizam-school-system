@@ -8,7 +8,17 @@
 $pageTitle = __('backups.title');
 $activeNav = 'backups';
 $pageScripts = ['/assets/js/backups-restore.js'];
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('backups.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-grades-stats-mini">
+        <div class="n-stat-mini">
+          <span class="n-stat-mini-value"><?= (int)$total ?></span>
+          <span class="n-stat-mini-label"><?= e(__('backups.total_backups')) ?></span>
+        </div>
+      </div>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 
@@ -16,27 +26,7 @@ $lastPage = max(1, (int) ceil($total / $limit));
 ?>
 
 <!-- POWERFUL PAGE HEADER -->
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper">
-          <?= icon('shield-check', 'n-grades-icon') ?>
-        </div>
-        <?= e(__('backups.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('backups.description')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-grades-stats-mini">
-        <div class="n-stat-mini">
-          <span class="n-stat-mini-value"><?= (int)$total ?></span>
-          <span class="n-stat-mini-label"><?= e(__('backups.total_backups')) ?></span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <div class="row g-4 n-reveal-group mb-4">
   <div class="col-md-6">

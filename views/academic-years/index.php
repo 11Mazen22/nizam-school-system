@@ -2,17 +2,22 @@
 /** @var array $years */
 $pageTitle = __('academic_years.title');
 $activeNav = 'academic-years';
-$suppressPageTitle = true;
 $canManage = hasPermission('academic_years.manage');
 $canClose = hasPermission('academic_years.close');
 $activeYears = array_filter($years, static fn (array $year): bool => (int) $year['is_active'] === 1);
 $closedYears = array_filter($years, static fn (array $year): bool => (int) $year['is_closed'] === 1);
 $openYears = array_filter($years, static fn (array $year): bool => (int) $year['is_closed'] === 0);
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('academic_years.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($years) ?></span><span class="n-stat-mini-label"><?= e(__('academic_years.total_years')) ?></span></div><div class="n-stat-mini success"><span class="n-stat-mini-value"><?= count($activeYears) ?></span><span class="n-stat-mini-label"><?= e(__('academic_years.stat_active')) ?></span></div><div class="n-stat-mini archived"><span class="n-stat-mini-value"><?= count($closedYears) ?></span><span class="n-stat-mini-label"><?= e(__('academic_years.stat_closed')) ?></span></div></div>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-grades-header"><div class="n-grades-header-content"><div class="n-grades-header-text"><h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('calendar', 'n-grades-icon') ?></span><?= e(__('academic_years.title')) ?></h1><p class="n-grades-subtitle"><?= e(__('academic_years.description')) ?></p></div><div class="n-grades-header-actions"><div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($years) ?></span><span class="n-stat-mini-label"><?= e(__('academic_years.total_years')) ?></span></div><div class="n-stat-mini success"><span class="n-stat-mini-value"><?= count($activeYears) ?></span><span class="n-stat-mini-label"><?= e(__('academic_years.stat_active')) ?></span></div><div class="n-stat-mini archived"><span class="n-stat-mini-value"><?= count($closedYears) ?></span><span class="n-stat-mini-label"><?= e(__('academic_years.stat_closed')) ?></span></div></div></div></div></div>
+
 
 <ul class="nav nav-tabs mb-4" role="tablist"><li class="nav-item"><button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button"><?= icon('list') ?><?= e(__('academic_years.tab_list')) ?><span class="badge"><?= count($years) ?></span></button></li><?php if ($canManage): ?><li class="nav-item"><button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" type="button"><?= icon('plus') ?><?= e(__('academic_years.tab_add')) ?></button></li><?php endif; ?></ul>
 

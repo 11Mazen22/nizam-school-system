@@ -1,21 +1,9 @@
 <?php
 /** @var array $leaves @var array $teachers @var ?string $activeStatus */
 $pageTitle = __('hr.leave_management');
-$suppressPageTitle = true;
 $activeNav = 'hr';
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('calendar', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('hr.leave_management')) ?>
-    </h1>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/hr" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<a href="/hr" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
@@ -23,8 +11,12 @@ use App\Middleware\CsrfMiddleware;
       <?= icon('plus') ?>
       <span><?= e(__('hr.request_leave')) ?></span>
     </button>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+?>
+
+
 
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">

@@ -1,28 +1,19 @@
 <?php
 /** @var array $routes */
 $pageTitle = __('transport.title');
-$suppressPageTitle = true;
 $activeNav = 'transport';
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('bus', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('transport.title')) ?>
-    </h1>
-    <p class="text-muted small mb-0"><?= e(__('transport.subtitle')) ?></p>
-  </div>
-  <?php if (hasPermission('transport.manage')): ?>
-    <div>
-      <a href="/transport/create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('transport.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/transport/create" class="btn btn-primary d-inline-flex align-items-center gap-2">
         <?= icon('plus') ?>
         <span><?= e(__('transport.add_route')) ?></span>
       </a>
-    </div>
-  <?php endif; ?>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <div class="card">
   <div class="card-body p-0">

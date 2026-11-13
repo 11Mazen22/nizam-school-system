@@ -3,24 +3,16 @@
 $pageTitle = __('assignments.workload_summary');
 $activeNav = 'assignments';
 $pageScripts = $hasActiveYear ? ['/assets/vendor/chartjs/chart.umd.min.js', '/assets/js/workload-chart.js'] : [];
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('chart', 'n-icon-lg text-body-secondary') ?>
-      <?= e($pageTitle) ?>
-    </h1>
-  </div>
-  <div class="n-page-head-actions">
-    <a href="/assignments" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+ob_start(); ?>
+<a href="/assignments" class="btn btn-outline-secondary d-flex align-items-center gap-2">
       <?= icon('chevron-right', 'n-flip-rtl') ?>
       <span><?= e(__('assignments.title')) ?></span>
     </a>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <?php if (!$hasActiveYear): ?>
   <div class="alert alert-warning d-flex align-items-center gap-2">

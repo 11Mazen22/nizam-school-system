@@ -3,12 +3,16 @@
 $isEdit = $teacher !== null;
 $pageTitle = $isEdit ? __('teachers.edit') : __('teachers.add');
 $activeNav = 'teachers';
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('teachers.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="<?= $isEdit ? '/teachers/' . (int) $teacher['id'] : '/teachers' ?>" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?><?= e(__('common.cancel')) ?></a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head"><div class="n-page-head-main"><span class="n-page-head-icon"><?= icon($isEdit ? 'edit' : 'plus') ?></span><div><h1><?= e($pageTitle) ?></h1><p><?= e(__('teachers.description')) ?></p></div></div><div class="n-page-head-actions"><a href="<?= $isEdit ? '/teachers/' . (int) $teacher['id'] : '/teachers' ?>" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?><?= e(__('common.cancel')) ?></a></div></div>
+
 <?php if ($error !== null): ?><div class="alert alert-danger"><?= icon('alert-circle', 'n-icon-lg') ?><span><?= e($error) ?></span></div><?php endif; ?>
 
 <div class="n-form-workspace">

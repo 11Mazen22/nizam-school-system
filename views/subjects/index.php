@@ -3,15 +3,20 @@
 $pageTitle = __('subjects.title');
 $activeNav = 'subjects';
 $pageScripts = ['/assets/js/subjects.js'];
-$suppressPageTitle = true;
 $canManage = hasPermission('subjects.manage');
 $activeSubjects = array_filter($subjects, static fn (array $subject): bool => (int) $subject['is_active'] === 1);
 $archivedSubjects = array_filter($subjects, static fn (array $subject): bool => (int) $subject['is_active'] === 0);
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('subjects.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($activeSubjects) ?></span><span class="n-stat-mini-label"><?= e(__('subjects.stat_active')) ?></span></div><div class="n-stat-mini archived"><span class="n-stat-mini-value"><?= count($archivedSubjects) ?></span><span class="n-stat-mini-label"><?= e(__('subjects.stat_archived')) ?></span></div></div><?php if ($canManage): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><?php endif; ?>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-grades-header"><div class="n-grades-header-content"><div class="n-grades-header-text"><h1 class="n-grades-title"><span class="n-grades-icon-wrapper"><?= icon('book', 'n-grades-icon') ?></span><?= e(__('subjects.title')) ?></h1><p class="n-grades-subtitle"><?= e(__('subjects.description')) ?></p></div><div class="n-grades-header-actions"><div class="n-grades-stats-mini"><div class="n-stat-mini"><span class="n-stat-mini-value"><?= count($activeSubjects) ?></span><span class="n-stat-mini-label"><?= e(__('subjects.stat_active')) ?></span></div><div class="n-stat-mini archived"><span class="n-stat-mini-value"><?= count($archivedSubjects) ?></span><span class="n-stat-mini-label"><?= e(__('subjects.stat_archived')) ?></span></div></div><?php if ($canManage): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><?php endif; ?></div></div></div>
+
 
 <ul class="nav nav-tabs mb-4" role="tablist"><li class="nav-item"><button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button"><?= icon('list') ?><?= e(__('subjects.tab_list')) ?><span class="badge"><?= count($subjects) ?></span></button></li><?php if ($canManage): ?><li class="nav-item"><button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" type="button"><?= icon('plus') ?><?= e(__('subjects.tab_add')) ?></button></li><li class="nav-item d-none" id="edit-tab-wrapper"><button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit-panel" type="button"><?= icon('edit') ?><?= e(__('subjects.tab_edit')) ?></button></li><?php endif; ?></ul>
 

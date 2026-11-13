@@ -10,25 +10,17 @@
  */
 $pageTitle = __('attendance.report_title');
 $activeNav = 'attendance';
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('attendance.report_subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<button type="button" class="btn btn-outline-secondary no-print" data-print-report><?= icon('printer') ?> <?= e(__('common.print')) ?></button>
+      <a href="/attendance" class="btn btn-primary"><?= icon('check-circle') ?> <?= e(__('attendance.mark_title')) ?></a>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('chart', 'n-grades-icon') ?></div>
-        <?= e(__('attendance.report_title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('attendance.report_subtitle')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <button type="button" class="btn btn-outline-secondary no-print" data-print-report><?= icon('printer') ?> <?= e(__('common.print')) ?></button>
-      <a href="/attendance" class="btn btn-primary"><?= icon('check-circle') ?> <?= e(__('attendance.mark_title')) ?></a>
-    </div>
-  </div>
-</div>
+
 
 <!-- Filter -->
 <form method="get" action="/attendance/report" class="n-filter-panel no-print">

@@ -1,20 +1,9 @@
 <?php
 /** @var array $invoices @var ?string $activeStatus */
 $pageTitle = __('finance.invoices_title');
-$suppressPageTitle = true;
 $activeNav = 'finance';
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('wallet', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('finance.invoices_title')) ?>
-    </h1>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/finance" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<a href="/finance" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
@@ -24,8 +13,11 @@ require dirname(__DIR__) . '/layout/start.php';
         <span><?= e(__('finance.create_invoice')) ?></span>
       </a>
     <?php endif; ?>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">

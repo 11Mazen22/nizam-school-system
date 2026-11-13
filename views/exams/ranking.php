@@ -6,24 +6,16 @@
  */
 $pageTitle = __('exams.ranking');
 $activeNav = 'exams';
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('exams.ranking_subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/exams" class="btn btn-outline-secondary"><?= icon('star') ?> <?= e(__('exams.title')) ?></a>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('trending-up', 'n-grades-icon') ?></div>
-        <?= e(__('exams.ranking')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('exams.ranking_subtitle')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <a href="/exams" class="btn btn-outline-secondary"><?= icon('star') ?> <?= e(__('exams.title')) ?></a>
-    </div>
-  </div>
-</div>
+
 
 <form method="get" action="/exams/ranking" class="n-filter-panel">
   <div class="n-filter-row">

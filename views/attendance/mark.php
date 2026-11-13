@@ -10,34 +10,10 @@
  */
 $pageTitle  = __('attendance.mark_title');
 $activeNav  = 'attendance';
-$suppressPageTitle = true;
-require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-
-// Real, current counts for the header stats -- same default-to-present
-// rule the table body below already uses for an unmarked student, so the
-// two never disagree.
-$statusCounts = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
-$canManage = hasPermission('attendance.manage');
-foreach ($students as $student) {
-    $status = $existing[$student['id']]['status'] ?? 'present';
-    if (isset($statusCounts[$status])) {
-        $statusCounts[$status]++;
-    }
-}
-?>
-
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper"><?= icon('check-circle', 'n-grades-icon') ?></div>
-        <?= e(__('attendance.mark_title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('attendance.mark_subtitle')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <?php if ($classId > 0 && !empty($students)): ?>
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('attendance.mark_subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<?php if ($classId > 0 && !empty($students)): ?>
       <div class="n-grades-stats-mini">
         <div class="n-stat-mini">
           <span class="n-stat-mini-value" data-count-up><?= $statusCounts['present'] ?></span>
@@ -65,9 +41,25 @@ foreach ($students as $student) {
         <?= icon('chart') ?>
         <span><?= e(__('attendance.view_report')) ?></span>
       </a>
-    </div>
-  </div>
-</div>
+<?php
+$pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+use App\Middleware\CsrfMiddleware;
+
+// Real, current counts for the header stats -- same default-to-present
+// rule the table body below already uses for an unmarked student, so the
+// two never disagree.
+$statusCounts = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
+$canManage = hasPermission('attendance.manage');
+foreach ($students as $student) {
+    $status = $existing[$student['id']]['status'] ?? 'present';
+    if (isset($statusCounts[$status])) {
+        $statusCounts[$status]++;
+    }
+}
+?>
+
+
 
 <!-- Filter bar -->
 <form method="get" action="/attendance" class="n-filter-panel">

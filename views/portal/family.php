@@ -1,24 +1,11 @@
 <?php
 /** @var array $guardians @var ?array $guardian @var array $children @var ?array $student @var array $scores @var ?array $attendanceStats */
 $pageTitle = __('portal.family_title');
-$suppressPageTitle = true;
 $activeNav = 'portal-family';
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('home', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('portal.family_title')) ?>
-    </h1>
-    <p class="text-muted small mb-0">
-      <?= e(__('portal.family_subtitle', ['name' => $guardian['full_name'] ?? 'Guardian'])) ?>
-    </p>
-  </div>
-  <?php if (count($guardians) > 1): ?>
-    <div>
-      <form method="get" action="/portal/family" class="d-flex gap-2 align-items-center">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('portal.family_subtitle', ['name' => $guardian['full_name'] ?? 'Guardian'])) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<form method="get" action="/portal/family" class="d-flex gap-2 align-items-center">
         <label class="small text-muted text-nowrap"><?= e(__('guardians.guardian')) ?>:</label>
         <select class="form-select form-select-sm" name="guardian_id" onchange="this.form.submit()">
           <?php foreach ($guardians as $g): ?>
@@ -28,9 +15,11 @@ require dirname(__DIR__) . '/layout/start.php';
           <?php endforeach; ?>
         </select>
       </form>
-    </div>
-  <?php endif; ?>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <?php if (empty($children)): ?>
   <div class="card">

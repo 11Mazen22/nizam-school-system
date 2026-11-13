@@ -1,8 +1,24 @@
 <?php
 /** @var array $application @var array $classes */
 $pageTitle = __('admissions.app_title', ['number' => $application['application_number']]);
-$suppressPageTitle = true;
 $activeNav = 'admissions';
+ob_start(); ?>
+<a href="/admissions" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+      <?= icon('chevron-left', 'n-flip-rtl') ?>
+      <span><?= e(__('common.back')) ?></span>
+    </a>
+    <?php if ($application['status'] !== 'enrolled' && hasPermission('admissions.convert')): ?>
+      <button type="button" class="btn btn-success d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#enrollModal">
+        <?= icon('user-check') ?>
+        <span><?= e(__('admissions.convert_to_student')) ?></span>
+      </button>
+    <?php elseif ($application['enrolled_student_id'] !== null): ?>
+      <a href="/students/<?= (int) $application['enrolled_student_id'] ?>" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+        <?= icon('eye') ?>
+        <span><?= e(__('admissions.view_student_profile')) ?></span>
+      </a>
+    <?php endif; ?>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 
@@ -18,40 +34,7 @@ $statusBadges = [
 ];
 ?>
 
-<div class="n-page-head">
-  <div>
-    <div class="d-flex align-items-center gap-2 mb-1">
-      <h1 class="d-flex align-items-center gap-2 mb-0">
-        <?= icon('sparkle', 'n-icon-lg text-body-secondary') ?>
-        <?= e($application['applicant_name']) ?>
-      </h1>
-      <span class="badge <?= $statusBadges[$application['status']] ?? 'text-bg-secondary' ?> fs-6">
-        <?= e(__('admissions.status_' . $application['status'])) ?>
-      </span>
-    </div>
-    <div class="text-muted small">
-      <?= e(__('admissions.app_number')) ?>: <span dir="ltr" class="font-monospace fw-bold"><?= e($application['application_number']) ?></span> |
-      <?= e(__('grades.grade')) ?>: <strong><?= e(currentLocale() === 'ar' ? $application['grade_name_ar'] : $application['grade_name_en']) ?></strong>
-    </div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/admissions" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
-      <?= icon('chevron-left', 'n-flip-rtl') ?>
-      <span><?= e(__('common.back')) ?></span>
-    </a>
-    <?php if ($application['status'] !== 'enrolled' && hasPermission('admissions.convert')): ?>
-      <button type="button" class="btn btn-success d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#enrollModal">
-        <?= icon('user-check') ?>
-        <span><?= e(__('admissions.convert_to_student')) ?></span>
-      </button>
-    <?php elseif ($application['enrolled_student_id'] !== null): ?>
-      <a href="/students/<?= (int) $application['enrolled_student_id'] ?>" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
-        <?= icon('eye') ?>
-        <span><?= e(__('admissions.view_student_profile')) ?></span>
-      </a>
-    <?php endif; ?>
-  </div>
-</div>
+
 
 <div class="row g-4 mb-4">
   <div class="col-lg-6">

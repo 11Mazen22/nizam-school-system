@@ -1,27 +1,20 @@
 <?php
 /** @var array $departments @var array $designations @var array $leaves @var array $teachers */
 $pageTitle = __('hr.title');
-$suppressPageTitle = true;
 $activeNav = 'hr';
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('hr.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/hr/leaves" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+      <?= icon('calendar') ?>
+      <span><?= e(__('hr.leave_management')) ?></span>
+    </a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('briefcase', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('hr.title')) ?>
-    </h1>
-    <p class="text-muted small mb-0"><?= e(__('hr.subtitle')) ?></p>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/hr/leaves" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
-      <?= icon('calendar') ?>
-      <span><?= e(__('hr.leave_management')) ?></span>
-    </a>
-  </div>
-</div>
+
 
 <div class="row g-4 mb-4">
   <div class="col-lg-6">

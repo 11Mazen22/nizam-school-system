@@ -2,19 +2,13 @@
 /** @var ?string $error @var array $years */
 $pageTitle = __('promotion.title');
 $activeNav = 'students';
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('promotion.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('trending-up', 'n-icon-lg text-body-secondary') ?>
-      <?= e($pageTitle) ?>
-    </h1>
-    <p class="mb-0"><?= e(__('promotion.subtitle')) ?></p>
-  </div>
-</div>
+
 
 <ul class="n-workflow-steps n-workflow-2">
   <li class="active" aria-current="step"><?= e(__('promotion.step1')) ?></li>

@@ -1,21 +1,11 @@
 <?php
 /** @var array $books */
 $pageTitle = __('library.title');
-$suppressPageTitle = true;
 $activeNav = 'library';
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('book-open', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('library.title')) ?>
-    </h1>
-    <p class="text-muted small mb-0"><?= e(__('library.subtitle')) ?></p>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/library/borrows" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('library.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/library/borrows" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('clipboard-list') ?>
       <span><?= e(__('library.borrows_desk')) ?></span>
     </a>
@@ -25,8 +15,11 @@ require dirname(__DIR__) . '/layout/start.php';
         <span><?= e(__('library.add_book')) ?></span>
       </a>
     <?php endif; ?>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <div class="card">
   <div class="card-body p-0">

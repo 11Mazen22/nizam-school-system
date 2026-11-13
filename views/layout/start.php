@@ -395,7 +395,9 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
                   <?= e(__($navGroups[$activeNavItem['group'] ?? 'main'] ?? 'nav.group.main')) ?>
                 </span>
                 <h1 class="n-hero-title"><?= e($pageTitle) ?></h1>
-                <?php if (!empty($pageSubtitle)): ?>
+                <?php if (!empty($pageSubtitleHtml)): ?>
+                  <?= $pageSubtitleHtml /* trusted markup built by the view */ ?>
+                <?php elseif (!empty($pageSubtitle)): ?>
                   <p class="n-hero-sub"><?= e($pageSubtitle) ?></p>
                 <?php endif; ?>
               </div>

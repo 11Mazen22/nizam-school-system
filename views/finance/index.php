@@ -1,21 +1,11 @@
 <?php
 /** @var array $summary @var array $invoices */
 $pageTitle = __('finance.title');
-$suppressPageTitle = true;
 $activeNav = 'finance';
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('wallet', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('finance.title')) ?>
-    </h1>
-    <p class="text-muted small mb-0"><?= e(__('finance.subtitle')) ?></p>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/finance/structures" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('finance.subtitle')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="/finance/structures" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('layers') ?>
       <span><?= e(__('finance.fee_structures')) ?></span>
     </a>
@@ -25,8 +15,11 @@ require dirname(__DIR__) . '/layout/start.php';
         <span><?= e(__('finance.create_invoice')) ?></span>
       </a>
     <?php endif; ?>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
   <div class="col">

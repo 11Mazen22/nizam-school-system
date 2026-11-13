@@ -1,23 +1,9 @@
 <?php
 /** @var array $guardian @var array $students */
 $pageTitle = $guardian['full_name'];
-$suppressPageTitle = true;
 $activeNav = 'guardians';
-require dirname(__DIR__) . '/layout/start.php';
-?>
-
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('users-group', 'n-icon-lg text-body-secondary') ?>
-      <?= e($guardian['full_name']) ?>
-    </h1>
-    <span class="badge text-bg-light border">
-      <?= e(__('guardians.rel_' . ($guardian['relationship_type'] ?? 'father'))) ?>
-    </span>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/guardians" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+ob_start(); ?>
+<a href="/guardians" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
@@ -27,8 +13,11 @@ require dirname(__DIR__) . '/layout/start.php';
         <span><?= e(__('common.edit')) ?></span>
       </a>
     <?php endif; ?>
-  </div>
-</div>
+<?php $pageActions = (string) ob_get_clean();
+require dirname(__DIR__) . '/layout/start.php';
+?>
+
+
 
 <div class="row g-4 mb-4">
   <div class="col-lg-4">

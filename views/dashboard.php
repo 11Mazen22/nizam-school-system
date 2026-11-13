@@ -1,8 +1,8 @@
 <?php
 /** @var array $stats @var array $insights */
 $pageTitle = __('dashboard.title');
-$activeNav = 'dashboard';
 $suppressPageTitle = true;
+$activeNav = 'dashboard';
 $pageScripts = $stats['hasActiveYear'] ? ['/assets/vendor/chartjs/chart.umd.min.js', '/assets/js/dashboard.js'] : [];
 require __DIR__ . '/layout/start.php';
 

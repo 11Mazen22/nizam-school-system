@@ -1,22 +1,14 @@
 <?php
 /** @var ?array $teacher @var array $assignments @var array $todayTimetable */
 $pageTitle = __('portal.teacher_title');
-$suppressPageTitle = true;
 $activeNav = 'portal-teacher';
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('portal.welcome_teacher', ['name' => $teacher['full_name'] ?? 'Teacher'])) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('chalkboard-teacher', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('portal.teacher_title')) ?>
-    </h1>
-    <p class="text-muted small mb-0">
-      <?= e(__('portal.welcome_teacher', ['name' => $teacher['full_name'] ?? 'Teacher'])) ?>
-    </p>
-  </div>
-</div>
+
 
 <div class="row g-4 mb-4">
   <div class="col-lg-7">

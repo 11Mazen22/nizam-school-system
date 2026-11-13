@@ -2,25 +2,17 @@
 /** @var array $teachers */
 $pageTitle = __('common.archived_list') . ' — ' . __('teachers.title');
 $activeNav = 'teachers';
-$suppressPageTitle = true;
+ob_start(); ?>
+<a href="/teachers" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+      <?= icon('chevron-right', 'n-flip-rtl') ?>
+      <span><?= e(__('teachers.title')) ?></span>
+    </a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div>
-    <h1 class="d-flex align-items-center gap-2">
-      <?= icon('archive', 'n-icon-lg text-body-secondary') ?>
-      <?= e(__('common.archived_list')) ?>
-    </h1>
-  </div>
-  <div class="n-page-head-actions">
-    <a href="/teachers" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-      <?= icon('chevron-right', 'n-flip-rtl') ?>
-      <span><?= e(__('teachers.title')) ?></span>
-    </a>
-  </div>
-</div>
+
 
 <?php if (empty($teachers)): ?>
   <div class="n-empty py-4">

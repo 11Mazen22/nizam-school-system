@@ -4,15 +4,16 @@ $isEdit = $student !== null;
 $pageTitle = $isEdit ? __('students.edit') : __('students.add');
 $activeNav = 'students';
 $pageScripts = !$isEdit || $grades !== [] ? ['/assets/js/students-form.js'] : [];
-$suppressPageTitle = true;
+ob_start(); ?>
+<p class="n-hero-sub"><?= e(__('students.description')) ?></p>
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<a href="<?= $isEdit ? '/students/' . (int) $student['id'] : '/students' ?>" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?><?= e(__('common.cancel')) ?></a>
+<?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>
 
-<div class="n-page-head">
-  <div class="n-page-head-main"><span class="n-page-head-icon"><?= icon($isEdit ? 'edit' : 'plus') ?></span><div><h1><?= e($pageTitle) ?></h1><p><?= e(__('students.description')) ?></p></div></div>
-  <div class="n-page-head-actions"><a href="<?= $isEdit ? '/students/' . (int) $student['id'] : '/students' ?>" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?><?= e(__('common.cancel')) ?></a></div>
-</div>
+
 
 <?php if ($error !== null): ?><div class="alert alert-danger"><?= icon('alert-circle', 'n-icon-lg flex-shrink-0') ?><span><?= e($error) ?></span></div><?php endif; ?>
 
