@@ -24,8 +24,12 @@ final class SetupGateMiddleware implements MiddlewareInterface
     {
         $path = $request->path();
         
-        // Emergency admin recovery bypasses the setup gate entirely
-        if ($path === '/setup/recover-admin') {
+        // Emergency admin recovery bypasses the setup gate entirely. The
+        // prefix check matters: the reset POST lives at
+        // /setup/recover-admin/reset, and an exact-match exemption silently
+        // redirected that POST to /login before the controller ever ran.
+        $isRecovery = $path === '/setup/recover-admin' || str_starts_with($path, '/setup/recover-admin/');
+        if ($isRecovery) {
             return true;
         }
         
@@ -40,7 +44,7 @@ final class SetupGateMiddleware implements MiddlewareInterface
         }
 
         // Setup complete: block setup wizard, redirect to login
-        if ($completed && $isSetupPath && $path !== '/setup/recover-admin') {
+        if ($completed && $isSetupPath && !$isRecovery) {
             Response::redirect('/login');
             return false;
         }
