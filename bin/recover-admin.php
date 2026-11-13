@@ -38,11 +38,13 @@ function listAccounts(array $accounts): void
     fwrite(STDOUT, "Active accounts:\n");
     foreach ($accounts as $account) {
         $role = $account['role'] === null ? '' : ' (' . $account['role'] . ')';
-        fwrite(STDOUT, "  - {$account['username']}{$role}  {$account['full_name']}\n");
+        // Usernames and role codes only: Windows consoles cannot shape or
+        // order Arabic names, so printing them shows reversed gibberish.
+        fwrite(STDOUT, "  - {$account['username']}{$role}\n");
     }
     fwrite(STDOUT, "\nRun again with one of those usernames:\n");
     fwrite(STDOUT, "  php bin/recover-admin.php <username>\n");
-    fwrite(STDOUT, "\nالحسابات المتاحة أعلاه؛ أعد تنفيذ الأمر باسم المستخدم المطلوب.\n");
+    fwrite(STDOUT, "\nCopy one of the usernames above exactly as printed.\n");
 }
 
 $username = isset($argv[1]) ? trim((string) $argv[1]) : '';
@@ -87,4 +89,4 @@ fwrite(STDOUT, "Recovery token for {$issued['username']}\n");
 fwrite(STDOUT, "  {$issued['token']}\n\n");
 fwrite(STDOUT, "Valid for {$minutes} minutes, usable once.\n");
 fwrite(STDOUT, "Open /setup/recover-admin, enter the token and the new password.\n");
-fwrite(STDOUT, "\nالرمز صالح 20 دقيقة ولمرة واحدة. افتح /setup/recover-admin وأدخله مع كلمة المرور الجديدة.\n\n");
+
