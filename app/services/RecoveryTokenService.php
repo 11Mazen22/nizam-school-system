@@ -36,6 +36,28 @@ final class RecoveryTokenService
     }
 
     /**
+     * Active accounts that can be recovered, for the CLI's help output.
+     *
+     * @return list<array{id:int, username:string, full_name:string, role:?string}>
+     */
+    public static function activeAdmins(): array
+    {
+        $pdo = Database::connection();
+        $rows = $pdo->query(
+            'SELECT u.id, u.username, u.full_name, r.code AS role
+             FROM users u LEFT JOIN roles r ON r.id = u.role_id
+             WHERE u.is_active = 1 ORDER BY u.id'
+        )->fetchAll();
+
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'username' => (string) $row['username'],
+            'full_name' => (string) $row['full_name'],
+            'role' => $row['role'] === null ? null : (string) $row['role'],
+        ], $rows);
+    }
+
+    /**
      * Mint a token for an active user.
      *
      * @return array{token: string, username: string, expires_at: int}|null

@@ -30,5 +30,8 @@ Thumbs.db
 # Local Claude Code session-tooling state -- not project source.
 .claude/
 
+# One-time admin recovery code -- a live credential, never committed.
+recovery-token.json
+
 # Installed local browser-testing dependencies.
 node_modules/
