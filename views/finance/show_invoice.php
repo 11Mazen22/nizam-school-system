@@ -1,6 +1,7 @@
 <?php
 /** @var array $invoice @var array $payments */
 $pageTitle = __('finance.invoice_title', ['number' => $invoice['invoice_number']]);
+$suppressPageTitle = true;
 $activeNav = 'finance';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

@@ -1,6 +1,7 @@
 <?php
 /** @var array $borrows @var array $books @var array $students @var array $teachers @var ?string $activeStatus */
 $pageTitle = __('library.borrows_desk');
+$suppressPageTitle = true;
 $activeNav = 'library';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

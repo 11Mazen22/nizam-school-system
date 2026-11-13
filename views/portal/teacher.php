@@ -1,6 +1,7 @@
 <?php
 /** @var ?array $teacher @var array $assignments @var array $todayTimetable */
 $pageTitle = __('portal.teacher_title');
+$suppressPageTitle = true;
 $activeNav = 'portal-teacher';
 require dirname(__DIR__) . '/layout/start.php';
 ?>

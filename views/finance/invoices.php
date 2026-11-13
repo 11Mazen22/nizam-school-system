@@ -1,6 +1,7 @@
 <?php
 /** @var array $invoices @var ?string $activeStatus */
 $pageTitle = __('finance.invoices_title');
+$suppressPageTitle = true;
 $activeNav = 'finance';
 require dirname(__DIR__) . '/layout/start.php';
 ?>

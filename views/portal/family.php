@@ -1,6 +1,7 @@
 <?php
 /** @var array $guardians @var ?array $guardian @var array $children @var ?array $student @var array $scores @var ?array $attendanceStats */
 $pageTitle = __('portal.family_title');
+$suppressPageTitle = true;
 $activeNav = 'portal-family';
 require dirname(__DIR__) . '/layout/start.php';
 ?>

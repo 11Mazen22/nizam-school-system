@@ -2,32 +2,14 @@
 /** @var array $entries @var int $page @var int $lastPage @var int $total @var bool $scopedToSelf */
 $pageTitle = __('activity_log.title');
 $activeNav = 'activity-log';
-$suppressPageTitle = true;
+// Uses the shared layout hero: the layout renders the single h1, icon and
+// eyebrow, so this screen only contributes its subtitle and total.
+$pageSubtitle = __('activity_log.description');
+$pageActions = '<div class="n-hero-stat"><b>' . (int) $total . '</b><span>'
+    . e(__('activity_log.total_entries')) . '</span></div>';
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
-<!-- POWERFUL PAGE HEADER -->
-<div class="n-grades-header">
-  <div class="n-grades-header-content">
-    <div class="n-grades-header-text">
-      <h1 class="n-grades-title">
-        <div class="n-grades-icon-wrapper">
-          <?= icon('activity', 'n-grades-icon') ?>
-        </div>
-        <?= e(__('activity_log.title')) ?>
-      </h1>
-      <p class="n-grades-subtitle"><?= e(__('activity_log.description')) ?></p>
-    </div>
-    <div class="n-grades-header-actions">
-      <div class="n-grades-stats-mini">
-        <div class="n-stat-mini">
-          <span class="n-stat-mini-value"><?= (int)$total ?></span>
-          <span class="n-stat-mini-label"><?= e(__('activity_log.total_entries')) ?></span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <?php if ($scopedToSelf): ?>
   <div class="alert alert-info d-flex align-items-center gap-2 mb-3">

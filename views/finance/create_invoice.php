@@ -1,6 +1,7 @@
 <?php
 /** @var array $students @var ?int $academicYearId */
 $pageTitle = __('finance.create_invoice');
+$suppressPageTitle = true;
 $activeNav = 'finance';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

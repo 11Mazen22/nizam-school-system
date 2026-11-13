@@ -1,6 +1,7 @@
 <?php
 /** @var array $guardian @var array $students */
 $pageTitle = $guardian['full_name'];
+$suppressPageTitle = true;
 $activeNav = 'guardians';
 require dirname(__DIR__) . '/layout/start.php';
 ?>

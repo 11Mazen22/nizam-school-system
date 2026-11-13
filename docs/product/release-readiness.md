@@ -352,6 +352,18 @@ Admissions fixes shipped with the redesign:
 - Stage tiles, hero and table are new components (`.n-hero`, `.n-stage-grid`,
   `.n-stage-tile`) rather than Bootstrap card grids.
 
+Consistency is now enforced rather than just applied. The shared layout renders one
+hero for every screen that does not build its own header, and 22 views that did
+build one were given `$suppressPageTitle` so no page can show two titles again.
+`tests/redesign-checks.php` (now part of `npm test`) fails when:
+
+- a view renders its own `<h1>` without suppressing the shared hero;
+- the layout hero disappears from `views/layout/start.php`;
+- any of the 29 navigation links has no matching `GET` route.
+
+The HTTP suite additionally asserts exactly one page title on seven screens, and
+that `/activity-log` renders the shared hero.
+
 Not verified visually: the fixed desktop sidebar at ≥992px. The browser panel used
 for these checks renders at ~511 CSS px, so only the drawer could be inspected;
 contrast for the desktop rail was confirmed through computed styles.

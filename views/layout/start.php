@@ -380,12 +380,31 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
       <?php endforeach; ?>
 
       <?php if (empty($suppressPageTitle)): ?>
-        <div class="n-page-head">
-          <div class="n-page-head-main">
-            <span class="n-page-head-icon"><?= icon($pageIcon) ?></span>
-            <div><h1><?= e($pageTitle) ?></h1></div>
+        <?php
+        // Shared hero. Every screen that does not build its own header gets this
+        // one automatically, so a new module inherits the design system without
+        // any page-specific markup. Optional: $pageSubtitle (plain text) and
+        // $pageActions (trusted HTML built in the view, e.g. action buttons).
+        ?>
+        <section class="n-hero n-hero-compact mb-4">
+          <div class="n-hero-body">
+            <div class="d-flex align-items-start gap-3">
+              <span class="n-page-head-icon"><?= icon($pageIcon) ?></span>
+              <div>
+                <span class="n-hero-eyebrow">
+                  <?= e(__($navGroups[$activeNavItem['group'] ?? 'main'] ?? 'nav.group.main')) ?>
+                </span>
+                <h1 class="n-hero-title"><?= e($pageTitle) ?></h1>
+                <?php if (!empty($pageSubtitle)): ?>
+                  <p class="n-hero-sub"><?= e($pageSubtitle) ?></p>
+                <?php endif; ?>
+              </div>
+            </div>
+            <?php if (!empty($pageActions)): ?>
+              <div class="n-hero-actions"><?= $pageActions ?></div>
+            <?php endif; ?>
           </div>
-        </div>
+        </section>
       <?php endif; ?>
 
     <!-- Shared dialogs -->

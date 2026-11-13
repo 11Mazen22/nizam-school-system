@@ -1,6 +1,7 @@
 <?php
 /** @var array $routes */
 $pageTitle = __('transport.title');
+$suppressPageTitle = true;
 $activeNav = 'transport';
 require dirname(__DIR__) . '/layout/start.php';
 ?>

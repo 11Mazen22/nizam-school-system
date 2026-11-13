@@ -1,6 +1,7 @@
 <?php
 /** @var array $leaves @var array $teachers @var ?string $activeStatus */
 $pageTitle = __('hr.leave_management');
+$suppressPageTitle = true;
 $activeNav = 'hr';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

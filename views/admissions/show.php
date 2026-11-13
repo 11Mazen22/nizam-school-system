@@ -1,6 +1,7 @@
 <?php
 /** @var array $application @var array $classes */
 $pageTitle = __('admissions.app_title', ['number' => $application['application_number']]);
+$suppressPageTitle = true;
 $activeNav = 'admissions';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

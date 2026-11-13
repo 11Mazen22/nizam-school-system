@@ -101,5 +101,73 @@ if ($missingClasses === []) {
         . implode(', ', array_keys($missingClasses)) . "\n";
 }
 
+// --- single heading per page ------------------------------------------------
+// The shared layout renders the page hero (h1) for every screen. A view that
+// draws its own header must set $suppressPageTitle, otherwise the page shows
+// two titles -- exactly the bug the admissions screen shipped with.
+$duplicateHeads = [];
+$viewIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/../views'));
+foreach ($viewIterator as $file) {
+    if ($file->getExtension() !== 'php') {
+        continue;
+    }
+    $path = $file->getPathname();
+    $normalized = str_replace('\\', '/', $path);
+    if (str_contains($normalized, '/views/layout/')) {
+        continue; // the shell documents own their own <html>
+    }
+    $contents = (string) file_get_contents($path);
+    if (!str_contains($contents, 'layout/start.php')) {
+        continue; // login/error/PDF are standalone documents with their own <html>
+    }
+    if (str_contains($contents, '<h1') && !str_contains($contents, 'suppressPageTitle')) {
+        $duplicateHeads[] = str_replace(__DIR__ . '/../', '', $file->getPathname());
+    }
+}
+if ($duplicateHeads === []) {
+    echo "PASS: every view with its own heading suppresses the shared hero\n";
+} else {
+    $fail++;
+    echo "FAIL: views render an h1 without suppressing the shared hero (double heading): " . implode(', ', $duplicateHeads) . "\n";
+}
+if (str_contains((string) file_get_contents(__DIR__ . '/../views/layout/start.php'), 'n-hero-compact')) {
+    echo "PASS: shared layout hero present\n";
+} else {
+    $fail++;
+    echo "FAIL: shared layout hero missing from views/layout/start.php\n";
+}
+
+// --- navigation coverage ----------------------------------------------------
+// Every sidebar/command-palette link must point at a GET route that exists, so
+// no module can be listed and then 404.
+$functionsSource = (string) file_get_contents(__DIR__ . '/../app/helpers/functions.php');
+preg_match('/function navItems\(\).*?\$catalog = \[(.*?)\];/s', $functionsSource, $navMatch);
+$navBlock = $navMatch[1] ?? '';
+preg_match_all("/'href'\s*=>\s*'([^']+)'/", $navBlock, $navHrefs);
+
+$routesSource = (string) file_get_contents(__DIR__ . '/../public/index.php');
+preg_match_all("/\\\$router->get\('([^']+)'/" , $routesSource, $getRoutes);
+$registered = [];
+foreach ($getRoutes[1] as $route) {
+    // collapse {param} segments so /students/{id} matches /students/7
+    $registered[preg_replace('/\{[^}]+\}/', '{id}', $route)] = true;
+}
+
+$brokenLinks = [];
+foreach ($navHrefs[1] as $href) {
+    if (preg_match('/\{[^}]+\}/', $href) === 1) {
+        continue; // parameterised destinations are not nav targets
+    }
+    if (!isset($registered[$href])) {
+        $brokenLinks[] = $href;
+    }
+}
+if ($brokenLinks === []) {
+    echo 'PASS: navigation coverage (' . count($navHrefs[1]) . " nav links all resolve to GET routes)\n";
+} else {
+    $fail++;
+    echo 'FAIL: navigation entries with no matching GET route: ' . implode(', ', $brokenLinks) . "\n";
+}
+
 echo $fail === 0 ? "ALL CHECKS PASSED\n" : "{$fail} CHECK(S) FAILED\n";
 exit($fail === 0 ? 0 : 1);

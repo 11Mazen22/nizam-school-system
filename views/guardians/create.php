@@ -1,5 +1,6 @@
 <?php
 $pageTitle = __('guardians.add');
+$suppressPageTitle = true;
 $activeNav = 'guardians';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

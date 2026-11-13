@@ -1,6 +1,7 @@
 <?php
 /** @var array $departments @var array $designations @var array $leaves @var array $teachers */
 $pageTitle = __('hr.title');
+$suppressPageTitle = true;
 $activeNav = 'hr';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

@@ -531,6 +531,13 @@ try {
     ok(strpos($offlineScreen['body'], 'data-queue-list') !== false, 'Pending-sends screen exposes the local queue list');
     same(302, $anon->get('/settings/offline')['status'], 'GET /settings/offline requires authentication');
 
+    // Every screen must show exactly one page title: the shared hero or the
+    // view's own header, never both.
+    foreach (['/dashboard', '/students', '/finance', '/guardians', '/timetable', '/reports', '/exams'] as $screen) {
+        same(1, substr_count($admin->get($screen)['body'], '<h1'), $screen . ' renders exactly one page title');
+    }
+    ok(strpos($admin->get('/activity-log')['body'], 'n-hero-compact') !== false, 'Shared layout hero renders on a screen that does not build its own header');
+
     // Subjects (create + duplicate rejection)
     $before = $count('subjects');
     same(302, $admin->post('/subjects', ['code' => 'HTTP-S1', 'name_en' => 'HTTP Subject', 'name_ar' => 'مادة اختبار', '_csrf_token' => $formToken])['status'], 'POST /subjects redirects');

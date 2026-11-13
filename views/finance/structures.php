@@ -1,6 +1,7 @@
 <?php
 /** @var array $categories @var array $structures @var array $grades */
 $pageTitle = __('finance.fee_structures');
+$suppressPageTitle = true;
 $activeNav = 'finance';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

@@ -1,6 +1,7 @@
 <?php
 /** @var array $guardian */
 $pageTitle = __('common.edit') . ' ' . $guardian['full_name'];
+$suppressPageTitle = true;
 $activeNav = 'guardians';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

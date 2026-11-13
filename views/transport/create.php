@@ -1,5 +1,6 @@
 <?php
 $pageTitle = __('transport.add_route');
+$suppressPageTitle = true;
 $activeNav = 'transport';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

@@ -1,5 +1,6 @@
 <?php
 $pageTitle = __('library.add_book');
+$suppressPageTitle = true;
 $activeNav = 'library';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

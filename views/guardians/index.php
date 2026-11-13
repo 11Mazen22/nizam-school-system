@@ -1,6 +1,7 @@
 <?php
 /** @var array $guardians */
 $pageTitle = __('guardians.title');
+$suppressPageTitle = true;
 $activeNav = 'guardians';
 require dirname(__DIR__) . '/layout/start.php';
 ?>

@@ -1,6 +1,7 @@
 <?php
 /** @var array $route @var array $students @var array $allStudents */
 $pageTitle = $route['route_name'];
+$suppressPageTitle = true;
 $activeNav = 'transport';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;

@@ -1,6 +1,7 @@
 <?php
 /** @var array $books */
 $pageTitle = __('library.title');
+$suppressPageTitle = true;
 $activeNav = 'library';
 require dirname(__DIR__) . '/layout/start.php';
 ?>

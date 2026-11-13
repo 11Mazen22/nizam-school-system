@@ -1,6 +1,7 @@
 <?php
 /** @var array $grades @var ?int $academicYearId */
 $pageTitle = __('admissions.new_application');
+$suppressPageTitle = true;
 $activeNav = 'admissions';
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
