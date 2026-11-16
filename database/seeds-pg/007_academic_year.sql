@@ -19,8 +19,8 @@ SELECT
   start_year::TEXT || '/' || (start_year + 1)::TEXT,
   make_date(start_year, 9, 1),
   make_date(start_year + 1, 6, 30),
-  true,
-  false,
+  1,
+  0,
   35
 FROM year_bounds
-WHERE NOT EXISTS (SELECT 1 FROM academic_years WHERE is_active = true);
+WHERE NOT EXISTS (SELECT 1 FROM academic_years WHERE is_active = 1);

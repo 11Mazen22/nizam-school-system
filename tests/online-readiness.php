@@ -72,6 +72,10 @@ onlineCheck(
     'Postgres seeds contain no MySQL-only write syntax'
 );
 onlineCheck(
+    preg_match('/academic_years[\s\S]*?is_active\s*=\s*(?:true|false)/i', $allSeedSql) !== 1,
+    'Academic-year seeds honor the PostgreSQL SMALLINT flag contract'
+);
+onlineCheck(
     str_contains($allSeedSql, "WHERE r.code = 'admin'\nON CONFLICT (role_id, permission_id) DO NOTHING"),
     'Fresh Postgres administrators receive the complete permission catalogue'
 );
