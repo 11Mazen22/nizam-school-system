@@ -6,7 +6,7 @@
     "require": {
         "php": ">=8.1",
         "mpdf/mpdf": "^8.2",
-        "phpoffice/phpspreadsheet": "^1.30.8"
+        "phpoffice/phpspreadsheet": "^5.11.0"
     },
     "config": {
         "optimize-autoloader": true,
