@@ -44,7 +44,7 @@ INSERT INTO permissions (code, name_en, name_ar, module) VALUES
   -- Timetable
   ('timetable.view',       'View Timetable',              'عرض الجدول الدراسي',        'timetable'),
   ('timetable.manage',     'Manage Timetable',            'إدارة الجدول الدراسي',      'timetable')
-ON DUPLICATE KEY UPDATE
-  name_en = VALUES(name_en),
-  name_ar = VALUES(name_ar),
-  module  = VALUES(module);
+ON CONFLICT (code) DO UPDATE SET
+  name_en = EXCLUDED.name_en,
+  name_ar = EXCLUDED.name_ar,
+  module  = EXCLUDED.module;

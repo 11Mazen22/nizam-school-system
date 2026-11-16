@@ -45,7 +45,7 @@ Every row below was executed against this working tree.
 | Academic calculation | `php tests/academic-calculation.php` | PASS |
 | Operational module integrity | `php tests/module-integrity.php` | PASS |
 | Scheduled endpoint authentication | `php tests/scheduled-auth.php` | PASS |
-| Online deployment/RLS contract | `php tests/online-readiness.php` | PASS (142 checks) |
+| Online deployment/RLS contract | `php tests/online-readiness.php` | PASS (150 checks) |
 | HTTP request pipeline | `php tests/http/run.php` | PASS (899 assertions) |
 | Dependency metadata/security | `composer validate --strict && composer audit --locked` | PASS |
 | PHP syntax, all first-party PHP | recursive `php -l` over `app bin database tests views` | PASS |

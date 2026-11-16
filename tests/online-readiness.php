@@ -56,6 +56,22 @@ onlineCheck(
     'Postgres role templates use explicit CROSS JOIN syntax'
 );
 
+$seedFiles = glob($root . '/database/seeds-pg/*.sql') ?: [];
+sort($seedFiles, SORT_STRING);
+$allSeedSql = '';
+foreach ($seedFiles as $file) {
+    $sql = (string) file_get_contents($file);
+    $allSeedSql .= "\n" . $sql;
+    onlineCheck(
+        App\Services\MigrationService::splitStatements($sql) !== [],
+        basename($file) . ' splits into executable seed statements'
+    );
+}
+onlineCheck(
+    preg_match('/\b(?:INSERT\s+IGNORE|ON\s+DUPLICATE\s+KEY|REPLACE\s+INTO)\b|`/i', $allSeedSql) !== 1,
+    'Postgres seeds contain no MySQL-only write syntax'
+);
+
 unset($createdTables['migrations']); // intentionally admin-only bookkeeping
 foreach (array_keys($createdTables) as $table) {
     $quoted = preg_quote($table, '/');

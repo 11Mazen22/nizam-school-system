@@ -2,12 +2,11 @@
 -- Grants exactly as tabulated in §J (Permission catalog) and clarified by §S-12
 -- (Undo Promotion rides on students.promote; Reassign Class rides on students.edit --
 -- no new permission codes needed for either). Looked up by CODE, never by assumed
--- auto-increment id. INSERT IGNORE: the composite PK has nothing else to update on
--- a re-run, so "ignore the duplicate" is the correct idempotency mechanism here
--- (as opposed to ON DUPLICATE KEY UPDATE, used where there is a non-key column to
--- refresh).
+-- auto-increment id. ON CONFLICT DO NOTHING: the composite PK has nothing
+-- else to update on a re-run, so "ignore the duplicate" is the correct
+-- idempotency mechanism here.
 
-INSERT IGNORE INTO role_permissions (role_id, permission_id)
+INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM (
   -- Administrator: every permission in the catalog.
@@ -69,4 +68,5 @@ FROM (
   SELECT 'staff', 'timetable.view'
 ) AS mapping
 JOIN roles r ON r.code = mapping.role_code
-JOIN permissions p ON p.code = mapping.perm_code;
+JOIN permissions p ON p.code = mapping.perm_code
+ON CONFLICT (role_id, permission_id) DO NOTHING;
