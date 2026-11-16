@@ -13,7 +13,8 @@
  *   node tests/ui-audit.js --base=http://127.0.0.1:8080 --user=admin --password=...
  *
  * Output: tests/ui-audit-shots/<lang>/<width>/<slug>.png plus report.json.
- * Exit code is always 0 -- audit findings are data for review, not pass/fail.
+ * Use --shots=false for a metrics-only crawl and --out=<directory> to keep
+ * artifacts outside the repository. Findings fail the command unless --soft.
  */
 
 const fs = require('fs');
@@ -31,7 +32,9 @@ const PASSWORD = args.password || '';
 const LANGS = (args.langs || 'ar,en').split(',');
 const WIDTHS = (args.widths || '1440,1280,1024,768,390,360').split(',').map(Number);
 const ONLY_WIDTHS = args.only ? args.only.split(',').map(Number) : null;
-const SHOTS_DIR = path.join(__dirname, 'ui-audit-shots');
+const TAKE_SHOTS = args.shots !== 'false';
+const SOFT = args.soft === true || args.soft === 'true';
+const SHOTS_DIR = path.resolve(args.out || path.join(__dirname, 'ui-audit-shots'));
 
 const PAGES = [
   { slug: 'dashboard', path: '/dashboard' },
@@ -62,11 +65,19 @@ const PAGES = [
   { slug: 'exam-scores', path: '/exams/1/scores' },
   { slug: 'exams-ranking', path: '/exams/ranking' },
   { slug: 'attendance', path: '/attendance' },
+  { slug: 'attendance-selected-class', path: '/attendance?class_id=1' },
   { slug: 'attendance-report', path: '/attendance/report' },
   { slug: 'welfare-discipline', path: '/welfare/discipline' },
   { slug: 'welfare-health', path: '/welfare/health' },
   { slug: 'timetable', path: '/timetable' },
+  { slug: 'timetable-selected-class', path: '/timetable?class_id=1' },
   { slug: 'reports', path: '/reports' },
+  { slug: 'report-religion', path: '/reports/religion' },
+  { slug: 'report-class-list', path: '/reports/class-list' },
+  { slug: 'report-density', path: '/reports/density' },
+  { slug: 'report-teachers-by-subject', path: '/reports/teachers-by-subject' },
+  { slug: 'report-workload', path: '/reports/workload' },
+  { slug: 'report-shortage', path: '/reports/shortage' },
   { slug: 'users', path: '/users' },
   { slug: 'backups', path: '/backups' },
   { slug: 'settings-profile', path: '/settings/profile' },
@@ -74,12 +85,32 @@ const PAGES = [
   { slug: 'settings-academic', path: '/settings/academic' },
   { slug: 'settings-security', path: '/settings/security' },
   { slug: 'settings-backup', path: '/settings/backup' },
+  { slug: 'settings-modules', path: '/settings/modules' },
+  { slug: 'settings-structure', path: '/settings/structure' },
+  { slug: 'settings-terms', path: '/settings/terms' },
+  { slug: 'settings-grading', path: '/settings/grading' },
+  { slug: 'settings-offline', path: '/settings/offline' },
+  { slug: 'guardians', path: '/guardians' },
+  { slug: 'guardians-create', path: '/guardians/create' },
+  { slug: 'admissions', path: '/admissions' },
+  { slug: 'admissions-create', path: '/admissions/create' },
+  { slug: 'finance', path: '/finance' },
+  { slug: 'finance-invoices', path: '/finance/invoices' },
+  { slug: 'finance-invoices-create', path: '/finance/invoices/create' },
+  { slug: 'finance-structures', path: '/finance/structures' },
+  { slug: 'hr', path: '/hr' },
+  { slug: 'hr-leaves', path: '/hr/leaves' },
+  { slug: 'transport', path: '/transport' },
+  { slug: 'transport-create', path: '/transport/create' },
+  { slug: 'library', path: '/library' },
+  { slug: 'library-create', path: '/library/create' },
+  { slug: 'library-borrows', path: '/library/borrows' },
+  { slug: 'portal-teacher', path: '/portal/teacher' },
+  { slug: 'portal-family', path: '/portal/family' },
+  { slug: 'portal-student', path: '/portal/student' },
   { slug: 'notifications', path: '/notifications' },
   { slug: 'activity-log', path: '/activity-log' },
 ];
-
-// Raw-key leak: tokens like `activity_log.empty_title` in visible text.
-const LEAK_RE = /\b[a-z][a-z0-9_]+(?:\.[a-z][a-z0-9_]+)+\b/g;
 
 async function submitLogin(page, lang) {
   if (lang === 'en') {
@@ -101,8 +132,10 @@ async function audit(url, page, tag) {
   const failed = [];
   const onConsole = (msg) => { if (msg.type() === 'error') { errors.push(String(msg.text()).slice(0, 240)); } };
   const onResponse = (res) => { if (res.status() >= 400) { failed.push(`${res.status()} ${res.url().replace(BASE, '')}`.slice(0, 220)); } };
-  const hadConsole = page.listeners('console').length === 0;
-  if (hadConsole) { page.on('console', onConsole); page.on('response', onResponse); }
+  const onPageError = (error) => { errors.push(`pageerror: ${String(error.message || error).slice(0, 220)}`); };
+  page.on('console', onConsole);
+  page.on('response', onResponse);
+  page.on('pageerror', onPageError);
 
   let status = 0;
   try {
@@ -111,27 +144,55 @@ async function audit(url, page, tag) {
   } catch (e) {
     errors.push(`goto: ${String(e).slice(0, 220)}`);
   }
-  await page.waitForTimeout(400); // settle JS-rendered bits (charts, counters)
+  await page.waitForTimeout(250); // settle JS-rendered bits (charts, counters)
 
   const metrics = await page.evaluate(() => {
     const doc = document.documentElement;
+    const width = doc.clientWidth;
+    const overflowElements = Array.from(document.querySelectorAll('body *')).map((el) => {
+      const rect = el.getBoundingClientRect();
+      return { el, rect };
+    }).filter(({ el, rect }) => {
+      const style = getComputedStyle(el);
+      return style.position !== 'fixed' && style.display !== 'none' && (rect.right > width + 2 || rect.left < -2);
+    }).slice(0, 8).map(({ el, rect }) => ({
+      tag: el.tagName.toLowerCase(),
+      id: el.id || '',
+      className: typeof el.className === 'string' ? el.className.slice(0, 100) : '',
+      left: Math.round(rect.left),
+      right: Math.round(rect.right),
+      width: Math.round(rect.width),
+    }));
     return {
       scrollW: doc.scrollWidth,
       clientW: doc.clientWidth,
-      keyTokens: document.body ? (document.body.innerText.match(LEAK_RE) || []) : [],
+      overflowX: doc.scrollWidth > doc.clientWidth + 1,
+      overflowElements,
+      keyTokens: document.body ? (document.body.innerText.match(/\b[a-z][a-z0-9_]+(?:\.[a-z][a-z0-9_]+)+\b/g) || []) : [],
     };
-  }).catch(() => ({ keyTokens: [] }));
+  }).catch((error) => ({ keyTokens: [], overflowX: false, overflowElements: [], metricError: String(error) }));
 
-  const screenshot = path.join(SHOTS_DIR, tag.dir, `${tag.slug}.png`);
-  fs.mkdirSync(path.dirname(screenshot), { recursive: true });
-  try {
-    await page.screenshot({ path: screenshot, fullPage: true });
-  } catch (e) {
-    errors.push(`shot: ${String(e).slice(0, 150)}`);
+  if (TAKE_SHOTS) {
+    const screenshot = path.join(SHOTS_DIR, tag.dir, `${tag.slug}.png`);
+    fs.mkdirSync(path.dirname(screenshot), { recursive: true });
+    try {
+      await page.screenshot({ path: screenshot, fullPage: true });
+    } catch (e) {
+      errors.push(`shot: ${String(e).slice(0, 150)}`);
+    }
   }
 
+  page.off('console', onConsole);
+  page.off('response', onResponse);
+  page.off('pageerror', onPageError);
+
   const seen = new Set(metrics.keyTokens || []);
-  const leakKeys = Array.from(seen).filter((k) => !/^(?:privacy\.|fixed\.|school\.)/.test(k) && k.split('.').length <= 4);
+  const leakKeys = Array.from(seen).filter((k) =>
+    !/^(?:privacy\.|fixed\.|school\.)/.test(k)
+    && !/\.(?:com|org|net|edu|gov|php|png|jpe?g|js|css|xlsx?|csv|pdf|sql)$/i.test(k)
+    && k.split('.').length <= 4
+  );
+  if (metrics.metricError) errors.push(`metrics: ${metrics.metricError}`);
 
   return {
     dir: tag.dir,
@@ -142,6 +203,9 @@ async function audit(url, page, tag) {
     consoleErrors: errors,
     failedRequests: failed,
     overflowX: !!metrics.overflowX,
+    overflowElements: metrics.overflowElements || [],
+    scrollWidth: metrics.scrollW || 0,
+    clientWidth: metrics.clientW || 0,
     leakKeys,
   };
 }
@@ -167,7 +231,7 @@ async function audit(url, page, tag) {
       const finalAfterLogin = await submitLogin(page, lang);
       if (!finalAfterLogin.includes('/dashboard')) {
         report.push({ dir: `${lang}/${width}`, slug: 'LOGIN-FAILED', finalUrl: finalAfterLogin });
-        ctx.close();
+        await ctx.close();
         continue;
       }
       for (const entry of PAGES) {
@@ -180,7 +244,9 @@ async function audit(url, page, tag) {
     for (const width of ONLY_WIDTHS || WIDTHS) {
       const ctx = await browser.newContext({ viewport: { width, height: Math.max(700, Math.round(width * 0.66)) } });
       const page = await ctx.newPage();
+      await page.goto(`${BASE}/lang?to=${lang}`, { waitUntil: 'load' });
       report.push(await audit(`${BASE}/login`, page, { dir: `${lang}/${width}`, slug: 'login' }));
+      report.push(await audit(`${BASE}/setup/recover-admin`, page, { dir: `${lang}/${width}`, slug: 'recover-admin' }));
       await ctx.close();
     }
   }
@@ -190,11 +256,10 @@ async function audit(url, page, tag) {
 
   for (const r of report) {
     const bits = [
-      rLOGIN(r), '',
       r.finalUrl === '/login' && r.slug !== 'login' ? 'KICKED-TO-LOGIN' : '',
       r.finalUrl === '/setup' ? 'REDIRECT-SETUP' : '',
       r.status >= 400 ? `HTTP-${r.status}` : '',
-      r.overflowX ? `OVERFLOW-X (${r.slug})` : '',
+      r.overflowX ? `OVERFLOW-X ${r.scrollWidth}>${r.clientWidth} ${JSON.stringify(r.overflowElements?.slice(0, 3))}` : '',
       r.consoleErrors?.length ? `console: ${r.consoleErrors.join(' | ')}` : '',
       r.failedRequests?.length ? `req-fail: ${r.failedRequests.join(' | ')}` : '',
       r.leakKeys?.length ? `keys: ${r.leakKeys.slice(0, 8).join(',')}` : '',
@@ -214,6 +279,5 @@ async function audit(url, page, tag) {
     || (!r.finalUrl && !r.consoleErrors)
   ).map((r) => [r.dir, r.slug].join('/')));
   console.log(`DONE pages=${total} problem-pages=${problem.size}`);
+  process.exitCode = problem.size > 0 && !SOFT ? 1 : 0;
 })();
-
-function rLOGIN() { return ''; }

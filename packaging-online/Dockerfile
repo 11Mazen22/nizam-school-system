@@ -2,11 +2,13 @@
 # (Railway; also works unmodified on Render or any other Dockerfile-based
 # host -- nothing here is platform-specific).
 #
-# Base: php:8.2-apache (Debian). vendor/ is committed to the repo (composer
-# is a dev-time-only tool per composer.json's own docblock -- "the school
-# never runs composer install"), so this image never runs composer at all;
-# it just copies the already-complete application tree and installs the
-# PHP/Apache extensions that tree actually uses.
+# Base: PHP 8.3 + Apache on Debian Bookworm. The multi-architecture image is
+# digest-pinned so a rebuild cannot silently pick up a different runtime;
+# updating it is an explicit, reviewable dependency change. The offline
+# package keeps vendor/ committed so a school installer never needs network
+# access; the online image independently rebuilds vendor/ from composer.lock
+# in a build-only stage. That guarantees the deployed dependencies match the
+# reviewed lock file even if a developer's local vendor directory is stale.
 #
 # What each extension is for (nothing installed speculatively):
 #   pdo_pgsql -- the production database driver (App\Database's pgsql branch)
@@ -15,6 +17,7 @@
 #   intl      -- PhpSpreadsheet's number/date formatting
 #   mbstring  -- mb_* string functions used throughout (UserService et al.)
 #   curl      -- SupabaseStorageClient's REST calls to Supabase Storage
+#   opcache   -- immutable production bytecode cache
 #
 # The -dev packages below are deliberately NOT purged after
 # docker-php-ext-install: found live (a real failed deploy, not a guess)
@@ -35,7 +38,9 @@
 # whatever the live filesystem actually is at that moment -- see its own
 # comment for the full story.
 
-FROM php:8.2-apache
+FROM composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c AS composer-bin
+
+FROM php:8.3-apache-bookworm@sha256:a14446c32a3c8aeb9b4dac7fb73b03dfd8006e670d9b43ea7947e4030d3cbae6 AS php-base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
@@ -54,13 +59,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         intl \
         mbstring \
         curl \
-    && a2enmod rewrite \
+        opcache \
+    && a2enmod rewrite headers expires deflate \
     && rm -rf /var/lib/apt/lists/*
 
+FROM php-base AS vendor-builder
+
+WORKDIR /build
+COPY --from=composer-bin /usr/bin/composer /usr/local/bin/composer
+COPY composer.json composer.lock ./
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
+        --no-dev \
+        --no-scripts \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist \
+        --optimize-autoloader
+
+FROM php-base AS runtime
+
 COPY packaging-online/apache-nizam.conf /etc/apache2/sites-available/000-default.conf
+COPY packaging-online/php-production.ini /usr/local/etc/php/conf.d/zz-nizam-production.ini
 
 WORKDIR /var/www/html
 COPY . .
+COPY --from=vendor-builder /build/vendor ./vendor
 
 # config/config.php is written by entrypoint.sh from environment variables
 # at container start -- the same "provisioning writes config.php, the Setup

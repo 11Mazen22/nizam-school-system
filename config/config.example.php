@@ -33,6 +33,7 @@ return [
         'from_name'     => 'Hadaba Al-Ahram Language School',
         'smtp_host'     => null,   // Optional: SMTP server (e.g., smtp.gmail.com)
         'smtp_port'     => null,   // Optional: SMTP port (587 for TLS, 465 for SSL)
+        'smtp_encryption' => 'tls', // tls (STARTTLS), ssl (implicit TLS), or none (unauthenticated LAN relay only)
         'smtp_user'     => null,   // Optional: SMTP username
         'smtp_password' => null,   // Optional: SMTP password
     ],

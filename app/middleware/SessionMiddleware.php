@@ -29,8 +29,19 @@ final class SessionMiddleware implements MiddlewareInterface
     public function handle(Request $request): bool
     {
         if (session_status() === PHP_SESSION_NONE) {
+            // Behind Railway's edge (and any normal reverse proxy) TLS is
+            // terminated upstream: the container itself only ever sees plain
+            // HTTP, so $_SERVER['HTTPS'] is empty and SERVER_PORT is the
+            // container's -- neither can ever say "https" there. The proxy
+            // tells the truth in X-Forwarded-Proto instead; trusting it
+            // marks the session cookie Secure on the online deployment
+            // while leaving every direct-HTTP deployment (LAN XAMPP) exactly
+            // as it was. A client forging that header on plain HTTP only
+            // gets a Secure cookie its own browser will then never send
+            // over HTTP -- harmless in the wrong direction.
             $isHttps = (($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off')
-                || ($_SERVER['SERVER_PORT'] ?? '') === '443';
+                || ($_SERVER['SERVER_PORT'] ?? '') === '443'
+                || strcasecmp(($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''), 'https') === 0;
 
             session_set_cookie_params([
                 'lifetime' => 0,
@@ -41,6 +52,16 @@ final class SessionMiddleware implements MiddlewareInterface
                 'samesite' => 'Lax',
             ]);
             ini_set('session.use_strict_mode', '1');
+            // The Railway container's own /var/lib/php/sessions directory is
+            // ephemeral. dataPath() is mounted on the persistent volume in
+            // production, so sessions survive an ordinary restart/redeploy
+            // instead of signing every member of staff out at once. Offline
+            // installs get the same directory under their existing mutable
+            // data root; no change to their deployment model.
+            $sessionDir = dataPath() . '/storage/sessions';
+            if ((!is_dir($sessionDir) && @mkdir($sessionDir, 0700, true)) || is_dir($sessionDir)) {
+                session_save_path($sessionDir);
+            }
             // Lazy write: a request that did not actually change the session
             // does not rewrite the session file at all. Combined with the
             // activity-stamp granularity below, this removes the lost-update

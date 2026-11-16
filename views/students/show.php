@@ -135,7 +135,7 @@ $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 
                     <div dir="ltr" class="font-monospace small text-muted"><?= e($g['phone']) ?></div>
                   </div>
                   <?php if (hasPermission('guardians.manage')): ?>
-                    <form method="post" action="/students/<?= (int) $student['id'] ?>/guardians/<?= (int) $g['id'] ?>/unlink" onsubmit="return confirm('<?= e(__('guardians.confirm_unlink')) ?>')">
+                    <form method="post" action="/students/<?= (int) $student['id'] ?>/guardians/<?= (int) $g['id'] ?>/unlink" data-confirm="<?= e(__('guardians.confirm_unlink')) ?>">
                       <?= CsrfMiddleware::field() ?>
                       <button type="submit" class="btn btn-sm btn-outline-danger" title="<?= e(__('guardians.unlink')) ?>">
                         <?= icon('trash') ?>

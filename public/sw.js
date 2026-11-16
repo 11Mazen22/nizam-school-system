@@ -4,7 +4,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_VERSION = 'nizam-v1.4.0-studio';
+const CACHE_VERSION = 'nizam-v1.6.1-production';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -30,6 +30,7 @@ const STATIC_ASSETS = [
   '/assets/js/confirm.js',
   '/assets/js/offline-queue.js',
   '/assets/js/dashboard.js',
+  '/assets/js/recover-admin.js',
   '/assets/vendor/chartjs/chart.umd.min.js',
   '/manifest.json',
   '/assets/vendor/jquery/jquery.min.js',
@@ -129,8 +130,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Different strategies for different resource types
-  if (isStaticAsset(url)) {
+  // Login/setup/recovery pages carry live CSRF and session state. Serving a
+  // cached copy can show a stale "no active code" banner or submit an expired
+  // CSRF token, so these routes are deliberately network-only and are never
+  // available as an offline snapshot.
+  if (isSensitivePage(url)) {
+    event.respondWith(networkOnly(request));
+  } else if (isStaticAsset(url)) {
     // JS/CSS: stale-while-revalidate. cacheFirst() would happily serve a
     // years-old cached app.js/app.css forever if the browser's own SW
     // update check ever gets delayed (it frequently is -- SW update checks
@@ -151,6 +157,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirst(request, DYNAMIC_CACHE, CACHE_LIMITS.dynamic));
   }
 });
+
+/** Network-only for live authentication/recovery state; never cache fallback. */
+async function networkOnly(request) {
+  return fetch(request, { cache: 'no-store' });
+}
 
 /**
  * Cache-first strategy: Check cache, fallback to network
@@ -299,6 +310,13 @@ function isAPIRequest(url) {
   return url.pathname.startsWith('/api/') || 
          url.pathname.includes('/notifications/api') ||
          url.pathname.includes('/scheduled/');
+}
+
+function isSensitivePage(url) {
+  return url.pathname === '/login' ||
+         url.pathname === '/csrf-token' ||
+         url.pathname === '/setup' ||
+         url.pathname.startsWith('/setup/');
 }
 
 /**

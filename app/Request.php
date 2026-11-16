@@ -164,7 +164,25 @@ final class Request
 
     public function ip(): string
     {
-        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        // Forwarded addresses are attacker-controlled on an ordinary direct
+        // deployment, so trust them only when the operator explicitly says a
+        // known edge proxy is the sole public ingress (Railway sets
+        // TRUST_PROXY_HEADERS=1 in the production environment). Railway's
+        // X-Forwarded-For order is client, proxies; the first valid address is
+        // the originating client. This keeps login throttling/audit records
+        // per person instead of treating every user as one shared edge IP.
+        if (getenv('TRUST_PROXY_HEADERS') === '1') {
+            $forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+            foreach (explode(',', (string) $forwarded) as $candidate) {
+                $candidate = trim($candidate);
+                if (filter_var($candidate, FILTER_VALIDATE_IP) !== false) {
+                    return $candidate;
+                }
+            }
+        }
+
+        $remote = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        return filter_var($remote, FILTER_VALIDATE_IP) !== false ? (string) $remote : '0.0.0.0';
     }
 
     /**

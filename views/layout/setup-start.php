@@ -22,8 +22,10 @@ $totalSteps = count($steps);
 <!DOCTYPE html>
 <html lang="<?= e(currentLocale()) ?>" dir="<?= e(currentDirection()) ?>">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="<?= e($pageTitle) ?> — <?= e(__('app.name')) ?>">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/img/favicon-180.png">

@@ -5,7 +5,8 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
  * Tests actual HTTP requests and responses
  */
 
-$baseUrl = 'http://127.0.0.1:8095';
+$baseUrl = (string) (getenv('NIZAM_TEST_BASE_URL') ?: ($argv[1] ?? 'http://127.0.0.1:8000'));
+$baseUrl = rtrim($baseUrl, '/');
 $passed = 0;
 $failed = 0;
 

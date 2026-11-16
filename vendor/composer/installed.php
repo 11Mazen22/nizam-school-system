@@ -1,13 +1,13 @@
 <?php return array(
     'root' => array(
         'name' => 'nizam/school-system',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'ae9ff82a6c4a45df023e0b67bfd35875ccd08aa5',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => false,
+        'dev' => true,
     ),
     'versions' => array(
         'composer/pcre' => array(
@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'ezyang/htmlpurifier' => array(
-            'pretty_version' => 'v4.19.0',
-            'version' => '4.19.0.0',
-            'reference' => 'b287d2a16aceffbf6e0295559b39662612b77fcf',
+            'pretty_version' => 'v4.19.1',
+            'version' => '4.19.1.0',
+            'reference' => '5e0539132d934f936fbae2c88b55d58f9438623f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../ezyang/htmlpurifier',
             'aliases' => array(),
@@ -92,9 +92,9 @@
             'dev_requirement' => false,
         ),
         'nizam/school-system' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'ae9ff82a6c4a45df023e0b67bfd35875ccd08aa5',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -110,9 +110,9 @@
             'dev_requirement' => false,
         ),
         'phpoffice/phpspreadsheet' => array(
-            'pretty_version' => '1.30.6',
-            'version' => '1.30.6.0',
-            'reference' => 'a416375ffc8bf5b661c1bb4e6c60d8f3fddbe5ce',
+            'pretty_version' => '1.30.8',
+            'version' => '1.30.8.0',
+            'reference' => '8cbf46b81d25f5e8af8b5710b841ec0462c63421',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpoffice/phpspreadsheet',
             'aliases' => array(),

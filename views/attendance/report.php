@@ -27,7 +27,7 @@ require dirname(__DIR__) . '/layout/start.php';
   <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:200px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
-      <select name="class_id" class="form-select" onchange="this.form.submit()">
+      <select name="class_id" class="form-select" data-auto-submit>
         <option value="0"><?= e(__('attendance.all_classes')) ?></option>
         <?php foreach ($classes as $cls): ?>
           <option value="<?= (int)$cls['id'] ?>" <?= (int)$cls['id'] === $classId ? 'selected' : '' ?>>

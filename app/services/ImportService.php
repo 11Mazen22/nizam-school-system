@@ -77,6 +77,25 @@ final class ImportService
      */
     public function generateTemplate(array $headers, string $filename, string $locale, array $referenceRows = []): void
     {
+        $bytes = $this->templateBytes($headers, $locale, $referenceRows);
+
+        header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        header("Content-Disposition: attachment; filename=\"{$filename}.xlsx\"");
+        header("Content-Length: " . strlen($bytes));
+        header("Cache-Control: max-age=0");
+
+        echo $bytes;
+        exit;
+    }
+
+    /**
+     * Build template bytes without emitting headers or terminating the request.
+     * Keeping generation separate from HTTP delivery makes the XLSX contract
+     * directly testable and reusable while generateTemplate() preserves the
+     * existing download endpoint behavior.
+     */
+    public function templateBytes(array $headers, string $locale, array $referenceRows = []): string
+    {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setRightToLeft($locale === "ar");
@@ -111,13 +130,20 @@ final class ImportService
         }
         
         $writer = new Xlsx($spreadsheet);
-        
-        header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        header("Content-Disposition: attachment; filename=\"{$filename}.xlsx\"");
-        header("Cache-Control: max-age=0");
-        
-        $writer->save("php://output");
-        exit;
+        ob_start();
+        try {
+            $writer->save('php://output');
+            $bytes = ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw $e;
+        }
+
+        if (!is_string($bytes) || $bytes === '') {
+            throw new RuntimeException('Could not generate import template');
+        }
+
+        return $bytes;
     }
 }
 

@@ -55,5 +55,17 @@ check($request->header('X-Custom-Header') === 'custom-value', 'Hyphenated custom
 check($request->header('Content-Type') === 'application/json', 'Content-Type is read from its server var');
 check($request->header('X-Missing') === null, 'Absent header returns null');
 
+echo "\nRequest::ip() proxy boundary\n";
+
+$_SERVER['REMOTE_ADDR'] = '10.0.0.12';
+$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.45, 10.0.0.12';
+putenv('TRUST_PROXY_HEADERS=0');
+check($request->ip() === '10.0.0.12', 'Forwarded address is ignored by default');
+putenv('TRUST_PROXY_HEADERS=1');
+check($request->ip() === '203.0.113.45', 'Trusted Railway proxy exposes the originating client');
+$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip';
+check($request->ip() === '10.0.0.12', 'Malformed forwarded address falls back safely');
+putenv('TRUST_PROXY_HEADERS');
+
 echo $failures === 0 ? "\nPASS: scheduled auth\n" : "\n{$failures} CHECK(S) FAILED\n";
 exit($failures === 0 ? 0 : 1);

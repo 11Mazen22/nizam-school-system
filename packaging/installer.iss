@@ -59,6 +59,7 @@ Source: "..\packaging\launcher\HadabaLauncher.exe"; DestDir: "{app}"; Flags: ign
 Source: "..\packaging\launcher\Microsoft.Web.WebView2.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\launcher\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\launcher\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "recover-admin.cmd"; DestDir: "{app}"; DestName: "RecoverAdministrator.cmd"; Flags: ignoreversion
 Source: "assets\hadaba.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\hadaba-256.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\apache\httpd-nizam.conf"; DestDir: "{app}\runtime-config"; Flags: ignoreversion
@@ -81,6 +82,7 @@ Name: "{commonappdata}\{#MyDataDirName}\storage\uploads\school"; Permissions: us
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"
+Name: "{group}\Recover Administrator Access"; Filename: "{app}\RecoverAdministrator.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\hadaba.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"; Tasks: desktopicon
 
@@ -245,7 +247,7 @@ begin
       // Keep it in ProgramData so updates never replace a customized logo,
       // while every fresh install has a working default logo.
       ForceDirectories(DataDir() + '\storage\uploads\school');
-      FileCopy(AppDir() + '\public\assets\img\hadaba-logo.png',
+      CopyFile(AppDir() + '\public\assets\img\hadaba-logo.png',
                DataDir() + '\storage\uploads\school\hadaba-logo.png', False);
 
       Exec(RuntimeDir() + '\mysql\bin\mysql.exe',
@@ -272,7 +274,7 @@ begin
     // The bundled default seal is versioned with the application. A school
     // custom logo is stored under a unique upload filename and is untouched.
     ForceDirectories(DataDir() + '\storage\uploads\school');
-    FileCopy(AppDir() + '\public\assets\img\hadaba-logo.png',
+    CopyFile(AppDir() + '\public\assets\img\hadaba-logo.png',
              DataDir() + '\storage\uploads\school\hadaba-logo.png', True);
 
     Exec('net.exe', 'start "{#ApacheServiceName}"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);

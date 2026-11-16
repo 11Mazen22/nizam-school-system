@@ -1,20 +1,21 @@
 {
   "name": "nizam-school-system",
-  "version": "1.0.0",
-  "description": "**Version 1.0.0**",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Arabic-first bilingual school management platform",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "php tests/import-contract.php && php tests/exam-integrity.php && php tests/authorization-refresh.php && php tests/academic-calculation.php && php tests/academic-configuration.php && php tests/module-integrity.php && php tests/scheduled-auth.php && php tests/redesign-checks.php && php tests/http/run.php"
+    "test": "php tests/import-contract.php && php tests/exam-integrity.php && php tests/authorization-refresh.php && php tests/academic-calculation.php && php tests/academic-configuration.php && php tests/module-integrity.php && php tests/scheduled-auth.php && php tests/redesign-checks.php && php tests/online-readiness.php && php tests/http/run.php"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/11Mazen22/nizam-school-system.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Nizam School System",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/11Mazen22/nizam-school-system/issues"

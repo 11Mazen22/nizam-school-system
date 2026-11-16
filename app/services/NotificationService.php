@@ -85,7 +85,14 @@ final class NotificationService
         
         $endDate = new \DateTime($year['end_date']);
         $today = new \DateTime();
-        $daysUntilEnd = $today->diff($endDate)->days;
+        $difference = $today->diff($endDate);
+        // DateInterval::days is absolute: without the invert check, a closed
+        // year whose end date was 7/14/30/60 days AGO triggered the same
+        // "ending soon" email as one that many days in the future.
+        if ($difference->invert === 1) {
+            return 0;
+        }
+        $daysUntilEnd = $difference->days;
         
         // Send reminders at 60, 30, 14, and 7 days before end
         $reminderDays = [60, 30, 14, 7];

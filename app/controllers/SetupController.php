@@ -8,8 +8,10 @@ use App\Controller;
 use App\Database;
 use App\Flash;
 use App\Repositories\AcademicYearRepository;
+use App\Repositories\LoginAttemptRepository;
 use App\Repositories\SchoolRepository;
 use App\Request;
+use App\Response;
 use App\Services\AuthService;
 use App\Services\EnvironmentCheckService;
 use App\Services\MigrationService;
@@ -307,16 +309,19 @@ final class SetupController extends Controller
      */
     public function showRecoverAdmin(Request $request): void
     {
+        Response::noStore();
+
         // Check ground truth: do ANY users exist?
         $pdo = Database::connection();
         $userCount = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
         
         if ($userCount > 0) {
-            // Users exist: recovery means resetting the existing password with
-            // a token only shell access can mint, not creating another admin.
+            $recoveryStatus = RecoveryTokenService::pendingStatus();
             $this->view('setup/recover-admin-token', [
                 'error' => null,
-                'hasPendingToken' => RecoveryTokenService::hasPending(),
+                'recoveryStatus' => $recoveryStatus['status'],
+                'tokenExpiresAt' => $recoveryStatus['expires_at'] ?? null,
+                'oldToken' => '',
             ]);
             return;
         }
@@ -327,11 +332,14 @@ final class SetupController extends Controller
 
     /**
      * Complete a password reset for an existing admin using a one-time token.
-     * The token is minted by `php bin/recover-admin.php <username>`, expires
-     * after 20 minutes and is burned on first successful use.
+     * The trusted CLI can discover/select an administrator without requiring
+     * a remembered username. Password update, account unlock and one-time-code
+     * consumption are committed atomically by RecoveryTokenService.
      */
     public function resetAdmin(Request $request): void
     {
+        Response::noStore();
+
         $pdo = Database::connection();
         if ((int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn() === 0) {
             $this->redirect('/setup');
@@ -342,41 +350,75 @@ final class SetupController extends Controller
         $password = (string) ($request->post('password', '') ?: '');
         $confirm = (string) ($request->post('password_confirm', '') ?: '');
 
-        if ($token === '' || $password === '') {
-            $this->recoverTokenError(__('validation.required'));
+        if ($token === '' || $password === '' || $confirm === '') {
+            $this->recoverTokenError(__('validation.required'), $token);
             return;
         }
         if (strlen($password) < 8) {
-            $this->recoverTokenError(__('validation.password_length'));
+            $this->recoverTokenError(__('validation.password_length'), $token);
+            return;
+        }
+        if (strlen($password) > 128) {
+            $this->recoverTokenError(__('validation.password_too_long'), $token);
             return;
         }
         if ($password !== $confirm) {
-            $this->recoverTokenError(__('validation.password_mismatch'));
+            $this->recoverTokenError(__('validation.password_mismatch'), $token);
             return;
         }
 
-        $user = RecoveryTokenService::consume($token);
-        if ($user === null || !RecoveryTokenService::resetPassword($user['user_id'], $password)) {
-            $this->recoverTokenError(__('setup.recover_token_invalid'));
+        $result = RecoveryTokenService::resetWithToken($token, $password);
+        if ($result['status'] !== 'ok') {
+            $message = match ($result['status']) {
+                'expired' => __('setup.recover_token_expired'),
+                'none' => __('setup.recover_token_none_error'),
+                'account_unavailable' => __('setup.recover_token_account_unavailable'),
+                'storage_error' => __('setup.recover_token_storage_error'),
+                default => __('setup.recover_token_invalid'),
+            };
+            $this->recoverTokenError($message);
             return;
         }
 
-        ActivityLogger::log(
-            'admin.password_reset',
-            'users',
-            $user['user_id'],
-            "Password reset with a recovery token for '{$user['username']}'"
-        );
+        // A server-authorized recovery is stronger evidence than the failed
+        // login guesses that may have preceded it. Reset the browser IP's
+        // temporary throttle so the new credentials work immediately; the
+        // account-level lock was cleared in the same transaction as the reset.
+        try {
+            (new LoginAttemptRepository())->clearFailuresForIp($request->ip());
+        } catch (\Throwable) {
+            // The password reset itself is already committed. A housekeeping
+            // failure must never turn a successful recovery into a 500 page.
+        }
 
-        Flash::set('success', __('setup.recover_token_success'));
+        try {
+            ActivityLogger::log(
+                'admin.password_reset',
+                'users',
+                $result['user_id'],
+                "Password reset with a recovery token for '{$result['username']}'"
+            );
+        } catch (\Throwable) {
+            // Logging is important but secondary: never strand the operator
+            // after the atomic reset has already succeeded.
+        }
+
+        // Session-only handoff: the username never enters a URL, access log,
+        // or Referer. The login form consumes it once and pre-fills the exact
+        // recovered identity, solving the forgotten-username dead end.
+        $_SESSION['_recovered_username'] = $result['username'];
+        Flash::set('success', __('setup.recover_token_success', ['username' => $result['username']]));
         $this->redirect('/login');
     }
 
-    private function recoverTokenError(string $message): void
+    private function recoverTokenError(string $message, string $oldToken = ''): void
     {
+        $recoveryStatus = RecoveryTokenService::pendingStatus();
         $this->view('setup/recover-admin-token', [
             'error' => $message,
-            'hasPendingToken' => RecoveryTokenService::hasPending(),
+            'recoveryStatus' => $recoveryStatus['status'],
+            'tokenExpiresAt' => $recoveryStatus['expires_at'] ?? null,
+            'oldToken' => $oldToken,
         ]);
     }
 

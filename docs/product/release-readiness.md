@@ -1,8 +1,8 @@
 # NIZAM UNIVERSAL SCHOOL PLATFORM -- RELEASE READINESS
 
 **Document status:** honest audit, not a marketing scorecard.
-**Date:** 2026-11-11
-**Baseline commit:** `2a23cb2` (branch `master`, clean working tree at audit start)
+**Date:** 2026-11-16
+**Baseline:** current pre-deployment working tree (branch `master`)
 
 ---
 
@@ -36,7 +36,7 @@ Every row below was executed against this working tree.
 | Check | Command | Result |
 |---|---|---|
 | PHP syntax, all application files | `find app views public database -name '*.php' -exec php -l {} \;` | see §4 |
-| Translation key parity | `php tests/redesign-checks.php` | PASS -- 1398 keys identical in `ar.php` / `en.php` |
+| Translation key parity | `php tests/redesign-checks.php` | PASS -- 1472 keys identical in `ar.php` / `en.php` |
 | Icon catalogue audit | `php tests/redesign-checks.php` | PASS -- every referenced icon is defined |
 | Import + pre-write validation | `php tests/import-contract.php` | PASS |
 | Exam score integrity and rollback | `php tests/exam-integrity.php` | PASS |
@@ -44,7 +44,11 @@ Every row below was executed against this working tree.
 | Academic configuration | `php tests/academic-configuration.php` | PASS |
 | Academic calculation | `php tests/academic-calculation.php` | PASS |
 | Operational module integrity | `php tests/module-integrity.php` | PASS |
-| HTTP request pipeline | `php tests/http/run.php` | PASS (271 assertions) |
+| Scheduled endpoint authentication | `php tests/scheduled-auth.php` | PASS |
+| Online deployment/RLS contract | `php tests/online-readiness.php` | PASS (141 checks) |
+| HTTP request pipeline | `php tests/http/run.php` | PASS (899 assertions) |
+| Dependency metadata/security | `composer validate --strict && composer audit --locked` | PASS |
+| PHP syntax, all first-party PHP | recursive `php -l` over `app bin database tests views` | PASS |
 
 The last suite is new and covers the universal academic-configuration slice
 described in §2.
@@ -145,7 +149,7 @@ seeds only, writes a temporary `config.php` under a temporary
 server, and drives it with a cookie jar. The real school database is never
 touched, and the database is dropped on exit.
 
-It asserts 271 behaviours across the request pipeline. Besides routing, 404s,
+It asserts 899 behaviours across the request pipeline. Besides routing, 404s,
 session regeneration at login, CSRF rejection, permission denial, module-gate
 redirection, PRG redirects, flash handling, the `/lang` open-redirect guard
 and security headers, it drives a create -> validate -> edit chain for every
@@ -208,18 +212,30 @@ Recovery now has two states on the same screen:
 - **No users yet** — the create-first-admin form, unchanged.
 - **Users exist** — a reset form that takes a one-time code plus a new password.
 
-Codes can only be minted from the server shell:
+Codes can only be minted from the trusted server utility. A username is no
+longer required: running the command without arguments opens a numbered account
+chooser (or prints the recoverable accounts when invoked non-interactively):
 
 ```
-php bin/recover-admin.php <username>
+php bin/recover-admin.php
 ```
 
-A code is 20 characters in five groups, valid for 20 minutes, stored as a
-`password_hash` in `dataPath()/recovery-token.json` with mode 0600, and burned on
-first successful use (the file is overwritten with an empty payload before it is
-deleted, so a locked file on Windows cannot make the code replayable). The reset
-updates `users.password_hash`, writes an `admin.password_reset` activity entry
-and returns to the login screen with a success message.
+A code is 20 characters in five groups and valid for 20 minutes. Migration 023
+(PostgreSQL twin: 027) stores only a SHA-256 lookup digest plus a
+`password_hash()` in `admin_recovery_tokens`; the plain code is never persisted.
+This replaces the old file handoff, which could split between Program Files and
+ProgramData when the CLI and packaged Apache resolved different mutable-data
+paths. Password replacement, account-lock clearing, and code deletion now happen
+inside one row-locked transaction. A failed update leaves the code available;
+successful use makes it immediately unreplayable.
+
+The CLI lists only active Administrator accounts and supports selection by
+number/account ID, solving recovery when both password and username were
+forgotten without exposing account names on a public web route. On success, the
+browser carries the recovered username through the session (never a URL), shows
+it in the success notice, pre-fills the sign-in field, and offers a copy button.
+The packaged Windows build ships the CLI plus a **Recover Administrator Access**
+Start-menu shortcut that sets the correct ProgramData path automatically.
 
 The recovery POST also needed a setup-gate fix: `SetupGateMiddleware` exempted the
 exact path `/setup/recover-admin` only, so `POST /setup/recover-admin/reset` was
@@ -237,21 +253,25 @@ These have code and screens. The repository-level invariants for finance,
 library, transport, HR and admissions are covered (§2.4), but the layers
 above them are not. None of the following may be described as verified:
 
-* Browser, responsive and RTL rendering. The HTTP suite reads status codes
-  and HTML, not pixels; no screenshot or visual review has been performed.
-* Edit paths for finance, transport, library and HR (only their create and
-  decision flows are covered), plus report/PDF export and backup/restore.
+* Full cross-browser/device responsive and RTL rendering. Targeted Playwright
+  checks and screenshots exist, but they are not a substitute for physical
+  iOS/Android and the school's actual displays/printers.
+* Edit paths for finance, transport, library and HR (their primary create and
+  decision flows are covered). PDF/XLSX export and MySQL backup/restore are
+  covered by the HTTP suite; a live PostgreSQL restore drill remains pending.
 * CSV import into admissions, finance or HR. Only the generic import contract
   is tested.
-* PostgreSQL. Every integration suite runs on MySQL/MariaDB. The
-  `database/seeds-pg/` files also still use MySQL-only `INSERT IGNORE`, so
-  they would fail if executed against PostgreSQL; treat them as unverified.
+* Live PostgreSQL. Static checks now parse all 28 Postgres migrations and prove
+  every application table has an explicit RLS policy. The dedicated online
+  runner, vanilla-Postgres role guards, catalog-driven backup order and PG
+  seeds are implemented, but they are not called runtime-verified until the
+  staged Railway database deployment completes.
 * Concurrent load, performance and backup/restore against real data.
 
-Seven suites now run in `npm test`, covering import contracts, exam
-integrity, authorization refresh, academic configuration, calculation,
-module invariants and the HTTP pipeline. The gaps listed above are the
-remaining honest ones.
+Ten suites now run in `npm test`, covering import contracts, exam integrity,
+authorization refresh, academic configuration/calculation, module invariants,
+scheduled authentication, redesign consistency, online deployment contracts,
+and the HTTP pipeline. The gaps listed above are the remaining honest ones.
 
 ---
 
@@ -283,14 +303,10 @@ remaining honest ones.
 
 ## 5. Release position
 
-Not a production release candidate for general school adoption.
-
-It is a working, tested foundation for the universal configuration layer, on
-top of a functioning single-school system. The next vertical slice that
-actually changes what a school can rely on is wiring grading bands into the
-shared calculation path used by score entry, ranking, report cards and
-transcripts -- because that is where "configurable grading" stops being a
-setting and starts being the school's real academic record.
+Deployment candidate for this single-school installation, pending the live
+Railway/PostgreSQL verification and the go-live gates in
+`DEPLOYMENT_SUMMARY.md`. It is not a multi-tenant SaaS release and must not be
+represented as one.
 ---
 
 ## Offline and production hardening (2026-11-12)
@@ -424,5 +440,26 @@ contrast for the desktop rail was confirmed through computed styles.
   under storage pressure, and two tabs replaying the same queue were not
   exercised; the browser check forced `navigator.onLine` rather than cutting
   the network.
-- Backup/restore against a real archive, PostgreSQL, PDF exports, and any load
-  or concurrency testing.
+- PostgreSQL backup/restore against a real production-shaped archive and any
+  load or concurrency testing. MySQL backup/restore and PDF/XLSX export are
+  now exercised by the HTTP suite.
+
+## Online deployment hardening (2026-11-16)
+
+| Control | Evidence/status |
+|---|---|
+| Reproducible image | PHP 8.3 Bookworm base pinned by OCI digest; `.dockerignore` excludes secrets/mutable/test artifacts |
+| Runtime performance | OPcache enabled; versioned assets receive immutable cache headers; compression enabled |
+| Database lifecycle | `database/migrate-pg.php`, advisory lock, idempotent seeds, fail-fast startup |
+| Least privilege | Separate migration/admin and `nizam_app` runtime identities; startup verifies `current_user` |
+| Postgres access policy | Migration 028 repairs grants/RLS for every module table; static coverage test checks all tables |
+| Durable state | `/data` contract for config, uploads, sessions, backups, logs; Supabase Storage optional |
+| Backups | live-catalog FK order, checksum, transactional PG restore, recovery-token exclusion, 30-day/minimum-7 retention |
+| Proxy/TLS correctness | forwarded HTTPS secure cookies; opt-in trusted client IP; HSTS and isolation headers |
+| Operations | separate `/healthz` liveness and `/readyz` DB readiness; logs to Railway stderr |
+| Automation | bounded/concurrency-guarded workflows; one bearer token; SMTP TLS support |
+| CI | PHP 8.2 + 8.3, MySQL 8.4, lint, Composer audit, complete `npm test` |
+
+Remaining live evidence: build the image on Railway, apply all migrations to a
+fresh Railway Postgres, complete setup, verify persistence across redeploy,
+run a scheduled backup, and execute a non-production restore drill.

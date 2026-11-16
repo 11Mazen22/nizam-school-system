@@ -91,7 +91,7 @@ First point of entry - authenticates users and shows school branding.
 Dashboard (automatic redirect after login)
 
 #### **Caveats**
-- **Emergency Recovery:** If no admin exists, visit `/setup/recover-admin` (documented but not visible in UI)
+- **Emergency Recovery:** `/setup/recover-admin` creates the first administrator when no users exist, or securely resets an existing administrator with a one-time server code. The CLI/Windows recovery utility lists accounts when the username is forgotten, and the login page pre-fills the recovered username after success.
 - **Login Throttling:** After 5 failed attempts, account locks for 15 minutes
 - **Case Sensitive:** Usernames are case-sensitive
 - **Photo Upload Note:** School logo must be uploaded via Settings → Profile (will show placeholder until then)
@@ -1263,7 +1263,7 @@ Summary of automation features
 - **Explain:** "Data backed up automatically every night"
 
 #### **Configuration Required (Show in AUTOMATION_GUIDE.md)**
-- GitHub Secrets: `NIZAM_URL`, `NIZAM_SCHEDULED_BACKUP_TOKEN`
+- GitHub Secrets: `NIZAM_URL`, `NIZAM_SCHEDULED_TOKEN`
 - Email config in config.php (SMTP or mail())
 - Supabase Storage for backups
 
@@ -1493,7 +1493,7 @@ Summary of automation features
 - "For هضبة الأهرام الثانوية, I recommend **Cloud Deployment**"
 - "Multiple staff, remote access, automated backups = Cloud wins"
 - "Setup time: 20 minutes"
-- "Monthly cost: $0 (free tier) or ~$5 (small school)"
+- "Usage-based hosting cost depends on the Railway plan, database, storage, and traffic"
 - "See AUTOMATION_GUIDE.md for complete setup instructions"
 
 ---

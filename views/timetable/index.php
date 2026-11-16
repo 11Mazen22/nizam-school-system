@@ -8,8 +8,11 @@
  * @var array  $subjects
  * @var array  $teachers
  */
+use App\Middleware\CsrfMiddleware;
+
 $pageTitle = __('timetable.title');
 $activeNav = 'timetable';
+$pageScripts = ['/assets/js/timetable.js'];
 ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('timetable.subtitle')) ?></p>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
@@ -26,7 +29,6 @@ ob_start(); ?>
         </form>
       <?php endif; ?>
 <?php
-use App\Middleware\CsrfMiddleware;
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
@@ -38,7 +40,7 @@ require dirname(__DIR__) . '/layout/start.php';
   <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:220px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
-      <select name="class_id" class="form-select" onchange="this.form.submit()">
+      <select name="class_id" class="form-select" data-auto-submit>
         <option value="0"><?= e(__('attendance.choose_class')) ?></option>
         <?php foreach ($classes as $cls): ?>
           <option value="<?= (int)$cls['id'] ?>" <?= (int)$cls['id'] === $classId ? 'selected' : '' ?>>
@@ -104,7 +106,10 @@ require dirname(__DIR__) . '/layout/start.php';
 
 <!-- Add Slot Modal -->
 <?php if (hasPermission('timetable.manage')): ?>
-<div class="modal fade" id="addSlotModal" tabindex="-1" aria-labelledby="addSlotModalLabel" aria-hidden="true">
+<div class="modal fade" id="addSlotModal" tabindex="-1" aria-labelledby="addSlotModalLabel" aria-hidden="true"
+     data-day-labels="<?= e(json_encode(array_values($dayLabels), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)) ?>"
+     data-day-label="<?= e(__('timetable.day')) ?>"
+     data-period-label="<?= e(__('timetable.period')) ?>">
   <div class="modal-dialog modal-dialog-centered">
     <form method="post" action="/timetable" class="modal-content" data-unsaved-guard data-loading-submit>
       <?= CsrfMiddleware::field() ?>
@@ -191,41 +196,3 @@ require dirname(__DIR__) . '/layout/start.php';
 <?php endif; ?>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const modal = document.getElementById('addSlotModal');
-  if (!modal) return;
-  
-  const dayLabels = <?= json_encode(array_values(array_map('e', $dayLabels))) ?>;
-  const dayLabel = '<?= e(__('timetable.day')) ?>';
-  const periodLabel = '<?= e(__('timetable.period')) ?>';
-  
-  modal.addEventListener('show.bs.modal', function (e) {
-    const btn = e.relatedTarget;
-    const day = btn.dataset.day;
-    const period = btn.dataset.period;
-    
-    // Set hidden fields
-    document.getElementById('slotDay').value = day;
-    document.getElementById('slotPeriod').value = period;
-    
-    // Format and display slot information
-    const dayName = dayLabels[day - 1] || day;
-    document.getElementById('slotInfo').textContent = `${dayLabel}: ${dayName}  |  ${periodLabel}: ${period}`;
-    
-    // Reset form fields
-    document.getElementById('slotSubject').value = '';
-    document.getElementById('slotTeacher').value = '';
-  });
-  
-  // Add form validation feedback
-  const form = modal.querySelector('form');
-  form.addEventListener('submit', function(e) {
-    if (!form.checkValidity()) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    form.classList.add('was-validated');
-  });
-});
-</script>

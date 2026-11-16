@@ -195,5 +195,46 @@ if ($brokenLinks === []) {
     echo 'FAIL: navigation entries with no matching GET route: ' . implode(', ', $brokenLinks) . "\n";
 }
 
+// Authentication and recovery HTML contains live CSRF/session state. The
+// service worker must never fall back to a stale cached copy of those pages.
+$serviceWorker = (string) file_get_contents(__DIR__ . '/../public/sw.js');
+if (str_contains($serviceWorker, 'isSensitivePage(url)')
+    && str_contains($serviceWorker, "url.pathname.startsWith('/setup/')")
+    && str_contains($serviceWorker, "url.pathname === '/login'")
+    && str_contains($serviceWorker, 'networkOnly(request)')) {
+    echo "PASS: auth and recovery routes are network-only in the service worker\n";
+} else {
+    $fail++;
+    echo "FAIL: service worker may cache live auth/recovery pages\n";
+}
+
+// Rail mode must override the desktop shell's higher-specificity flex
+// shorthand, not merely hide labels while retaining a full-width column.
+if (str_contains($css, 'body.n-app-body .nizam-shell.n-sidebar-collapsed > .nizam-sidebar')
+    && str_contains($css, 'flex: 0 0 var(--n-sidebar-collapsed-width)')) {
+    echo "PASS: collapsed sidebar releases its full-width flex column\n";
+} else {
+    $fail++;
+    echo "FAIL: collapsed sidebar does not override the desktop flex width\n";
+}
+
+// Inline handlers/scripts force script-src 'unsafe-inline', weakening CSP on
+// every route. All behavior must live in versioned self-hosted JS files.
+$inlineScriptViews = [];
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/../views')) as $file) {
+    if ($file->getExtension() !== 'php') continue;
+    $source = (string) file_get_contents($file->getPathname());
+    if (preg_match('/<script(?![^>]*\bsrc=)[^>]*>/i', $source) === 1
+        || preg_match('/\son[a-z]+\s*=/i', $source) === 1) {
+        $inlineScriptViews[] = str_replace(__DIR__ . '/../', '', $file->getPathname());
+    }
+}
+if ($inlineScriptViews === []) {
+    echo "PASS: views require no inline JavaScript CSP exception\n";
+} else {
+    $fail++;
+    echo 'FAIL: inline JavaScript remains in: ' . implode(', ', $inlineScriptViews) . "\n";
+}
+
 echo $fail === 0 ? "ALL CHECKS PASSED\n" : "{$fail} CHECK(S) FAILED\n";
 exit($fail === 0 ? 0 : 1);

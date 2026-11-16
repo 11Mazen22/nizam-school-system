@@ -19,6 +19,8 @@ TEAL_DARK = colors.HexColor("#123D33")
 INK = colors.HexColor("#1E2622")
 INK_SOFT = colors.HexColor("#5B675F")
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))
+VERSION = "1.0.1"
+INSTALLER_FILENAME = "Hadaba-Al-Ahram-School-Setup-1.0.1.exe"
 
 styles = getSampleStyleSheet()
 styles.add(ParagraphStyle("NizamTitle", parent=styles["Title"], textColor=TEAL_DARK,
@@ -47,7 +49,7 @@ def cover(title, subtitle, doc_label):
         Paragraph(title, ParagraphStyle("CoverTitle", parent=styles["Heading1"], fontSize=20, textColor=INK)),
         Paragraph(subtitle, styles["NizamBody"]),
         Spacer(1, 6 * cm),
-        Paragraph("Version 1.0.0", ParagraphStyle("Ver", parent=styles["Normal"], textColor=INK_SOFT, fontSize=10)),
+        Paragraph(f"Version {VERSION}", ParagraphStyle("Ver", parent=styles["Normal"], textColor=INK_SOFT, fontSize=10)),
         Paragraph(doc_label, ParagraphStyle("Lbl", parent=styles["Normal"], textColor=INK_SOFT, fontSize=10)),
         PageBreak(),
     ]
@@ -175,10 +177,10 @@ admin_guide = cover(
 )
 admin_guide += [
     h1("1. Installation"),
-    p("Nizam is installed from a single file: <b>Nizam-Setup-1.0.0.exe</b>. No other software needs to be "
+    p(f"Nizam is installed from a single file: <b>{INSTALLER_FILENAME}</b>. No other software needs to be "
       "installed beforehand -- Nizam brings its own web server and database with it."),
     numbered([
-        "Copy Nizam-Setup-1.0.0.exe onto the school computer (a USB drive works fine -- no internet connection "
+        f"Copy {INSTALLER_FILENAME} onto the school computer (a USB drive works fine -- no internet connection "
         "is needed at any point).",
         "Double-click it and follow the installer. Windows may ask for permission to make changes -- this is "
         "expected for installing new software and only happens this once.",
@@ -239,8 +241,11 @@ admin_guide += [
     ]),
     h2("Forgotten password"),
     p("Another Administrator can reset it from the Users screen. If no Administrator account is reachable, "
-      "restoring the most recent backup that still had a working account is the recovery path -- this is why a "
-      "recent backup always matters."),
+      "open Recover Administrator Access from the Windows Start menu. The private utility lists active "
+      "Administrator accounts by number, full name, and username, so it also works when the username was "
+      "forgotten. Choose the account, copy the one-time code, then open Recover Admin Access on the sign-in "
+      "screen. The code works once for 20 minutes; after a successful reset the sign-in page displays and "
+      "pre-fills the recovered username."),
 
     h1("8. Uninstallation"),
     p("Uninstall Nizam from Windows Settings → Apps, like any other program. You will be asked whether to "
@@ -254,10 +259,10 @@ build("Administrator-Guide.pdf", admin_guide)
 release_notes = cover(
     "Release Notes",
     "What's included in this release.",
-    "Version 1.0.0",
+    f"Version {VERSION}",
 )
 release_notes += [
-    h1("Nizam 1.0.0"),
+    h1(f"Nizam {VERSION}"),
     p("The first production release of Nizam, a complete, fully offline school management system for "
       "independent K-12 schools."),
 

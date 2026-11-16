@@ -1,5 +1,11 @@
 ﻿const { chromium } = require('playwright');
-const BASE = 'http://127.0.0.1:8080';
+const args = Object.fromEntries(process.argv.slice(2).map((a) => {
+  const match = a.match(/^--([^=]+)=(.*)$/);
+  return match ? [match[1], match[2]] : [];
+}));
+const BASE = args.base || 'http://127.0.0.1:8000';
+const USER = args.user || 'admin';
+const PASSWORD = args.password || '';
 const WIDTHS = [1440, 1280, 1024, 768, 390, 360];
 const LANGS = ['ar', 'en'];
 const PAGES = [
@@ -17,6 +23,7 @@ const PAGES = [
 const LEAK_RE = /\b[a-z][a-z0-9_]+(?:\.[a-z][a-z0-9_]+)+\b/g;
 
 (async () => {
+  if (!PASSWORD) throw new Error('Pass --password=<dev admin password>');
   const browser = await chromium.launch();
   let totalChecks = 0;
   let issues = 0;
@@ -25,13 +32,13 @@ const LEAK_RE = /\b[a-z][a-z0-9_]+(?:\.[a-z][a-z0-9_]+)+\b/g;
     for (const w of WIDTHS) {
       const ctx = await browser.newContext({ viewport: { width: w, height: 800 } });
       const page = await ctx.newPage();
-      const errs = [];
+      let errs = [];
       page.on('console', m => { if (m.type() === 'error') errs.push(m.text().slice(0, 160)); });
 
       // Sign in
       await page.goto(`${BASE}/login`, { waitUntil: 'load' });
-      await page.fill('#username', 'admin');
-      await page.fill('#password', 'Dev-Test-2026');
+      await page.fill('#username', USER);
+      await page.fill('#password', PASSWORD);
       await Promise.all([
         page.waitForURL(/dashboard|login/, { timeout: 15000 }).catch(() => null),
         page.click('button[type="submit"]')
@@ -39,6 +46,7 @@ const LEAK_RE = /\b[a-z][a-z0-9_]+(?:\.[a-z][a-z0-9_]+)+\b/g;
       await page.goto(`${BASE}/lang?to=${lang}`, { waitUntil: 'load' });
 
       for (const p of PAGES) {
+        errs = [];
         totalChecks++;
         const res = await page.goto(`${BASE}${p}`, { waitUntil: 'load' });
         await page.waitForTimeout(150);
@@ -63,4 +71,5 @@ const LEAK_RE = /\b[a-z][a-z0-9_]+(?:\.[a-z][a-z0-9_]+)+\b/g;
   }
   await browser.close();
   console.log(`RESPONSIVE VERIFICATION COMPLETE: ${totalChecks} checks executed, ${issues} issues found.`);
+  process.exitCode = issues === 0 ? 0 : 1;
 })();

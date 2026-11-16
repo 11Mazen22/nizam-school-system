@@ -2,10 +2,14 @@
 /**
  * @var string|null $error
  * @var string|null $notice
+ * @var string|null $recoveredUsername
+ * @var string      $username
  */
 use App\Middleware\CsrfMiddleware;
 use App\Repositories\SchoolRepository;
 $notice ??= null;
+$recoveredUsername ??= null;
+$username ??= '';
 
 $school = (new SchoolRepository())->full();
 $schoolName = $school === null
@@ -18,6 +22,8 @@ $logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="<?= e(__('auth.login.subtitle')) ?>">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/img/favicon-180.png">
@@ -108,7 +114,17 @@ $logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png
         <?php if ($notice !== null): ?>
           <div class="alert alert-success d-flex align-items-center gap-2 n-auth-alert">
             <?= icon('check-circle', 'n-icon-lg flex-shrink-0') ?>
-            <span><?= e($notice) ?></span>
+            <span class="flex-grow-1"><?= e($notice) ?></span>
+            <?php if ($recoveredUsername !== null): ?>
+              <button type="button" class="btn btn-sm btn-success n-copy-inline"
+                      data-copy-text="<?= e($recoveredUsername) ?>"
+                      data-copy-label="<?= e(__('app.copy')) ?>"
+                      data-copied-label="<?= e(__('app.copied')) ?>"
+                      aria-label="<?= e(__('setup.recover_username_copy')) ?>">
+                <?= icon('copy', 'n-icon-sm') ?>
+                <span><?= e(__('app.copy')) ?></span>
+              </button>
+            <?php endif; ?>
           </div>
         <?php endif; ?>
         <?php if ($error !== null): ?>
@@ -130,7 +146,8 @@ $logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png
               <div class="n-input-icon-prefix"><?= icon('users') ?></div>
               <input type="text" class="form-control n-input-premium" id="username" name="username" 
                      placeholder="<?= e(__('auth.login.username_placeholder')) ?>"
-                     autofocus required autocomplete="username">
+                     value="<?= e($username) ?>"
+                     <?= $recoveredUsername === null ? 'autofocus' : '' ?> required autocomplete="username">
               <div class="n-input-focus-border"></div>
             </div>
           </div>
@@ -143,8 +160,8 @@ $logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png
             <div class="n-input-enhanced">
               <div class="n-input-icon-prefix"><?= icon('lock') ?></div>
               <input type="password" class="form-control n-input-premium" id="password" name="password"
-                     placeholder="<?= e(__('auth.login.password_placeholder')) ?>"
-                     required autocomplete="current-password">
+                      placeholder="<?= e(__('auth.login.password_placeholder')) ?>"
+                     <?= $recoveredUsername !== null ? 'autofocus' : '' ?> required autocomplete="current-password">
               <div class="n-input-focus-border"></div>
             </div>
           </div>

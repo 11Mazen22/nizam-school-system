@@ -25,11 +25,30 @@ final class SupabaseStorageClient
     private readonly string $projectUrl;
     private readonly string $serviceRoleKey;
 
-    public function __construct()
+    /**
+     * True when the environment actually carries Supabase Storage
+     * credentials. This -- not "is the database Postgres?" -- is the real
+     * switch for cloud storage: a Postgres deployment backed by a persistent
+     * volume (e.g. the Railway-native target, whose database is Railway's own
+     * Postgres) has no Supabase to upload to and keeps every file on its own
+     * disk, while a genuine Supabase deployment sets both variables and gets
+     * cloud storage. Deciding on the database driver alone conflated two
+     * independent things.
+     */
+    public static function configured(): bool
     {
         $url = getenv('SUPABASE_URL');
         $key = getenv('SUPABASE_SERVICE_ROLE_KEY');
-        if ($url === false || $key === false || $url === '' || $key === '') {
+        return is_string($url) && $url !== '' && is_string($key) && $key !== '';
+    }
+
+    public function __construct()
+    {
+        // configured() is the guard; these narrows exist only for the static
+        // analyser -- getenv() alone also returns false for an absent var.
+        $url = getenv('SUPABASE_URL');
+        $key = getenv('SUPABASE_SERVICE_ROLE_KEY');
+        if (!is_string($url) || !is_string($key) || !self::configured()) {
             throw new RuntimeException('supabase_storage_not_configured');
         }
         $this->projectUrl = rtrim($url, '/');

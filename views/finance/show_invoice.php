@@ -7,7 +7,7 @@ ob_start(); ?>
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
-    <button type="button" class="btn btn-outline-dark d-inline-flex align-items-center gap-2" onclick="window.print()">
+    <button type="button" class="btn btn-outline-dark d-inline-flex align-items-center gap-2" data-print-report>
       <?= icon('printer') ?>
       <span><?= e(__('common.print')) ?></span>
     </button>

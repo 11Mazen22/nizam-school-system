@@ -49,7 +49,15 @@ function check(name, pass, detail) {
     page.waitForURL(/dashboard|login/, { timeout: 20000 }).catch(() => null),
     page.click('button[type="submit"]'),
   ]);
-  await page.waitForTimeout(1500);
+
+  // A fresh cache generation may still be installing after login. Wait for
+  // an active controller rather than racing it with a fixed sleep (which is
+  // especially unreliable while the Windows installer is compiling).
+  await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return;
+    await navigator.serviceWorker.ready;
+  });
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 20000 });
 
   const controlled = await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) return false;
@@ -61,7 +69,14 @@ function check(name, pass, detail) {
   // Visit a real page so it lands in the dynamic cache, and let the shell
   // assets settle into the static cache.
   await page.goto(`${BASE}/students`, { waitUntil: 'load' });
-  await page.waitForTimeout(1200);
+  await page.waitForFunction(async () => {
+    for (const key of await caches.keys()) {
+      if (!key.includes('dynamic')) continue;
+      const cache = await caches.open(key);
+      if ((await cache.keys()).length > 0) return true;
+    }
+    return false;
+  }, null, { timeout: 20000 });
 
   const cacheNames = await page.evaluate(async () => {
     const keys = await caches.keys();
@@ -79,7 +94,8 @@ function check(name, pass, detail) {
 
   // 2. Go offline and read a page that was cached while online.
   await ctx.setOffline(true);
-  await page.goto(`${BASE}/students`, { waitUntil: 'load' }).catch(() => null);
+  await page.goto(`${BASE}/students`, { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => null);
+  await page.waitForLoadState('domcontentloaded').catch(() => null);
   const offlineStudents = await page.evaluate(() => ({
     title: document.title,
     hasShell: !!document.querySelector('link[href*="app.css"]'),
@@ -92,7 +108,8 @@ function check(name, pass, detail) {
   );
 
   // 3. A page never visited must fall back to the offline document.
-  await page.goto(`${BASE}/settings/security`, { waitUntil: 'load' }).catch(() => null);
+  await page.goto(`${BASE}/settings/security`, { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => null);
+  await page.waitForLoadState('domcontentloaded').catch(() => null);
   const offlineFallback = await page.evaluate(() => ({
     title: document.title,
     text: document.body ? document.body.innerText.slice(0, 200) : '',

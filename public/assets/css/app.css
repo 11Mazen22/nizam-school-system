@@ -603,6 +603,17 @@ a:hover { color: var(--n-primary-hover); }
   width: var(--n-sidebar-collapsed-width);
   flex-basis: var(--n-sidebar-collapsed-width);
 }
+/* The desktop shell declares `flex: 0 0 var(--n-sidebar-width)` through the
+   more-specific `body.n-app-body .nizam-sidebar` selector above. Setting only
+   flex-basis here therefore lost the cascade and hid the labels while leaving
+   a full 272px column behind. Override the complete flex shorthand at higher
+   specificity so rail mode actually returns the space to the page. */
+@media (min-width: 992px) {
+  body.n-app-body .nizam-shell.n-sidebar-collapsed > .nizam-sidebar {
+    width: var(--n-sidebar-collapsed-width);
+    flex: 0 0 var(--n-sidebar-collapsed-width);
+  }
+}
 .n-sidebar-collapsed .n-sidebar-brand-box {
   justify-content: center;
   padding: 12px 6px;

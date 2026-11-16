@@ -2,6 +2,20 @@
 
 declare(strict_types=1);
 
+// The database stores local school dates/times without a timezone offset, so
+// every process (web requests, migration CLI, scheduled jobs) must agree on
+// one timezone before the first date() call. The online deployment sets
+// APP_TIMEZONE; existing Egyptian/offline schools retain their established
+// Cairo default. Invalid configuration fails safe to UTC instead of making
+// bootstrap fatal.
+$timezone = getenv('APP_TIMEZONE');
+$timezone = is_string($timezone) && $timezone !== '' ? $timezone : 'Africa/Cairo';
+try {
+    date_default_timezone_set((new DateTimeZone($timezone))->getName());
+} catch (Throwable) {
+    date_default_timezone_set('UTC');
+}
+
 /**
  * Nizam -- application bootstrap. Own App\ classes use a plain
  * spl_autoload_register mapping the namespace onto app/ -- no Composer

@@ -2,6 +2,8 @@
 /**
  * @var array $notifications
  */
+use App\Middleware\CsrfMiddleware;
+
 $pageTitle = __('notifications.title');
 $activeNav = 'notifications';
 ob_start(); ?>
@@ -20,7 +22,6 @@ ob_start(); ?>
         </form>
       <?php endif; ?>
 <?php
-use App\Middleware\CsrfMiddleware;
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 $locale = currentLocale();

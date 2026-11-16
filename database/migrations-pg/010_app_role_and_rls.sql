@@ -63,11 +63,34 @@ REVOKE ALL ON TABLE public.migrations FROM nizam_app;
 -- deny under RLS unless a matching policy exists) is the real backstop --
 -- this explicit revoke removes the more obvious, unnecessary privilege
 -- outright rather than relying on RLS as the only line of defense.
-REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;
-REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated;
-REVOKE ALL ON SCHEMA public FROM anon, authenticated;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated;
+-- Found live the second time this ran, against a fresh deployment target:
+-- anon/authenticated are Supabase-created roles (its own PostgREST users).
+-- A vanilla Postgres -- the Railway-native deployment runs this schema on
+-- Railway's own Postgres, via database/migrate-pg.php, exactly as it ran it
+-- on Supabase -- has no such roles at all, and REVOKE ... FROM a role that
+-- does not exist aborts the whole migration with "role does not exist",
+-- leaving every later migration unapplied and the schema half-built.
+-- Guard each one on the role actually existing. On Supabase the statements
+-- run exactly as before; on a target without those roles there is nothing
+-- to revoke anyway (they never held a grant to lose).
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon;
+    REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon;
+    REVOKE ALL ON SCHEMA public FROM anon;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    REVOKE ALL ON ALL TABLES IN SCHEMA public FROM authenticated;
+    REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM authenticated;
+    REVOKE ALL ON SCHEMA public FROM authenticated;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM authenticated;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM authenticated;
+  END IF;
+END
+$$;
 
 -- One explicit statement per table, deliberately not a DO-block loop with
 -- dynamic EXECUTE format(): found live against Supabase's transaction-mode

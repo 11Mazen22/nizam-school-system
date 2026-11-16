@@ -7,7 +7,7 @@ ob_start(); ?>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
 <form method="get" action="/portal/family" class="d-flex gap-2 align-items-center">
         <label class="small text-muted text-nowrap"><?= e(__('guardians.guardian')) ?>:</label>
-        <select class="form-select form-select-sm" name="guardian_id" onchange="this.form.submit()">
+        <select class="form-select form-select-sm" name="guardian_id" data-auto-submit>
           <?php foreach ($guardians as $g): ?>
             <option value="<?= (int) $g['id'] ?>" <?= ($guardian['id'] ?? 0) === $g['id'] ? 'selected' : '' ?>>
               <?= e($g['full_name']) ?>

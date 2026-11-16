@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Database;
 use PDO;
+use RuntimeException;
 
 /**
  * Service for running scheduled maintenance and cleanup tasks
@@ -47,6 +48,52 @@ final class ScheduledTaskService
     }
 
     /**
+     * Delete successful backup files older than the retention window, while
+     * always preserving at least the seven newest successful snapshots even
+     * if a deployment was offline long enough for all of them to age past the
+     * cutoff. Metadata is deleted only after the object/file delete succeeds;
+     * an unavailable storage provider therefore leaves a visible retryable
+     * row instead of silently orphaning the backup.
+     */
+    public function cleanupOldSuccessfulBackups(int $daysToKeep = 30, int $minimumToKeep = 7): int
+    {
+        $pdo = Database::connection();
+        $cutoff = date('Y-m-d H:i:s', strtotime("-{$daysToKeep} days"));
+
+        $keep = $pdo->prepare(
+            "SELECT id FROM backups WHERE status = 'success' ORDER BY created_at DESC, id DESC LIMIT :limit"
+        );
+        $keep->bindValue('limit', max(1, $minimumToKeep), PDO::PARAM_INT);
+        $keep->execute();
+        $keepIds = array_map('intval', $keep->fetchAll(PDO::FETCH_COLUMN));
+
+        $candidates = $pdo->prepare(
+            "SELECT id, filename FROM backups WHERE status = 'success' AND created_at < :cutoff ORDER BY id"
+        );
+        $candidates->execute(['cutoff' => $cutoff]);
+
+        $backups = new BackupService();
+        $deleted = 0;
+        $deleteRow = $pdo->prepare('DELETE FROM backups WHERE id = :id');
+        foreach ($candidates->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $id = (int) $row['id'];
+            if (in_array($id, $keepIds, true)) {
+                continue;
+            }
+            try {
+                $backups->deleteStored((string) $row['filename']);
+            } catch (RuntimeException $e) {
+                error_log('[Hadaba] Backup retention could not delete ' . basename((string) $row['filename']) . ': ' . $e->getMessage());
+                continue;
+            }
+            $deleteRow->execute(['id' => $id]);
+            $deleted += $deleteRow->rowCount();
+        }
+
+        return $deleted;
+    }
+
+    /**
      * Clear expired login lockouts. locked_until lives on users (set by the
      * login-throttle check on repeated failures), not login_attempts (which
      * only ever logs individual attempts, no lockout state of its own).
@@ -66,29 +113,22 @@ final class ScheduledTaskService
         return $stmt->rowCount();
     }
 
-    /**
-     * Clean up old session data (if stored in database)
-     */
+    /** Remove expired PHP file sessions from the mutable data root. */
     public function cleanupOldSessions(int $hoursToKeep = 24): int
     {
-        // This assumes sessions are stored in database
-        // If using file-based sessions, this can be skipped
-        $pdo = Database::connection();
-        
-        try {
-            $cutoffTime = date('Y-m-d H:i:s', strtotime("-{$hoursToKeep} hours"));
-            
-            $stmt = $pdo->prepare("
-                DELETE FROM sessions
-                WHERE last_activity < :cutoff
-            ");
-            
-            $stmt->execute(['cutoff' => $cutoffTime]);
-            return $stmt->rowCount();
-        } catch (\PDOException $e) {
-            // Table might not exist if using file sessions
+        $directory = dataPath() . '/storage/sessions';
+        if (!is_dir($directory)) {
             return 0;
         }
+
+        $cutoff = time() - (max(1, $hoursToKeep) * 3600);
+        $deleted = 0;
+        foreach (glob($directory . '/sess_*') ?: [] as $file) {
+            if (is_file($file) && (int) filemtime($file) < $cutoff && @unlink($file)) {
+                $deleted++;
+            }
+        }
+        return $deleted;
     }
 
     /**
@@ -125,6 +165,7 @@ final class ScheduledTaskService
         return [
             'activity_logs_deleted' => $this->cleanupActivityLogs(),
             'failed_backups_deleted' => $this->cleanupFailedBackups(),
+            'expired_backups_deleted' => $this->cleanupOldSuccessfulBackups(),
             'expired_lockouts_cleared' => $this->cleanupExpiredLockouts(),
             'old_sessions_deleted' => $this->cleanupOldSessions(),
             'old_years_closed' => $this->autoCloseOldYears(),

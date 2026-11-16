@@ -44,6 +44,24 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/healthz') {
 
 require dirname(__DIR__) . '/app/bootstrap.php';
 
+// Deep readiness probe for operators/uptime monitors. Unlike /healthz this
+// deliberately exercises generated config + database connectivity; Railway's
+// deployment health check remains /healthz so a transient database incident
+// cannot create a restart loop that makes recovery harder.
+if ((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) === '/readyz') {
+    header('Content-Type: text/plain; charset=UTF-8');
+    header('Cache-Control: no-store');
+    try {
+        \App\Database::connection()->query('SELECT 1')->fetchColumn();
+        http_response_code(200);
+        echo 'ready';
+    } catch (\Throwable) {
+        http_response_code(503);
+        echo 'not_ready';
+    }
+    exit;
+}
+
 use App\Controllers\AcademicYearController;
 use App\Controllers\ActivityLogController;
 use App\Controllers\AdmissionsController;

@@ -18,8 +18,24 @@ final class ScheduledController extends Controller
 {
     private function authenticate(Request $request): bool
     {
-        $config = require dirname(__DIR__, 2) . '/config/config.php';
-        $expectedToken = $config['scheduled_backup_token'] ?? null;
+        // The token lives in the SCHEDULED_BACKUP_TOKEN environment variable
+        // on the online deployment (packaging-online/entrypoint.sh never
+        // writes config.php's 'scheduled_backup_token' key, and the container
+        // has no hand-edited config file to read it from) -- the offline
+        // Windows/Scheduled-Task target instead keeps it in config/config.php
+        // like every other per-installation setting. Read the env var first,
+        // fall back to the file; both go through the same timing-safe guard,
+        // which also rejects the placeholder tokens published in this repo.
+        $expectedToken = getenv('SCHEDULED_BACKUP_TOKEN');
+        if (!is_string($expectedToken) || $expectedToken === '') {
+            $configPath = dataPath() . '/config/config.php';
+            if (!is_file($configPath)) {
+                return false;
+            }
+            /** @var mixed $config */
+            $config = require $configPath;
+            $expectedToken = is_array($config) ? ($config['scheduled_backup_token'] ?? null) : null;
+        }
 
         $authHeader = $request->header('Authorization');
         if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {

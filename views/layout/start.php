@@ -78,12 +78,12 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
         ?>
         <div class="n-nav-group<?= $hasActive ? ' n-group-has-active' : '' ?>" data-group="<?= e($groupKey) ?>">
           <button type="button" class="n-nav-group-header" aria-expanded="true"
-                  aria-label="<?= e(__('shell.collapse_group')) ?>"
+                  title="<?= e(__('shell.collapse_group')) ?>"
                   data-label-collapse="<?= e(__('shell.collapse_group')) ?>"
                   data-label-expand="<?= e(__('shell.expand_group')) ?>">
             <span class="n-nav-group-title"><?= e(__($groupLabel)) ?></span>
             <span class="n-nav-group-meta">
-              <span class="n-nav-group-count" aria-hidden="true"><?= $itemCount ?></span>
+              <span class="n-nav-group-count"><?= $itemCount ?></span>
               <span class="n-nav-group-chevron" aria-hidden="true"><?= icon('chevron-down') ?></span>
             </span>
           </button>
@@ -114,6 +114,8 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="<?= e($pageTitle) ?> — <?= e($schoolName) ?>">
   <meta name="theme-color" content="#4f46e5">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/favicon.ico" sizes="any">
@@ -136,7 +138,7 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 <div class="nizam-shell" id="nizamShell">
   <aside class="nizam-sidebar d-none d-lg-flex" id="nizamSidebar" aria-label="<?= e(__('nav.menu')) ?>">
     <div class="n-sidebar-brand-box">
-      <a class="nizam-brand" href="/dashboard" aria-label="<?= e($schoolName) ?>">
+      <a class="nizam-brand" href="/dashboard" aria-label="<?= e($schoolName) ?> Nizam">
         <span class="school-brand-mark school-brand-mark-logo"><img src="<?= e($logoUrl) ?>" alt=""></span>
         <span class="nizam-brand-copy">
           <span class="nizam-brand-name"><?= e($schoolName) ?></span>
@@ -298,6 +300,7 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 
         <div class="dropdown">
           <button class="n-user-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden"><?= e(__('shell.user_profile')) ?>: <?= e($_SESSION['full_name'] ?? '') ?></span>
             <span class="n-avatar" aria-hidden="true"><?= e(mb_substr($_SESSION['full_name'] ?? '?', 0, 1)) ?></span>
             <span class="n-user-trigger-copy d-none d-xl-flex">
               <strong><?= e($_SESSION['full_name'] ?? '') ?></strong>

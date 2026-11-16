@@ -2,18 +2,27 @@ const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
 
-const BASE = 'http://127.0.0.1:8080';
-const ARTIFACTS_DIR = 'C:/Users/mazen/.gemini/antigravity/brain/cd51b3a4-3946-4652-9a51-0ffc34902a92';
+const args = Object.fromEntries(process.argv.slice(2).map((a) => {
+  const match = a.match(/^--([^=]+)=(.*)$/);
+  return match ? [match[1], match[2]] : [];
+}));
+const BASE = args.base || 'http://127.0.0.1:8000';
+const USER = args.user || 'admin';
+const PASSWORD = args.password || '';
+const ARTIFACTS_DIR = path.resolve(args.out || path.join(__dirname, 'ui-audit-shots', 'sidebar'));
 
 (async () => {
+  if (!PASSWORD) throw new Error('Pass --password=<dev admin password>');
+  fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
+  let failures = 0;
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
 
   console.log('Logging in...');
   await page.goto(`${BASE}/login`, { waitUntil: 'load' });
-  await page.fill('#username', 'admin');
-  await page.fill('#password', 'Dev-Test-2026');
+  await page.fill('#username', USER);
+  await page.fill('#password', PASSWORD);
   await page.click('button[type="submit"]');
   await page.waitForURL(/dashboard/);
 
@@ -98,6 +107,7 @@ const ARTIFACTS_DIR = 'C:/Users/mazen/.gemini/antigravity/brain/cd51b3a4-3946-46
     console.log('SUCCESS: Sidebar is perfectly pinned and visible (top=0) while main content scrolled down (' + afterScroll.mainScrollTop + 'px)!');
   } else {
     console.error('FAILURE: Sidebar moved during scroll!', { beforeScroll, afterScroll });
+    failures++;
   }
 
   await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'sidebar-scrolled-ar.png') });
@@ -149,6 +159,10 @@ const ARTIFACTS_DIR = 'C:/Users/mazen/.gemini/antigravity/brain/cd51b3a4-3946-46
     };
   });
   console.log('Rail mode check:', isRail);
+  if (!isRail.shellCollapsed || isRail.sidebarWidth > 90) {
+    console.error('FAILURE: Rail mode retained the expanded sidebar width');
+    failures++;
+  }
   await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'sidebar-rail-ar.png') });
   console.log('Captured sidebar-rail-ar.png');
 
@@ -165,5 +179,6 @@ const ARTIFACTS_DIR = 'C:/Users/mazen/.gemini/antigravity/brain/cd51b3a4-3946-46
   console.log('Captured sidebar-redesign-en.png');
 
   await browser.close();
-  console.log('ALL SIDEBAR VISUAL AND INTERACTIVE TESTS COMPLETE!');
+  console.log(`ALL SIDEBAR VISUAL AND INTERACTIVE TESTS COMPLETE: ${failures} failure(s)`);
+  process.exitCode = failures === 0 ? 0 : 1;
 })();

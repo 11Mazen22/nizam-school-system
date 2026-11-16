@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Database;
-use PDO;
 use RuntimeException;
 
 /**
@@ -19,13 +17,14 @@ use RuntimeException;
  * / TeacherController::photo() / SettingsController::logo()).
  *
  * Validation and re-encoding are identical for every deployment target --
- * only the final write/read/delete step branches on the active DB driver
- * (same branch already established in Database.php / MigrationService.php).
- * The mysql (Windows/offline) path writes to local disk under
- * storage/uploads/ exactly as originally built. The pgsql (online) path
- * writes to Supabase Storage instead, because Render's free-tier container
- * disk is ephemeral -- a redeploy or restart can wipe local files, which
- * the offline deployment never had to consider.
+ * only the final write/read/delete step branches on whether Supabase
+ * Storage is actually configured (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
+ * in the environment). The cloud path uploads to Supabase Storage. The
+ * local path writes to disk under storage/uploads/ -- for the offline
+ * XAMPP deployment exactly as originally built, and for the online target
+ * onto the platform's persistent volume (NIZAM_DATA_PATH), because a
+ * container's own disk is ephemeral -- a redeploy or restart can wipe
+ * local files, which the offline deployment never had to consider.
  */
 final class UploadService
 {
@@ -97,10 +96,10 @@ final class UploadService
         $filename = bin2hex(random_bytes(16)) . '.' . $extension;
         $relativePath = $type . '/' . $filename;
 
-        if (self::isPgsql()) {
-            // No filesystem to write to on this deployment target -- encode
-            // into memory (GD writes to the output buffer when the filename
-            // argument is omitted) and ship the bytes to Supabase Storage.
+        if (self::isCloudStorage()) {
+            // Cloud-storage deployment -- encode into memory (GD writes to
+            // the output buffer when the filename argument is omitted) and
+            // ship the bytes to Supabase Storage.
             ob_start();
             $written = $extension === 'png' ? imagepng($image) : imagejpeg($image, null, 90);
             $contents = ob_get_clean();
@@ -142,7 +141,7 @@ final class UploadService
             return;
         }
 
-        if (self::isPgsql()) {
+        if (self::isCloudStorage()) {
             try {
                 self::storage()->delete(self::BUCKET, $relativePath);
             } catch (RuntimeException) {
@@ -190,7 +189,7 @@ final class UploadService
             return null;
         }
 
-        if (self::isPgsql()) {
+        if (self::isCloudStorage()) {
             try {
                 return self::storage()->download(self::BUCKET, $relativePath);
             } catch (RuntimeException) {
@@ -211,9 +210,15 @@ final class UploadService
         return $extension === 'png' ? 'image/png' : 'image/jpeg';
     }
 
-    private static function isPgsql(): bool
+    private static function isCloudStorage(): bool
     {
-        return Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
+        // The real cloud-vs-disk switch -- Supabase Storage credentials in
+        // the environment -- not the database driver. A Postgres deployment
+        // with its own persistent volume (Railway-native) keeps files on
+        // disk; a Supabase deployment uploads them. Every branch that reads
+        // or writes a file uses this same predicate so store/delete/retrieve
+        // can never disagree about where a file lives.
+        return SupabaseStorageClient::configured();
     }
 
     private static function storage(): SupabaseStorageClient

@@ -1,17 +1,21 @@
--- Nizam School Management System -- Seed: Default Academic Year
+-- Nizam School Management System -- Seed: current default academic year
 --
--- Hadaba Al-Ahram School deployment: Creates a default academic year
--- so the system is immediately usable without requiring manual setup.
--- This matches the production deployment behavior.
+-- Dynamic twin of seeds-pg/007. From July onward, prepare the year beginning
+-- that September; January-June belong to the year that began the previous
+-- September. Existing active years are never changed.
 
-INSERT INTO academic_years (label, start_date, end_date, is_active, is_closed, expected_weekly_capacity)
+SET @nizam_start_year := YEAR(CURDATE()) - IF(MONTH(CURDATE()) < 7, 1, 0);
+
+INSERT INTO academic_years (
+  label, start_date, end_date, is_active, is_closed, expected_weekly_capacity
+)
 SELECT * FROM (
-    SELECT 
-        '2025/2026' AS label,
-        '2025-09-01' AS start_date,
-        '2026-06-30' AS end_date,
-        1 AS is_active,
-        0 AS is_closed,
-        35 AS expected_weekly_capacity
-) AS s
+  SELECT
+    CONCAT(@nizam_start_year, '/', @nizam_start_year + 1) AS label,
+    STR_TO_DATE(CONCAT(@nizam_start_year, '-09-01'), '%Y-%m-%d') AS start_date,
+    STR_TO_DATE(CONCAT(@nizam_start_year + 1, '-06-30'), '%Y-%m-%d') AS end_date,
+    1 AS is_active,
+    0 AS is_closed,
+    35 AS expected_weekly_capacity
+) AS current_year
 WHERE NOT EXISTS (SELECT 1 FROM academic_years WHERE is_active = 1);

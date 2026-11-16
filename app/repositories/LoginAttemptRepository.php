@@ -42,4 +42,17 @@ final class LoginAttemptRepository
         $stmt->execute(['ip' => $ip, 'm' => $minutes]);
         return (int) $stmt->fetchColumn();
     }
+
+    /**
+     * Clear the short-lived IP throttle after a server-authorized recovery.
+     * The permanent audit event remains in activity_logs; these rows are only
+     * the rolling anti-brute-force counter used by LoginThrottleService.
+     */
+    public function clearFailuresForIp(string $ip): void
+    {
+        $stmt = Database::connection()->prepare(
+            'DELETE FROM login_attempts WHERE ip_address = :ip AND success = 0'
+        );
+        $stmt->execute(['ip' => $ip]);
+    }
 }

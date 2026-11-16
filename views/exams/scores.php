@@ -27,7 +27,7 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
   <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:200px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
-      <select name="class_id" class="form-select" onchange="this.form.submit()">
+      <select name="class_id" class="form-select" data-auto-submit>
         <option value="0"><?= e(__('attendance.choose_class')) ?></option>
         <?php foreach ($classes as $cls): ?>
           <option value="<?= (int)$cls['id'] ?>" <?= (int)$cls['id'] === $classId ? 'selected' : '' ?>>
@@ -39,7 +39,7 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
     <?php if ($subjects !== []): ?>
     <div class="flex-grow-1">
       <label class="form-label" for="score-subject"><?= e(__('exams.subject')) ?></label>
-      <select id="score-subject" name="subject_id" class="form-select" onchange="this.form.submit()">
+      <select id="score-subject" name="subject_id" class="form-select" data-auto-submit>
         <?php foreach ($subjects as $sub): ?>
         <option value="<?= (int)$sub['id'] ?>" <?= (int)$sub['id'] === $subjectId ? 'selected' : '' ?>><?= e(currentLocale() === 'ar' ? $sub['name_ar'] : $sub['name_en']) ?></option>
         <?php endforeach; ?>

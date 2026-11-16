@@ -375,11 +375,15 @@ try {
 
     $loginPage = $anon->get('/login');
     same(200, $loginPage['status'], 'GET /login renders');
+    ok(count(array_filter($loginPage['headers'], static fn (string $header): bool => stripos($header, 'Cache-Control:') === 0 && stripos($header, 'no-store') !== false)) === 1, 'Login page cannot be cached');
     $token = $anon->csrf($loginPage['body']);
     ok($token !== null && strlen($token) >= 32, 'Login form carries a CSRF token');
 
     $headers = array_map('strtolower', $loginPage['headers']);
     ok(in_array('x-frame-options: sameorigin', $headers, true), 'Security headers are present on the login page');
+    $cspHeader = current(array_filter($loginPage['headers'], static fn (string $header): bool => stripos($header, 'Content-Security-Policy:') === 0)) ?: '';
+    ok(str_contains($cspHeader, "script-src 'self'") && !str_contains($cspHeader, "script-src 'self' 'unsafe-inline'"), 'CSP rejects inline JavaScript');
+    ok(str_contains($cspHeader, "base-uri 'self'") && str_contains($cspHeader, "form-action 'self'") && str_contains($cspHeader, "object-src 'none'"), 'CSP restricts base URLs, form targets, and plugins');
 
     $dash = $anon->get('/dashboard');
     same(302, $dash['status'], 'Unauthenticated GET /dashboard is not rendered');
@@ -477,6 +481,16 @@ try {
     foreach ($landingPages as $path) {
         same(200, $admin->get($path)['status'], 'Admin can load ' . $path);
     }
+
+    $activeYearId = (int) $pdo->query('SELECT id FROM academic_years WHERE is_active = 1 LIMIT 1')->fetchColumn();
+    $excelExport = $admin->get('/reports/religion/export/excel?year=' . $activeYearId);
+    same(200, $excelExport['status'], 'Excel report export responds');
+    ok(str_starts_with($excelExport['body'], 'PK'), 'Excel report export is a real XLSX archive');
+    ok(count(array_filter($excelExport['headers'], static fn (string $header): bool => stripos($header, 'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') === 0)) === 1, 'Excel export has the XLSX content type');
+    $pdfExport = $admin->get('/reports/religion/export/pdf?year=' . $activeYearId);
+    same(200, $pdfExport['status'], 'PDF report export responds');
+    ok(str_starts_with($pdfExport['body'], '%PDF'), 'PDF report export has a valid PDF signature');
+    same(404, $admin->get('/reports/religion/export/exe?year=' . $activeYearId)['status'], 'Unsupported report export format is rejected');
 
     // --------------------------------------------------- write paths (admin)
     // One create -> validate -> edit chain per module, driven through the real
@@ -580,6 +594,26 @@ try {
     // A shell-issued code must reset an existing admin password, work exactly
     // once, and be reachable from the login screen on a completed install.
     $recoveryEnv = $env;
+    $runRecoveryCli = static function (array $arguments) use ($root, $recoveryEnv): array {
+        $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+        $process = proc_open(
+            array_merge([PHP_BINARY, $root . '/bin/recover-admin.php'], $arguments),
+            $descriptors,
+            $pipes,
+            $root,
+            $recoveryEnv
+        );
+        if (!is_resource($process)) {
+            return ['status' => -1, 'output' => '', 'error' => ''];
+        }
+        fclose($pipes[0]);
+        $output = (string) stream_get_contents($pipes[1]);
+        $error = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $status = proc_close($process);
+        return ['status' => $status, 'output' => $output, 'error' => $error];
+    };
     $issueRecoveryCode = static function (string $username) use ($root, $recoveryEnv): string {
         $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
         $process = proc_open(
@@ -602,20 +636,46 @@ try {
 
     $recoverPage = $anon->get('/setup/recover-admin');
     same(200, $recoverPage['status'], 'Recovery screen is reachable when users already exist');
+    ok(count(array_filter($recoverPage['headers'], static fn (string $header): bool => stripos($header, 'Cache-Control:') === 0 && stripos($header, 'no-store') !== false)) === 1, 'Recovery screen cannot be cached');
     ok(strpos($recoverPage['body'], '/setup/recover-admin/reset') !== false, 'Recovery screen offers the token form');
+    ok(strpos($recoverPage['body'], 'php bin/recover-admin.php</code>') !== false, 'Recovery screen offers a username-free command');
+
+    $discovery = $runRecoveryCli([]);
+    same(0, $discovery['status'], 'Recovery CLI can discover accounts without a remembered username');
+    ok(str_contains($discovery['output'], 'Username: http_admin'), 'Username-free recovery lists the administrator identity');
 
     $recoveryCode = $issueRecoveryCode('http_admin');
     ok($recoveryCode !== '', 'CLI issues a one-time recovery code');
+    same(1, (int) $scalar('SELECT COUNT(*) FROM admin_recovery_tokens'), 'Recovery code is stored in the shared database');
+    ok(!is_file($tempPath . '/recovery-token.json'), 'Recovery no longer depends on a CLI/web token file');
+
+    // Simulate the exact state recovery must repair: account lockout plus an
+    // IP-wide throttle caused by trying several forgotten usernames.
+    $pdo->exec("UPDATE users SET failed_attempts = 5, locked_until = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE username = 'http_admin'");
+    $failedAttempt = $pdo->prepare('INSERT INTO login_attempts (username, ip_address, success) VALUES (:u, :ip, 0)');
+    for ($attempt = 0; $attempt < 24; $attempt++) {
+        $failedAttempt->execute(['u' => 'forgotten_' . $attempt, 'ip' => '127.0.0.1']);
+    }
+
     $newPassword = 'Recovered-Test-2026';
     $recoveryCsrf = (string) $anon->csrf($recoverPage['body']);
     $reset = $anon->post('/setup/recover-admin/reset', [
-        'token' => $recoveryCode,
+        // Server normalization accepts copy/paste variations independent of JS.
+        'token' => strtolower(str_replace('-', ' ', $recoveryCode)),
         'password' => $newPassword,
         'password_confirm' => $newPassword,
         '_csrf_token' => $recoveryCsrf,
     ]);
     same(302, $reset['status'], 'Recovery reset is accepted');
     ok(str_contains((string) $reset['location'], '/login'), 'Recovery reset lands on the sign-in page');
+    same(0, (int) $scalar("SELECT failed_attempts FROM users WHERE username = 'http_admin'"), 'Recovery clears account failed-attempt state');
+    same(0, (int) $scalar("SELECT COUNT(*) FROM login_attempts WHERE ip_address = '127.0.0.1' AND success = 0"), 'Recovery clears the browser IP throttle');
+    same(0, (int) $scalar('SELECT COUNT(*) FROM admin_recovery_tokens'), 'Successful reset consumes the code atomically');
+
+    $recoveredLanding = $anon->get('/login');
+    ok(strpos($recoveredLanding['body'], 'value="http_admin"') !== false, 'Sign-in pre-fills the recovered username');
+    ok(strpos($recoveredLanding['body'], 'data-copy-text="http_admin"') !== false, 'Recovered username can be copied from the success notice');
+    ok(strpos($recoveredLanding['body'], ':username') === false, 'Recovery success notice renders the actual username');
 
     $reuseClient = new Browser($base, 'reuse');
     $reusePage = $reuseClient->get('/setup/recover-admin');
@@ -635,6 +695,30 @@ try {
     ]);
     same(302, $recoveredSignIn['status'], 'The recovered password signs in');
     ok(str_contains((string) $recoveredSignIn['location'], '/dashboard'), 'Recovered sign-in reaches the dashboard');
+
+    // A temporary account-state problem must not burn a valid code. This is
+    // the regression for the old consume-first implementation: it deleted the
+    // credential before it knew the password update could succeed.
+    $heldCode = $issueRecoveryCode('http_admin');
+    $holdClient = new Browser($base, 'held-code');
+    $holdPage = $holdClient->get('/setup/recover-admin');
+    $pdo->exec("UPDATE users SET is_active = 0 WHERE username = 'http_admin'");
+    $heldRejected = $holdClient->post('/setup/recover-admin/reset', [
+        'token' => $heldCode,
+        'password' => 'Held-Code-2026',
+        'password_confirm' => 'Held-Code-2026',
+        '_csrf_token' => $holdClient->csrf($holdPage['body']),
+    ]);
+    same(200, $heldRejected['status'], 'Recovery reports a temporarily unavailable account');
+    same(1, (int) $scalar('SELECT COUNT(*) FROM admin_recovery_tokens'), 'Failed account update does not consume the valid code');
+    $pdo->exec("UPDATE users SET is_active = 1 WHERE username = 'http_admin'");
+    same(302, $holdClient->post('/setup/recover-admin/reset', [
+        'token' => $heldCode,
+        'password' => 'Held-Code-2026',
+        'password_confirm' => 'Held-Code-2026',
+        '_csrf_token' => $holdClient->csrf($heldRejected['body']),
+    ])['status'], 'The same unexpired code works after the account is re-enabled');
+    same(0, (int) $scalar('SELECT COUNT(*) FROM admin_recovery_tokens'), 'Deferred successful reset consumes the held code');
 
     // Put the original password back so later assertions keep working.
     $restoreClient = new Browser($base, 'restore');
@@ -784,6 +868,31 @@ try {
     same(302, $admin->post('/users', ['username' => 'ab', 'password' => 'Str0ng!Pass2026', 'full_name' => 'Bad Username', 'role_code' => 'staff', '_csrf_token' => $formToken])['status'], 'Invalid username is rejected');
     same($before + 1, $count('users'), 'Invalid username created no row');
 
+    // Render the conditional unread-notification action. This path previously
+    // referenced CsrfMiddleware before importing it and only crashed when an
+    // unread row actually existed.
+    $httpAdminId = (int) $scalar("SELECT id FROM users WHERE username = 'http_admin' LIMIT 1");
+    $unreadBefore = (int) $scalar("SELECT COUNT(*) FROM notifications WHERE user_id = {$httpAdminId} AND is_read = 0");
+    $insertNotification = $pdo->prepare(
+        'INSERT INTO notifications (user_id, category, priority, title_en, title_ar, body_en, body_ar, link, is_read)
+         VALUES (:user, :category, :priority, :title_en, :title_ar, :body_en, :body_ar, :link, 0)'
+    );
+    $insertNotification->execute([
+        'user' => $httpAdminId,
+        'category' => 'system',
+        'priority' => 'normal',
+        'title_en' => 'HTTP unread notification',
+        'title_ar' => 'إشعار اختبار غير مقروء',
+        'body_en' => 'Browser pipeline notification',
+        'body_ar' => 'إشعار لاختبار مسار المتصفح',
+        'link' => '/notifications',
+    ]);
+    same($unreadBefore + 1, (int) $scalar("SELECT COUNT(*) FROM notifications WHERE user_id = {$httpAdminId} AND is_read = 0"), 'Unread notification is stored for the signed-in administrator');
+    $notificationPage = $admin->get('/notifications');
+    same(200, $notificationPage['status'], 'Notifications renders with an unread item');
+    ok(strpos($notificationPage['body'], 'HTTP unread notification') !== false, 'Unread notification appears in the inbox');
+    ok(strpos($notificationPage['body'], '/notifications/read-all') !== false, 'Unread notifications render the protected mark-all action');
+
     // Academic years last: creating one must not disturb anything above that
     // depends on the active year.
     $before = $count('academic_years');
@@ -816,6 +925,11 @@ try {
     ])['status'], 'Edit student redirects');
     same('HTTP Direct Student Edited', $scalar("SELECT full_name FROM students WHERE id = {$directStudentId}"), 'Edit student persisted');
 
+    $attendanceSheet = $admin->get('/attendance?class_id=' . $classId);
+    same(200, $attendanceSheet['status'], 'Populated attendance sheet renders');
+    ok(strpos($attendanceSheet['body'], 'data-attendance-mark-all="present"') !== false, 'Attendance bulk controls render for a populated class');
+    same(0, preg_match('/\b(Fatal error|Warning:|Notice:|Undefined variable|Undefined array key)\b/', $attendanceSheet['body']), 'Populated attendance sheet has no PHP diagnostics');
+
     // Exams (create + edit)
     $before = $count('exams');
     same(302, $admin->post('/exams', ['name_en' => 'HTTP Exam', 'name_ar' => 'امتحان اختبار', 'term' => '1', 'max_score' => '100', 'weight' => '100', '_csrf_token' => $formToken])['status'], 'POST /exams redirects');
@@ -843,6 +957,11 @@ try {
     same($before + 1, $count('teacher_assignments'), 'POST /assignments persisted one assignment');
     same(200, $admin->post('/assignments', ['teacher_id' => '0', 'subject_id' => '0', 'class_id' => '0', 'weekly_periods' => '0', '_csrf_token' => $formToken])['status'], 'Invalid assignment re-renders the form');
     same($before + 1, $count('teacher_assignments'), 'Rejected assignment created no row');
+
+    $timetablePage = $admin->get('/timetable?class_id=' . $classId);
+    same(200, $timetablePage['status'], 'Selected-class timetable renders');
+    ok(strpos($timetablePage['body'], 'id="addSlotModal"') !== false, 'Timetable renders its add-slot dialog');
+    ok(strpos($timetablePage['body'], '/assets/js/timetable.js') !== false, 'Timetable behavior is loaded from CSP-safe external JavaScript');
 
     // Timetable slot. Deliberately after the assignment: addSlot() refuses a
     // teacher/subject/class tuple that has no teaching assignment, so a slot
@@ -1003,6 +1122,38 @@ try {
             same('1', $scalar("SELECT is_enabled FROM installed_modules WHERE module_key = 'library'"), 'Denied module toggle changed nothing');
         }
     }
+
+    // ----------------------------------------------------- backup round-trip
+    // A child process is essential here: this parent bootstrapped against the
+    // real development config before creating the throwaway database, while
+    // the child receives NIZAM_DATA_PATH and therefore exercises services
+    // against the exact same isolated database as the HTTP server.
+    http_out();
+    http_out('Backup and restore integrity');
+    $roundtripEnv = $env;
+    $roundtripEnv['NIZAM_HTTP_TEST'] = '1';
+    $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+    $roundtripProcess = proc_open(
+        [PHP_BINARY, $root . '/tests/http/backup-roundtrip.php'],
+        $descriptors,
+        $roundtripPipes,
+        $root,
+        $roundtripEnv
+    );
+    $roundtripStatus = -1;
+    $roundtripOutput = '';
+    $roundtripError = '';
+    if (is_resource($roundtripProcess)) {
+        fclose($roundtripPipes[0]);
+        $roundtripOutput = (string) stream_get_contents($roundtripPipes[1]);
+        $roundtripError = (string) stream_get_contents($roundtripPipes[2]);
+        fclose($roundtripPipes[1]);
+        fclose($roundtripPipes[2]);
+        $roundtripStatus = proc_close($roundtripProcess);
+    }
+    same(0, $roundtripStatus, 'Backup/restore child process completes' . ($roundtripError !== '' ? ': ' . trim($roundtripError) : ''));
+    ok(str_contains($roundtripOutput, 'PASS: backup and restore round-trip'), 'Backup checksum, tamper rejection, and restore assertions pass');
+    ok((int) $scalar("SELECT COUNT(*) FROM users u JOIN roles r ON r.id = u.role_id WHERE r.code = 'admin' AND u.is_active = 1") > 0, 'Restored database retains an active administrator');
 
     // ------------------------------------------------------------- logout
     http_out();

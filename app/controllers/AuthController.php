@@ -8,12 +8,15 @@ use App\Controller;
 use App\Flash;
 use App\Middleware\CsrfMiddleware;
 use App\Request;
+use App\Response;
 use App\Services\AuthService;
 
 final class AuthController extends Controller
 {
     public function showLogin(Request $request): void
     {
+        Response::noStore();
+
         if (!empty($_SESSION['user_id'])) {
             $this->redirect('/dashboard');
             return;
@@ -26,12 +29,23 @@ final class AuthController extends Controller
         // *after* logging back in. Only the first message is shown: nothing
         // currently sets more than one flash before landing on this page.
         $notice = Flash::consume()[0]['message'] ?? null;
+        $username = isset($_SESSION['_recovered_username'])
+            ? (string) $_SESSION['_recovered_username']
+            : '';
+        unset($_SESSION['_recovered_username']);
 
-        $this->view('auth/login', ['error' => null, 'notice' => $notice]);
+        $this->view('auth/login', [
+            'error' => null,
+            'notice' => $notice,
+            'username' => $username,
+            'recoveredUsername' => $username !== '' ? $username : null,
+        ]);
     }
 
     public function login(Request $request): void
     {
+        Response::noStore();
+
         $username = $request->post('username', '') ?? '';
         $password = $request->post('password', '') ?? '';
 
@@ -48,7 +62,12 @@ final class AuthController extends Controller
             default => __('auth.login.invalid'),
         };
 
-        $this->view('auth/login', ['error' => $error]);
+        $this->view('auth/login', [
+            'error' => $error,
+            'notice' => null,
+            'username' => $username,
+            'recoveredUsername' => null,
+        ]);
     }
 
     public function logout(Request $request): void

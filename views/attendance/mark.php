@@ -8,8 +8,22 @@
  * @var array  $existing  existing attendance records keyed by student_id
  * @var int|null $yearId
  */
+use App\Middleware\CsrfMiddleware;
+
 $pageTitle  = __('attendance.mark_title');
 $activeNav  = 'attendance';
+$pageScripts = ['/assets/js/attendance.js'];
+
+// Current counts use the same default-to-present rule as the table below.
+$statusCounts = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
+$canManage = hasPermission('attendance.manage');
+foreach ($students as $student) {
+    $status = $existing[$student['id']]['status'] ?? 'present';
+    if (isset($statusCounts[$status])) {
+        $statusCounts[$status]++;
+    }
+}
+
 ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('attendance.mark_subtitle')) ?></p>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
@@ -44,19 +58,6 @@ ob_start(); ?>
 <?php
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
-use App\Middleware\CsrfMiddleware;
-
-// Real, current counts for the header stats -- same default-to-present
-// rule the table body below already uses for an unmarked student, so the
-// two never disagree.
-$statusCounts = ['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0];
-$canManage = hasPermission('attendance.manage');
-foreach ($students as $student) {
-    $status = $existing[$student['id']]['status'] ?? 'present';
-    if (isset($statusCounts[$status])) {
-        $statusCounts[$status]++;
-    }
-}
 ?>
 
 
@@ -66,7 +67,7 @@ foreach ($students as $student) {
   <div class="n-filter-row">
     <div class="flex-grow-1" style="min-width:200px;">
       <label class="form-label fw-semibold"><?= e(__('attendance.class')) ?></label>
-      <select name="class_id" class="form-select" onchange="this.form.submit()">
+      <select name="class_id" class="form-select" data-auto-submit>
         <option value="0"><?= e(__('attendance.choose_class')) ?></option>
         <?php foreach ($classes as $cls): ?>
           <option value="<?= (int) $cls['id'] ?>" <?= (int)$cls['id'] === $classId ? 'selected' : '' ?>>
@@ -97,11 +98,11 @@ foreach ($students as $student) {
       </div>
       <?php if ($canManage): ?><div class="d-flex gap-2 flex-wrap">
         <!-- Quick-mark all buttons -->
-        <button type="button" class="btn btn-sm btn-success d-flex align-items-center gap-1" onclick="markAll('present')">
+        <button type="button" class="btn btn-sm btn-success d-flex align-items-center gap-1" data-attendance-mark-all="present">
           <?= icon('check-circle', 'n-icon-sm') ?>
           <span><?= e(__('attendance.mark_all_present')) ?></span>
         </button>
-        <button type="button" class="btn btn-sm btn-danger d-flex align-items-center gap-1" onclick="markAll('absent')">
+        <button type="button" class="btn btn-sm btn-danger d-flex align-items-center gap-1" data-attendance-mark-all="absent">
           <?= icon('x-circle', 'n-icon-sm') ?>
           <span><?= e(__('attendance.mark_all_absent')) ?></span>
         </button>
@@ -185,8 +186,3 @@ foreach ($students as $student) {
 <?php endif; ?>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>
-<script>
-function markAll(status) {
-  document.querySelectorAll('.attendance-toggle input[value="' + status + '"]').forEach(r => r.click());
-}
-</script>

@@ -125,7 +125,7 @@ final class RestoreService
      * TRIGGER ALL even if that were the equivalent (least-privilege, no
      * ALTER grant at all -- database/migrations-pg/010_app_role_and_rls.sql).
      * Instead: delete every table's rows in reverse dependency order
-     * (children before parents, BackupService::TABLE_ORDER_PG) so no FK is
+     * (children before parents, BackupService::orderedTables()) so no FK is
      * ever violated, replay the dump's INSERTs (already forward-ordered by
      * the same list) the same way, then resync every identity sequence to
      * MAX(id) so the next ordinary insert can't collide with a just-restored
@@ -146,7 +146,11 @@ final class RestoreService
     {
         $pdo->beginTransaction();
         try {
-            foreach (array_reverse(BackupService::TABLE_ORDER_PG) as $table) {
+            // Live catalog order (BackupService::orderedTables), parents
+            // before children -- the same list the dump itself was written
+            // in, so a backup and the database it came from can never drift
+            // apart the way the old hand-maintained const did.
+            foreach (array_reverse(BackupService::orderedTables($pdo)) as $table) {
                 $pdo->exec('DELETE FROM "' . $table . '"');
             }
             // One call, not split statement-by-statement: the dump's INSERT
@@ -158,7 +162,7 @@ final class RestoreService
             // already executes a ';'-separated batch correctly, respecting
             // quoting, inside this same transaction.
             $pdo->exec($sql);
-            foreach (BackupService::TABLE_ORDER_PG as $table) {
+            foreach (BackupService::orderedTables($pdo) as $table) {
                 $this->resyncSequence($pdo, $table);
             }
             $this->runStructuralChecks($pdo);

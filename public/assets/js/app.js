@@ -16,6 +16,7 @@
     initTableFilters();
     initUnsavedGuards();
     initLoadingForms();
+    initCopyButtons();
     initHashTabs();
     normalizeModals();
     initLogoutCachePurge();
@@ -58,6 +59,47 @@
       } catch (error) {
         // Cache purging is a privacy nicety; it must never block sign-out.
       }
+    });
+  }
+
+  /** Copy small, explicitly marked values without exposing them in a URL. */
+  function initCopyButtons() {
+    document.querySelectorAll('[data-copy-text]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var value = button.dataset.copyText || '';
+        if (!value) return;
+
+        var copy = navigator.clipboard && window.isSecureContext
+          ? navigator.clipboard.writeText(value)
+          : new Promise(function (resolve, reject) {
+              var input = document.createElement('textarea');
+              input.value = value;
+              input.setAttribute('readonly', '');
+              input.style.position = 'fixed';
+              input.style.opacity = '0';
+              document.body.appendChild(input);
+              input.select();
+              try {
+                document.execCommand('copy') ? resolve() : reject(new Error('copy_failed'));
+              } catch (error) {
+                reject(error);
+              }
+              input.remove();
+            });
+
+        copy.then(function () {
+          var label = button.querySelector('span');
+          if (!label) return;
+          label.textContent = button.dataset.copiedLabel || label.textContent;
+          button.classList.add('is-copied');
+          window.setTimeout(function () {
+            label.textContent = button.dataset.copyLabel || label.textContent;
+            button.classList.remove('is-copied');
+          }, 1600);
+        }).catch(function () {
+          // Copy is a convenience. The visible text remains selectable.
+        });
+      });
     });
   }
 
@@ -136,6 +178,13 @@
     document.querySelectorAll('[data-print-report]').forEach(function (button) {
       button.addEventListener('click', function () { window.print(); });
     });
+    document.querySelectorAll('[data-auto-submit]').forEach(function (control) {
+      control.addEventListener('change', function () {
+        if (!control.form) return;
+        if (typeof control.form.requestSubmit === 'function') control.form.requestSubmit();
+        else control.form.submit();
+      });
+    });
     document.querySelectorAll('[data-history-back]').forEach(function (button) {
       button.addEventListener('click', function () { window.history.back(); });
     });
@@ -202,7 +251,7 @@
         if (headerBtn) {
           headerBtn.setAttribute('aria-expanded', 'false');
           if (headerBtn.dataset.labelExpand) {
-            headerBtn.setAttribute('aria-label', headerBtn.dataset.labelExpand);
+            headerBtn.setAttribute('title', headerBtn.dataset.labelExpand);
           }
         }
       }
@@ -212,7 +261,7 @@
           var isCollapsed = groupEl.classList.toggle('is-collapsed');
           headerBtn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
           var label = isCollapsed ? headerBtn.dataset.labelExpand : headerBtn.dataset.labelCollapse;
-          if (label) headerBtn.setAttribute('aria-label', label);
+          if (label) headerBtn.setAttribute('title', label);
 
           if (groupKey) {
             var idx = savedGroups.indexOf(groupKey);

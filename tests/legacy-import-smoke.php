@@ -25,13 +25,9 @@ echo "TEST 1: Generate template\n";
 try {
     $importService = new ImportService();
     $headers = ["Name (English)", "Name (Arabic)", "Sort Order"];
+    $output = $importService->templateBytes($headers, "en");
     
-    // Capture output
-    ob_start();
-    $importService->generateTemplate($headers, "test_template", "en");
-    $output = ob_get_clean();
-    
-    if (strlen($output) > 100) {
+    if (strlen($output) > 100 && str_starts_with($output, 'PK')) {
         echo "✓ PASS: Template generated successfully\n";
         $passed++;
     } else {

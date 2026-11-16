@@ -21,12 +21,16 @@ use Throwable;
  * MigrationService.php): mysql produces the original schema+data dump
  * (DROP/CREATE TABLE + INSERT, backtick-quoted) written straight to
  * directory() -- completely unchanged. pgsql produces a DATA-ONLY dump
- * (double-quoted, OVERRIDING SYSTEM VALUE for identity columns) written to a
- * local scratch file just long enough to hash and size it, then uploaded to
- * Supabase Storage and the scratch file deleted -- Render's free-tier
- * container disk is ephemeral, so nothing written there survives a redeploy
- * or restart. Schema is never dumped for pgsql because it doesn't need to
- * be: the target's schema always comes from replaying the versioned
+ * (double-quoted, OVERRIDING SYSTEM VALUE for identity columns). Where the
+ * pgsql dump lands depends on the deployment's storage: a cloud-storage
+ * (Supabase) deployment writes a local scratch file just long enough to
+ * hash and size it, uploads it to Supabase Storage and deletes the scratch
+ * -- the container's own disk is ephemeral, so nothing may live there. A
+ * pgsql deployment whose storage rides on a persistent volume instead
+ * (Railway-native: Railway's own Postgres, NIZAM_DATA_PATH on a volume)
+ * keeps the finished dump in directory() exactly like the mysql path does.
+ * Schema is never dumped for pgsql because it doesn't need to be: the
+ * target's schema always comes from replaying the versioned
  * database/migrations-pg/*.sql files, and RestoreService already refuses a
  * backup whose declared schema version doesn't match what's live (§O-4) --
  * a schema dump would be dead weight, never actually used to recreate
@@ -39,6 +43,7 @@ final class BackupService
 
     /** Supabase Storage bucket for the pgsql/online path. */
     private const BUCKET = 'backups';
+    /** Cloud-storage deployments only -- Supabase Storage, not the local disk. */
 
     /**
      * A valid topological order for the FK graph in §D -- not copied
@@ -46,7 +51,8 @@ final class BackupService
      * only one), but every table here still appears after everything it
      * references. Order only matters for a human reading the dump by eye;
      * the replay itself runs with FOREIGN_KEY_CHECKS=0 (§O-5) so it isn't
-     * order-dependent. mysql only.
+     * order-dependent. mysql only. Newly added mysql tables are picked up
+     * automatically (SHOW TABLES below) and appended in database order.
      */
     private const TABLE_ORDER = [
         'schools', 'settings', 'migrations', 'roles', 'permissions', 'role_permissions',
@@ -57,29 +63,95 @@ final class BackupService
     ];
 
     /**
-     * Same graph, minus 'migrations': nizam_app holds no grant on it at all
-     * (database/migrations-pg/010_app_role_and_rls.sql's own note -- schema
-     * bookkeeping is a postgres-superuser-only concern) and, unlike mysql,
-     * this order is load-bearing for pgsql restore, not just cosmetic --
-     * RestoreService deletes existing rows in reverse of this order (children
-     * before parents) and replays INSERTs forward, since nizam_app has no
-     * privilege to disable FK triggers the way FOREIGN_KEY_CHECKS=0 does.
+     * Live, dependency-safe table order for the pgsql data-only dump and
+     * restore. Found live the hard way: the order used to be a second
+     * hand-maintained const, and it silently rotted -- every table added by
+     * a migration after the one that introduced it (exams, attendance,
+     * timetables, notifications, the whole universal-platform set, ...) was
+     * missing from pgsql backups AND from restore's delete/replay pass, so
+     * a quarter of the school's data simply wasn't in any backup. The mysql
+     * path never had this bug because it lists tables with SHOW TABLES
+     * instead of trusting a const -- the pgsql path now does the same
+     * thing, straight from the live catalog:
+     *
+     *   - every durable application-data table in schema public except
+     *     `migrations` (schema bookkeeping, never user data) and
+     *     `admin_recovery_tokens` (short-lived credentials must never be
+     *     resurrected by restoring an old backup), then
+     *   - topologically sorted by the FK graph from pg_constraint so
+     *     parents always precede children (the replay's INSERTs run in this
+     *     order and RestoreService's DELETEs run it in reverse), with
+     *     self-references (student_enrollments.previous_enrollment_id)
+     *     excluded -- they're handled by the dump's own ORDER BY id.
+     *
+     * Deterministic (name-ordered visit) so two backups of the same schema
+     * are byte-comparable apart from the data. A hypothetical FK cycle --
+     * none exists and Postgres largely prevents one -- can't hang or crash
+     * this: the visiting-guard breaks it, and the surrounding single
+     * transaction in executePgsql is what actually guarantees integrity.
+     *
+     * @return string[]
      */
-    public const TABLE_ORDER_PG = [
-        'schools', 'settings', 'roles', 'permissions', 'role_permissions',
-        'academic_years', 'grades', 'subjects', 'users', 'classes',
-        'subject_staffing_requirements', 'students', 'teachers',
-        'student_enrollments', 'teacher_subjects', 'teacher_assignments',
-        'promotion_locks', 'activity_logs', 'backups', 'login_attempts',
-    ];
+    public static function orderedTables(PDO $pdo): array
+    {
+        $tables = $pdo->query(
+            "SELECT tablename FROM pg_tables
+             WHERE schemaname = 'public'
+               AND tablename NOT IN ('migrations', 'admin_recovery_tokens')
+             ORDER BY tablename"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        /** @var array<string, string[]> $parents child table => tables it references */
+        $parents = [];
+        $stmt = $pdo->query(
+            "SELECT DISTINCT child.relname AS child, parent.relname AS parent
+             FROM pg_constraint con
+             JOIN pg_class child ON child.oid = con.conrelid
+             JOIN pg_namespace child_ns ON child_ns.oid = child.relnamespace
+             JOIN pg_class parent ON parent.oid = con.confrelid
+             JOIN pg_namespace parent_ns ON parent_ns.oid = parent.relnamespace
+             WHERE con.contype = 'f'
+               AND child_ns.nspname = 'public'
+               AND parent_ns.nspname = 'public'
+               AND con.conrelid <> con.confrelid"
+        );
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $parents[$row['child']][] = $row['parent'];
+        }
+
+        $sorted = [];
+        $visiting = [];
+        $visit = static function (string $table) use (&$visit, &$sorted, &$visiting, $parents, $tables): void {
+            if (isset($sorted[$table]) || ($visiting[$table] ?? false)) {
+                return;
+            }
+            $visiting[$table] = true;
+            foreach ($parents[$table] ?? [] as $parent) {
+                // Only recurse into tables that actually exist right now --
+                // a dangling FK is impossible, but a reference to a table in
+                // another schema would arrive here under a qualified name.
+                if (in_array($parent, $tables, true)) {
+                    $visit($parent);
+                }
+            }
+            unset($visiting[$table]);
+            $sorted[$table] = true;
+        };
+        foreach ($tables as $table) {
+            $visit($table);
+        }
+        return array_keys($sorted);
+    }
 
     public function __construct(
         private readonly BackupRepository $repo = new BackupRepository(),
         private readonly MigrationService $migrations = new MigrationService(),
     ) {
-        // No local persistent directory on the pgsql/online path -- backups
-        // live in Supabase Storage, never on Render's ephemeral disk.
-        if (Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'pgsql') {
+        // No local persistent directory on the cloud-storage path -- backups
+        // live in Supabase Storage, never on the container's ephemeral disk.
+        // Every other target (mysql offline, and the pgsql deployment whose
+        // storage rides on a persistent volume) writes real files here.
+        if (!(Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql' && SupabaseStorageClient::configured())) {
             $dir = self::directory();
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
@@ -156,10 +228,16 @@ final class BackupService
         }
 
         $isPgsql = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
+        // Cloud upload only when this deployment actually has Supabase
+        // Storage configured. A pgsql deployment without it (Railway-native:
+        // Railway's own Postgres + a persistent volume) keeps the dump on
+        // that volume's disk like the mysql path always has.
+        $toCloud = $isPgsql && SupabaseStorageClient::configured();
         $filename = 'nizam_backup_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.sql';
-        // pgsql: a scratch file just long enough to stream-write, hash and
-        // size the dump -- never the final resting place (see class docblock).
-        $filepath = $isPgsql ? sys_get_temp_dir() . '/nizam_' . $filename : self::directory() . '/' . $filename;
+        // Cloud path: a scratch file just long enough to stream-write, hash
+        // and size the dump -- never the final resting place (see class
+        // docblock). Volume/disk path: this IS the final resting place.
+        $filepath = $toCloud ? sys_get_temp_dir() . '/nizam_' . $filename : self::directory() . '/' . $filename;
         $handle = false;
         $uploaded = false;
 
@@ -181,7 +259,7 @@ final class BackupService
             $write("-- Hadaba Al-Ahram Language School Backup\n-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n\n");
 
             if ($isPgsql) {
-                foreach (self::TABLE_ORDER_PG as $table) {
+                foreach (self::orderedTables($pdo) as $table) {
                     $this->dumpTablePgsql($pdo, $table, $write);
                 }
             } else {
@@ -205,7 +283,7 @@ final class BackupService
 
             $size = (int) filesize($filepath);
 
-            if ($isPgsql) {
+            if ($toCloud) {
                 $contents = (string) file_get_contents($filepath);
                 @unlink($filepath);
                 self::storage()->upload(self::BUCKET, $filename, $contents, 'application/sql');
@@ -230,7 +308,7 @@ final class BackupService
             if (is_file($filepath)) {
                 unlink($filepath);
             }
-            if ($isPgsql && $uploaded) {
+            if ($uploaded) {
                 try {
                     self::storage()->delete(self::BUCKET, $filename);
                 } catch (RuntimeException) {
@@ -398,8 +476,9 @@ final class BackupService
      * Raw bytes of a previously created backup, resolved by the
      * database-recorded filename only -- the caller (BackupController::
      * download()) looks the row up by id first, §S-10, never a
-     * client-supplied path. mysql: local disk, where run() left it. pgsql:
-     * Supabase Storage, the only place run() ever wrote it.
+     * client-supplied path. Cloud-storage deployment: Supabase Storage,
+     * where run() uploaded it. Everywhere else (mysql offline, pgsql on a
+     * persistent volume): local disk, where run() left it.
      *
      * @throws RuntimeException 'file_not_found'
      */
@@ -407,7 +486,7 @@ final class BackupService
     {
         $filename = basename($filename);
 
-        if (Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+        if (SupabaseStorageClient::configured()) {
             try {
                 return self::storage()->download(self::BUCKET, $filename);
             } catch (RuntimeException $e) {
@@ -420,6 +499,31 @@ final class BackupService
             throw new RuntimeException('file_not_found');
         }
         return (string) file_get_contents($filepath);
+    }
+
+    /**
+     * Delete a stored backup object/file by the filename already read from a
+     * trusted backups row. Used by retention maintenance; basename() is a
+     * final defence so a corrupted row can never escape the backup folder.
+     * Missing objects are a successful no-op -- retention should still be
+     * able to remove stale metadata for a file already gone.
+     */
+    public function deleteStored(string $filename): void
+    {
+        $filename = basename($filename);
+        if ($filename === '') {
+            return;
+        }
+
+        if (SupabaseStorageClient::configured()) {
+            self::storage()->delete(self::BUCKET, $filename);
+            return;
+        }
+
+        $filepath = self::directory() . '/' . $filename;
+        if (is_file($filepath)) {
+            @unlink($filepath);
+        }
     }
 
     private static function storage(): SupabaseStorageClient

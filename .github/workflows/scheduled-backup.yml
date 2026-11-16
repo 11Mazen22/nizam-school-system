@@ -1,12 +1,19 @@
 name: Scheduled database backup
 
+permissions:
+  contents: read
+
+concurrency:
+  group: nizam-scheduled-backup
+  cancel-in-progress: false
+
 # Neither Railway's nor Render's free tier has built-in cron; this is the
 # free substitute -- GitHub Actions' own scheduled-workflow trigger, calling
 # the app's bearer-token-gated backup endpoint (App\Controllers\
 # BackupController::scheduled()) once a day. Two repository secrets
 # required (Settings -> Secrets and variables -> Actions): NIZAM_URL (the
 # deployed https:// origin, no trailing slash) and
-# NIZAM_SCHEDULED_BACKUP_TOKEN (must match the deployed service's own
+# NIZAM_SCHEDULED_TOKEN (must match the deployed service's own
 # SCHEDULED_BACKUP_TOKEN environment variable exactly -- rotate both
 # together, never one alone).
 on:
@@ -17,12 +24,18 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Trigger scheduled backup
+        env:
+          NIZAM_URL: ${{ secrets.NIZAM_URL }}
+          NIZAM_SCHEDULED_TOKEN: ${{ secrets.NIZAM_SCHEDULED_TOKEN }}
         run: |
-          status=$(curl -s -o /tmp/response.txt -w "%{http_code}" -X POST \
-            -H "Authorization: Bearer ${{ secrets.NIZAM_SCHEDULED_BACKUP_TOKEN }}" \
-            "${{ secrets.NIZAM_URL }}/backups/scheduled")
+          test -n "$NIZAM_URL" && test -n "$NIZAM_SCHEDULED_TOKEN"
+          status=$(curl --silent --show-error \
+            --connect-timeout 15 --max-time 180 -o /tmp/response.txt -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $NIZAM_SCHEDULED_TOKEN" \
+            "${NIZAM_URL%/}/backups/scheduled")
           echo "HTTP status: $status"
           cat /tmp/response.txt
           if [ "$status" != "200" ]; then

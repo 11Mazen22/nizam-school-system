@@ -54,6 +54,17 @@ final class Response
         echo $bytes;
     }
 
+    /**
+     * Authentication, setup, and recovery pages contain live CSRF/session
+     * state and must never be replayed by a browser cache or service worker.
+     */
+    public static function noStore(): void
+    {
+        header('Cache-Control: no-store, no-cache, must-revalidate, private');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+    }
+
     public static function securityHeaders(): void
     {
         // §Q "Security must be implemented centrally" -- set once, here, not
@@ -77,9 +88,22 @@ final class Response
         // relaxation -- a data: URI is bytes already inside the CSS file,
         // never a fetch to anywhere -- so it doesn't reopen the "nothing
         // external, ever" guarantee the rest of this policy protects.
-        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'");
+        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'");
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('Referrer-Policy: same-origin');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header('Cross-Origin-Resource-Policy: same-origin');
+        header('Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=()');
+
+        // HSTS only when this request really arrived through HTTPS. The
+        // online container sees TLS terminated at Railway's edge, hence the
+        // forwarded-proto check; direct HTTP/XAMPP must never receive HSTS.
+        $isHttps = (($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off')
+            || ($_SERVER['SERVER_PORT'] ?? '') === '443'
+            || strcasecmp(($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''), 'https') === 0;
+        if ($isHttps) {
+            header('Strict-Transport-Security: max-age=31536000');
+        }
     }
 }
