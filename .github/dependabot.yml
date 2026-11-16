@@ -9,6 +9,7 @@ updates:
       timezone: UTC
     open-pull-requests-limit: 5
     labels: [dependencies, php]
+    versioning-strategy: lockfile-only
 
   - package-ecosystem: npm
     directory: /
@@ -19,6 +20,7 @@ updates:
       timezone: UTC
     open-pull-requests-limit: 5
     labels: [dependencies, javascript]
+    versioning-strategy: lockfile-only
 
   - package-ecosystem: github-actions
     directory: /
@@ -29,6 +31,9 @@ updates:
       timezone: UTC
     open-pull-requests-limit: 5
     labels: [dependencies, ci]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /packaging-online
@@ -39,3 +44,6 @@ updates:
       timezone: UTC
     open-pull-requests-limit: 3
     labels: [dependencies, container]
+    ignore:
+      - dependency-name: php
+        update-types: [version-update:semver-major, version-update:semver-minor]
