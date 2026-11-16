@@ -51,6 +51,11 @@ foreach ($migrationFiles as $file) {
     }
 }
 
+onlineCheck(
+    preg_match('/FROM roles r JOIN permissions p(?:\s|$)/i', $allMigrationSql) !== 1,
+    'Postgres role templates use explicit CROSS JOIN syntax'
+);
+
 unset($createdTables['migrations']); // intentionally admin-only bookkeeping
 foreach (array_keys($createdTables) as $table) {
     $quoted = preg_quote($table, '/');
