@@ -61,6 +61,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         opcache \
     && a2enmod rewrite headers expires deflate \
+    && printf '%s\n' 'ServerName nizam.local' > /etc/apache2/conf-available/nizam-server-name.conf \
+    && a2enconf nizam-server-name \
     && rm -rf /var/lib/apt/lists/*
 
 FROM php-base AS vendor-builder

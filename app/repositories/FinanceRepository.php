@@ -264,12 +264,12 @@ final class FinanceRepository
                     COUNT(*) as invoice_count,
                     COALESCE(SUM(total_amount - discount_amount), 0) as total_billed,
                     COALESCE(SUM(paid_amount), 0) as total_collected,
-                    COALESCE(SUM(CASE WHEN status != "paid" AND status != "cancelled" THEN (total_amount - discount_amount - paid_amount) ELSE 0 END), 0) as total_outstanding,
-                    COALESCE(SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END), 0) as pending_count,
-                    COALESCE(SUM(CASE WHEN status = "partial" THEN 1 ELSE 0 END), 0) as partial_count,
-                    COALESCE(SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END), 0) as paid_count
+                    COALESCE(SUM(CASE WHEN status != \'paid\' AND status != \'cancelled\' THEN (total_amount - discount_amount - paid_amount) ELSE 0 END), 0) as total_outstanding,
+                    COALESCE(SUM(CASE WHEN status = \'pending\' THEN 1 ELSE 0 END), 0) as pending_count,
+                    COALESCE(SUM(CASE WHEN status = \'partial\' THEN 1 ELSE 0 END), 0) as partial_count,
+                    COALESCE(SUM(CASE WHEN status = \'paid\' THEN 1 ELSE 0 END), 0) as paid_count
                 FROM student_invoices
-                WHERE status != "cancelled"';
+                WHERE status != \'cancelled\'';
         $params = [];
         if ($academicYearId !== null) {
             $sql .= ' AND academic_year_id = :year_id';

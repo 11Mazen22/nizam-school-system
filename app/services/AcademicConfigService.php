@@ -224,7 +224,7 @@ final class AcademicConfigService
         if ($scale === null) {
             return ['ok' => false, 'error' => 'structure.grading.not_found'];
         }
-        if ((int) $scale['is_default'] === 1) {
+        if (dbBool($scale['is_default'])) {
             return ['ok' => false, 'error' => 'structure.grading.delete_blocked'];
         }
 

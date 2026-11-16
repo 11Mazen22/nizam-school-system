@@ -189,7 +189,7 @@ final class AcademicCalculationService
             'band_label' => $band['band_label'] ?? null,
             'gpa_point'  => isset($band['gpa_point']) && $band['gpa_point'] !== null
                 ? (float) $band['gpa_point'] : null,
-            'is_passing' => isset($band['is_passing']) ? (int) $band['is_passing'] === 1 : null,
+            'is_passing' => isset($band['is_passing']) ? dbBool($band['is_passing']) : null,
             'scale_id'   => isset($resolved['id']) ? (int) $resolved['id'] : null,
             'scale_type' => $resolved['scale_type'] ?? null,
             'scale_name' => $resolved['name_en'] ?? null,

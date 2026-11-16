@@ -29,7 +29,7 @@ final class DataQualityService
         // 1. Students without linked guardians
         $stmt = $pdo->query(
             'SELECT COUNT(*) FROM students s
-             WHERE s.status = "active"
+             WHERE s.status = \'active\'
                AND NOT EXISTS (SELECT 1 FROM student_guardians sg WHERE sg.student_id = s.id)'
         );
         $unlinkedCount = (int) $stmt->fetchColumn();
@@ -48,7 +48,7 @@ final class DataQualityService
         // 2. Active students with incomplete national ID / phone / address
         $stmt = $pdo->query(
             'SELECT COUNT(*) FROM students s
-             WHERE s.status = "active" AND (s.phone IS NULL OR s.phone = "" OR s.address IS NULL OR s.address = "")'
+             WHERE s.status = \'active\' AND (s.phone IS NULL OR s.phone = \'\' OR s.address IS NULL OR s.address = \'\')'
         );
         $missingContactCount = (int) $stmt->fetchColumn();
         if ($missingContactCount > 0) {
@@ -69,7 +69,7 @@ final class DataQualityService
              JOIN (
                  SELECT class_id, COUNT(*) as enrolled
                  FROM student_enrollments
-                 WHERE status = "active" AND class_id IS NOT NULL
+                 WHERE status = \'active\' AND class_id IS NOT NULL
                  GROUP BY class_id
              ) e ON e.class_id = c.id
              WHERE c.capacity IS NOT NULL AND e.enrolled > c.capacity'
@@ -91,7 +91,7 @@ final class DataQualityService
         $stmt = $pdo->query(
             'SELECT COUNT(*) FROM subjects s
              WHERE s.is_active = 1
-               AND NOT EXISTS (SELECT 1 FROM teacher_assignments ta WHERE ta.subject_id = s.id AND ta.status = "active")'
+               AND NOT EXISTS (SELECT 1 FROM teacher_assignments ta WHERE ta.subject_id = s.id AND ta.status = \'active\')'
         );
         $unassignedSubjects = (int) $stmt->fetchColumn();
         if ($unassignedSubjects > 0) {

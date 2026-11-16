@@ -111,7 +111,7 @@ final class GuardianRepository
                     c.name AS class_name, g.name_en AS grade_name_en, g.name_ar AS grade_name_ar
              FROM student_guardians sg
              JOIN students s ON s.id = sg.student_id
-             LEFT JOIN student_enrollments se ON se.student_id = s.id AND se.status = "active"
+             LEFT JOIN student_enrollments se ON se.student_id = s.id AND se.status = \'active\'
              LEFT JOIN classes c ON c.id = se.class_id
              LEFT JOIN grades g ON g.id = se.grade_id
              WHERE sg.guardian_id = :guardian_id
@@ -131,25 +131,29 @@ final class GuardianRepository
         bool $receivesReports = true
     ): void {
         $pdo = Database::connection();
+        $primary = $isPrimary ? 'TRUE' : 'FALSE';
+        $emergency = $isEmergency ? 'TRUE' : 'FALSE';
+        $pickup = $canPickup ? 'TRUE' : 'FALSE';
+        $reports = $receivesReports ? 'TRUE' : 'FALSE';
         $sql = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql'
             ? 'INSERT INTO student_guardians (student_id, guardian_id, relationship, is_primary, is_emergency, can_pickup, receives_reports, created_at)
-               VALUES (:s, :g, :rel, :p, :e, :pick, :rep, :now)
+               VALUES (:s, :g, :rel, ' . $primary . ', ' . $emergency . ', ' . $pickup . ', ' . $reports . ', :now)
                ON CONFLICT (student_id, guardian_id) DO UPDATE SET
-               relationship = EXCLUDED.relationship, is_primary = EXCLUDED.is_primary'
+               relationship = EXCLUDED.relationship, is_primary = EXCLUDED.is_primary,
+               is_emergency = EXCLUDED.is_emergency, can_pickup = EXCLUDED.can_pickup,
+               receives_reports = EXCLUDED.receives_reports'
             : 'INSERT INTO student_guardians (student_id, guardian_id, relationship, is_primary, is_emergency, can_pickup, receives_reports, created_at)
-               VALUES (:s, :g, :rel, :p, :e, :pick, :rep, :now)
+               VALUES (:s, :g, :rel, ' . $primary . ', ' . $emergency . ', ' . $pickup . ', ' . $reports . ', :now)
                ON DUPLICATE KEY UPDATE
-               relationship = VALUES(relationship), is_primary = VALUES(is_primary)';
+               relationship = VALUES(relationship), is_primary = VALUES(is_primary),
+               is_emergency = VALUES(is_emergency), can_pickup = VALUES(can_pickup),
+               receives_reports = VALUES(receives_reports)';
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             's'    => $studentId,
             'g'    => $guardianId,
             'rel'  => $relationship,
-            'p'    => $isPrimary ? 1 : 0,
-            'e'    => $isEmergency ? 1 : 0,
-            'pick' => $canPickup ? 1 : 0,
-            'rep'  => $receivesReports ? 1 : 0,
             'now'  => date('Y-m-d H:i:s'),
         ]);
     }

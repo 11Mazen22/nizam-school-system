@@ -44,7 +44,7 @@ final class PortalController extends Controller
                  JOIN classes c ON c.id = ta.class_id
                  JOIN grades g ON g.id = c.grade_id
                  JOIN subjects s ON s.id = ta.subject_id
-                 WHERE ta.teacher_id = :t_id AND ta.academic_year_id = :y_id AND ta.status = "active"'
+                 WHERE ta.teacher_id = :t_id AND ta.academic_year_id = :y_id AND ta.status = \'active\''
             );
             $stmt->execute(['t_id' => $teacher['id'], 'y_id' => $activeYearId]);
             $assignments = $stmt->fetchAll() ?: [];

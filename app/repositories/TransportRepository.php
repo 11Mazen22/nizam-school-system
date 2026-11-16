@@ -13,7 +13,7 @@ final class TransportRepository
     {
         $stmt = Database::connection()->query(
             'SELECT r.*,
-                    (SELECT COUNT(*) FROM student_transport st WHERE st.route_id = r.id AND st.status = "active") AS assigned_students
+                    (SELECT COUNT(*) FROM student_transport st WHERE st.route_id = r.id AND st.status = \'active\') AS assigned_students
              FROM transport_routes r
              ORDER BY r.route_name ASC'
         );
@@ -35,7 +35,7 @@ final class TransportRepository
             'INSERT INTO transport_routes (
                 route_name, vehicle_number, driver_name, driver_phone, capacity, fee_amount, is_active, created_at
              ) VALUES (
-                :name, :vehicle, :driver, :phone, :capacity, :fee, 1, :now
+                :name, :vehicle, :driver, :phone, :capacity, :fee, TRUE, :now
              )'
         );
         $stmt->execute([
@@ -57,7 +57,7 @@ final class TransportRepository
                     c.name AS class_name
              FROM student_transport st
              JOIN students s ON s.id = st.student_id
-             LEFT JOIN student_enrollments se ON se.student_id = s.id AND se.status = "active"
+             LEFT JOIN student_enrollments se ON se.student_id = s.id AND se.status = \'active\'
              LEFT JOIN classes c ON c.id = se.class_id
              WHERE st.route_id = :route_id
              ORDER BY s.full_name ASC'

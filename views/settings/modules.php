@@ -46,14 +46,14 @@ use App\Middleware\CsrfMiddleware;
                 </span>
               </td>
               <td>
-                <?php if ($m['is_core']): ?>
+                <?php if (dbBool($m['is_core'])): ?>
                   <span class="badge text-bg-primary"><?= e(__('modules.core')) ?></span>
                 <?php else: ?>
                   <span class="badge text-bg-secondary"><?= e(__('modules.optional')) ?></span>
                 <?php endif; ?>
               </td>
               <td>
-                <?php if ($m['is_enabled']): ?>
+                <?php if (dbBool($m['is_enabled'])): ?>
                   <span class="badge text-bg-success d-inline-flex align-items-center gap-1">
                     <?= icon('check', 'n-icon-sm') ?>
                     <span><?= e(__('modules.enabled')) ?></span>
@@ -65,14 +65,14 @@ use App\Middleware\CsrfMiddleware;
                 <?php endif; ?>
               </td>
               <td class="text-end">
-                <?php if ($m['is_core']): ?>
+                <?php if (dbBool($m['is_core'])): ?>
                   <span class="small text-muted fst-italic"><?= e(__('modules.required')) ?></span>
                 <?php else: ?>
                   <form method="post" action="/settings/modules/<?= e($m['module_key']) ?>/toggle" class="d-inline">
                     <?= CsrfMiddleware::field() ?>
-                    <input type="hidden" name="enable" value="<?= $m['is_enabled'] ? '0' : '1' ?>">
-                    <button type="submit" class="btn btn-sm <?= $m['is_enabled'] ? 'btn-outline-danger' : 'btn-outline-success' ?>">
-                      <?= $m['is_enabled'] ? e(__('modules.disable')) : e(__('modules.enable')) ?>
+                    <input type="hidden" name="enable" value="<?= dbBool($m['is_enabled']) ? '0' : '1' ?>">
+                    <button type="submit" class="btn btn-sm <?= dbBool($m['is_enabled']) ? 'btn-outline-danger' : 'btn-outline-success' ?>">
+                      <?= dbBool($m['is_enabled']) ? e(__('modules.disable')) : e(__('modules.enable')) ?>
                     </button>
                   </form>
                 <?php endif; ?>

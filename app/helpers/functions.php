@@ -19,6 +19,29 @@ function e(?string $value): string
 }
 
 /**
+ * Normalize database flags across both supported PDO drivers.
+ *
+ * MySQL SMALLINT flags arrive as 0/1 strings; PostgreSQL native BOOLEAN may
+ * arrive as bools or as t/f strings depending on PHP/libpq versions. Plain
+ * `(bool) 'f'` is true and `(int) 't'` is zero, so either ordinary cast gives
+ * the wrong answer on one driver. All native-boolean UI/domain reads use this
+ * one explicit conversion.
+ */
+function dbBool(mixed $value): bool
+{
+    if (is_bool($value)) {
+        return $value;
+    }
+    if (is_int($value) || is_float($value)) {
+        return (int) $value === 1;
+    }
+    if (is_string($value)) {
+        return in_array(strtolower(trim($value)), ['1', 't', 'true', 'yes', 'on'], true);
+    }
+    return false;
+}
+
+/**
  * Appends a cache-busting ?v=<mtime> to a public/ asset path, e.g.
  * assetUrl('/assets/css/app.css') -> '/assets/css/app.css?v=1234567890'.
  *

@@ -57,18 +57,17 @@ final class ModuleRepository
         );
         $stmt->execute(['key' => $moduleKey]);
         $val = $stmt->fetchColumn();
-        return $val !== false && (bool) $val;
+        return $val !== false && dbBool($val);
     }
 
     public function setEnabled(string $moduleKey, bool $enabled): void
     {
         $stmt = Database::connection()->prepare(
             'UPDATE installed_modules
-             SET is_enabled = :enabled, updated_at = :now
-             WHERE module_key = :key AND is_core = 0'
+             SET is_enabled = ' . ($enabled ? 'TRUE' : 'FALSE') . ', updated_at = :now
+             WHERE module_key = :key AND is_core = FALSE'
         );
         $stmt->execute([
-            'enabled' => $enabled ? 1 : 0,
             'now'     => date('Y-m-d H:i:s'),
             'key'     => $moduleKey,
         ]);

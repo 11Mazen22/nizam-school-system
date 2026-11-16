@@ -130,8 +130,8 @@ $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 
                       <?= e($g['full_name']) ?>
                     </a>
                     <span class="badge text-bg-light border ms-1"><?= e(__('guardians.rel_' . ($g['relationship'] ?? 'father'))) ?></span>
-                    <?php if ($g['is_primary']): ?><span class="badge text-bg-success small ms-1"><?= e(__('guardians.primary')) ?></span><?php endif; ?>
-                    <?php if ($g['is_emergency']): ?><span class="badge text-bg-danger small ms-1"><?= e(__('guardians.emergency')) ?></span><?php endif; ?>
+                    <?php if (dbBool($g['is_primary'])): ?><span class="badge text-bg-success small ms-1"><?= e(__('guardians.primary')) ?></span><?php endif; ?>
+                    <?php if (dbBool($g['is_emergency'])): ?><span class="badge text-bg-danger small ms-1"><?= e(__('guardians.emergency')) ?></span><?php endif; ?>
                     <div dir="ltr" class="font-monospace small text-muted"><?= e($g['phone']) ?></div>
                   </div>
                   <?php if (hasPermission('guardians.manage')): ?>

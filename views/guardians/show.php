@@ -91,7 +91,7 @@ require dirname(__DIR__) . '/layout/start.php';
                       <span class="badge text-bg-light border">
                         <?= e(__('guardians.rel_' . ($s['relationship'] ?? 'father'))) ?>
                       </span>
-                      <?php if ($s['is_primary']): ?>
+                      <?php if (dbBool($s['is_primary'])): ?>
                         <span class="badge text-bg-success small"><?= e(__('guardians.primary')) ?></span>
                       <?php endif; ?>
                     </td>

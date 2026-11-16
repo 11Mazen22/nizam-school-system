@@ -100,8 +100,8 @@ for ($i = 0; $i < 4; $i++) {
                   <td data-label="<?= e(__('structure.stage.order')) ?>"><span class="n-order-chip"><?= (int) $stage['sort_order'] ?></span></td>
                   <td data-label="<?= e(__('structure.stage.grades')) ?>"><span class="badge text-bg-light"><?= (int) $stage['grade_count'] ?></span></td>
                   <td data-label="<?= e(__('structure.stage.active')) ?>">
-                    <span class="badge <?= (int) $stage['is_active'] === 1 ? 'text-bg-success' : 'text-bg-secondary' ?>">
-                      <?= e((int) $stage['is_active'] === 1 ? __('common.status_active') : __('common.status_archived')) ?>
+                    <span class="badge <?= dbBool($stage['is_active']) ? 'text-bg-success' : 'text-bg-secondary' ?>">
+                      <?= e(dbBool($stage['is_active']) ? __('common.status_active') : __('common.status_archived')) ?>
                     </span>
                   </td>
                   <td data-label="<?= e(__('common.actions')) ?>">
@@ -117,7 +117,7 @@ for ($i = 0; $i < 4; $i++) {
                             <div class="col-md-4"><label class="form-label"><?= e(__('structure.stage.order')) ?></label><input type="number" min="1" max="99" class="form-control" name="sort_order" value="<?= (int) $stage['sort_order'] ?>" required></div>
                             <div class="col-md-4 d-flex align-items-end">
                               <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="is_active" value="1" id="stage-active-<?= (int) $stage['id'] ?>" <?= (int) $stage['is_active'] === 1 ? 'checked' : '' ?>>
+                                <input class="form-check-input" type="checkbox" name="is_active" value="1" id="stage-active-<?= (int) $stage['id'] ?>" <?= dbBool($stage['is_active']) ? 'checked' : '' ?>>
                                 <label class="form-check-label" for="stage-active-<?= (int) $stage['id'] ?>"><?= e(__('structure.stage.active')) ?></label>
                               </div>
                             </div>
@@ -267,7 +267,7 @@ for ($i = 0; $i < 4; $i++) {
                         <td data-label="<?= e(__('structure.terms.start')) ?>"><?= e($term['start_date']) ?></td>
                         <td data-label="<?= e(__('structure.terms.end')) ?>"><?= e($term['end_date']) ?></td>
                         <td data-label="<?= e(__('structure.terms.current')) ?>">
-                          <?php if ((int) $term['is_active'] === 1): ?>
+                          <?php if (dbBool($term['is_active'])): ?>
                             <span class="badge text-bg-success"><?= e(__('structure.terms.current')) ?></span>
                           <?php else: ?>
                             <form method="post" action="/settings/terms/<?= (int) $term['id'] ?>/activate">
@@ -290,7 +290,7 @@ for ($i = 0; $i < 4; $i++) {
                                   <div class="col-md-3"><label class="form-label"><?= e(__('structure.terms.end')) ?></label><input type="date" class="form-control" name="end_date" value="<?= e($term['end_date']) ?>" required></div>
                                   <div class="col-md-3 d-flex align-items-end">
                                     <div class="form-check">
-                                      <input class="form-check-input" type="checkbox" name="is_active" value="1" id="term-active-<?= (int) $term['id'] ?>" <?= (int) $term['is_active'] === 1 ? 'checked' : '' ?>>
+                                      <input class="form-check-input" type="checkbox" name="is_active" value="1" id="term-active-<?= (int) $term['id'] ?>" <?= dbBool($term['is_active']) ? 'checked' : '' ?>>
                                       <label class="form-check-label" for="term-active-<?= (int) $term['id'] ?>"><?= e(__('structure.terms.current')) ?></label>
                                     </div>
                                   </div>
@@ -398,7 +398,7 @@ for ($i = 0; $i < 4; $i++) {
                   <td data-label="<?= e(__('structure.grading.type')) ?>"><span class="badge text-bg-light"><?= e(__('structure.grading.type.' . $scale['scale_type'])) ?></span></td>
                   <td data-label="<?= e(__('structure.grading.bands_count')) ?>"><?= (int) $scale['band_count'] ?></td>
                   <td data-label="<?= e(__('structure.grading.default')) ?>">
-                    <?php if ((int) $scale['is_default'] === 1): ?>
+                    <?php if (dbBool($scale['is_default'])): ?>
                       <span class="badge text-bg-success"><?= e(__('structure.grading.default')) ?></span>
                     <?php else: ?>
                       <form method="post" action="/settings/grading/<?= (int) $scale['id'] ?>/default">
@@ -457,7 +457,7 @@ for ($i = 0; $i < 4; $i++) {
             </div>
             <div class="col-md-4 d-flex align-items-end">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="is_default" value="1" id="scale_default" <?= (int) $selected['is_default'] === 1 ? 'checked' : '' ?>>
+                <input class="form-check-input" type="checkbox" name="is_default" value="1" id="scale_default" <?= dbBool($selected['is_default']) ? 'checked' : '' ?>>
                 <label class="form-check-label" for="scale_default"><?= e(__('structure.grading.default')) ?></label>
               </div>
             </div>
@@ -482,7 +482,7 @@ for ($i = 0; $i < 4; $i++) {
                     <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="band_max[]" value="<?= e((string) $band['max_score']) ?>" aria-label="<?= e(__('structure.grading.band_max')) ?>"></td>
                     <td><input type="number" step="0.01" min="0" max="5" class="form-control" name="band_gpa[]" value="<?= e((string) ($band['gpa_point'] ?? '')) ?>" aria-label="<?= e(__('structure.grading.band_gpa')) ?>"></td>
                     <td class="text-center">
-                      <input type="checkbox" class="form-check-input" name="band_passing[<?= (int) $index ?>]" value="1" <?= (int) ($band['is_passing'] ?? 0) === 1 ? 'checked' : '' ?> aria-label="<?= e(__('structure.grading.band_passing')) ?>">
+                      <input type="checkbox" class="form-check-input" name="band_passing[<?= (int) $index ?>]" value="1" <?= dbBool($band['is_passing'] ?? false) ? 'checked' : '' ?> aria-label="<?= e(__('structure.grading.band_passing')) ?>">
                     </td>
                   </tr>
                 <?php endforeach; ?>

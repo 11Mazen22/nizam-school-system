@@ -33,6 +33,29 @@ require $root . '/app/bootstrap.php';
 echo "Online production-readiness contract\n";
 echo str_repeat('=', 60) . "\n";
 
+onlineCheck(
+    dbBool(true) && dbBool(1) && dbBool('1') && dbBool('t') && dbBool('true')
+        && !dbBool(false) && !dbBool(0) && !dbBool('0') && !dbBool('f') && !dbBool(null),
+    'Database boolean normalization covers MySQL and PostgreSQL representations'
+);
+
+$runtimeSqlFiles = [
+    $root . '/app/controllers/PortalController.php',
+    $root . '/app/services/DataQualityService.php',
+    $root . '/app/repositories/FinanceRepository.php',
+    $root . '/app/repositories/GuardianRepository.php',
+    $root . '/app/repositories/TransportRepository.php',
+];
+$runtimeSql = implode("\n", array_map(static fn (string $file): string => (string) file_get_contents($file), $runtimeSqlFiles));
+onlineCheck(
+    preg_match('/\bstatus\s*(?:=|!=)\s*"[a-z_]+"/i', $runtimeSql) !== 1,
+    'Cross-database runtime SQL uses standard single-quoted text literals'
+);
+onlineCheck(
+    !str_contains((string) file_get_contents($root . '/app/repositories/ModuleRepository.php'), 'is_core = 0'),
+    'Module updates use native-boolean SQL literals'
+);
+
 $migrationFiles = glob($root . '/database/migrations-pg/*.sql') ?: [];
 sort($migrationFiles, SORT_STRING);
 onlineCheck(count($migrationFiles) >= 28, 'Postgres migration set is present');

@@ -37,7 +37,7 @@ final class ModuleManager
         if (self::$enabledCache === null) {
             self::$enabledCache = [];
             foreach ($this->repository->all() as $m) {
-                self::$enabledCache[$m['module_key']] = (bool) $m['is_enabled'];
+                self::$enabledCache[$m['module_key']] = dbBool($m['is_enabled']);
             }
         }
 
