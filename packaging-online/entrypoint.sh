@@ -102,6 +102,11 @@ php -r '
     echo "Database runtime role verified.\n";
 '
 
+# Execute the real dashboard/module read surface with the least-privilege
+# production connection. A dialect/schema regression fails this deployment
+# before Railway can promote it and send staff into a 500 page.
+php /var/www/html/bin/production-smoke.php
+
 # Railway/Render route to the injected PORT. The image itself starts from a
 # clean template on every deploy, so @@PORT@@ is present exactly once here.
 PORT="${PORT:-80}"

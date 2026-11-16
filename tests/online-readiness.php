@@ -122,6 +122,7 @@ foreach (array_keys($createdTables) as $table) {
 
 $entrypoint = (string) file_get_contents($root . '/packaging-online/entrypoint.sh');
 onlineCheck(str_contains($entrypoint, 'database/migrate-pg.php'), 'Container applies Postgres migrations on start');
+onlineCheck(str_contains($entrypoint, 'bin/production-smoke.php'), 'Container runs live PostgreSQL smoke checks before Apache');
 onlineCheck(str_contains($entrypoint, 'DB_ADMIN_USERNAME'), 'Migration and runtime DB identities are separate');
 onlineCheck(str_contains($entrypoint, 'NIZAM_DATA_PATH'), 'Container uses the persistent data root');
 onlineCheck(!preg_match('/required_vars=.*SUPABASE/', $entrypoint), 'Supabase is optional, not a startup requirement');

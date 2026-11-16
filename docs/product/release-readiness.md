@@ -45,7 +45,7 @@ Every row below was executed against this working tree.
 | Academic calculation | `php tests/academic-calculation.php` | PASS |
 | Operational module integrity | `php tests/module-integrity.php` | PASS |
 | Scheduled endpoint authentication | `php tests/scheduled-auth.php` | PASS |
-| Online deployment/RLS contract | `php tests/online-readiness.php` | PASS (157 checks) |
+| Online deployment/RLS contract | `php tests/online-readiness.php` | PASS (158 checks) |
 | HTTP request pipeline | `php tests/http/run.php` | PASS (899 assertions) |
 | Dependency metadata/security | `composer validate --strict && composer audit --locked` | PASS |
 | PHP syntax, all first-party PHP | recursive `php -l` over `app bin database tests views` | PASS |
@@ -457,6 +457,7 @@ contrast for the desktop rail was confirmed through computed styles.
 | Backups | live-catalog FK order, checksum, transactional PG restore, recovery-token exclusion, 30-day/minimum-7 retention |
 | Proxy/TLS correctness | forwarded HTTPS secure cookies; opt-in trusted client IP; HSTS and isolation headers |
 | Operations | separate `/healthz` liveness and `/readyz` DB readiness; logs to Railway stderr |
+| Promotion gate | `bin/production-smoke.php` executes the live PostgreSQL dashboard/module read surface before Apache starts |
 | Automation | bounded/concurrency-guarded workflows; one bearer token; SMTP TLS support |
 | CI | PHP 8.2 + 8.3, MySQL 8.4, lint, Composer audit, complete `npm test` |
 
