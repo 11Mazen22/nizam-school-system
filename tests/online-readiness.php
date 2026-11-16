@@ -71,6 +71,14 @@ onlineCheck(
     preg_match('/\b(?:INSERT\s+IGNORE|ON\s+DUPLICATE\s+KEY|REPLACE\s+INTO)\b|`/i', $allSeedSql) !== 1,
     'Postgres seeds contain no MySQL-only write syntax'
 );
+onlineCheck(
+    str_contains($allSeedSql, "WHERE r.code = 'admin'\nON CONFLICT (role_id, permission_id) DO NOTHING"),
+    'Fresh Postgres administrators receive the complete permission catalogue'
+);
+onlineCheck(
+    is_file($root . '/database/seeds-pg/008_role_template_permissions.sql'),
+    'Role templates are re-applied after the full fresh-install catalogue exists'
+);
 
 unset($createdTables['migrations']); // intentionally admin-only bookkeeping
 foreach (array_keys($createdTables) as $table) {

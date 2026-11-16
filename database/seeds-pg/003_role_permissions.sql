@@ -70,3 +70,15 @@ FROM (
 JOIN roles r ON r.code = mapping.role_code
 JOIN permissions p ON p.code = mapping.perm_code
 ON CONFLICT (role_id, permission_id) DO NOTHING;
+
+-- Administrator: every permission in the live catalogue, including modules
+-- added after the hand-written base list above. On a fresh install the admin
+-- role is created by seed 001, after all migrations, so migration 025 cannot
+-- grant it anything; this post-permission seed is the load-bearing half of
+-- the fix (same contract as the MySQL twin).
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+CROSS JOIN permissions p
+WHERE r.code = 'admin'
+ON CONFLICT (role_id, permission_id) DO NOTHING;
