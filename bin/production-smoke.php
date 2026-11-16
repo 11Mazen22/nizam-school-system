@@ -15,6 +15,7 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/app/bootstrap.php';
 
 use App\Database;
+use App\Middleware\AcademicYearContext;
 use App\Repositories\AcademicConfigRepository;
 use App\Repositories\GuardianRepository;
 use App\Repositories\ModuleRepository;
@@ -42,6 +43,12 @@ try {
     $_SESSION['role_code'] = 'admin';
     $_SESSION['user_id'] = 0;
     $_SESSION['permissions'] = $pdo->query('SELECT code FROM permissions ORDER BY code')->fetchAll(PDO::FETCH_COLUMN);
+
+    $activeYear = $pdo->query('SELECT * FROM academic_years WHERE is_active = 1 LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+    if ($activeYear === false) {
+        throw new RuntimeException('no active academic year after seeding');
+    }
+    AcademicYearContext::set($activeYear);
 
     (new DashboardStatsService())->build();
 
