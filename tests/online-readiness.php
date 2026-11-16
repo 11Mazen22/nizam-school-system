@@ -141,6 +141,12 @@ onlineCheck(
 onlineCheck(str_contains($dockerfile, 'composer install'), 'Online vendor tree is rebuilt from composer.lock');
 onlineCheck(str_contains($dockerfile, 'opcache'), 'Production image enables OPcache');
 
+$apacheConfig = (string) file_get_contents($root . '/packaging-online/apache-nizam.conf');
+onlineCheck(
+    str_contains($apacheConfig, 'Header onsuccess unset X-Content-Type-Options'),
+    'Online Apache normalizes dynamic/static security headers without duplicates'
+);
+
 $uploadService = (string) file_get_contents($root . '/app/services/UploadService.php');
 onlineCheck(str_contains($uploadService, 'SupabaseStorageClient::configured()'), 'Upload storage is selected by storage configuration');
 onlineCheck(!str_contains($uploadService, 'isPgsql()'), 'Upload storage is not coupled to the DB driver');
