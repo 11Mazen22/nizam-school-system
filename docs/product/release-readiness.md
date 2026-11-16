@@ -261,11 +261,6 @@ above them are not. None of the following may be described as verified:
   covered by the HTTP suite; a live PostgreSQL restore drill remains pending.
 * CSV import into admissions, finance or HR. Only the generic import contract
   is tested.
-* Live PostgreSQL. Static checks now parse all 28 Postgres migrations and prove
-  every application table has an explicit RLS policy. The dedicated online
-  runner, vanilla-Postgres role guards, catalog-driven backup order and PG
-  seeds are implemented, but they are not called runtime-verified until the
-  staged Railway database deployment completes.
 * Concurrent load, performance and backup/restore against real data.
 
 Ten suites now run in `npm test`, covering import contracts, exam integrity,
@@ -290,21 +285,19 @@ and the HTTP pipeline. The gaps listed above are the remaining honest ones.
    claimed.
 4. **Multi-tenancy is not implemented.** There is no tenant column, no query
    scoping and no isolation test. Do not describe this build as SaaS-ready.
-5. **No PostgreSQL run was performed in this environment.** The PostgreSQL
-   migrations are maintained in parallel, and the new repository avoids
-   dialect-specific SQL (literal `TRUE`/`FALSE`, `RETURNING` on pgsql), but
-   that is a design argument, not a test result.
-6. **No browser or responsive verification was performed** for the new
-   screens. Layout, RTL composition and narrow-width behaviour are unviewed.
-7. **Payroll, procurement, boarding, cafeteria, visitor management and
+5. **No complete physical-device responsive verification was performed.**
+   Targeted Playwright/screenshots pass, but the school's actual phones,
+   displays and printers remain a go-live check.
+6. **Payroll, procurement, boarding, cafeteria, visitor management and
    alumni do not exist** beyond schema or documentation.
 
 ---
 
 ## 5. Release position
 
-Deployment candidate for this single-school installation, pending the live
-Railway/PostgreSQL verification and the go-live gates in
+Active production deployment for this single-school installation. The live
+Railway/PostgreSQL promotion gate is green; restore-drill, physical-device,
+SMTP (if enabled), and off-platform backup gates remain in
 `DEPLOYMENT_SUMMARY.md`. It is not a multi-tenant SaaS release and must not be
 represented as one.
 ---
@@ -461,6 +454,18 @@ contrast for the desktop rail was confirmed through computed styles.
 | Automation | bounded/concurrency-guarded workflows; one bearer token; SMTP TLS support |
 | CI | PHP 8.2 + 8.3, MySQL 8.4, lint, Composer audit, complete `npm test` |
 
-Remaining live evidence: build the image on Railway, apply all migrations to a
-fresh Railway Postgres, complete setup, verify persistence across redeploy,
-run a scheduled backup, and execute a non-production restore drill.
+Live evidence captured on 2026-11-16:
+
+- Railway app and PostgreSQL are online in production; `/healthz` and
+  `/readyz` return 200.
+- All 28 migrations and all 8 seeds apply idempotently; startup verifies the
+  `nizam_app` identity.
+- The active-year production smoke executes the dashboard and module query
+  surface and discovers 49 durable backup tables before Apache starts.
+- GitHub CI is green on PHP 8.2/8.3, including the production image build.
+- Scheduled backup, year-rollover, and weekly-cleanup workflows returned 200;
+  the backup request completed successfully on the persistent volume.
+
+Remaining live evidence: a non-production PostgreSQL restore drill, manual
+download/copy of a backup outside the Railway project, physical-device and
+printer checks, and SMTP delivery if email is enabled.

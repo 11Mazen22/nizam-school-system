@@ -3,6 +3,9 @@
 **Target:** Railway production · **Database:** Railway PostgreSQL ·
 **Persistent data:** Railway volume mounted at `/data`
 
+**Status:** Online · **URL:**
+`https://nizam-school-system-production-ce930327.up.railway.app`
+
 This file is an operational summary, not a marketing claim. The authoritative
 details are in `packaging-online/README.md`; current test evidence is in
 `docs/product/release-readiness.md`.
@@ -57,16 +60,16 @@ details are in `packaging-online/README.md`; current test evidence is in
 
 ## Go-live gates
 
-- [ ] Railway staged changes reviewed and committed by the project owner
-- [ ] App and Postgres deployments both healthy
-- [ ] `/healthz` returns `200 ok`
-- [ ] `/readyz` returns `200 ready`
-- [ ] First-run school/year/admin setup completed
+- [x] Railway staged changes reviewed and committed by the project owner
+- [x] App and Postgres deployments both healthy
+- [x] `/healthz` returns `200 ok`
+- [x] `/readyz` returns `200 ready`
+- [x] First-run school/year/admin setup completed
 - [ ] Administrator recovery code issued and rejected after one use
 - [ ] Student/teacher photo survives a redeploy
 - [ ] PDF and XLSX exports open successfully
 - [ ] Manual backup downloads and validates
-- [ ] Scheduled backup workflow succeeds
+- [x] Scheduled backup workflow succeeds
 - [ ] Restore drill completed on non-production data
 - [ ] SMTP test arrives (if email is enabled)
 - [ ] Custom domain and DNS/certificate verified (if used)
