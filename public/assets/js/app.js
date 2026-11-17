@@ -104,7 +104,11 @@
   }
 
   function initFlashMessages(reduceMotion) {
-    var flashes = document.querySelectorAll('main.nizam-content > .alert');
+    // Only real flash messages are lifted into the toast host. Page-level
+    // guidance ("this class changed since sign-off", "choose the real teacher
+    // for each lesson") is part of the page and must stay where it was read,
+    // not float over the header like a transient notification.
+    var flashes = document.querySelectorAll('main.nizam-content > .alert[data-flash]');
     if (flashes.length) {
       var host = document.createElement('div');
       host.className = 'n-toast-host';

@@ -216,6 +216,7 @@ function navItems(): array
         ['key' => 'assessments', 'href' => '/assessments', 'label' => 'nav.assessments', 'permission' => 'exams.view', 'icon' => 'clipboard-check', 'group' => 'academic', 'module' => 'exams'],
 
         ['key' => 'students', 'href' => '/students', 'label' => 'nav.students', 'permission' => 'students.view', 'icon' => 'users', 'group' => 'people', 'module' => 'people'],
+        ['key' => 'roster-verification', 'href' => '/students/verification', 'label' => 'nav.roster_verification', 'permission' => 'students.view', 'icon' => 'clipboard-check', 'group' => 'people', 'module' => 'people'],
         ['key' => 'guardians', 'href' => '/guardians', 'label' => 'nav.guardians', 'permission' => 'guardians.view', 'icon' => 'users-group', 'group' => 'people', 'module' => 'people'],
         ['key' => 'teachers', 'href' => '/teachers', 'label' => 'nav.teachers', 'permission' => 'teachers.view', 'icon' => 'graduation-cap', 'group' => 'people', 'module' => 'people'],
         ['key' => 'users', 'href' => '/users', 'label' => 'nav.users', 'permission' => 'users.manage', 'icon' => 'users-cog', 'group' => 'people', 'module' => 'core'],

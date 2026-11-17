@@ -85,6 +85,7 @@ use App\Controllers\NotificationController;
 use App\Controllers\PortalController;
 use App\Controllers\PromotionController;
 use App\Controllers\ReportController;
+use App\Controllers\RosterVerificationController;
 use App\Controllers\ScheduledController;
 use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
@@ -93,6 +94,7 @@ use App\Controllers\StudentController;
 use App\Controllers\SubjectController;
 use App\Controllers\TeacherController;
 use App\Controllers\TimetableController;
+use App\Controllers\TimetableGapController;
 use App\Controllers\TransportController;
 use App\Controllers\UserController;
 use App\Controllers\WelfareController;
@@ -251,6 +253,16 @@ $router->get('/students/import/roster', [RosterImportController::class, 'show'],
 $router->get('/students/import/roster/template', [RosterImportController::class, 'template'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
 $router->post('/students/import/roster/preview', [RosterImportController::class, 'preview'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.create')]);
 $router->post('/students/import/roster/commit', [RosterImportController::class, 'commit'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.create')]);
+// Roster verification -- class-by-class check against the printed page. Must
+// be registered before /students/{id} for the same reason as the import
+// routes above. Reading the page is students.view; correcting and signing off
+// change student records, so they require students.edit.
+$router->get('/students/verification', [RosterVerificationController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
+$router->get('/students/verification/{id}', [RosterVerificationController::class, 'show'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
+$router->get('/students/verification/{id}/page', [RosterVerificationController::class, 'page'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
+$router->post('/students/verification/{id}', [RosterVerificationController::class, 'save'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
+$router->post('/students/verification/{id}/confirm', [RosterVerificationController::class, 'confirm'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
+$router->post('/students/verification/{id}/reopen', [RosterVerificationController::class, 'reopen'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
 $router->get('/students/{id}', [StudentController::class, 'show'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
 $router->get('/students/{id}/edit', [StudentController::class, 'edit'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
 $router->post('/students/{id}', [StudentController::class, 'update'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
@@ -426,6 +438,17 @@ $router->post('/welfare/health',                 [WelfareController::class, 'sto
 $router->post('/welfare/health/{id}/delete',     [WelfareController::class, 'deleteHealth'],    [$session, $csrf, $yearContext, ModuleGateMiddleware::for('welfare'), RoleGuardMiddleware::requiresPermission('welfare.manage')]);
 
 // ---------------------------------------------------------------- Timetable
+// Gaps and printed-name mapping are part of the timetable module: a cell the
+// source printed without a teacher (or with a first name two teachers share)
+// stays visible here until the school fills it in.
+$router->get('/timetable/gaps',               [TimetableGapController::class, 'index'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.view')]);
+$router->post('/timetable/gaps/{id}/resolve', [TimetableGapController::class, 'resolve'],[$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->post('/timetable/gaps/{id}/ignore',  [TimetableGapController::class, 'ignore'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->post('/timetable/gaps/{id}/reopen',  [TimetableGapController::class, 'reopen'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->get('/timetable/staff',               [TimetableGapController::class, 'staff'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.view')]);
+$router->post('/timetable/staff/rename',       [TimetableGapController::class, 'rename'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->post('/timetable/staff/attach',       [TimetableGapController::class, 'attach'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->post('/timetable/staff/create',       [TimetableGapController::class, 'createTeacher'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
 $router->get('/timetable',            [TimetableController::class, 'index'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.view')]);
 $router->post('/timetable',           [TimetableController::class, 'store'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
 $router->post('/timetable/{id}/delete',[TimetableController::class, 'delete'],[$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);

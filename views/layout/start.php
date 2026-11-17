@@ -374,7 +374,7 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 
     <main class="nizam-content" id="main-content" tabindex="-1">
       <?php foreach (Flash::consume() as $flash): ?>
-        <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show" role="alert"
+        <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show" role="alert" data-flash
              <?= $flash['type'] === 'success' ? 'data-flash-autodismiss' : '' ?>>
           <?= icon($flash['type'] === 'success' ? 'check-circle' : ($flash['type'] === 'danger' ? 'alert-circle' : 'info'), 'n-icon-lg flex-shrink-0') ?>
           <span class="flex-grow-1"><?= e($flash['message']) ?></span>

@@ -16,7 +16,15 @@ $pageScripts = ['/assets/js/timetable.js'];
 ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('timetable.subtitle')) ?></p>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
-<?php if ($classId > 0): ?>
+<?php if (hasPermission('timetable.view')): ?>
+        <a href="/timetable/gaps" class="btn btn-outline-secondary btn-sm no-print">
+          <?= icon('alert-triangle') ?> <?= e(__('timetable.gaps_title')) ?><?= (int) ($openGaps ?? 0) > 0 ? ' (' . (int) $openGaps . ')' : '' ?>
+        </a>
+        <a href="/timetable/staff" class="btn btn-outline-secondary btn-sm no-print">
+          <?= icon('users-group') ?> <?= e(__('timetable.staff_title')) ?>
+        </a>
+      <?php endif; ?>
+      <?php if ($classId > 0): ?>
         <button type="button" class="btn btn-outline-secondary btn-sm no-print" data-print-report>
           <?= icon('printer') ?> <?= e(__('common.print') ?? 'Print') ?>
         </button>

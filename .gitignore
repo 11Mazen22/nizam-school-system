@@ -6,7 +6,7 @@ config/config.supabase.php
 config/*.local.php
 
 # Mutable, per-installation data -- never part of the source tree.
-storage/logs/*.log
+storage/logs/*
 storage/uploads/*
 !storage/uploads/.htaccess
 storage/sessions/*

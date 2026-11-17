@@ -10,6 +10,7 @@ use App\Middleware\AcademicYearContext;
 use App\Repositories\ClassRepository;
 use App\Repositories\SubjectRepository;
 use App\Repositories\TeacherRepository;
+use App\Repositories\TimetableGapRepository;
 use App\Request;
 use App\Services\TimetableService;
 use RuntimeException;
@@ -37,9 +38,10 @@ final class TimetableController extends Controller
 
         $subjects  = $yearId ? $this->subjects->all(true) : [];
         $teachers  = $this->teachers->all('active');
+        $openGaps  = $yearId !== null ? (new TimetableGapRepository())->counts($yearId)['open'] : 0;
 
         $this->view('timetable/index', compact(
-            'classes', 'classId', 'grid', 'dayLabels', 'maxPeriods', 'subjects', 'teachers'
+            'classes', 'classId', 'grid', 'dayLabels', 'maxPeriods', 'subjects', 'teachers', 'openGaps'
         ));
     }
 

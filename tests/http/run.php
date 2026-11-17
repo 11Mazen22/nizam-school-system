@@ -870,6 +870,89 @@ try {
     ok($studentId > 0, 'Conversion produced a student id');
     same('enrolled', $scalar("SELECT status FROM admissions_applications WHERE id = {$applicationId}"), 'Application is marked enrolled after conversion');
 
+    // --- roster verification (027) ----------------------------------------
+    http_out();
+    http_out('Roster verification');
+    $verificationList = $admin->get('/students/verification');
+    same(200, $verificationList['status'], 'GET /students/verification renders');
+    ok(str_contains($verificationList['body'], 'HTTP Class Edited'), 'The class list includes the active class');
+    same(302, $anon->get('/students/verification')['status'], 'GET /students/verification requires authentication');
+
+    $verificationPage = $admin->get('/students/verification/' . $classId);
+    same(200, $verificationPage['status'], 'GET /students/verification/{id} renders the class');
+    ok(str_contains($verificationPage['body'], 'HTTP Applicant'), 'The class screen lists its student');
+    $verificationToken = (string) $admin->csrf($verificationPage['body']);
+
+    $saveRoster = $admin->post('/students/verification/' . $classId, [
+        'name' => [(string) $studentId => 'HTTP Applicant'],
+        'attribute' => [(string) $studentId => 'مسلم'],
+        '_csrf_token' => $verificationToken,
+    ]);
+    same(302, $saveRoster['status'], 'Saving a roster correction redirects');
+    same('مسلم', $scalar("SELECT class_attribute_raw FROM students WHERE id = {$studentId}"), 'The printed attribute is stored verbatim');
+    same('printed', $scalar("SELECT class_attribute_source FROM students WHERE id = {$studentId}"), 'A corrected value is marked as printed');
+    same('muslim', $scalar("SELECT religion FROM students WHERE id = {$studentId}"), 'An unambiguous religion is derived');
+
+    same(302, $admin->post('/students/verification/' . $classId . '/confirm', [
+        'note' => 'checked in the HTTP suite',
+        '_csrf_token' => $verificationToken,
+    ])['status'], 'Signing a roster off redirects');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM roster_verifications WHERE class_id = {$classId}"), 'The sign-off is stored');
+    same(64, strlen($scalar("SELECT fingerprint FROM roster_verifications WHERE class_id = {$classId}")), 'The sign-off stores a SHA-256 fingerprint');
+
+    $admin->post('/students/verification/' . $classId, [
+        'name' => [(string) $studentId => 'HTTP Applicant'],
+        'attribute' => [(string) $studentId => 'مسيحي'],
+        '_csrf_token' => $verificationToken,
+    ]);
+    same(0, (int) $scalar("SELECT COUNT(*) FROM roster_verifications WHERE class_id = {$classId}"), 'Editing the roster invalidates the sign-off');
+    same('christian', $scalar("SELECT religion FROM students WHERE id = {$studentId}"), 'Changing the attribute updates the derived religion');
+
+    same(302, $admin->post('/students/verification/' . $classId . '/reopen', ['_csrf_token' => $verificationToken])['status'], 'Reopening verification redirects');
+
+    // --- timetable gaps (027) ---------------------------------------------
+    http_out();
+    http_out('Timetable gaps');
+    $pdo->exec("DELETE FROM timetable_gaps WHERE academic_year_id = {$activeYearId} AND class_id = {$classId} AND day_of_week = 2 AND period_number = 8");
+    $pdo->prepare(
+        "INSERT INTO timetable_gaps (academic_year_id, class_id, day_of_week, period_number, subject_id, subject_raw, printed_teacher, reason, status)
+         VALUES (:year, :class, 2, 8, :subject, 'اختبار', NULL, 'no_teacher', 'open')"
+    )->execute(['year' => $activeYearId, 'class' => $classId, 'subject' => $subjectId]);
+    $gapId = (int) $pdo->lastInsertId();
+
+    $gapPage = $admin->get('/timetable/gaps');
+    same(200, $gapPage['status'], 'GET /timetable/gaps renders');
+    ok(str_contains($gapPage['body'], 'اختبار'), 'The gap screen shows the printed subject');
+    same(302, $anon->get('/timetable/gaps')['status'], 'GET /timetable/gaps requires authentication');
+
+    same(302, $admin->post('/timetable/gaps/' . $gapId . '/resolve', [
+        'teacher_id' => (string) $teacherId,
+        'subject_id' => (string) $subjectId,
+        '_csrf_token' => $formToken,
+    ])['status'], 'Resolving a gap redirects');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM timetables WHERE academic_year_id = {$activeYearId} AND class_id = {$classId} AND day_of_week = 2 AND period_number = 8"), 'Resolving a gap creates the lesson');
+    same('resolved', $scalar("SELECT status FROM timetable_gaps WHERE id = {$gapId}"), 'The gap is marked resolved');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM teacher_assignments WHERE teacher_id = {$teacherId} AND subject_id = {$subjectId} AND class_id = {$classId} AND academic_year_id = {$activeYearId}"), 'The lesson creates the missing assignment');
+
+    same(302, $admin->post('/timetable/gaps/' . $gapId . '/reopen', ['_csrf_token' => $formToken])['status'], 'Reopening a gap redirects');
+    same(0, (int) $scalar("SELECT COUNT(*) FROM timetables WHERE academic_year_id = {$activeYearId} AND class_id = {$classId} AND day_of_week = 2 AND period_number = 8"), 'Reopening removes the lesson it created');
+    same('open', $scalar("SELECT status FROM timetable_gaps WHERE id = {$gapId}"), 'The gap returns to open');
+
+    $pdo->exec("DELETE FROM timetable_gaps WHERE id = {$gapId}");
+    $pdo->exec("DELETE FROM teacher_assignments WHERE teacher_id = {$teacherId} AND subject_id = {$subjectId} AND class_id = {$classId} AND academic_year_id = {$activeYearId}");
+
+    // --- printed-name mapping ---------------------------------------------
+    $staffPage = $admin->get('/timetable/staff');
+    same(200, $staffPage['status'], 'GET /timetable/staff renders');
+    same(302, $admin->post('/timetable/staff/rename', [
+        'teacher_id' => (string) $teacherId,
+        'full_name' => 'HTTP Teacher Full',
+        'printed_name' => 'HTTP Teacher',
+        '_csrf_token' => $formToken,
+    ])['status'], 'Renaming a printed teacher redirects');
+    same('HTTP Teacher Full', $scalar("SELECT full_name FROM teachers WHERE id = {$teacherId}"), 'The staff record takes the real full name');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM teacher_aliases WHERE teacher_id = {$teacherId} AND alias = 'HTTP Teacher'"), 'The printed name is kept as an alias');
+
     // Guardians (create + edit + link to the converted student)
     $before = $count('guardians');
     same(302, $admin->post('/guardians', ['full_name' => 'HTTP Guardian Record', 'phone' => '0122222222', 'email' => 'guardian@example.com', 'national_id' => '', 'relationship_type' => 'father', 'occupation' => '', 'address' => '', 'notes' => '', '_csrf_token' => $formToken])['status'], 'POST /guardians redirects');
