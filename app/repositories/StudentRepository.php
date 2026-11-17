@@ -142,9 +142,9 @@ final class StudentRepository
     /** @return array{id:int} §O-7: insert first (placeholder code), then UPDATE the code from the row's own new id -- never a precomputed MAX+1. */
     public function create(
         string $fullName,
-        string $gender,
-        string $dateOfBirth,
-        string $religion,
+        ?string $gender,
+        ?string $dateOfBirth,
+        ?string $religion,
         ?string $phone,
         ?string $guardianPhone,
         ?string $address,

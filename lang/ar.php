@@ -333,6 +333,7 @@ return [
     'students.full_name' => 'الاسم الكامل',
     'students.gender' => 'الجنس',
     'students.gender_m' => 'ذكر',
+    'students.not_recorded' => 'غير مسجل',
     'students.gender_f' => 'أنثى',
     'students.date_of_birth' => 'تاريخ الميلاد',
     'students.religion' => 'الديانة',

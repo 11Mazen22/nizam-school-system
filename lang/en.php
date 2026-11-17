@@ -329,6 +329,7 @@ return [
     'students.full_name' => 'Full Name',
     'students.gender' => 'Gender',
     'students.gender_m' => 'Male',
+    'students.not_recorded' => 'Not recorded',
     'students.gender_f' => 'Female',
     'students.date_of_birth' => 'Date of Birth',
     'students.religion' => 'Religion',

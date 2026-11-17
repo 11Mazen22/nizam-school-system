@@ -168,13 +168,16 @@ final class RosterImportService
             if ($className === '' || !isset($classes[$className])) {
                 $messages[] = 'class_unknown';
             }
-            if ($gender === null) {
+            // The official rosters print neither gender, birth date nor
+            // religion. Blank cells are therefore legal and stored as NULL
+            // ("not recorded"); a filled cell must still be valid.
+            if (trim((string) ($data['Gender (M/F)'] ?? '')) !== '' && $gender === null) {
                 $messages[] = 'gender_invalid';
             }
-            if ($dob === null) {
+            if (trim((string) ($data['Date of Birth (YYYY-MM-DD)'] ?? '')) !== '' && $dob === null) {
                 $messages[] = 'dob_invalid';
             }
-            if ($religion === null) {
+            if (trim((string) ($data['Religion'] ?? '')) !== '' && $religion === null) {
                 $messages[] = 'religion_invalid';
             }
 
@@ -207,9 +210,9 @@ final class RosterImportService
                 'status' => $status,
                 'messages' => $messages,
                 'data' => $data + [
-                    '_gender' => $gender ?? '',
-                    '_dob' => $dob ?? '',
-                    '_religion' => $religion ?? '',
+                    '_gender' => $gender,
+                    '_dob' => $dob,
+                    '_religion' => $religion,
                     '_grade_id' => $classes[$className]['grade_id'] ?? 0,
                     '_class_id' => $classes[$className]['id'] ?? 0,
                 ],
@@ -243,9 +246,9 @@ final class RosterImportService
                 try {
                     $studentId = (new StudentService())->create(
                         (string) $row['name'],
-                        (string) $row['data']['_gender'],
-                        (string) $row['data']['_dob'],
-                        (string) $row['data']['_religion'],
+                        $row['data']['_gender'] !== null ? (string) $row['data']['_gender'] : null,
+                        $row['data']['_dob'] !== null ? (string) $row['data']['_dob'] : null,
+                        $row['data']['_religion'] !== null ? (string) $row['data']['_religion'] : null,
                         null,
                         null,
                         null,

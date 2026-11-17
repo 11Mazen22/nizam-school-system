@@ -34,9 +34,9 @@ final class StudentService
     /** @throws RuntimeException 'no_active_year'|'wrong_scope'|'year_closed' */
     public function create(
         string $fullName,
-        string $gender,
-        string $dateOfBirth,
-        string $religion,
+        ?string $gender,
+        ?string $dateOfBirth,
+        ?string $religion,
         ?string $phone,
         ?string $guardianPhone,
         ?string $address,

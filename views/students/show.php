@@ -83,9 +83,9 @@ $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 
         <div class="card-body">
           <dl class="n-detail-list">
             <dt><?= e(__('students.full_name')) ?></dt><dd><?= e($student['full_name']) ?></dd>
-            <dt><?= e(__('students.gender')) ?></dt><dd><?= e(__('students.gender_' . $student['gender'])) ?></dd>
-            <dt><?= e(__('students.date_of_birth')) ?></dt><dd dir="ltr"><?= e($student['date_of_birth']) ?></dd>
-            <dt><?= e(__('students.religion')) ?></dt><dd><?= e(__('students.religion_' . $student['religion'])) ?></dd>
+            <dt><?= e(__('students.gender')) ?></dt><dd><?= $student['gender'] ? e(__('students.gender_' . $student['gender'])) : e(__('students.not_recorded')) ?></dd>
+            <dt><?= e(__('students.date_of_birth')) ?></dt><dd dir="ltr"><?= $student['date_of_birth'] ? e($student['date_of_birth']) : e(__('students.not_recorded')) ?></dd>
+            <dt><?= e(__('students.religion')) ?></dt><dd><?= $student['religion'] ? e(__('students.religion_' . $student['religion'])) : e(__('students.not_recorded')) ?></dd>
           </dl>
         </div>
       </section>
