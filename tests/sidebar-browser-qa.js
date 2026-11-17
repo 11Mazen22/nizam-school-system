@@ -171,6 +171,13 @@ const check = (condition, label, detail = '') => {
 
   await page.goto(`${BASE}/timetable/gaps`, { waitUntil: 'load' });
   check(await page.locator('form[action$="/resolve"]').count() >= 10, 'open gaps offer a resolve form');
+  const gapsText = await page.locator('main').innerText();
+  check(gapsText.includes('يحملها الآن'), 'a collision names the class that already holds the teacher');
+  const teacherGroups = await page.locator('select[name="teacher_id"] optgroup').evaluateAll(
+    (groups) => groups.map((group) => group.label)
+  );
+  check(teacherGroups.includes('متاحون في هذا الوقت'), 'the resolve list marks teachers free at that period');
+  check(teacherGroups.includes('مشغولون في هذا الوقت'), 'the resolve list marks teachers busy at that period');
   await page.screenshot({ path: path.join(OUT, 'timetable-gaps-ar.png'), fullPage: true });
 
   check(pageErrors.length === 0, 'no page or console errors', pageErrors.slice(0, 3).join(' | '));

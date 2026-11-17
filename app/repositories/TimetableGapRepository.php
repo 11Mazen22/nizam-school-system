@@ -58,6 +58,41 @@ final class TimetableGapRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * Every loaded lesson in the year, indexed for the gaps screen:
+     * day => period => teacher => the class/subject that already holds them.
+     *
+     * The screen needs this to name the class a double-booked teacher is
+     * already teaching, and to split the resolve list into free and busy
+     * teachers for that exact period. One query for the whole year, not one
+     * per gap.
+     *
+     * @return array<int, array<int, array<int, array{class_name:string,subject_ar:string,subject_en:string}>>>
+     */
+    public function bookings(int $yearId): array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT t.day_of_week, t.period_number, t.teacher_id,
+                    c.name AS class_name, s.name_ar AS subject_ar, s.name_en AS subject_en
+             FROM timetables t
+             JOIN classes c ON c.id = t.class_id
+             JOIN subjects s ON s.id = t.subject_id
+             WHERE t.academic_year_id = :year'
+        );
+        $stmt->execute(['year' => $yearId]);
+
+        $map = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $map[(int) $row['day_of_week']][(int) $row['period_number']][(int) $row['teacher_id']] = [
+                'class_name' => (string) $row['class_name'],
+                'subject_ar' => (string) $row['subject_ar'],
+                'subject_en' => (string) $row['subject_en'],
+            ];
+        }
+
+        return $map;
+    }
+
     public function find(int $id, int $yearId): ?array
     {
         $stmt = Database::connection()->prepare(

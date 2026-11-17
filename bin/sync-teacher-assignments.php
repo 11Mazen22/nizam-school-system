@@ -36,6 +36,7 @@ $result = (new TeacherAssignmentSyncService())->sync((int) $year['id'], $dryRun)
 echo ($dryRun ? 'DRY RUN -- nothing written' : 'Committed') . ' for ' . $year['label'] . "\n";
 echo "assignments created: {$result['created']}\n";
 echo "assignments corrected: {$result['updated']}\n";
+echo "hand-edited loads kept: {$result['manual_kept']}\n";
 echo "assignments unchanged: {$result['unchanged']}\n";
 echo "teacher-subject links added: {$result['subjects_linked']}\n";
 echo "classes covered: {$result['classes']}\n";

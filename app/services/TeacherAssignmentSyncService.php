@@ -22,15 +22,18 @@ use Throwable;
  *  - an assignment row per distinct (teacher, subject, class) with
  *    weekly_periods = the number of printed cells;
  *  - the matching teacher_subjects link.
- * It never deletes an assignment the school created itself, and it does not
- * touch a row's status (an assignment archived on purpose stays archived).
+ * It never deletes an assignment the school created itself, it does not touch
+ * a row's status (an assignment archived on purpose stays archived), and it
+ * never overwrites weekly periods the school edited by hand. An assignment is
+ * either 'manual' (created or edited on the assignment screen) or 'timetable'
+ * (derived here); only the derived rows are corrected when the grid changes.
  *
  * Idempotent: a second run finds the same triples and changes nothing.
  */
 final class TeacherAssignmentSyncService
 {
     /**
-     * @return array{created:int,updated:int,unchanged:int,subjects_linked:int,classes:int,dry_run:bool}
+     * @return array{created:int,updated:int,unchanged:int,manual_kept:int,subjects_linked:int,classes:int,dry_run:bool}
      */
     public function sync(int $academicYearId, bool $dryRun = false): array
     {
@@ -39,6 +42,7 @@ final class TeacherAssignmentSyncService
             'created' => 0,
             'updated' => 0,
             'unchanged' => 0,
+            'manual_kept' => 0,
             'subjects_linked' => 0,
             'classes' => 0,
             'dry_run' => $dryRun,
@@ -56,7 +60,7 @@ final class TeacherAssignmentSyncService
 
         $existing = [];
         $stmt = $pdo->prepare(
-            'SELECT id, teacher_id, subject_id, class_id, weekly_periods
+            'SELECT id, teacher_id, subject_id, class_id, weekly_periods, weekly_periods_source
              FROM teacher_assignments WHERE academic_year_id = :year'
         );
         $stmt->execute(['year' => $academicYearId]);
@@ -71,8 +75,8 @@ final class TeacherAssignmentSyncService
         }
 
         $insert = $pdo->prepare(
-            "INSERT INTO teacher_assignments (teacher_id, subject_id, class_id, academic_year_id, weekly_periods, status)
-             VALUES (:teacher, :subject, :class, :year, :periods, 'active')"
+            "INSERT INTO teacher_assignments (teacher_id, subject_id, class_id, academic_year_id, weekly_periods, weekly_periods_source, status)
+             VALUES (:teacher, :subject, :class, :year, :periods, 'timetable', 'active')"
         );
         $update = $pdo->prepare(
             'UPDATE teacher_assignments SET weekly_periods = :periods, updated_at = CURRENT_TIMESTAMP WHERE id = :id'
@@ -107,9 +111,15 @@ final class TeacherAssignmentSyncService
                         ]);
                     }
                 } elseif ((int) $row['weekly_periods'] !== $periods) {
-                    $result['updated']++;
-                    if (!$dryRun) {
-                        $update->execute(['periods' => $periods, 'id' => (int) $row['id']]);
+                    if ((string) ($row['weekly_periods_source'] ?? 'manual') === 'timetable') {
+                        $result['updated']++;
+                        if (!$dryRun) {
+                            $update->execute(['periods' => $periods, 'id' => (int) $row['id']]);
+                        }
+                    } else {
+                        // Hand-entered or hand-corrected load: the school's
+                        // number wins over the grid's cell count.
+                        $result['manual_kept']++;
                     }
                 } else {
                     $result['unchanged']++;

@@ -87,8 +87,8 @@ final class TeacherAssignmentRepository
     {
         $pdo = Database::connection();
         $stmt = $pdo->prepare(
-            'INSERT INTO teacher_assignments (teacher_id, subject_id, class_id, academic_year_id, weekly_periods, status)
-             VALUES (:t, :s, :c, :y, :w, \'active\')'
+            "INSERT INTO teacher_assignments (teacher_id, subject_id, class_id, academic_year_id, weekly_periods, weekly_periods_source, status)
+             VALUES (:t, :s, :c, :y, :w, 'manual', 'active')"
         );
         $stmt->execute(['t' => $teacherId, 's' => $subjectId, 'c' => $classId, 'y' => $academicYearId, 'w' => $weeklyPeriods]);
         return (int) $pdo->lastInsertId();
@@ -96,7 +96,13 @@ final class TeacherAssignmentRepository
 
     public function update(int $id, int $weeklyPeriods): void
     {
-        $stmt = Database::connection()->prepare('UPDATE teacher_assignments SET weekly_periods = :w WHERE id = :id');
+        // An edit on the assignment screen is the school's decision: mark it
+        // manual so the timetable sync stops correcting this row.
+        $stmt = Database::connection()->prepare(
+            "UPDATE teacher_assignments
+             SET weekly_periods = :w, weekly_periods_source = 'manual', updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id"
+        );
         $stmt->execute(['w' => $weeklyPeriods, 'id' => $id]);
     }
 
@@ -288,14 +294,17 @@ final class TeacherAssignmentRepository
     {
         $pdo = Database::connection();
         $source = $pdo->prepare(
-            "SELECT teacher_id, subject_id, class_id, weekly_periods FROM teacher_assignments
+            "SELECT teacher_id, subject_id, class_id, weekly_periods, weekly_periods_source FROM teacher_assignments
              WHERE academic_year_id = :year AND status = 'active'"
         );
         $source->execute(['year' => $fromYearId]);
 
+        // The provenance travels with the load: a hand-edited assignment stays
+        // hand-edited in the new year, and a derived one stays correctable by
+        // the new year's timetable sync.
         $insert = $pdo->prepare(
-            'INSERT INTO teacher_assignments (teacher_id, subject_id, class_id, academic_year_id, weekly_periods, status)
-             VALUES (:t, :s, :c, :y, :w, \'active\')'
+            'INSERT INTO teacher_assignments (teacher_id, subject_id, class_id, academic_year_id, weekly_periods, weekly_periods_source, status)
+             VALUES (:t, :s, :c, :y, :w, :src, \'active\')'
         );
 
         foreach ($source->fetchAll() as $row) {
@@ -306,6 +315,7 @@ final class TeacherAssignmentRepository
             $insert->execute([
                 't' => $row['teacher_id'], 's' => $row['subject_id'], 'c' => $newClassId,
                 'y' => $toYearId, 'w' => $row['weekly_periods'],
+                'src' => $row['weekly_periods_source'] ?? 'manual',
             ]);
         }
     }

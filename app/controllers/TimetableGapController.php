@@ -61,12 +61,23 @@ final class TimetableGapController extends Controller
         }
 
         $gaps = $this->gaps->forYear($yearId, $filters);
+        $teachers = $this->teachers->all('active');
+
+        // The printed grids use first names; resolving a collision needs the
+        // class that already holds that teacher in this exact period, plus the
+        // teachers who are actually free then.
+        $teacherIdsByName = [];
+        foreach ($teachers as $teacherRow) {
+            $teacherIdsByName[(string) $teacherRow['full_name']] = (int) $teacherRow['id'];
+        }
 
         $this->view('timetable/gaps', [
             'gaps' => $gaps,
             'counts' => $this->gaps->counts($yearId),
             'classes' => $this->classes->allForYear($yearId),
-            'teachers' => $this->teachers->all('active'),
+            'teachers' => $teachers,
+            'bookings' => $this->gaps->bookings($yearId),
+            'teacherIdsByName' => $teacherIdsByName,
             'subjects' => $this->subjects->all(true),
             'status' => $status,
             'reason' => $reason,

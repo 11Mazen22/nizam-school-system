@@ -12,12 +12,21 @@
  * @var int $classId
  * @var string $teacher
  * @var array<int,string> $dayLabels
+ * @var array<int, array<int, array<int, array{class_name:string,subject_ar:string,subject_en:string}>>> $bookings
+ * @var array<string,int> $teacherIdsByName
  */
 use App\Middleware\CsrfMiddleware;
 
 $pageTitle = __('timetable.gaps_title');
 $activeNav = 'timetable';
 $canManage = hasPermission('timetable.manage');
+
+$bookingAt = static function (int $day, int $period, int $teacherId) use ($bookings): ?array {
+    return $bookings[$day][$period][$teacherId] ?? null;
+};
+$bookingSubject = static function (array $booking): string {
+    return currentLocale() === 'ar' ? (string) $booking['subject_ar'] : (string) $booking['subject_en'];
+};
 
 $returnFields = static function () use ($status, $reason, $classId, $teacher): void {
     foreach (['status' => $status, 'reason' => $reason, 'teacher' => $teacher] as $key => $value) {
@@ -133,7 +142,20 @@ require dirname(__DIR__) . '/layout/start.php';
               <td data-label="<?= e(__('timetable.gaps_class')) ?>"><a href="/timetable?class_id=<?= (int) $gap['class_id'] ?>" class="fw-semibold"><?= e((string) $gap['class_name']) ?></a></td>
               <td data-label="<?= e(__('timetable.gaps_slot')) ?>"><?= e($dayLabels[$day] ?? (string) $day) ?> — <?= e(__('timetable.period')) ?> <?= (int) $gap['period_number'] ?></td>
               <td data-label="<?= e(__('timetable.gaps_subject')) ?>"><?= e((string) $gap['subject_raw']) ?></td>
-              <td data-label="<?= e(__('timetable.gaps_teacher')) ?>"><?= e((string) ($gap['printed_teacher'] ?? '—')) ?></td>
+              <td data-label="<?= e(__('timetable.gaps_teacher')) ?>">
+                <?= e((string) ($gap['printed_teacher'] ?? '—')) ?>
+                <?php
+                $printedPrimary = trim(explode('/', (string) ($gap['printed_teacher'] ?? ''))[0]);
+                $printedId = $printedPrimary !== '' ? (int) ($teacherIdsByName[$printedPrimary] ?? 0) : 0;
+                $held = $printedId > 0 ? $bookingAt($day, (int) $gap['period_number'], $printedId) : null;
+                ?>
+                <?php if ($held !== null): ?>
+                  <div class="small text-danger mt-1">
+                    <strong><?= e(__('timetable.gaps_held_by')) ?>:</strong>
+                    <?= e((string) $held['class_name']) ?> — <?= e($bookingSubject($held)) ?>
+                  </div>
+                <?php endif; ?>
+              </td>
               <td data-label="<?= e(__('timetable.gaps_reason')) ?>">
                 <span class="badge text-bg-<?= $reasonBadge ?>"><?= e($reasonLabel) ?></span>
                 <?php if ($gap['status'] === 'resolved' && !empty($gap['resolved_teacher_name'])): ?>
@@ -155,9 +177,34 @@ require dirname(__DIR__) . '/layout/start.php';
                     </select>
                     <select name="teacher_id" class="form-select form-select-sm" style="max-width:170px;" required aria-label="<?= e(__('timetable.teacher')) ?>">
                       <option value="" disabled selected><?= e(__('timetable.select_teacher')) ?></option>
-                      <?php foreach ($teachers as $teacherRow): ?>
-                        <option value="<?= (int) $teacherRow['id'] ?>"><?= e($teacherRow['full_name']) ?></option>
-                      <?php endforeach; ?>
+                      <?php
+                      $freeTeachers = [];
+                      $busyTeachers = [];
+                      foreach ($teachers as $teacherRow) {
+                          $booking = $bookingAt($day, (int) $gap['period_number'], (int) $teacherRow['id']);
+                          if ($booking === null) {
+                              $freeTeachers[] = $teacherRow;
+                          } else {
+                              $busyTeachers[] = ['teacher' => $teacherRow, 'booking' => $booking];
+                          }
+                      }
+                      ?>
+                      <?php if ($freeTeachers !== []): ?>
+                        <optgroup label="<?= e(__('timetable.gaps_free_teachers')) ?>">
+                          <?php foreach ($freeTeachers as $teacherRow): ?>
+                            <option value="<?= (int) $teacherRow['id'] ?>"><?= e($teacherRow['full_name']) ?></option>
+                          <?php endforeach; ?>
+                        </optgroup>
+                      <?php endif; ?>
+                      <?php if ($busyTeachers !== []): ?>
+                        <optgroup label="<?= e(__('timetable.gaps_busy_teachers')) ?>">
+                          <?php foreach ($busyTeachers as $busy): ?>
+                            <option value="<?= (int) $busy['teacher']['id'] ?>" disabled>
+                              <?= e($busy['teacher']['full_name']) ?> — <?= e((string) $busy['booking']['class_name']) ?>
+                            </option>
+                          <?php endforeach; ?>
+                        </optgroup>
+                      <?php endif; ?>
                     </select>
                     <button type="submit" class="btn btn-sm btn-primary"><?= e(__('timetable.gaps_resolve')) ?></button>
                   </form>

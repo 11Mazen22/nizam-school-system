@@ -74,6 +74,25 @@ composer validate --strict
 composer audit --locked
 ```
 
+### PostgreSQL parity (optional)
+
+The pgsql branches have their own disposable test. It needs a throwaway
+PostgreSQL server (never a school database) and the `pdo_pgsql` extension:
+
+```bash
+# Windows embedded server used locally; any disposable PostgreSQL works
+npm install --no-save @embedded-postgres/windows-x64
+PG=node_modules/@embedded-postgres/windows-x64/native/bin
+$PG/initdb -D /tmp/nizam-pg -U postgres -A trust --locale=C
+$PG/pg_ctl -D /tmp/nizam-pg -o "-p 55432" -l /tmp/nizam-pg.log start
+NIZAM_PG_PORT=55432 php tests/postgres-parity.php
+$PG/pg_ctl -D /tmp/nizam-pg -m immediate stop
+```
+
+It applies `database/migrations-pg/`, runs the seeds, and verifies migrations
+029/030 plus the roster-verification, teacher-alias, timetable-gap and
+teaching-load upserts against real PostgreSQL, then drops its database.
+
 ### Official 2026/2027 package
 
 The school's package is loaded with idempotent commands; each one can be re-run
@@ -86,6 +105,10 @@ php bin/import-timetables.php                # the 17 printed grids
 php bin/sync-timetable-gaps.php              # cells that could not load
 php bin/sync-teacher-assignments.php         # teaching load from the grid
 ```
+
+The load sync never overwrites periods the school edited on the assignment
+screen: those rows are marked manual, while rows derived from the grid are
+corrected when the grid changes.
 
 Roster pages print a repeated value once and leave the rows below blank; the
 expansion writes that value to every student while keeping the printed text
