@@ -8,7 +8,7 @@ ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('students.description')) ?></p>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
 <div class="n-stat-mini"><span class="n-stat-mini-value" data-count-up><?= (int) $total ?></span><span class="n-stat-mini-label"><?= e(__('students.total_students')) ?></span></div>
-      <?php if ($canCreate): ?><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><span><?= e(__('app.import')) ?></span></button><?php endif; ?>
+      <?php if ($canCreate): ?><a class="btn btn-outline-secondary" href="/students/import/roster"><?= icon('file-text') ?><?= e(__('roster.short')) ?></a><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><span><?= e(__('app.import')) ?></span></button><?php endif; ?>
       <?php if (hasPermission('students.promote')): ?><a href="/students/promotion" class="btn btn-outline-primary"><?= icon('trending-up') ?><span><?= e(__('promotion.title')) ?></span></a><?php endif; ?>
       <?php if ($canCreate): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><span><?= e(__('students.add')) ?></span></a><?php endif; ?>
 <?php
