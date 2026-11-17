@@ -238,10 +238,22 @@ $yearLabel = \App\Middleware\AcademicYearContext::label();
           <?php else: ?>
             <div class="n-chart-wrap">
               <canvas id="religion-chart" height="145"
-                data-chart='<?= e(json_encode([
-                    'labels' => [__('dashboard.muslim'), __('dashboard.christian'), __('dashboard.other')],
-                    'counts' => [$stats['religion']['muslim'], $stats['religion']['christian'], $stats['religion']['other']],
-                ], JSON_UNESCAPED_UNICODE)) ?>'></canvas>
+                data-chart='<?php
+                  $religionLabels = [__('dashboard.muslim'), __('dashboard.christian'), __('dashboard.other')];
+                  $religionCounts = [
+                      $stats['religion']['muslim'],
+                      $stats['religion']['christian'],
+                      $stats['religion']['other'],
+                  ];
+                  if (($stats['religion']['not_recorded'] ?? 0) > 0) {
+                      $religionLabels[] = __('students.not_recorded');
+                      $religionCounts[] = $stats['religion']['not_recorded'];
+                  }
+                  echo e(json_encode([
+                      'labels' => $religionLabels,
+                      'counts' => $religionCounts,
+                  ], JSON_UNESCAPED_UNICODE));
+                ?>'></canvas>
             </div>
           <?php endif; ?>
         </div>

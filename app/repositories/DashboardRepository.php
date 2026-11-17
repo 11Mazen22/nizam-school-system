@@ -112,9 +112,12 @@ final class DashboardRepository
              GROUP BY s.religion"
         );
         $stmt->execute(['year' => $academicYearId]);
-        $counts = ['muslim' => 0, 'christian' => 0, 'other' => 0];
+        $counts = ['muslim' => 0, 'christian' => 0, 'other' => 0, 'not_recorded' => 0];
         foreach ($stmt->fetchAll() as $row) {
-            $counts[$row['religion']] = (int) $row['c'];
+            // Roster-imported students have no recorded religion; a NULL key
+            // would silently create a '' bucket and leave the chart at zero.
+            $key = ($row['religion'] === null || $row['religion'] === '') ? 'not_recorded' : (string) $row['religion'];
+            $counts[$key] = ($counts[$key] ?? 0) + (int) $row['c'];
         }
         return $counts;
     }

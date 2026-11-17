@@ -33,7 +33,7 @@ final class DashboardStatsService
                 'classes'           => 0,
                 'subjects'          => 0,
                 'grades'            => 0,
-                'religion'          => ['muslim' => 0, 'christian' => 0, 'other' => 0],
+                'religion'          => ['muslim' => 0, 'christian' => 0, 'other' => 0, 'not_recorded' => 0],
                 'activity'          => [],
                 'attendance'        => null,
                 'pendingAttendance' => [],

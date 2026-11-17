@@ -791,3 +791,5 @@ body.n-density-compact .table > thead th { padding: 9px 12px; }
 .n-roster-count-duplicate .n-roster-count-value { color: var(--n-warning); }
 .n-roster-count-error { border-inline-start: 3px solid var(--n-danger); }
 .n-roster-count-error .n-roster-count-value { color: var(--n-danger); }
+
+.n-slot-note { display: block; margin-block-start: 2px; font-size: .62rem; color: var(--n-muted); }

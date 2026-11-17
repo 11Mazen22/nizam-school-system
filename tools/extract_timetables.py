@@ -131,6 +131,28 @@ def read_page(pdf: Path) -> tuple[list[dict], list[str]]:
                 "special": len(ordered) > 2,
             })
 
+    # A teacher's name occasionally lands one period over because its PDF
+    # line merged with the neighbouring cell's dash. Move it back when the
+    # previous cell has a subject with no teacher and this text is a name that
+    # appears as a teacher elsewhere on the page.
+    vocabulary = set()
+    for row in rows:
+        for name in str(row.get("teacher", "")).split("/"):
+            name = name.strip()
+            if name:
+                vocabulary.add(name)
+    for index in range(1, len(rows)):
+        current, previous = rows[index], rows[index - 1]
+        if (current["day"] == previous["day"]
+                and current["period"] == previous["period"] + 1
+                and current["subject"] in vocabulary
+                and not current["teacher"]
+                and previous["subject"] and not previous["teacher"]):
+            previous["teacher"] = current["subject"]
+            previous["raw"] = previous["raw"] + " | " + current["subject"]
+            current["subject"] = ""
+            current["raw"] = ""
+
     doc.close()
     return rows, warnings
 

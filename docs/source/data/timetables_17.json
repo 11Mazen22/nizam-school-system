@@ -576,16 +576,16 @@
      "day": "الثلاثاء",
      "period": 8,
      "subject": "دين",
-     "teacher": "",
-     "raw": "دين",
+     "teacher": "ثناء",
+     "raw": "دين | ثناء",
      "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
-     "subject": "ثناء",
+     "subject": "",
      "teacher": "",
-     "raw": "ثناء",
+     "raw": "",
      "special": false
     },
     {
@@ -2628,16 +2628,16 @@
      "day": "الأحد",
      "period": 8,
      "subject": "إنجليزي",
-     "teacher": "",
-     "raw": "إنجليزي",
+     "teacher": "مها",
+     "raw": "إنجليزي | مها",
      "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
-     "subject": "مها",
+     "subject": "",
      "teacher": "",
-     "raw": "مها",
+     "raw": "",
      "special": false
     },
     {

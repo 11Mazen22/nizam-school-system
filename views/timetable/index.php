@@ -77,6 +77,7 @@ require dirname(__DIR__) . '/layout/start.php';
                     <?= e(currentLocale() === 'ar' ? $slot['subject_ar'] : $slot['subject_en']) ?>
                   </strong>
                   <small><?= e($slot['teacher_name']) ?></small>
+                  <?php if (!empty($slot['note'])): ?><small class="n-slot-note" title="<?= e($slot['note']) ?>"><?= e($slot['note']) ?></small><?php endif; ?>
                   <?php if (hasPermission('timetable.manage')): ?>
                     <form method="post" action="/timetable/<?= (int)$slot['id'] ?>/delete" class="mt-1">
                       <?= CsrfMiddleware::field() ?>
