@@ -150,6 +150,8 @@ const check = (condition, label, detail = '') => {
     ['/timetable/gaps', 'timetable gaps'],
     ['/timetable/staff', 'printed-name mapping'],
     ['/timetable', 'timetable grid'],
+    ['/assignments', 'teaching assignments'],
+    ['/assignments/workload', 'teaching workload'],
   ];
   for (const [url, label] of screens) {
     const response = await page.goto(`${BASE}${url}`, { waitUntil: 'load' });

@@ -29,6 +29,7 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/app/bootstrap.php';
 
 use App\Database;
+use App\Services\TeacherAssignmentSyncService;
 
 $dryRun = in_array('--dry-run', $argv, true);
 $pdo = Database::connection();
@@ -235,8 +236,18 @@ try {
     exit(1);
 }
 
+if (!$dryRun) {
+    // A printed lesson is evidence of the teaching assignment behind it;
+    // without this pass the timetable is full but /assignments and the
+    // teacher workspace have nothing to show.
+    $load = (new TeacherAssignmentSyncService())->sync($yearId);
+}
+
 echo "\n" . ($dryRun ? 'DRY RUN -- nothing written' : 'Committed') . "\n";
 echo "slots inserted: {$inserted}\n";
+if (!$dryRun) {
+    echo "assignments created: {$load['created']}, corrected: {$load['updated']}\n";
+}
 echo "subjects created: {$createdSubjects}\n";
 echo "teachers created: {$createdTeachers}\n";
 echo 'skipped: ' . count($skipped) . "\n";

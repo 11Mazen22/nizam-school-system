@@ -74,6 +74,27 @@ composer validate --strict
 composer audit --locked
 ```
 
+### Official 2026/2027 package
+
+The school's package is loaded with idempotent commands; each one can be re-run
+safely and reports what it changed:
+
+```bash
+php bin/import-roster-csv.php <file.csv>     # one printed roster page
+php bin/expand-roster-attributes.php --all   # the page's "printed once" rule
+php bin/import-timetables.php                # the 17 printed grids
+php bin/sync-timetable-gaps.php              # cells that could not load
+php bin/sync-teacher-assignments.php         # teaching load from the grid
+```
+
+Roster pages print a repeated value once and leave the rows below blank; the
+expansion writes that value to every student while keeping the printed text
+verbatim and recording whether it was printed on the row or inherited.
+`/students/verification` then checks a class against its printed page and signs
+it off. `/timetable/gaps` lists printed cells that are not lessons yet (no
+teacher printed, or a teacher already booked elsewhere in the same period), and
+`/timetable/staff` attaches a printed first name to the real staff record.
+
 ## Operations
 
 - **Backups:** pure-PHP, checksummed, dependency-ordered SQL snapshots;
