@@ -1,10 +1,10 @@
 """Extract the 17 class timetables from the supplied PDFs.
 
-The PDFs embed a nonstandard font-to-Unicode map, so naive text extraction
-shuffles the page. The glyphs nevertheless sit at exact coordinates, which is
-enough to rebuild the table cell by cell: find the period header columns, find
-the weekday row anchors, then read the two text lines inside each cell
-(subject on top, teacher underneath).
+The PDFs embed a nonstandard font-to-Unicode map, so whole-page text
+extraction scrambles the grid. The glyphs still sit at exact coordinates, so
+each table cell is read through its own clip rectangle: inside a cell the
+first line is the subject and the remaining line is the teacher. That matches
+the printed layout and avoids guessing word order.
 
 Run:  python tools/extract_timetables.py docs/source/timetables docs/source/data/timetables_17.json
 """
@@ -29,30 +29,37 @@ DAY_ALIASES = {
     "الخميس": "الخميس",
 }
 
-# Presentation-form ligatures the embedded font emits for lam-alef.
-LIGATURES = {
-    "األ": "الأ",
-    "اإل": "الإ",
-    "اآل": "الآ",
-    "اال": "الا",
-    "Ǆ": "ل",
-}
-
+LIGATURES = {"األ": "الأ", "اإل": "الإ", "اآل": "الآ", "اال": "الا", "Ǆ": "ل"}
 TOKEN_FIXES = {
     "إىل": "إلى",
     "عىل": "على",
     "األوىل": "الأولى",
-    "االوىل": "الاولى",
     "األسبوعي": "الأسبوعي",
-    "األهرام": "الأهرام",
 }
 
 
 def clean(text: str) -> str:
-    text = unicodedata.normalize("NFC", text)
+    text = unicodedata.normalize("NFC", text).strip().strip("—").strip()
     for bad, good in LIGATURES.items():
         text = text.replace(bad, good)
-    return TOKEN_FIXES.get(text, text).strip()
+    return TOKEN_FIXES.get(text, text)
+
+
+def cluster_lines(entries: list[tuple[float, float, str]]) -> list[str]:
+    """Group a cell's words into visual lines (y proximity) and join RTL."""
+    lines: list[list[tuple[float, float, str]]] = []
+    for entry in sorted(entries, key=lambda e: e[1]):
+        if lines and abs(entry[1] - lines[-1][0][1]) <= 3:
+            lines[-1].append(entry)
+        else:
+            lines.append([entry])
+    joined = []
+    for group in lines:
+        text = " ".join(clean(word) for _, _, word in sorted(group, key=lambda e: -e[0]))
+        text = text.replace(" / ", " / ").strip()
+        if text and text != "/":
+            joined.append(text)
+    return joined
 
 
 def read_page(pdf: Path) -> tuple[list[dict], list[str]]:
@@ -61,67 +68,67 @@ def read_page(pdf: Path) -> tuple[list[dict], list[str]]:
     words = page.get_text("words")
     warnings: list[str] = []
 
-    # Period columns: header digits 1..9 above the grid.
-    headers = [w for w in words if w[1] < 205 and re.fullmatch(r"[1-9]", w[4])]
     columns: dict[int, float] = {}
-    for w in headers:
-        period = int(w[4])
-        center = (w[0] + w[2]) / 2
-        columns.setdefault(period, center)
+    for w in words:
+        if 175 < w[1] < 205 and re.fullmatch(r"[1-9]", w[4]):
+            columns.setdefault(int(w[4]), (w[0] + w[2]) / 2)
     if len(columns) < 8:
         warnings.append(f"{pdf.name}: only {len(columns)} period columns found")
 
-    # Weekday anchors on the right edge.
     anchors: dict[str, float] = {}
     for w in words:
         name = DAY_ALIASES.get(w[4], clean(w[4]))
         if name in DAYS and w[0] > 690 and w[1] > 205:
             anchors.setdefault(name, w[1])
-    if len(anchors) < 5 and not re.search(r"B\d+", pdf.name):
-        warnings.append(f"{pdf.name}: only {len(anchors)} weekday rows found")
-    if re.search(r"B\d+", pdf.name) and len(anchors) != 3:
+    is_pathway = bool(re.search(r"B\d+", pdf.name))
+    if is_pathway and len(anchors) != 3:
         warnings.append(f"{pdf.name}: pathway class should have 3 weekdays, found {len(anchors)}")
+    if not is_pathway and len(anchors) != 5:
+        warnings.append(f"{pdf.name}: expected 5 weekdays, found {len(anchors)}")
 
     ordered_days = sorted(anchors.items(), key=lambda kv: kv[1])
-    gap = 59.0
-    if len(ordered_days) > 1:
-        gaps = [b[1] - a[1] for a, b in zip(ordered_days, ordered_days[1:])]
-        gap = sum(gaps) / len(gaps)
+    ordered_periods = sorted(columns.items())
+    gaps = [b[1] - a[1] for a, b in zip(ordered_periods, ordered_periods[1:])]
+    step = abs(sum(gaps) / len(gaps)) if gaps else 75.0
 
-    def band_words(day_y: float) -> list[tuple[float, float, str]]:
-        low, high = day_y - 18, day_y + 40
-        return [
-            ((w[0] + w[2]) / 2, w[1], clean(w[4]))
-            for w in words
-            if low <= w[1] <= high and w[0] < 690 and w[4].strip()
-        ]
+    # Text lines, not words: a word can straddle a cell border, a line does not.
+    text_lines: list[tuple[float, float, str]] = []
+    for block in page.get_text("dict")["blocks"]:
+        for line in block.get("lines", []):
+            text = "".join(span["text"] for span in line["spans"]).strip()
+            if not text:
+                continue
+            x0, y0, x1, y1 = line["bbox"]
+            text_lines.append(((x0 + x1) / 2, (y0 + y1) / 2, text))
 
+    centers = [(period, cx) for period, cx in ordered_periods]
     rows: list[dict] = []
     for day, day_y in ordered_days:
-        cells = band_words(day_y)
-        for period, cx in columns.items():
-            near = [c for c in cells if abs(c[0] - cx) < gap / 2]
-            lines: dict[int, list[tuple[float, str]]] = {}
-            pending_period_digits = False
-            for x, y, text in sorted(near, key=lambda c: c[1]):
-                if re.fullmatch(r"[1-9/]", text):
-                    pending_period_digits = True
-                    continue
-                key = int(round((y - (day_y - 18)) / 6))
-                lines.setdefault(key, []).append((x, text))
-            ordered = sorted(lines.items(), key=lambda kv: kv[0])
-            parts = [" ".join(t for _, t in sorted(group, key=lambda c: -c[0])) for _, group in ordered]
-            parts = [p for p in parts if p and p != "/"]
-            subject = parts[0] if parts else ""
-            teacher = parts[1] if len(parts) > 1 else ""
-            if subject == "—":
+        grouped: dict[int, list[tuple[float, float, str]]] = {period: [] for period, _ in centers}
+        for entry in text_lines:
+            if not (day_y - 16 <= entry[1] <= day_y + 22) or entry[0] >= 690:
+                continue
+            period = min(centers, key=lambda c: abs(c[1] - entry[0]))[0]
+            grouped[period].append(entry)
+        for period, _ in centers:
+            ordered = [clean(t) for _, _, t in sorted(grouped[period], key=lambda e: e[1])]
+            ordered = [t.replace(" / ", "/").strip("/").strip() for t in ordered]
+            ordered = [t for t in ordered if t and t not in {"/", "—"}]
+            raw = " | ".join(ordered)
+            if not ordered:
                 subject, teacher = "", ""
+            elif len(ordered) == 1:
+                subject, teacher = ordered[0], ""
+            else:
+                subject = ordered[0]
+                teacher = ordered[-1]
             rows.append({
                 "day": day,
                 "period": period,
                 "subject": subject,
                 "teacher": teacher,
-                "combined": pending_period_digits,
+                "raw": raw,
+                "special": len(ordered) > 2,
             })
 
     doc.close()
@@ -133,24 +140,18 @@ def main() -> int:
     out = Path(sys.argv[2] if len(sys.argv) > 2 else "docs/source/data/timetables_17.json")
     out.parent.mkdir(parents=True, exist_ok=True)
 
-    classes = []
-    warnings: list[str] = []
+    classes, warnings = [], []
     for pdf in sorted(src.glob("*.pdf")):
         match = re.search(r"(A\d+|B\d+)", pdf.name)
         if not match:
             continue
-        class_id = match.group(1)
         rows, warns = read_page(pdf)
         warnings.extend(warns)
-        classes.append({
-            "class_id": class_id,
-            "source_pdf": pdf.name,
-            "rows": rows,
-        })
+        classes.append({"class_id": match.group(1), "source_pdf": pdf.name, "rows": rows})
 
     payload = {
         "academic_year": "2026/2027",
-        "extraction": "pymupdf word coordinates; subject is the upper cell line, teacher the lower one",
+        "extraction": "per-cell clip rectangles on exact PDF coordinates; upper line = subject, lower = teacher",
         "classes": classes,
         "warnings": warnings,
     }
@@ -158,8 +159,7 @@ def main() -> int:
 
     for entry in classes:
         filled = sum(1 for r in entry["rows"] if r["subject"])
-        subjects = len({r["subject"] for r in entry["rows"] if r["subject"]})
-        print(f"{entry['class_id']}: {filled} filled cells, {subjects} subjects, {len(entry['rows'])} grid slots")
+        print(f"{entry['class_id']}: {filled} filled of {len(entry['rows'])} slots")
     print(f"wrote {out}")
     for warning in warnings:
         print("WARN", warning)

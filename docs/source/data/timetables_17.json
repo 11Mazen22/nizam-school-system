@@ -1,6 +1,6 @@
 {
  "academic_year": "2026/2027",
- "extraction": "pymupdf word coordinates; subject is the upper cell line, teacher the lower one",
+ "extraction": "per-cell clip rectangles on exact PDF coordinates; upper line = subject, lower = teacher",
  "classes": [
   {
    "class_id": "A1",
@@ -8,318 +8,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "رياضيات",
-     "teacher": "هشام",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "G+F",
-     "teacher": "خالد إيناس",
-     "combined": true
+     "teacher": "خالد/إيناس",
+     "raw": "G+F | خالد/إيناس",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "G+F",
-     "teacher": "خالد إيناس",
-     "combined": true
+     "teacher": "خالد/إيناس",
+     "raw": "G+F | خالد/إيناس",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "فلسفة",
      "teacher": "فريال",
-     "combined": false
+     "raw": "فلسفة | فريال",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "دين",
-     "teacher": "رباب",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "حمادة",
+     "raw": "علوم | حمادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "علوم",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "علوم | حمادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "دين",
      "teacher": "رباب",
-     "combined": false
+     "raw": "دين | رباب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "دين",
      "teacher": "رباب",
-     "combined": false
+     "raw": "دين | رباب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "نشاط",
-     "teacher": "كاميليا",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "الغياب",
      "teacher": "",
-     "combined": false
+     "raw": "الغياب",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "نشاط",
      "teacher": "كاميليا",
-     "combined": false
+     "raw": "نشاط | كاميليا",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "فلسفة",
      "teacher": "فريال",
-     "combined": false
+     "raw": "فلسفة | فريال",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "علوم",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "علوم | حمادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "فلسفة",
      "teacher": "فريال",
-     "combined": false
+     "raw": "فلسفة | فريال",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "علوم",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "علوم | حمادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "دين",
      "teacher": "هيام",
-     "combined": false
+     "raw": "دين | هيام",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "فريال",
+     "raw": "فلسفة | فريال",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "علوم",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "علوم | حمادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -329,318 +374,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "رياضيات",
-     "teacher": "سمر",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "عربي",
-     "teacher": "إكرام",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "نشاط",
      "teacher": "لمياء",
-     "combined": false
+     "raw": "نشاط | لمياء",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "ألعاب",
+     "teacher": "",
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "دين",
-     "teacher": "ثناء",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "دين",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "دين | ثناء",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "دين",
-     "teacher": "ثناء",
-     "combined": false
+     "teacher": "",
+     "raw": "دين",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
-     "subject": "",
+     "subject": "ثناء",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "ثناء",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
-     "subject": "ألماني فرنساوي",
-     "teacher": "خالد إيناس",
-     "combined": true
+     "subject": "ألماني/فرنساوي",
+     "teacher": "خالد/إيناس",
+     "raw": "ألماني/فرنساوي | خالد/إيناس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
-     "subject": "ألماني فرنساوي",
-     "teacher": "خالد إيناس",
-     "combined": true
+     "subject": "ألماني/فرنساوي",
+     "teacher": "خالد/إيناس",
+     "raw": "ألماني/فرنساوي | خالد/إيناس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -650,318 +740,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "فلسفة",
-     "teacher": "عماد",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "G+F",
-     "teacher": "خالد",
-     "combined": true
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "G+F",
-     "teacher": "خالد إيناس",
-     "combined": true
+     "teacher": "خالد/إيناس",
+     "raw": "G+F | خالد/إيناس",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "إنجليزي",
-     "teacher": "عبير",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "دين",
      "teacher": "رباب",
-     "combined": false
+     "raw": "دين | رباب",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "دين",
      "teacher": "رباب",
-     "combined": false
+     "raw": "دين | رباب",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "G+F",
-     "teacher": "إيناس خالد",
-     "combined": true
+     "teacher": "إيناس/خالد",
+     "raw": "G+F | إيناس/خالد",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "رياضيات",
      "teacher": "هشام",
-     "combined": false
+     "raw": "رياضيات | هشام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "نشاط",
      "teacher": "لمياء",
-     "combined": false
+     "raw": "نشاط | لمياء",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -971,318 +1106,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "إنجليزي",
-     "teacher": "ممدوح",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "G+F",
-     "teacher": "نسرين إيناس",
-     "combined": true
+     "teacher": "نسرين/إيناس",
+     "raw": "G+F | نسرين/إيناس",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "G+F",
-     "teacher": "نسرين إيناس",
-     "combined": true
+     "teacher": "نسرين/إيناس",
+     "raw": "G+F | نسرين/إيناس",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "علوم",
-     "teacher": "نهاد",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "تاريخ",
-     "teacher": "هبة",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "دين",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "دين | إكرام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "دين",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "دين | إكرام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "نشاط",
      "teacher": "عزة",
-     "combined": false
+     "raw": "نشاط | عزة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -1292,318 +1472,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "نشاط",
-     "teacher": "فاطمة",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "نشاط",
      "teacher": "فاطمة",
-     "combined": false
+     "raw": "نشاط | فاطمة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "تاريخ",
-     "teacher": "هبة",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "دين",
-     "teacher": "عماد",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "دين",
      "teacher": "عماد",
-     "combined": false
+     "raw": "دين | عماد",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "دين",
      "teacher": "عماد",
-     "combined": false
+     "raw": "دين | عماد",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
-     "subject": "ألماني فرنساوي",
-     "teacher": "نسرين إيناس",
-     "combined": true
+     "subject": "ألماني/فرنساوي",
+     "teacher": "نسرين/إيناس",
+     "raw": "ألماني/فرنساوي | نسرين/إيناس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
-     "subject": "ألماني فرنساوي",
-     "teacher": "نسرين إيناس",
-     "combined": true
+     "subject": "ألماني/فرنساوي",
+     "teacher": "نسرين/إيناس",
+     "raw": "ألماني/فرنساوي | نسرين/إيناس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "دين",
+     "teacher": "إكرام",
+     "raw": "دين | إكرام",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "علوم",
      "teacher": "نهاد",
-     "combined": false
+     "raw": "علوم | نهاد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -1613,318 +1838,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "علوم",
-     "teacher": "منال",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "نشاط",
      "teacher": "عزة",
-     "combined": false
+     "raw": "نشاط | عزة",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "إنجليزي",
-     "teacher": "ممدوح",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "عربي",
-     "teacher": "حنان",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "هبة الله",
-     "combined": false
+     "raw": "تاريخ | هبة الله",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "دين",
      "teacher": "حنان",
-     "combined": false
+     "raw": "دين | حنان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "دين",
      "teacher": "حنان",
-     "combined": false
+     "raw": "دين | حنان",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "منال",
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "برمجة",
      "teacher": "فردوس",
-     "combined": false
+     "raw": "برمجة | فردوس",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "G+F",
+     "teacher": "نسرين/إيناس",
+     "raw": "G+F | نسرين/إيناس",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "G+F",
-     "teacher": "نسرين إيناس",
-     "combined": true
+     "teacher": "نسرين/إيناس",
+     "raw": "G+F | نسرين/إيناس",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "رياضيات",
      "teacher": "سمر",
-     "combined": false
+     "raw": "رياضيات | سمر",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -1934,318 +2204,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "G+F",
-     "teacher": "نسرين",
-     "combined": true
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "نشاط",
      "teacher": "أسماء",
-     "combined": false
+     "raw": "نشاط | أسماء",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "G+F",
-     "teacher": "نسرين إيناس",
-     "combined": true
+     "teacher": "نسرين/إيناس",
+     "raw": "G+F | نسرين/إيناس",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "G+F",
-     "teacher": "نسرين إيناس",
-     "combined": true
+     "teacher": "نسرين/إيناس",
+     "raw": "G+F | نسرين/إيناس",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "تاريخ",
-     "teacher": "إيمان",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "عربي",
-     "teacher": "هيام",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "علوم",
      "teacher": "منال",
-     "combined": false
+     "raw": "علوم | منال",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "دين",
      "teacher": "عماد",
-     "combined": false
+     "raw": "دين | عماد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "دين",
      "teacher": "عماد",
-     "combined": false
+     "raw": "دين | عماد",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -2255,318 +2570,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "إنجليزي",
-     "teacher": "مها",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "نشاط",
+     "teacher": "فادي",
+     "raw": "نشاط | فادي",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "إنجليزي",
-     "teacher": "مها",
-     "combined": false
+     "teacher": "",
+     "raw": "إنجليزي",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
-     "subject": "",
+     "subject": "مها",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "عربي",
-     "teacher": "هيام",
-     "combined": false
+     "raw": "مها",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "دين",
      "teacher": "حنان",
-     "combined": false
+     "raw": "دين | حنان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "برمجة",
-     "teacher": "مروة",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "دين",
+     "teacher": "حنان",
+     "raw": "دين | حنان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "فلسفة",
      "teacher": "نادية",
-     "combined": false
+     "raw": "فلسفة | نادية",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "G+A",
-     "teacher": "نسرين مروة",
-     "combined": true
+     "teacher": "نسرين/مروة",
+     "raw": "G+A | نسرين/مروة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "G+A",
-     "teacher": "نسرين مروة",
-     "combined": true
+     "teacher": "نسرين/مروة",
+     "raw": "G+A | نسرين/مروة",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -2576,318 +2936,363 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 5,
-     "subject": "تاريخ",
-     "teacher": "إيمان",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 3,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "نشاط",
      "teacher": "أسماء",
-     "combined": false
+     "raw": "نشاط | أسماء",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 5,
-     "subject": "فلسفة",
-     "teacher": "عماد",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 3,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
-     "period": 5,
-     "subject": "علوم",
-     "teacher": "إيمان",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 1,
      "subject": "دين",
      "teacher": "عماد",
-     "combined": false
+     "raw": "دين | عماد",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "دين",
      "teacher": "عماد",
-     "combined": false
+     "raw": "دين | عماد",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 3,
      "subject": "فلسفة",
      "teacher": "عماد",
-     "combined": false
+     "raw": "فلسفة | عماد",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 3,
      "subject": "إسباني",
      "teacher": "مروة",
-     "combined": false
+     "raw": "إسباني | مروة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "إسباني",
      "teacher": "مروة",
-     "combined": false
+     "raw": "إسباني | مروة",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 5,
-     "subject": "",
-     "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 3,
      "subject": "عربي",
      "teacher": "هيام",
-     "combined": false
+     "raw": "عربي | هيام",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "علوم",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "علوم | إيمان",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "برمجة",
      "teacher": "مروة",
-     "combined": false
+     "raw": "برمجة | مروة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "",
      "teacher": "",
-     "combined": false
+     "raw": "",
+     "special": false
     }
    ]
   },
@@ -2897,192 +3302,219 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 3,
-     "subject": "تاريخ",
-     "teacher": "عايدة",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 5,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 3,
-     "subject": "إنجليزي",
-     "teacher": "غادة",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 5,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "رياضيات",
-     "teacher": "محفوظ",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "عربي",
      "teacher": "إكرام",
-     "combined": false
+     "raw": "عربي | إكرام",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "رياضيات",
      "teacher": "محفوظ",
-     "combined": false
+     "raw": "رياضيات | محفوظ",
+     "special": false
     }
    ]
   },
@@ -3092,192 +3524,219 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 3,
-     "subject": "إنجليزي",
-     "teacher": "غادة",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 5,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 3,
-     "subject": "عربي",
-     "teacher": "حنان",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "فيزياء",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "فيزياء | حمادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "فيزياء",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "فيزياء | حمادة",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "فيزياء",
+     "teacher": "حمادة",
+     "raw": "فيزياء | حمادة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 5,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "عربي",
-     "teacher": "حنان",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "فيزياء",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "فيزياء | حمادة",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "فيزياء",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "فيزياء | حمادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "فيزياء",
      "teacher": "حمادة",
-     "combined": false
+     "raw": "فيزياء | حمادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "غادة",
-     "combined": false
+     "raw": "إنجليزي | غادة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     }
    ]
   },
@@ -3287,192 +3746,219 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 3,
-     "subject": "إنجليزي",
-     "teacher": "عبير",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 5,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 3,
-     "subject": "إنجليزي",
-     "teacher": "عبير",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 5,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "هبة",
-     "combined": false
+     "raw": "تاريخ | هبة",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "عربي",
-     "teacher": "رباب",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     }
    ]
   },
@@ -3482,192 +3968,219 @@
    "rows": [
     {
      "day": "الأحد",
-     "period": 3,
-     "subject": "إنجليزي",
-     "teacher": "عبير",
-     "combined": false
-    },
-    {
-     "day": "الأحد",
      "period": 1,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 2,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 4,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 5,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 6,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الأحد",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
-    },
-    {
-     "day": "الاثنين",
-     "period": 3,
-     "subject": "مالية ثقافة مالية",
-     "teacher": "",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 1,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 2,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 4,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 5,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 6,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 7,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 8,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الاثنين",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "عربي",
-     "teacher": "ثناء",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "إنجليزي",
      "teacher": "عبير",
-     "combined": false
+     "raw": "إنجليزي | عبير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     }
    ]
   },
@@ -3677,192 +4190,219 @@
    "rows": [
     {
      "day": "الثلاثاء",
-     "period": 3,
-     "subject": "برمجة",
-     "teacher": "تيسير",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
      "period": 1,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 5,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 3,
-     "subject": "عربي",
-     "teacher": "رباب",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 5,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "عربي",
      "teacher": "رباب",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "برمجة",
-     "teacher": "تيسير",
-     "combined": false
+     "raw": "عربي | رباب",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "برمجة",
      "teacher": "تيسير",
-     "combined": false
+     "raw": "برمجة | تيسير",
+     "special": false
     }
    ]
   },
@@ -3872,192 +4412,219 @@
    "rows": [
     {
      "day": "الثلاثاء",
-     "period": 3,
-     "subject": "إنجليزي",
-     "teacher": "ممدوح",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 5,
-     "subject": "كيمياء إدارة أعمال",
-     "teacher": "منال محمد",
-     "combined": true
+     "subject": "كيمياء/إدارة أعمال",
+     "teacher": "منال/محمد",
+     "raw": "كيمياء/إدارة أعمال | منال/محمد",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
-     "subject": "كيمياء إدارة أعمال",
-     "teacher": "منال محمد",
-     "combined": true
+     "subject": "كيمياء/إدارة أعمال",
+     "teacher": "منال/محمد",
+     "raw": "كيمياء/إدارة أعمال | منال/محمد",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 3,
-     "subject": "أعمال كيمياء إدارة",
-     "teacher": "منال",
-     "combined": true
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 5,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
-     "subject": "كيمياء إدارة أعمال",
+     "subject": "كيمياء/إدارة أعمال",
      "teacher": "منال",
-     "combined": true
+     "raw": "كيمياء/إدارة أعمال | منال",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
-     "subject": "كيمياء إدارة أعمال",
+     "subject": "كيمياء/إدارة أعمال",
      "teacher": "منال",
-     "combined": true
+     "raw": "كيمياء/إدارة أعمال | منال",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "تاريخ",
-     "teacher": "أعمال",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "إنجليزي",
      "teacher": "ممدوح",
-     "combined": false
+     "raw": "إنجليزي | ممدوح",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "عربي",
      "teacher": "حنان",
-     "combined": false
+     "raw": "عربي | حنان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
-     "subject": "كيمياء إدارة أعمال",
+     "subject": "كيمياء/إدارة أعمال",
      "teacher": "",
-     "combined": true
+     "raw": "كيمياء/إدارة أعمال",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
-     "subject": "كيمياء إدارة أعمال",
+     "subject": "كيمياء/إدارة أعمال",
      "teacher": "",
-     "combined": true
+     "raw": "كيمياء/إدارة أعمال",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "إيمان",
-     "combined": false
+     "raw": "تاريخ | إيمان",
+     "special": false
     }
    ]
   },
@@ -4067,192 +4634,219 @@
    "rows": [
     {
      "day": "الثلاثاء",
-     "period": 3,
-     "subject": "تاريخ",
-     "teacher": "عايدة",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "علم نفس/لغة ثانية",
+     "teacher": "إيناس/مروة",
+     "raw": "علم نفس/لغة ثانية | نادية/نسرين | إيناس/مروة",
+     "special": true
     },
     {
      "day": "الثلاثاء",
      "period": 4,
-     "subject": "علم نفس لغة ثانية",
-     "teacher": "نادية نسرين",
-     "combined": true
+     "subject": "علم نفس/لغة ثانية",
+     "teacher": "إيناس/مروة",
+     "raw": "علم نفس/لغة ثانية | نادية/نسرين | إيناس/مروة",
+     "special": true
     },
     {
      "day": "الثلاثاء",
      "period": 5,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 3,
-     "subject": "علم نفس لغة",
-     "teacher": "",
-     "combined": true
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "ألعاب",
      "teacher": "",
-     "combined": false
+     "raw": "ألعاب",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 5,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
-     "subject": "علم نفس لغة ثانية",
+     "subject": "علم نفس/لغة ثانية",
      "teacher": "",
-     "combined": true
+     "raw": "علم نفس/لغة ثانية",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
-     "subject": "علم نفس لغة ثانية",
+     "subject": "علم نفس/لغة ثانية",
      "teacher": "",
-     "combined": true
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "إنجليزي",
-     "teacher": "مها",
-     "combined": false
+     "raw": "علم نفس/لغة ثانية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
-     "subject": "نفس لغة ثانية",
-     "teacher": "نادية نسرين",
-     "combined": true
+     "subject": "علم نفس/لغة ثانية",
+     "teacher": "نادية/نسرين",
+     "raw": "علم نفس/لغة ثانية | نادية/نسرين",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
-     "subject": "علم نفس لغة ثانية",
-     "teacher": "نادية نسرين",
-     "combined": true
+     "subject": "علم نفس/لغة ثانية",
+     "teacher": "نادية/نسرين",
+     "raw": "علم نفس/لغة ثانية | نادية/نسرين",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "تاريخ",
      "teacher": "عايدة",
-     "combined": false
+     "raw": "تاريخ | عايدة",
+     "special": false
     }
    ]
   },
@@ -4262,192 +4856,219 @@
    "rows": [
     {
      "day": "الثلاثاء",
-     "period": 3,
-     "subject": "ثقافة مالية",
-     "teacher": "",
-     "combined": false
-    },
-    {
-     "day": "الثلاثاء",
      "period": 1,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 2,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "ألعاب",
+     "teacher": "",
+     "raw": "ألعاب",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 4,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 5,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 6,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 7,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 8,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     },
     {
      "day": "الثلاثاء",
      "period": 9,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
-    },
-    {
-     "day": "الأربعاء",
-     "period": 3,
-     "subject": "تاريخ",
-     "teacher": "هاني",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "ألماني",
+     "teacher": "محاسبة",
+     "raw": "ألماني | محاسبة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 4,
      "subject": "ألماني",
      "teacher": "محاسبة",
-     "combined": true
+     "raw": "ألماني | محاسبة",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 5,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 6,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 7,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 8,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الأربعاء",
      "period": 9,
      "subject": "ألماني",
      "teacher": "محاسبة",
-     "combined": true
-    },
-    {
-     "day": "الخميس",
-     "period": 3,
-     "subject": "ألماني",
-     "teacher": "محاسبة",
-     "combined": true
+     "raw": "ألماني | محاسبة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 1,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 2,
      "subject": "إنجليزي",
      "teacher": "مها",
-     "combined": false
+     "raw": "إنجليزي | مها",
+     "special": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 4,
      "subject": "تاريخ",
      "teacher": "هاني",
-     "combined": false
+     "raw": "تاريخ | هاني",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 5,
      "subject": "ألماني",
      "teacher": "محاسبة",
-     "combined": true
+     "raw": "ألماني | محاسبة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 6,
      "subject": "عربي",
      "teacher": "ثناء",
-     "combined": false
+     "raw": "عربي | ثناء",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 7,
      "subject": "ألماني",
      "teacher": "محاسبة",
-     "combined": true
+     "raw": "ألماني | محاسبة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 8,
      "subject": "ألماني",
      "teacher": "محاسبة",
-     "combined": true
+     "raw": "ألماني | محاسبة",
+     "special": false
     },
     {
      "day": "الخميس",
      "period": 9,
      "subject": "ثقافة مالية",
      "teacher": "",
-     "combined": false
+     "raw": "ثقافة مالية",
+     "special": false
     }
    ]
   }
