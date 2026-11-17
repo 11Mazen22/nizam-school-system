@@ -320,9 +320,33 @@ a:hover { color: var(--n-primary-hover); }
   transition: all var(--n-fast);
 }
 .n-sidebar-search:focus-within {
-  background: #fff;
+  /* Never force a light background here: the shell sidebar is dark, and a
+     white panel with white text made the search field look blank. */
   border-color: var(--n-primary);
   box-shadow: 0 0 0 3px rgba(49, 94, 251, .12);
+  transform: translateY(-1px);
+}
+.n-sidebar-search {
+  transition: background-color var(--n-fast) ease, border-color var(--n-fast) ease,
+              box-shadow var(--n-fast) ease, transform var(--n-fast) ease;
+}
+.n-sidebar-search .n-search-icon {
+  transition: color var(--n-fast) ease, transform var(--n-fast) ease;
+}
+.n-sidebar-search:focus-within .n-search-icon {
+  color: var(--n-primary);
+  transform: scale(1.06);
+}
+.n-filter-input::-webkit-search-decoration,
+.n-filter-input::-webkit-search-cancel-button,
+.n-filter-input::-webkit-search-results-button,
+.n-filter-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.n-filter-input {
+  -webkit-appearance: none;
+  appearance: none;
 }
 .n-search-icon {
   display: inline-flex;
@@ -467,8 +491,19 @@ a:hover { color: var(--n-primary-hover); }
 [dir="rtl"] .n-nav-group.is-collapsed .n-nav-group-chevron {
   transform: rotate(90deg);
 }
+.n-nav-group-list {
+  max-height: 1600px;
+  opacity: 1;
+  visibility: visible;
+  overflow: hidden;
+  transition: max-height .32s var(--n-ease), opacity .22s ease, visibility 0s;
+}
 .n-nav-group.is-collapsed .n-nav-group-list {
-  display: none !important;
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: max-height .32s var(--n-ease), opacity .18s ease, visibility 0s .32s;
 }
 .n-nav-group-list {
   gap: 2px;
@@ -534,6 +569,39 @@ a:hover { color: var(--n-primary-hover); }
   background: var(--n-primary);
   box-shadow: 0 0 6px var(--n-primary);
   margin-inline-start: auto;
+  animation: n-pip-breathe 2.8s ease-in-out infinite;
+}
+@keyframes n-pip-breathe {
+  0%, 100% { opacity: .75; transform: scale(.9); }
+  50%      { opacity: 1;   transform: scale(1.15); }
+}
+
+/* Sidebar entrance: groups settle in sequence, links respond to the icon. */
+.nizam-sidebar .n-nav-group {
+  animation: n-nav-rise .38s var(--n-ease) both;
+}
+.nizam-sidebar .n-nav-group:nth-child(2) { animation-delay: .03s; }
+.nizam-sidebar .n-nav-group:nth-child(3) { animation-delay: .06s; }
+.nizam-sidebar .n-nav-group:nth-child(4) { animation-delay: .09s; }
+.nizam-sidebar .n-nav-group:nth-child(5) { animation-delay: .12s; }
+.nizam-sidebar .n-nav-group:nth-child(6) { animation-delay: .15s; }
+.nizam-sidebar .n-nav-group:nth-child(n+7) { animation-delay: .18s; }
+@keyframes n-nav-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.nizam-sidebar .nav-link .n-nav-icon {
+  transition: color var(--n-fast) ease, transform var(--n-fast) ease;
+}
+.nizam-sidebar .nav-link:hover .n-nav-icon {
+  transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nizam-sidebar .n-nav-group,
+  .n-nav-active-pip { animation: none !important; }
+  .n-nav-group-list,
+  .n-sidebar-search { transition: none !important; }
 }
 
 /* Pinned User Card at Bottom */
@@ -649,6 +717,10 @@ a:hover { color: var(--n-primary-hover); }
 }
 .n-sidebar-collapsed .n-nav-group.is-collapsed .n-nav-group-list {
   display: flex !important;
+  max-height: none;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 .n-sidebar-collapsed .nizam-sidebar .nav-link {
   justify-content: center;

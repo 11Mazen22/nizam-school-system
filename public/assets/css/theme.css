@@ -138,7 +138,17 @@ body.n-app-body .nizam-sidebar {
 .n-sidebar-search .n-filter-input::placeholder { color: rgba(255, 255, 255, .5); }
 .n-sidebar-search .n-search-icon, .n-sidebar-search .n-filter-kbd, .n-sidebar-search .n-filter-clear { color: rgba(255, 255, 255, .55); }
 .n-sidebar-search .n-filter-kbd { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .12); }
-.n-sidebar-search:focus-within { box-shadow: 0 0 0 3px rgba(189, 139, 50, .28); border-color: rgba(189, 139, 50, .4); }
+.n-sidebar-search:hover { background: rgba(255, 255, 255, .09); border-color: rgba(255, 255, 255, .16); }
+.n-sidebar-search:focus-within {
+  background: rgba(255, 255, 255, .12);
+  border-color: rgba(233, 198, 127, .55);
+  box-shadow: 0 0 0 3px rgba(189, 139, 50, .28);
+}
+.n-sidebar-search:focus-within .n-search-icon { color: #f2d79c; }
+.n-sidebar-search:focus-within .n-filter-input { caret-color: #f2d79c; }
+.n-sidebar-search .n-filter-input { color: #fff; }
+.n-sidebar-search .n-filter-input::placeholder { color: rgba(255, 255, 255, .55); }
+.n-sidebar-search .n-filter-clear:hover { background: rgba(255, 255, 255, .14); color: #fff; }
 
 .nizam-sidebar .nav-link, .n-mobile-nav .nav-link {
   border-radius: 10px;

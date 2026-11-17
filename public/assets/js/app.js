@@ -278,6 +278,47 @@
       }
     });
 
+    // Keep the sidebar's scroll position across full page navigation: without
+    // this every click reset the menu to the top and the user lost their place.
+    var scrollPersistKey = 'nizam_sidebar_scroll';
+    var navScroll = document.getElementById('sidebarNavScroll');
+    if (navScroll) {
+      var restoreScroll = function () {
+        var saved = null;
+        try { saved = sessionStorage.getItem(scrollPersistKey); } catch (e) { saved = null; }
+        if (saved !== null) {
+          var top = parseInt(saved, 10);
+          if (!isNaN(top) && top > 0) {
+            navScroll.scrollTop = top;
+          }
+        }
+      };
+
+      restoreScroll();
+      // Layout settles after webfonts and the collapse class apply, so restore
+      // once more on the next frame to avoid a clamped 0.
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(restoreScroll);
+      });
+
+      var scrollTicking = false;
+      navScroll.addEventListener('scroll', function () {
+        if (scrollTicking) return;
+        scrollTicking = true;
+        window.requestAnimationFrame(function () {
+          try { sessionStorage.setItem(scrollPersistKey, String(navScroll.scrollTop)); } catch (e) {}
+          scrollTicking = false;
+        });
+      });
+
+      // Clicking a link unloads the page immediately; persist before leaving.
+      navScroll.addEventListener('click', function (event) {
+        if (event.target.closest('a.nav-link')) {
+          try { sessionStorage.setItem(scrollPersistKey, String(navScroll.scrollTop)); } catch (e) {}
+        }
+      });
+    }
+
     // Real-time navigation filter
     var filterInput = document.getElementById('sidebarNavFilter');
     var filterClear = document.getElementById('sidebarFilterClear');

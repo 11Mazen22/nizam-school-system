@@ -218,6 +218,48 @@ if (str_contains($css, 'body.n-app-body .nizam-shell.n-sidebar-collapsed > .niza
     echo "FAIL: collapsed sidebar does not override the desktop flex width\n";
 }
 
+// The sidebar search field lives on the dark shell. A light focus background
+// combined with white text blanked the whole field once it was clicked, so the
+// focus style must keep a dark surface and the theme must own its background.
+$appCss   = (string) file_get_contents(__DIR__ . '/../public/assets/css/app.css');
+$themeCss = (string) file_get_contents(__DIR__ . '/../public/assets/css/theme.css');
+$focusBlock = '';
+if (preg_match('/\.n-sidebar-search:focus-within\s*\{([^}]*)\}/', $appCss, $m) === 1) {
+    $focusBlock = $m[1];
+}
+$themeFocus = '';
+if (preg_match('/\.n-sidebar-search:focus-within\s*\{([^}]*)\}/', $themeCss, $m) === 1) {
+    $themeFocus = $m[1];
+}
+if (preg_match('/(?<![a-z-])background\s*:/', $focusBlock) !== 1
+    && str_contains($themeFocus, 'rgba(255, 255, 255')) {
+    echo "PASS: sidebar search keeps its dark surface while focused\n";
+} else {
+    $fail++;
+    echo "FAIL: sidebar search focus style can blank the field (light background on white text)\n";
+}
+
+// The menu must remember its scroll position across full page loads.
+$appJs = (string) file_get_contents(__DIR__ . '/../public/assets/js/app.js');
+if (str_contains($appJs, 'nizam_sidebar_scroll')
+    && str_contains($appJs, 'navScroll.scrollTop')
+    && str_contains($appJs, 'navScroll.addEventListener(\'scroll\'')) {
+    echo "PASS: sidebar scroll position survives navigation\n";
+} else {
+    $fail++;
+    echo "FAIL: sidebar scroll position is not persisted\n";
+}
+
+// Motion is expected on the rail, but must be disabled for reduced-motion users.
+if (str_contains($css, '@keyframes n-nav-rise')
+    && str_contains($css, 'prefers-reduced-motion: reduce')
+    && str_contains($css, 'transition: max-height .32s')) {
+    echo "PASS: sidebar has motion with a reduced-motion fallback\n";
+} else {
+    $fail++;
+    echo "FAIL: sidebar animation or its reduced-motion fallback is missing\n";
+}
+
 // Inline handlers/scripts force script-src 'unsafe-inline', weakening CSP on
 // every route. All behavior must live in versioned self-hosted JS files.
 $inlineScriptViews = [];
