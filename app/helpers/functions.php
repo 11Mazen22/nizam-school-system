@@ -213,6 +213,7 @@ function navItems(): array
         ['key' => 'subjects', 'href' => '/subjects', 'label' => 'nav.subjects', 'permission' => 'subjects.view', 'icon' => 'book', 'group' => 'academic', 'module' => 'academics'],
         ['key' => 'classes', 'href' => '/classes', 'label' => 'nav.classes', 'permission' => 'classes.view', 'icon' => 'chalkboard', 'group' => 'academic', 'module' => 'academics'],
         ['key' => 'timetable', 'href' => '/timetable', 'label' => 'nav.timetable', 'permission' => 'timetable.view', 'icon' => 'grid', 'group' => 'academic', 'module' => 'academics'],
+        ['key' => 'assessments', 'href' => '/assessments', 'label' => 'nav.assessments', 'permission' => 'exams.view', 'icon' => 'clipboard-check', 'group' => 'academic', 'module' => 'exams'],
 
         ['key' => 'students', 'href' => '/students', 'label' => 'nav.students', 'permission' => 'students.view', 'icon' => 'users', 'group' => 'people', 'module' => 'people'],
         ['key' => 'guardians', 'href' => '/guardians', 'label' => 'nav.guardians', 'permission' => 'guardians.view', 'icon' => 'users-group', 'group' => 'people', 'module' => 'people'],

@@ -93,6 +93,25 @@ final class Browser
         return $this->send('POST', $path, http_build_query($data), $headers);
     }
 
+    /** Multipart POST, for file uploads (roster CSV import). */
+    public function upload(string $path, string $field, string $filename, string $contents, array $data = []): array
+    {
+        $boundary = '----nizam' . bin2hex(random_bytes(8));
+        $body = '';
+        foreach ($data as $key => $value) {
+            $body .= "--{$boundary}\r\n";
+            $body .= "Content-Disposition: form-data; name=\"{$key}\"\r\n\r\n";
+            $body .= $value . "\r\n";
+        }
+        $body .= "--{$boundary}\r\n";
+        $body .= "Content-Disposition: form-data; name=\"{$field}\"; filename=\"{$filename}\"\r\n";
+        $body .= "Content-Type: text/csv\r\n\r\n";
+        $body .= $contents . "\r\n";
+        $body .= "--{$boundary}--\r\n";
+
+        return $this->send('POST', $path, $body, ['Content-Type: multipart/form-data; boundary=' . $boundary]);
+    }
+
     public function cookie(string $name): ?string
     {
         return $this->cookies[$name] ?? null;
@@ -124,7 +143,13 @@ final class Browser
             }
             $lines[] = 'Cookie: ' . implode('; ', $pairs);
         }
-        if ($body !== null) {
+        $hasContentType = false;
+        foreach ($headers as $header) {
+            if (stripos($header, 'Content-Type:') === 0) {
+                $hasContentType = true;
+            }
+        }
+        if ($body !== null && !$hasContentType) {
             $lines[] = 'Content-Type: application/x-www-form-urlencoded';
         }
 
@@ -596,6 +621,58 @@ try {
     same(1, substr_count($assessmentPage['body'], '<h1'), '/assessments renders exactly one page title');
     ok(strpos($assessmentPage['body'], 'n-hero-compact') !== false, '/assessments uses the shared hero');
     same(302, $anon->get('/assessments')['status'], 'GET /assessments requires authentication');
+
+    // --- student roster CSV import ----------------------------------------
+    $rosterClass = (string) $scalar('SELECT name FROM classes WHERE is_active = 1 ORDER BY id LIMIT 1');
+    if ($rosterClass === '') {
+        // Roster validation needs a real class in the active year; the class
+        // management assertions run later in this suite, so seed one here.
+        $seedGrade = (int) $scalar('SELECT id FROM grades ORDER BY id LIMIT 1');
+        $seedYear = (int) $scalar('SELECT id FROM academic_years ORDER BY id LIMIT 1');
+        $pdo->exec("INSERT INTO classes (grade_id, academic_year_id, name, is_active) VALUES ({$seedGrade}, {$seedYear}, 'HTTP Class', 1)");
+        $rosterClass = 'HTTP Class';
+    }
+    $template = $admin->get('/students/import/roster/template');
+    same(200, $template['status'], 'Roster template downloads');
+    ok(str_contains($template['body'], 'Full Name') && str_contains($template['body'], 'Class Name'), 'Template carries the documented headers');
+
+    $importScreen = $admin->get('/students/import/roster');
+    same(200, $importScreen['status'], 'Roster import screen renders');
+
+    $rosterCsv = "Full Name,Class Name,Gender (M/F),Date of Birth (YYYY-MM-DD),Religion,Class Attribute,Notes\n";
+    $rosterCsv .= "HTTP Roster Student,{$rosterClass},M,2009-09-01,muslim,مسلم,\n";
+    $rosterCsv .= "HTTP Unknown Class Student,ZZ9,M,2009-09-01,muslim,مسلم,\n";
+
+    $preview = $admin->upload('/students/import/roster/preview', 'roster_file', 'roster.csv', $rosterCsv, [
+        '_csrf_token' => (string) $admin->csrf($importScreen['body']),
+    ]);
+    same(200, $preview['status'], 'Roster upload reaches the preview');
+    ok(substr_count($preview['body'], 'badge text-bg-success') === 1, 'Preview marks exactly one valid row');
+    ok(str_contains($preview['body'], 'HTTP Roster Student') && str_contains($preview['body'], 'HTTP Unknown Class Student'), 'Preview lists every uploaded row');
+    ok(str_contains($preview['body'], 'badge text-bg-danger'), 'Preview flags the row with an unknown class');
+
+    $token = null;
+    if (preg_match('/name="token" value="([a-f0-9]+)"/', $preview['body'], $m) === 1) {
+        $token = $m[1];
+    }
+    ok($token !== null, 'Preview carries a commit token');
+
+    $commit = $admin->post('/students/import/roster/commit', [
+        'token' => (string) $token,
+        '_csrf_token' => (string) $admin->csrf($preview['body']),
+    ]);
+    same(302, $commit['status'], 'Roster commit redirects to the student list');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM students WHERE full_name = 'HTTP Roster Student'"), 'Commit created the valid row');
+    same(0, (int) $scalar("SELECT COUNT(*) FROM students WHERE full_name = 'HTTP Unknown Class Student'"), 'Commit skipped the invalid row');
+    same(0, (int) $scalar("SELECT COUNT(*) FROM students WHERE full_name = 'HTTP Roster Student' AND class_attribute_raw IS NULL"), 'Commit kept the printed class attribute');
+
+    // Remove the imported student (and the seeded class when this block had to
+    // create one) so the later student/class assertions see a clean slate.
+    $pdo->exec("DELETE e FROM student_enrollments e JOIN students s ON s.id = e.student_id WHERE s.full_name = 'HTTP Roster Student'");
+    $pdo->exec("DELETE FROM students WHERE full_name = 'HTTP Roster Student'");
+    if ($rosterClass === 'HTTP Class') {
+        $pdo->exec("DELETE FROM classes WHERE name = 'HTTP Class'");
+    }
 
     // --- admin recovery ---------------------------------------------------
     // A shell-issued code must reset an existing admin password, work exactly

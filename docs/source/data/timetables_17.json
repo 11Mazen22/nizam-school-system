@@ -1,0 +1,4456 @@
+{
+ "academic_year": "2026/2027",
+ "extraction": "pymupdf word coordinates; subject is the upper cell line, teacher the lower one",
+ "classes": [
+  {
+   "class_id": "A1",
+   "source_pdf": "جدول_حصص_الفصل_A1_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "G+F",
+     "teacher": "خالد إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "G+F",
+     "teacher": "خالد إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "فلسفة",
+     "teacher": "فريال",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "دين",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "علوم",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "دين",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "دين",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "نشاط",
+     "teacher": "كاميليا",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "الغياب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "نشاط",
+     "teacher": "كاميليا",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "فلسفة",
+     "teacher": "فريال",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "علوم",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "فلسفة",
+     "teacher": "فريال",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "علوم",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "دين",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A2",
+   "source_pdf": "جدول_حصص_الفصل_A2_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "نشاط",
+     "teacher": "لمياء",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "دين",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "دين",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "دين",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "ألماني فرنساوي",
+     "teacher": "خالد إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "ألماني فرنساوي",
+     "teacher": "خالد إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A3",
+   "source_pdf": "جدول_حصص_الفصل_A3_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "G+F",
+     "teacher": "خالد",
+     "combined": true
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "G+F",
+     "teacher": "خالد إيناس",
+     "combined": true
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "دين",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "دين",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "G+F",
+     "teacher": "إيناس خالد",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "رياضيات",
+     "teacher": "هشام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "نشاط",
+     "teacher": "لمياء",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A4",
+   "source_pdf": "جدول_حصص_الفصل_A4_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "G+F",
+     "teacher": "نسرين إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "G+F",
+     "teacher": "نسرين إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "دين",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "دين",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "نشاط",
+     "teacher": "عزة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A5",
+   "source_pdf": "جدول_حصص_الفصل_A5_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "نشاط",
+     "teacher": "فاطمة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "نشاط",
+     "teacher": "فاطمة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "دين",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "دين",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "دين",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "ألماني فرنساوي",
+     "teacher": "نسرين إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "ألماني فرنساوي",
+     "teacher": "نسرين إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "نهاد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A6",
+   "source_pdf": "جدول_حصص_الفصل_A6_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "نشاط",
+     "teacher": "عزة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "هبة الله",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "دين",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "دين",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "برمجة",
+     "teacher": "فردوس",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "G+F",
+     "teacher": "نسرين إيناس",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "رياضيات",
+     "teacher": "سمر",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A7",
+   "source_pdf": "جدول_حصص_الفصل_A7_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "G+F",
+     "teacher": "نسرين",
+     "combined": true
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "نشاط",
+     "teacher": "أسماء",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "G+F",
+     "teacher": "نسرين إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "G+F",
+     "teacher": "نسرين إيناس",
+     "combined": true
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "علوم",
+     "teacher": "منال",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "دين",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "دين",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A8",
+   "source_pdf": "جدول_حصص_الفصل_A8_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "دين",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "فلسفة",
+     "teacher": "نادية",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "G+A",
+     "teacher": "نسرين مروة",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "G+A",
+     "teacher": "نسرين مروة",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "A9",
+   "source_pdf": "جدول_حصص_الفصل_A9_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "نشاط",
+     "teacher": "أسماء",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "دين",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "دين",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "فلسفة",
+     "teacher": "عماد",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "إسباني",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "إسباني",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "هيام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "علوم",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "برمجة",
+     "teacher": "مروة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B1",
+   "source_pdf": "جدول_حصص_الفصل_B1_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "إكرام",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "رياضيات",
+     "teacher": "محفوظ",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B2",
+   "source_pdf": "جدول_حصص_الفصل_B2_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "فيزياء",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "فيزياء",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "فيزياء",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "فيزياء",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "فيزياء",
+     "teacher": "حمادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "غادة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B3",
+   "source_pdf": "جدول_حصص_الفصل_B3_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "هبة",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B4",
+   "source_pdf": "جدول_حصص_الفصل_B4_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الأحد",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 2,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 4,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 6,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الأحد",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 3,
+     "subject": "مالية ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 1,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 2,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 6,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 7,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 8,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الاثنين",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "عبير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B5",
+   "source_pdf": "جدول_حصص_الفصل_B5_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "عربي",
+     "teacher": "رباب",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "برمجة",
+     "teacher": "تيسير",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B6",
+   "source_pdf": "جدول_حصص_الفصل_B6_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "كيمياء إدارة أعمال",
+     "teacher": "منال محمد",
+     "combined": true
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "كيمياء إدارة أعمال",
+     "teacher": "منال محمد",
+     "combined": true
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "أعمال كيمياء إدارة",
+     "teacher": "منال",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "كيمياء إدارة أعمال",
+     "teacher": "منال",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "كيمياء إدارة أعمال",
+     "teacher": "منال",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "أعمال",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "إنجليزي",
+     "teacher": "ممدوح",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "حنان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "كيمياء إدارة أعمال",
+     "teacher": "",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "كيمياء إدارة أعمال",
+     "teacher": "",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "إيمان",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B7",
+   "source_pdf": "جدول_حصص_الفصل_B7_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "علم نفس لغة ثانية",
+     "teacher": "نادية نسرين",
+     "combined": true
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "علم نفس لغة",
+     "teacher": "",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "ألعاب",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "علم نفس لغة ثانية",
+     "teacher": "",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "علم نفس لغة ثانية",
+     "teacher": "",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "نفس لغة ثانية",
+     "teacher": "نادية نسرين",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "علم نفس لغة ثانية",
+     "teacher": "نادية نسرين",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "تاريخ",
+     "teacher": "عايدة",
+     "combined": false
+    }
+   ]
+  },
+  {
+   "class_id": "B8",
+   "source_pdf": "جدول_حصص_الفصل_B8_2026-2027.pdf",
+   "rows": [
+    {
+     "day": "الثلاثاء",
+     "period": 3,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 1,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 2,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 4,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 6,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 7,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 8,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    },
+    {
+     "day": "الثلاثاء",
+     "period": 9,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 3,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 4,
+     "subject": "ألماني",
+     "teacher": "محاسبة",
+     "combined": true
+    },
+    {
+     "day": "الأربعاء",
+     "period": 5,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 7,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 8,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الأربعاء",
+     "period": 9,
+     "subject": "ألماني",
+     "teacher": "محاسبة",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 3,
+     "subject": "ألماني",
+     "teacher": "محاسبة",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 1,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 2,
+     "subject": "إنجليزي",
+     "teacher": "مها",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 4,
+     "subject": "تاريخ",
+     "teacher": "هاني",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 5,
+     "subject": "ألماني",
+     "teacher": "محاسبة",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 6,
+     "subject": "عربي",
+     "teacher": "ثناء",
+     "combined": false
+    },
+    {
+     "day": "الخميس",
+     "period": 7,
+     "subject": "ألماني",
+     "teacher": "محاسبة",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 8,
+     "subject": "ألماني",
+     "teacher": "محاسبة",
+     "combined": true
+    },
+    {
+     "day": "الخميس",
+     "period": 9,
+     "subject": "ثقافة مالية",
+     "teacher": "",
+     "combined": false
+    }
+   ]
+  }
+ ],
+ "warnings": []
+}

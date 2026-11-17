@@ -37,3 +37,10 @@ recovery-token.json
 # Installed local browser-testing dependencies.
 node_modules/
 /screenshots/
+
+# Official source package copies (large; extracted data lives in docs/source/data)
+docs/source/rosters/
+docs/source/timetables/
+docs/source/weekly_assessments_A1_A9.json
+docs/source/source_reconciliation_report.json
+docs/source/SHA256SUMS.txt

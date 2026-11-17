@@ -776,3 +776,18 @@ body.n-density-compact .table > thead th { padding: 9px 12px; }
 [lang="ar"] .n-assessment-table th { font-size: .78rem; letter-spacing: 0; text-transform: none; }
 .n-assessment-table td { font-size: .86rem; }
 .n-assessment-table tbody tr.n-assessment-none td { background: #f6f7f6; }
+
+/* ------------------------------------------------------ roster CSV import */
+.n-roster-upload .n-import-steps { margin-block: 16px; }
+.n-roster-columns { margin: 0; padding-inline-start: 18px; font-size: .82rem; line-height: 1.9; }
+.n-roster-columns code { font-size: .78rem; }
+.n-roster-count { border: 1px solid var(--n-border); }
+.n-roster-count .card-body { padding: 16px 18px; }
+.n-roster-count-value { font-size: 1.9rem; font-weight: 750; line-height: 1; letter-spacing: -.03em; }
+.n-roster-count-label { margin-block-start: 6px; font-size: .78rem; color: var(--n-muted); }
+.n-roster-count-ok { border-inline-start: 3px solid var(--n-success); }
+.n-roster-count-ok .n-roster-count-value { color: var(--n-success); }
+.n-roster-count-duplicate { border-inline-start: 3px solid var(--n-warning); }
+.n-roster-count-duplicate .n-roster-count-value { color: var(--n-warning); }
+.n-roster-count-error { border-inline-start: 3px solid var(--n-danger); }
+.n-roster-count-error .n-roster-count-value { color: var(--n-danger); }

@@ -88,6 +88,7 @@ use App\Controllers\ReportController;
 use App\Controllers\ScheduledController;
 use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
+use App\Controllers\RosterImportController;
 use App\Controllers\StudentController;
 use App\Controllers\SubjectController;
 use App\Controllers\TeacherController;
@@ -244,6 +245,12 @@ $router->post('/students', [StudentController::class, 'store'], [$session, $csrf
 // "families" of student routes visually grouped in registration order.
 $router->get('/students/promotion', [PromotionController::class, 'preview'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.promote')]);
 $router->post('/students/promotion', [PromotionController::class, 'confirm'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.promote')]);
+// Roster CSV import -- must be registered before /students/{id}, which would
+// otherwise treat "import" as a student id.
+$router->get('/students/import/roster', [RosterImportController::class, 'show'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.create')]);
+$router->get('/students/import/roster/template', [RosterImportController::class, 'template'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
+$router->post('/students/import/roster/preview', [RosterImportController::class, 'preview'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.create')]);
+$router->post('/students/import/roster/commit', [RosterImportController::class, 'commit'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.create')]);
 $router->get('/students/{id}', [StudentController::class, 'show'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
 $router->get('/students/{id}/edit', [StudentController::class, 'edit'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
 $router->post('/students/{id}', [StudentController::class, 'update'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
