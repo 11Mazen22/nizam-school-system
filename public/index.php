@@ -66,6 +66,7 @@ use App\Controllers\AcademicYearController;
 use App\Controllers\ActivityLogController;
 use App\Controllers\AdmissionsController;
 use App\Controllers\AssignmentController;
+use App\Controllers\AssessmentController;
 use App\Controllers\AttendanceController;
 use App\Controllers\AuthController;
 use App\Controllers\BackupController;
@@ -215,6 +216,7 @@ $router->post('/subjects/{id}/restore', [SubjectController::class, 'restore'], [
 
 // Classes -- classes.view / .manage
 $router->get('/classes', [ClassController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.view')]);
+$router->get('/assessments', [AssessmentController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('exams.view')]);
 $router->post('/classes', [ClassController::class, 'store'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
 $router->post('/classes/{id}', [ClassController::class, 'update'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);
 $router->post('/classes/{id}/archive', [ClassController::class, 'archive'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('classes.manage')]);

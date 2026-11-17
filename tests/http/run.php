@@ -590,6 +590,13 @@ try {
     }
     $admin->get('/lang?to=en');
 
+    // Weekly assessment schedule (official A1-A9 distribution lives here).
+    $assessmentPage = $admin->get('/assessments');
+    same(200, $assessmentPage['status'], 'GET /assessments renders the weekly assessment schedule');
+    same(1, substr_count($assessmentPage['body'], '<h1'), '/assessments renders exactly one page title');
+    ok(strpos($assessmentPage['body'], 'n-hero-compact') !== false, '/assessments uses the shared hero');
+    same(302, $anon->get('/assessments')['status'], 'GET /assessments requires authentication');
+
     // --- admin recovery ---------------------------------------------------
     // A shell-issued code must reset an existing admin password, work exactly
     // once, and be reachable from the login screen on a completed install.

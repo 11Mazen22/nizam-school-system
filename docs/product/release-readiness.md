@@ -247,6 +247,33 @@ the new password -> reuse the same code (rejected) -> restore the original
 password. `tests/http/run.php` now covers the screen, the reset, single-use
 rejection and the recovered sign-in.
 
+### 2.8 Official 2026/2027 package import (new)
+
+`bin/import-school-package.php` imports what the supplied package actually
+contains as structured data, and refuses to guess the rest:
+
+- **17 classes** A1-A9 / B1-B8 with their exact Arabic pathway labels, parsed
+  from §2.2 of the package prompt and mapped to first/second secondary.
+- **45 assessment weekday rows** for A1-A9 from
+  `data/weekly_assessments_A1_A9.json`, including A8 Thursday as an explicit
+  no-assessment row, stored with source class and source document.
+- **Subject catalogue**: فلسفة and اللغة الثانية added; برمجة reuses the
+  existing CS subject instead of duplicating a code.
+
+Each run is recorded in `import_batches` with a JSON summary; a `--dry-run`
+flag prints the full plan without writing. `classes.pathway_ar` was added in
+migration 024 and is displayed in the class list; `/assessments` renders the
+weekly distribution from the database.
+
+Not imported, deliberately: student names and class timetables. The roster
+PDFs have a broken font-to-Unicode mapping and the brief requires every name
+to be visually transcribed from the rendered page; the timetables ship as PDFs
+and scrambled page text with no structured cells. A blind import would
+fabricate names and teacher/period assignments, so those stay out until the
+verified data is supplied (a CSV/XLSX export of the rosters is enough).
+
+A database dump was written to `database/backups/` before the import ran.
+
 ## 3. Not verified by an automated check
 
 These have code and screens. The repository-level invariants for finance,

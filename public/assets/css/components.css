@@ -746,3 +746,33 @@ body.n-density-compact .table > thead th { padding: 9px 12px; }
   border-radius: var(--n-radius);
   background: var(--n-surface-subtle);
 }
+
+/* ------------------------------------------------- official pathway badge */
+/* Exact Arabic pathway label from the roster headings. Wraps rather than
+   truncates: "مسار الآداب والفنون" is meaningful text, not a code. */
+.n-pathway-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(13, 92, 74, .18);
+  background: var(--n-primary-soft);
+  color: var(--n-primary-strong);
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: normal;
+  text-align: start;
+}
+
+/* ------------------------------------------------------ weekly assessments */
+.n-assessment-card .card-header { background: #fbfcfb; border-bottom: 1px solid var(--n-border); }
+.n-assessment-table th {
+  font-size: .7rem;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--n-muted);
+}
+[lang="ar"] .n-assessment-table th { font-size: .78rem; letter-spacing: 0; text-transform: none; }
+.n-assessment-table td { font-size: .86rem; }
+.n-assessment-table tbody tr.n-assessment-none td { background: #f6f7f6; }
