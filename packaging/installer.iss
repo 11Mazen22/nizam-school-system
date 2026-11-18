@@ -12,7 +12,7 @@
 ; Launcher just health-checks and opens the browser.
 
 #define MyAppName "Hadaba Al-Ahram School"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Hadaba Al-Ahram Language School"
 #define MyAppURL "http://127.0.0.1:8890/"
 #define MyDataDirName "HadabaSchool"
@@ -60,6 +60,7 @@ Source: "..\packaging\launcher\Microsoft.Web.WebView2.Core.dll"; DestDir: "{app}
 Source: "..\packaging\launcher\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\launcher\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "recover-admin.cmd"; DestDir: "{app}"; DestName: "RecoverAdministrator.cmd"; Flags: ignoreversion
+Source: "load-official-data.cmd"; DestDir: "{app}"; DestName: "LoadOfficialData.cmd"; Flags: ignoreversion
 Source: "assets\hadaba.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\hadaba-256.png"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packaging\apache\httpd-nizam.conf"; DestDir: "{app}\runtime-config"; Flags: ignoreversion
@@ -83,6 +84,7 @@ Name: "{commonappdata}\{#MyDataDirName}\storage\uploads\school"; Permissions: us
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"
 Name: "{group}\Recover Administrator Access"; Filename: "{app}\RecoverAdministrator.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\hadaba.ico"
+Name: "{group}\Load Official School Data"; Filename: "{app}\LoadOfficialData.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\hadaba.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\HadabaLauncher.exe"; IconFilename: "{app}\hadaba.ico"; Tasks: desktopicon
 

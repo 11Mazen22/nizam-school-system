@@ -34,7 +34,7 @@ if ($year === false) {
 $service = new TimetableGapService();
 $result = $service->sync(
     (int) $year['id'],
-    dirname(__DIR__) . '/docs/source/data/timetables_17.json',
+    dirname(__DIR__) . '/database/official/timetables_17.json',
     $dryRun
 );
 

@@ -120,6 +120,14 @@ jobs:
           NIZAM_PG_PASSWORD: nizam_ci_pg
         run: php tests/postgres-parity.php
 
+      - name: Seed the official school data on PostgreSQL
+        env:
+          NIZAM_PG_HOST: 127.0.0.1
+          NIZAM_PG_PORT: '5432'
+          NIZAM_PG_USER: postgres
+          NIZAM_PG_PASSWORD: nizam_ci_pg
+        run: php tests/official-seed.php
+
   container:
     name: Production container build
     runs-on: ubuntu-latest

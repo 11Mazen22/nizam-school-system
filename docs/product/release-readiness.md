@@ -247,32 +247,55 @@ the new password -> reuse the same code (rejected) -> restore the original
 password. `tests/http/run.php` now covers the screen, the reset, single-use
 rejection and the recovered sign-in.
 
-### 2.8 Official 2026/2027 package import (new)
+### 2.8 Official 2026/2027 school data (new)
 
-`bin/import-school-package.php` imports what the supplied package actually
-contains as structured data, and refuses to guess the rest:
+The reviewed official package ships inside the application in
+`database/official/`, so the Windows installer and the Railway image carry
+exactly the same school data:
 
-- **17 classes** A1-A9 / B1-B8 with their exact Arabic pathway labels, parsed
-  from §2.2 of the package prompt and mapped to first/second secondary.
-- **45 assessment weekday rows** for A1-A9 from
-  `data/weekly_assessments_A1_A9.json`, including A8 Thursday as an explicit
+- **17 class pathway labels** A1-A9 / B1-B8 (`pathways.json`), mapped to the
+  first/second secondary grades.
+- **17 reviewed student rosters** (`roster_*.csv`): 777 students and their
+  enrollments in those classes.
+- **17 class timetables** (`timetables_17.json`): 507 teaching slots and the
+  teaching load derived from them.
+- **45 assessment weekday rows** for A1-A9
+  (`weekly_assessments_A1_A9.json`), including A8 Thursday as an explicit
   no-assessment row, stored with source class and source document.
-- **Subject catalogue**: فلسفة and اللغة الثانية added; برمجة reuses the
-  existing CS subject instead of duplicating a code.
+- **17-subject catalogue**: Arabic, English, Mathematics, Science, History,
+  Computer, Religion, Philosophy, Second Language, Financial Literacy, Sports,
+  Activity, Physics, Chemistry / Business, Psychology / Second Language,
+  German and Spanish.
 
-Each run is recorded in `import_batches` with a JSON summary; a `--dry-run`
-flag prints the full plan without writing. `classes.pathway_ar` was added in
-migration 024 and is displayed in the class list; `/assessments` renders the
-weekly distribution from the database.
+`bin/seed-official-data.php` loads all of it through the same importers the
+browser flows use, verifies the resulting counts, and writes a completion
+marker. It is the one command that turns a freshly migrated installation into
+the real school:
 
-Not imported, deliberately: student names and class timetables. The roster
-PDFs have a broken font-to-Unicode mapping and the brief requires every name
-to be visually transcribed from the rendered page; the timetables ship as PDFs
-and scrambled page text with no structured cells. A blind import would
-fabricate names and teacher/period assignments, so those stay out until the
-verified data is supplied (a CSV/XLSX export of the rosters is enough).
+- **Offline:** run it after the installer provisions the database.
+- **Online:** `packaging-online/entrypoint.sh` runs it once when
+  `NIZAM_SEED_OFFICIAL_DATA=1`, after migrations and the runtime-role check,
+  before `bin/production-smoke.php`. The marker lives on the persistent volume,
+  so later boots never re-import.
 
-A database dump was written to `database/backups/` before the import ran.
+Every import step is idempotent: classes are matched by year/grade/name,
+subjects by Arabic name or stable code, assessments upsert on
+(year, class, weekday), already-enrolled students are enriched rather than
+duplicated, and a year that already has timetable slots is left untouched.
+`tests/official-seed.php` proves the exact counts (17 classes, 777 students,
+777 enrollments, 17 subjects, 507 slots, 45 assessment rows) and the
+second-run no-op on both MySQL and PostgreSQL.
+
+The printed grid lists teachers by first name only, so a handful of cells book
+the same name in two classes during one period. A teacher cannot be in two
+rooms at once (`uq_timetable_teacher_slot`), so the later cell is reported and
+skipped rather than invented -- 519 printed cells yield the same 507 stored
+slots the offline database has always had.
+
+Nothing from the reviewed package is guessed: names and grid cells come from
+the reviewed CSV/JSON files, never from the broken PDF font map.
+
+A database dump was written to `database/backups/` before the first import ran.
 
 ## 3. Not verified by an automated check
 

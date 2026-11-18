@@ -14,7 +14,7 @@ declare(strict_types=1);
  *
  * Usage:
  *   php bin/expand-roster-attributes.php --all [--dry-run]
- *   php bin/expand-roster-attributes.php docs/source/data/roster_A1.csv [--dry-run]
+ *   php bin/expand-roster-attributes.php database/official/roster_A1.csv [--dry-run]
  *
  * A UTF-8 JSON report (per class, including any unmatched printed name) is
  * written to storage/logs/ so the result can be inspected without a terminal
@@ -35,7 +35,7 @@ foreach (array_slice($argv, 1) as $arg) {
     }
 }
 if ($all || $paths === []) {
-    $paths = glob(dirname(__DIR__) . '/docs/source/data/roster_*.csv') ?: [];
+    $paths = glob(dirname(__DIR__) . '/database/official/roster_*.csv') ?: [];
 }
 if ($paths === []) {
     fwrite(STDERR, "No roster CSV files found.\n");

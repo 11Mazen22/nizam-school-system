@@ -38,9 +38,9 @@ recovery-token.json
 node_modules/
 /screenshots/
 
-# Official source package copies (large; extracted data lives in docs/source/data)
+# Official source package copies (large PDFs/PNGs). The normalized, reviewable
+# data the application imports and seeds from lives in database/official/.
 docs/source/rosters/
 docs/source/timetables/
-docs/source/weekly_assessments_A1_A9.json
 docs/source/source_reconciliation_report.json
 docs/source/SHA256SUMS.txt

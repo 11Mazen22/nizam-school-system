@@ -1,0 +1,487 @@
+{
+  "academic_year": "2026/2027",
+  "school": "مدرسة هضبة الأهرام الثانوية الرسمية لغات",
+  "classes": {
+    "A1": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "رياضيات",
+          "تاريخ",
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "رياضيات   •   تاريخ   •   لغة ثانية"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "برمجة"
+        ],
+        "subjects_cell_exact": "برمجة"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "عربي"
+        ],
+        "subjects_cell_exact": "عربي"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "فلسفة"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "علوم",
+          "إنجليزي"
+        ],
+        "subjects_cell_exact": "علوم   •   إنجليزي"
+      }
+    ],
+    "A2": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "رياضيات",
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "رياضيات   •   فلسفة"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "عربي",
+          "تاريخ"
+        ],
+        "subjects_cell_exact": "عربي   •   تاريخ"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "إنجليزي",
+          "برمجة"
+        ],
+        "subjects_cell_exact": "إنجليزي   •   برمجة"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "لغة ثانية"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "علوم"
+        ],
+        "subjects_cell_exact": "علوم"
+      }
+    ],
+    "A3": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "فلسفة"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "عربي",
+          "تاريخ",
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "عربي   •   تاريخ   •   لغة ثانية"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "إنجليزي"
+        ],
+        "subjects_cell_exact": "إنجليزي"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "رياضيات",
+          "برمجة"
+        ],
+        "subjects_cell_exact": "رياضيات   •   برمجة"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "علوم"
+        ],
+        "subjects_cell_exact": "علوم"
+      }
+    ],
+    "A4": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "إنجليزي",
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "إنجليزي   •   لغة ثانية"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "علوم"
+        ],
+        "subjects_cell_exact": "علوم"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "تاريخ",
+          "عربي"
+        ],
+        "subjects_cell_exact": "تاريخ   •   عربي"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "رياضيات",
+          "برمجة"
+        ],
+        "subjects_cell_exact": "رياضيات   •   برمجة"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "فلسفة"
+      }
+    ],
+    "A5": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "علوم",
+          "إنجليزي"
+        ],
+        "subjects_cell_exact": "علوم   •   إنجليزي"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "تاريخ",
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "تاريخ   •   فلسفة"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "عربي"
+        ],
+        "subjects_cell_exact": "عربي"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "لغة ثانية"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "رياضيات",
+          "برمجة"
+        ],
+        "subjects_cell_exact": "رياضيات   •   برمجة"
+      }
+    ],
+    "A6": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "علوم"
+        ],
+        "subjects_cell_exact": "علوم"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "فلسفة",
+          "إنجليزي"
+        ],
+        "subjects_cell_exact": "فلسفة   •   إنجليزي"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "عربي",
+          "تاريخ"
+        ],
+        "subjects_cell_exact": "عربي   •   تاريخ"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "برمجة"
+        ],
+        "subjects_cell_exact": "برمجة"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "رياضيات",
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "رياضيات   •   لغة ثانية"
+      }
+    ],
+    "A7": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "لغة ثانية"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "تاريخ",
+          "إنجليزي"
+        ],
+        "subjects_cell_exact": "تاريخ   •   إنجليزي"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "عربي",
+          "رياضيات"
+        ],
+        "subjects_cell_exact": "عربي   •   رياضيات"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "برمجة",
+          "علوم"
+        ],
+        "subjects_cell_exact": "برمجة   •   علوم"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "فلسفة"
+      }
+    ],
+    "A8": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "إنجليزي",
+          "تاريخ"
+        ],
+        "subjects_cell_exact": "إنجليزي   •   تاريخ"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "عربي",
+          "رياضيات"
+        ],
+        "subjects_cell_exact": "عربي   •   رياضيات"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "برمجة",
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "برمجة   •   فلسفة"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "علوم",
+          "لغة ثانية"
+        ],
+        "subjects_cell_exact": "علوم   •   لغة ثانية"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "لا يوجد تقييم مقرر"
+        ],
+        "subjects_cell_exact": "لا يوجد تقييم مقرر"
+      }
+    ],
+    "A9": [
+      {
+        "sequence": "1",
+        "weekday": "الأحد",
+        "subjects_exact": [
+          "إنجليزي",
+          "تاريخ"
+        ],
+        "subjects_cell_exact": "إنجليزي   •   تاريخ"
+      },
+      {
+        "sequence": "2",
+        "weekday": "الاثنين",
+        "subjects_exact": [
+          "فلسفة"
+        ],
+        "subjects_cell_exact": "فلسفة"
+      },
+      {
+        "sequence": "3",
+        "weekday": "الثلاثاء",
+        "subjects_exact": [
+          "علوم"
+        ],
+        "subjects_cell_exact": "علوم"
+      },
+      {
+        "sequence": "4",
+        "weekday": "الأربعاء",
+        "subjects_exact": [
+          "لغة ثانية",
+          "رياضيات"
+        ],
+        "subjects_cell_exact": "لغة ثانية   •   رياضيات"
+      },
+      {
+        "sequence": "5",
+        "weekday": "الخميس",
+        "subjects_exact": [
+          "برمجة",
+          "عربي"
+        ],
+        "subjects_cell_exact": "برمجة   •   عربي"
+      }
+    ]
+  },
+  "class_metadata": {
+    "A1": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A1.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A1.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A2": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A2.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A2.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A3": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A3.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A3.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A4": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A4.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A4.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A5": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A5.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A5.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A6": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A6.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A6.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A7": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A7.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A7.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A8": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A8.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A8.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    },
+    "A9": {
+      "source_docx": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/Word/جدول التقييمات - A9.docx",
+      "source_pdf": "source_files/assessment_zip_extracted/جداول التقييمات للفصول A1-A9 - 2026-2027/PDF/جدول التقييمات - A9.pdf",
+      "notice": "توزيع مواد التقييم على أيام الأسبوع طبقًا للجدول المعتمد",
+      "note": "ملحوظة: يُراعى الالتزام بتوزيع المواد الموضح أعلاه.",
+      "principal": "محمد رفعت",
+      "vice_principal": "فريال"
+    }
+  },
+  "source_integrity": "Extracted from nine Word files inside the assessment ZIP; PDFs were rendered/visually spot-checked and the assessment PDFs carry the same table content."
+}

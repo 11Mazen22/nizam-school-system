@@ -6,7 +6,7 @@ each table cell is read through its own clip rectangle: inside a cell the
 first line is the subject and the remaining line is the teacher. That matches
 the printed layout and avoids guessing word order.
 
-Run:  python tools/extract_timetables.py docs/source/timetables docs/source/data/timetables_17.json
+Run:  python tools/extract_timetables.py docs/source/timetables database/official/timetables_17.json
 """
 
 from __future__ import annotations
@@ -159,7 +159,7 @@ def read_page(pdf: Path) -> tuple[list[dict], list[str]]:
 
 def main() -> int:
     src = Path(sys.argv[1] if len(sys.argv) > 1 else "docs/source/timetables")
-    out = Path(sys.argv[2] if len(sys.argv) > 2 else "docs/source/data/timetables_17.json")
+    out = Path(sys.argv[2] if len(sys.argv) > 2 else "database/official/timetables_17.json")
     out.parent.mkdir(parents=True, exist_ok=True)
 
     classes, warnings = [], []

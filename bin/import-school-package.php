@@ -5,8 +5,10 @@ declare(strict_types=1);
 /**
  * Import the official 2026/2027 school package (Hadaba Al-Ahram).
  *
- *   php bin/import-school-package.php --source="<package dir>" --dry-run
- *   php bin/import-school-package.php --source="<package dir>"
+ *   php bin/import-school-package.php
+ *   php bin/import-school-package.php --dry-run
+ *   php bin/import-school-package.php --pathways=<file> --assessments=<file>
+ *   php bin/import-school-package.php --source="<original package dir>"
  *
  * What this imports, and only this:
  *   - the 17 canonical classes A1-A9 / B1-B8 with their exact Arabic pathway
@@ -14,13 +16,20 @@ declare(strict_types=1);
  *   - the nine A1-A9 weekly assessment distributions (45 weekday rows);
  *   - the subject catalogue those rows reference.
  *
+ * The canonical inputs ship with the application in database/official/:
+ * pathways.json and weekly_assessments_A1_A9.json. The older --source form is
+ * still accepted for the original package layout, where the pathway table
+ * lives in the master prompt and the assessments file sits under data/.
+ *
  * What it deliberately does NOT import:
  *   - student names. The roster PDFs have a broken font-to-Unicode map and the
  *     brief requires every name to be read from the rendered page and verified.
- *     Inventing them is worse than leaving the roster empty.
+ *     Inventing them is worse than leaving the roster empty. The reviewed CSV
+ *     rosters are imported by bin/import-roster-csv.php.
  *   - class timetables. The package ships them as PDFs and as scrambled page
  *     text; no structured cell data exists, so a blind parse would fabricate
- *     teacher/period assignments.
+ *     teacher/period assignments. The reviewed grid is imported by
+ *     bin/import-timetables.php.
  *
  * Every written row records its source document, class and version, and the
  * run itself is recorded in import_batches.
@@ -36,6 +45,7 @@ require dirname(__DIR__) . '/app/bootstrap.php';
 use App\Database;
 use App\Services\MigrationService;
 
+$root = dirname(__DIR__);
 $options = [];
 foreach (array_slice($argv, 1) as $arg) {
     if (str_starts_with($arg, '--')) {
@@ -44,17 +54,41 @@ foreach (array_slice($argv, 1) as $arg) {
     }
 }
 
-$source = (string) ($options['source'] ?? 'C:/Users/mazen/Downloads/Nizam_Complete_Prompt_and_Source_Data_2026-2027/Nizam_Complete_Prompt_Package');
 $dryRun = array_key_exists('dry-run', $options);
+$skipMigrations = array_key_exists('skip-migrations', $options);
+$source = (string) ($options['source'] ?? '');
+$pathwaysFile = (string) ($options['pathways'] ?? '');
+$assessmentsFile = (string) ($options['assessments'] ?? '');
 
-if (!is_dir($source)) {
-    fwrite(STDERR, "Package directory not found: {$source}\n");
-    exit(1);
+if ($source !== '') {
+    if (!is_dir($source)) {
+        fwrite(STDERR, "Package directory not found: {$source}\n");
+        exit(1);
+    }
+    // The original package keeps the pathway table in the master prompt and
+    // the assessments under data/. Use those when the caller did not name an
+    // explicit canonical file.
+    if ($pathwaysFile === '') {
+        $candidate = $source . '/Nizam_Master_Prompt_Full.md';
+        if (is_file($candidate)) {
+            $pathwaysFile = $candidate;
+        }
+    }
+    if ($assessmentsFile === '') {
+        $candidate = $source . '/data/weekly_assessments_A1_A9.json';
+        if (is_file($candidate)) {
+            $assessmentsFile = $candidate;
+        }
+    }
 }
 
-$promptFile = $source . '/Nizam_Master_Prompt_Full.md';
-$assessmentsFile = $source . '/data/weekly_assessments_A1_A9.json';
-foreach ([$promptFile, $assessmentsFile] as $file) {
+if ($pathwaysFile === '') {
+    $pathwaysFile = $root . '/database/official/pathways.json';
+}
+if ($assessmentsFile === '') {
+    $assessmentsFile = $root . '/database/official/weekly_assessments_A1_A9.json';
+}
+foreach ([$pathwaysFile, $assessmentsFile] as $file) {
     if (!is_file($file)) {
         fwrite(STDERR, "Missing source file: {$file}\n");
         exit(1);
@@ -62,29 +96,53 @@ foreach ([$promptFile, $assessmentsFile] as $file) {
 }
 
 // ---------------------------------------------------------------- pathways
-// The canonical table lives in §2.2 of the package prompt. Parsing it keeps
-// the labels source-derived instead of retyped by hand.
-$prompt = (string) file_get_contents($promptFile);
-// The supplied prompt file stores a literal \n inside most lines (on top of
-// the real line endings), which keeps its Markdown tables on one physical
-// line. Normalize both forms so the tables can be parsed.
-$prompt = str_replace('\\n', "\n", $prompt);
-$prompt = (string) preg_replace("/\n{3,}/", "\n\n", $prompt);
 $pathways = [];
-if (preg_match('/### 2\.2[^\n]*\n(.*?)### 2\.3/s', $prompt, $section) === 1) {
-    preg_match_all('/^\|\s*(A\d|B\d)\s*\|\s*([^|]+?)\s*\|/mu', $section[1], $matches, PREG_SET_ORDER);
-    foreach ($matches as $match) {
-        $pathways[$match[1]] = trim($match[2]);
+if (str_ends_with(strtolower($pathwaysFile), '.md')) {
+    // The supplied prompt file stores a literal \n inside most lines (on top
+    // of the real line endings), which keeps its Markdown tables on one
+    // physical line. Normalize both forms so the tables can be parsed.
+    $prompt = (string) file_get_contents($pathwaysFile);
+    $prompt = str_replace('\\n', "\n", $prompt);
+    $prompt = (string) preg_replace("/\n{3,}/", "\n\n", $prompt);
+    if (preg_match('/### 2\.2[^\n]*\n(.*?)### 2\.3/s', $prompt, $section) === 1) {
+        preg_match_all('/^\|\s*(A\d|B\d)\s*\|\s*([^|]+?)\s*\|/mu', $section[1], $matches, PREG_SET_ORDER);
+        foreach ($matches as $match) {
+            $pathways[strtoupper($match[1])] = trim($match[2]);
+        }
+    }
+} else {
+    try {
+        $decoded = json_decode((string) file_get_contents($pathwaysFile), true, 512, JSON_THROW_ON_ERROR);
+    } catch (Throwable $e) {
+        fwrite(STDERR, "Could not read {$pathwaysFile}: {$e->getMessage()}\n");
+        exit(1);
+    }
+    $rows = is_array($decoded) ? ($decoded['classes'] ?? $decoded) : [];
+    if (!is_array($rows)) {
+        fwrite(STDERR, "{$pathwaysFile} does not contain a class => pathway map.\n");
+        exit(1);
+    }
+    foreach ($rows as $name => $label) {
+        $name = strtoupper(trim((string) $name));
+        $label = trim((string) $label);
+        if (preg_match('/^[AB][1-9]$/', $name) === 1 && $label !== '') {
+            $pathways[$name] = $label;
+        }
     }
 }
 ksort($pathways);
 if (count($pathways) !== 17) {
-    fwrite(STDERR, 'Expected 17 pathway labels in the prompt, found ' . count($pathways) . ".\n");
+    fwrite(STDERR, 'Expected 17 pathway labels, found ' . count($pathways) . " in {$pathwaysFile}.\n");
     exit(1);
 }
 
 // -------------------------------------------------------------- assessments
-$assessmentData = json_decode((string) file_get_contents($assessmentsFile), true, 512, JSON_THROW_ON_ERROR);
+try {
+    $assessmentData = json_decode((string) file_get_contents($assessmentsFile), true, 512, JSON_THROW_ON_ERROR);
+} catch (Throwable $e) {
+    fwrite(STDERR, "Could not read {$assessmentsFile}: {$e->getMessage()}\n");
+    exit(1);
+}
 $classes = $assessmentData['classes'] ?? [];
 if (count($classes) !== 9) {
     fwrite(STDERR, 'Expected 9 assessment classes, found ' . count($classes) . ".\n");
@@ -108,12 +166,16 @@ $subjectDefinitions = [
 ];
 
 $pdo = Database::connection();
+$driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
-if (!$dryRun) {
-    // Apply pending migrations so a fresh install gets the tables too.
+if (!$dryRun && !$skipMigrations) {
+    // Apply pending migrations so a fresh install gets the tables too. The
+    // online entrypoint already migrated, so the seed runner passes
+    // --skip-migrations and never needs CREATE privileges.
+    $migrationsDir = $root . '/database/' . ($driver === 'pgsql' ? 'migrations-pg' : 'migrations');
     $migration = new MigrationService();
     $migration->bootstrapMigrationsTable($pdo);
-    $applied = $migration->run($pdo, dirname(__DIR__) . '/database/migrations');
+    $applied = $migration->run($pdo, $migrationsDir);
     if (($applied['applied'] ?? []) !== []) {
         echo 'Applied migrations: ' . implode(', ', $applied['applied']) . "\n";
     }
@@ -146,7 +208,7 @@ if ($firstSecondary === null || $secondSecondary === null) {
 }
 
 $report = [
-    'source_package' => $source,
+    'source_package' => $source !== '' ? basename($source) : 'database/official',
     'academic_year' => $year['label'],
     'pathways_parsed' => count($pathways),
     'classes_created' => 0,
@@ -157,7 +219,8 @@ $report = [
     'unmapped_subjects' => [],
 ];
 
-echo "Package: {$source}\n";
+echo "Pathways: {$pathwaysFile}\n";
+echo "Assessments: {$assessmentsFile}\n";
 echo "Academic year: {$year['label']} (id {$yearId})\n";
 echo 'Classes/pathways: ' . count($pathways) . "\n";
 echo $dryRun ? "MODE: dry run (nothing is written)\n\n" : "MODE: import\n\n";
@@ -204,6 +267,7 @@ $resolveSubject = static function (string $label) use (&$existingSubjects, &$exi
     $stmt->execute(['c' => $code, 'en' => $nameEn, 'ar' => $nameAr]);
     $id = (int) $pdo->lastInsertId();
     $existingSubjects[$nameAr] = $id;
+    $existingByCode[strtoupper($code)] = $id;
     $report['subjects_created'][] = "{$nameAr} ({$code})";
 
     return $id;
@@ -215,23 +279,25 @@ foreach ($subjectDefinitions as $label => [$code]) {
 }
 
 // ----------------------------------------------------------------- classes
-// A dry run skips migrations, so the new column may not exist yet.
-$hasPathway = false;
-foreach ($pdo->query('SHOW COLUMNS FROM classes') as $column) {
-    if ((string) $column['Field'] === 'pathway_ar') {
-        $hasPathway = true;
-        break;
-    }
+// A dry run skips migrations, so the new column may not exist yet. Asking for
+// the column is portable across MySQL and PostgreSQL; SHOW COLUMNS is not.
+$hasPathway = true;
+try {
+    $probe = $pdo->query('SELECT pathway_ar FROM classes WHERE 1 = 0');
+    $hasPathway = $probe !== false;
+} catch (Throwable) {
+    $hasPathway = false;
 }
-$classSelect = $hasPathway ? 'SELECT id, pathway_ar FROM classes' : 'SELECT id, NULL AS pathway_ar FROM classes';
+
+$classSelect = $hasPathway
+    ? 'SELECT id, pathway_ar FROM classes WHERE academic_year_id = :y AND grade_id = :g AND name = :n'
+    : 'SELECT id, NULL AS pathway_ar FROM classes WHERE academic_year_id = :y AND grade_id = :g AND name = :n';
 
 $classIds = [];
 foreach ($pathways as $className => $pathway) {
     $gradeId = $className[0] === 'A' ? $firstSecondary : $secondSecondary;
 
-    $stmt = $pdo->prepare(
-        str_replace('FROM classes', 'FROM classes WHERE academic_year_id = :y AND grade_id = :g AND name = :n', $classSelect)
-    );
+    $stmt = $pdo->prepare($classSelect);
     $stmt->execute(['y' => $yearId, 'g' => $gradeId, 'n' => $className]);
     $existing = $stmt->fetch();
 
@@ -266,6 +332,29 @@ foreach ($pathways as $className => $pathway) {
 
 // ------------------------------------------------------------- assessments
 $sourceDocument = 'جداول التقييمات للفصول A1-A9 - 2026-2027.zip';
+$upsert = null;
+if (!$dryRun) {
+    $sql = 'INSERT INTO assessment_schedules
+                (academic_year_id, class_id, day_of_week, sequence, subjects_raw, no_assessment, source_document, source_class, source_version)
+            VALUES (:y, :c, :d, :s, :raw, :none, :doc, :sc, :v)';
+    $sql .= $driver === 'pgsql'
+        ? ' ON CONFLICT (academic_year_id, class_id, day_of_week) DO UPDATE SET
+                sequence = EXCLUDED.sequence,
+                subjects_raw = EXCLUDED.subjects_raw,
+                no_assessment = EXCLUDED.no_assessment,
+                source_document = EXCLUDED.source_document,
+                source_class = EXCLUDED.source_class,
+                source_version = EXCLUDED.source_version'
+        : ' ON DUPLICATE KEY UPDATE
+                sequence = VALUES(sequence),
+                subjects_raw = VALUES(subjects_raw),
+                no_assessment = VALUES(no_assessment),
+                source_document = VALUES(source_document),
+                source_class = VALUES(source_class),
+                source_version = VALUES(source_version)';
+    $upsert = $pdo->prepare($sql);
+}
+
 foreach ($classes as $className => $rows) {
     $classId = $classIds[$className] ?? null;
     if ($classId === null && !$dryRun) {
@@ -298,18 +387,6 @@ foreach ($classes as $className => $rows) {
             continue;
         }
 
-        $upsert = $pdo->prepare(
-            'INSERT INTO assessment_schedules
-                (academic_year_id, class_id, day_of_week, sequence, subjects_raw, no_assessment, source_document, source_class, source_version)
-             VALUES (:y, :c, :d, :s, :raw, :none, :doc, :sc, :v)
-             ON DUPLICATE KEY UPDATE
-                sequence = VALUES(sequence),
-                subjects_raw = VALUES(subjects_raw),
-                no_assessment = VALUES(no_assessment),
-                source_document = VALUES(source_document),
-                source_class = VALUES(source_class),
-                source_version = VALUES(source_version)'
-        );
         $upsert->execute([
             'y' => $yearId,
             'c' => $classId,
@@ -333,15 +410,16 @@ if ($report['unmapped_subjects'] !== []) {
 }
 
 if (!$dryRun) {
-    $insert = $pdo->prepare(
-        'INSERT INTO import_batches (source_package, source_version, summary_json, imported_by) VALUES (:p, :v, :j, :by)'
-    );
+    $summary = json_encode($report, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    $batchSql = 'INSERT INTO import_batches (source_package, source_version, summary_json, imported_by)
+                 VALUES (:p, :v, ' . ($driver === 'pgsql' ? 'CAST(:j AS JSONB)' : ':j') . ', :by)';
+    $insert = $pdo->prepare($batchSql);
     $insert->execute([
-        'p' => basename($source),
+        'p' => $report['source_package'],
         'v' => '2026/2027',
-        'j' => json_encode($report, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+        'j' => $summary,
         'by' => 'cli',
     ]);
     echo "\nImport recorded as batch #" . $pdo->lastInsertId() . ".\n";
-    echo "Student rosters and class timetables were NOT imported: the package ships them as PDFs/images only.\n";
+    echo "Rosters and timetables are imported separately by bin/seed-official-data.php.\n";
 }

@@ -102,6 +102,21 @@ php -r '
     echo "Database runtime role verified.\n";
 '
 
+# One-time official school data. The marker lives on the persistent volume,
+# so a later restart never re-imports; the importers are independently
+# idempotent as a second guard. Seeding runs with the same least-privilege
+# runtime role as the application and must succeed before Apache starts --
+# a half-loaded school is worse than a held deployment.
+if [ "${NIZAM_SEED_OFFICIAL_DATA:-0}" = "1" ]; then
+    SEED_MARKER="$DATA_PATH/storage/official-data-seed.json"
+    if [ -f "$SEED_MARKER" ]; then
+        echo "Official school data already loaded ($SEED_MARKER)."
+    else
+        echo "Loading official 2026/2027 school data..."
+        php /var/www/html/bin/seed-official-data.php
+    fi
+fi
+
 # Execute the real dashboard/module read surface with the least-privilege
 # production connection. A dialect/schema regression fails this deployment
 # before Railway can promote it and send staff into a 500 page.

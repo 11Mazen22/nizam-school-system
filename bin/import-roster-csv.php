@@ -10,7 +10,7 @@ declare(strict_types=1);
  * the preview screen. Blank gender / date of birth / religion are stored as
  * NULL ("not recorded") because the official rosters print none of them.
  *
- * Usage: php bin/import-roster-csv.php docs/source/data/roster_A1.csv [--dry-run]
+ * Usage: php bin/import-roster-csv.php database/official/roster_A1.csv [--dry-run]
  */
 
 require dirname(__DIR__) . '/app/bootstrap.php';
@@ -49,21 +49,32 @@ $service = new RosterImportService();
 $parsed = $service->parse($path);
 $result = $service->validate($parsed);
 
-echo 'rows: ' . count($result['rows']) . "\n";
-echo 'ready: ' . $result['counts']['ok'] . ', duplicate: ' . $result['counts']['duplicate'] . ', error: ' . $result['counts']['error'] . "\n";
+echo basename($path) . ': ' . count($result['rows']) . " rows\n";
+echo '  ready: ' . $result['counts']['ok']
+    . ', already enrolled: ' . $result['counts']['duplicate']
+    . ', error: ' . $result['counts']['error'] . "\n";
 foreach ($result['rows'] as $row) {
-    if ($row['status'] !== 'ok') {
+    if ($row['status'] === 'error') {
         echo '  line ' . $row['line'] . ' ' . $row['name'] . ': ' . implode(', ', $row['messages']) . "\n";
     }
 }
+if ($result['counts']['error'] > 0) {
+    fwrite(STDERR, "Aborted: fix the {$result['counts']['error']} invalid row(s) above.\n");
+    exit(1);
+}
 
 if ($dryRun) {
-    echo "DRY RUN -- nothing written\n";
+    echo "  DRY RUN -- nothing written\n";
     exit(0);
 }
 
 $commit = $service->commit($result['rows']);
-echo 'created: ' . $commit['created'] . ', skipped: ' . $commit['skipped'] . "\n";
+echo '  created: ' . $commit['created'] . ', updated: ' . $commit['updated'] . ', skipped: ' . $commit['skipped'] . "\n";
 foreach ($commit['errors'] as $error) {
     echo '  ' . $error . "\n";
 }
+if ($commit['errors'] !== []) {
+    fwrite(STDERR, 'Aborted: ' . count($commit['errors']) . " row(s) could not be committed.\n");
+    exit(1);
+}
+

@@ -171,5 +171,70 @@ onlineCheck(
     'The readiness probe checks the schema without needing CREATE privileges'
 );
 
+// The official school package must ship with the cloud image, and the
+// entrypoint must load it. Without these checks a build can be green while
+// the live site comes up as an empty shell with different data from offline.
+$officialDir = $root . '/database/official';
+$officialRosters = glob($officialDir . '/roster_*.csv') ?: [];
+$pathwaysJson = json_decode((string) @file_get_contents($officialDir . '/pathways.json'), true);
+$timetablesJson = json_decode((string) @file_get_contents($officialDir . '/timetables_17.json'), true);
+$assessmentsJson = json_decode((string) @file_get_contents($officialDir . '/weekly_assessments_A1_A9.json'), true);
+$assessmentRows = 0;
+foreach (($assessmentsJson['classes'] ?? []) as $rows) {
+    $assessmentRows += count((array) $rows);
+}
+onlineCheck(
+    is_array($pathwaysJson) && count((array) ($pathwaysJson['classes'] ?? [])) === 17,
+    'Official package ships the 17 class pathway labels'
+);
+onlineCheck(count($officialRosters) === 17, 'Official package ships all 17 student rosters');
+onlineCheck(
+    is_array($timetablesJson) && count((array) ($timetablesJson['classes'] ?? [])) === 17,
+    'Official package ships all 17 class timetables'
+);
+onlineCheck($assessmentRows === 45, 'Official package ships the 45 weekly assessment rows');
+
+$dockerIgnore = (string) file_get_contents($root . '/.dockerignore');
+$officialDataExcluded = false;
+foreach (preg_split('/\R/', $dockerIgnore) ?: [] as $ignoreLine) {
+    $ignoreLine = trim($ignoreLine);
+    if (in_array($ignoreLine, [
+        'database', 'database/', 'database/**',
+        'database/official', 'database/official/', 'database/official/**',
+        '**/database', '**/database/official',
+    ], true)) {
+        $officialDataExcluded = true;
+    }
+}
+onlineCheck(
+    !$officialDataExcluded,
+    'The official data directory is not excluded from the cloud image'
+);
+onlineCheck(
+    str_contains($entrypoint, 'NIZAM_SEED_OFFICIAL_DATA')
+        && str_contains($entrypoint, 'bin/seed-official-data.php'),
+    'Container can seed the official school data on first boot'
+);
+onlineCheck(
+    str_contains($entrypoint, '$DATA_PATH/storage/official-data-seed.json'),
+    'Official seed marker lives on the persistent volume'
+);
+onlineCheck(
+    strpos($entrypoint, 'bin/seed-official-data.php') !== false
+        && strpos($entrypoint, 'bin/seed-official-data.php') < strpos($entrypoint, 'bin/production-smoke.php'),
+    'Official data is seeded before the production smoke check'
+);
+
+$seedRunner = (string) file_get_contents($root . '/bin/seed-official-data.php');
+onlineCheck(
+    str_contains($seedRunner, "'2026/2027'") && str_contains($seedRunner, 'official-data-seed.json'),
+    'The seed runner pins the official year and writes its completion marker'
+);
+$timetableImporter = (string) file_get_contents($root . '/bin/import-timetables.php');
+onlineCheck(
+    str_contains($timetableImporter, 'SAVEPOINT timetable_slot'),
+    'Timetable import keeps one rejected slot from aborting a PostgreSQL transaction'
+);
+
 echo "\n{$passed} passed, {$failed} failed.\n";
 exit($failed === 0 ? 0 : 1);

@@ -1,6 +1,6 @@
 # Nizam School System
 
-**Version 1.0.1** · Arabic-first, bilingual school operations platform
+**Version 1.1.0** · Arabic-first, bilingual school operations platform
 
 Nizam is a modular PHP school-management system for students, guardians,
 teachers, attendance, examinations, timetables, admissions, finance, HR,
@@ -116,8 +116,26 @@ class query that reads the pathway return a 500 on PostgreSQL.
 
 ### Official 2026/2027 package
 
-The school's package is loaded with idempotent commands; each one can be re-run
-safely and reports what it changed:
+The reviewed package ships inside the application in `database/official/` and
+is loaded in one verified step:
+
+```bash
+php bin/seed-official-data.php
+```
+
+It creates/activates the 2026/2027 year on an empty installation, imports the
+17 classes, 777 students, the subject catalogue, 45 assessment rows and the 17
+timetables (507 slots), verifies the resulting counts, and writes
+`storage/official-data-seed.json`. Re-running it on a seeded installation is a
+no-op, and the individual importers are idempotent as a second guard.
+
+The Railway image runs the same command once when
+`NIZAM_SEED_OFFICIAL_DATA=1`, so the live site carries exactly the same school
+data as the offline install. `tests/official-seed.php` proves the exact counts
+and the second-run no-op on both MySQL and PostgreSQL.
+
+The individual steps remain available for a single page or a repair; each one
+can be re-run safely and reports what it changed:
 
 ```bash
 php bin/import-roster-csv.php <file.csv>     # one printed roster page
