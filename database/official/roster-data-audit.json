@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "academic_year": "2026/2027",
   "source": "Rendered official roster pages under docs/source/rosters (human-reviewed) + the school's confirmed name-based religion classification for the 75 rows whose printed cell proves no religion.",
   "rules": {

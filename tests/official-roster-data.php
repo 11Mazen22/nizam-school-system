@@ -135,7 +135,7 @@ rosterDataCheck($languageSources === ['printed_cell' => 353, 'class_heading' => 
 
 $auditPath = $root . '/database/official/roster-data-audit.json';
 $audit = is_file($auditPath) ? json_decode((string) file_get_contents($auditPath), true) : null;
-rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 4, 'The committed roster audit is version 4', 'version=' . ($audit['version'] ?? 'null'));
+rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 5, 'The committed roster audit is version 5', 'version=' . ($audit['version'] ?? 'null'));
 rosterDataCheck(is_array($audit) && count((array) ($audit['source_image_sha256'] ?? [])) === 17, 'The audit pins all 17 source-image checksums');
 rosterDataCheck(is_array($audit) && ($audit['totals']['students'] ?? 0) === 778, 'The audit records the exact source total');
 

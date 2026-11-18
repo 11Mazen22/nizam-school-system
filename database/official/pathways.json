@@ -1,6 +1,8 @@
 {
     "source": "Official 2026/2027 class pathway labels, transcribed from the printed roster headings (Hadaba Al-Ahram Language School).",
     "academic_year": "2026/2027",
+    "class_capacity": 50,
+    "class_capacity_source": "School-confirmed maximum of 50 students in every class section for 2026/2027.",
     "classes": {
         "A1": "ألماني - فرنساوي",
         "A2": "ألماني - فرنساوي",

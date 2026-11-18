@@ -254,7 +254,8 @@ The reviewed official package ships inside the application in
 exactly the same school data:
 
 - **17 class pathway labels** A1-A9 / B1-B8 (`pathways.json`), mapped to the
-  first/second secondary grades.
+  first/second secondary grades, with the school-confirmed 50-student maximum
+  capacity applied to every section.
 - **17 reviewed student rosters** (`roster_*.csv`): 778 populated source rows and their
   enrollments in those classes.
 - **17 class timetables** (`timetables_17.json`): 507 teaching slots and the

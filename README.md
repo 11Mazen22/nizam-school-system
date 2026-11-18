@@ -125,7 +125,8 @@ php bin/seed-official-data.php
 
 It creates/activates the 2026/2027 year on an empty installation, imports the
 17 classes, 778 populated roster rows, the subject catalogue, 45 assessment rows and the 17
-timetables (507 slots), verifies the resulting counts, and writes
+timetables (507 slots), sets the school-confirmed maximum of 50 students per
+class, verifies the resulting counts, and writes
 `storage/official-data-seed.json`. Re-running it on a seeded installation is a
 no-op, and the individual importers are idempotent as a second guard.
 

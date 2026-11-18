@@ -16,7 +16,8 @@ declare(strict_types=1);
  * teaching load derived from them.
  *
  * Every step is idempotent:
- *   - classes are matched by year/grade/name and only their pathway is updated;
+ *   - classes are matched by year/grade/name and their pathway and the
+ *     school-confirmed 50-student capacity are applied;
  *   - subjects are matched by Arabic name or stable code;
  *   - assessments upsert on (year, class, weekday);
  *   - an already-enrolled student is enriched, never duplicated;
@@ -52,7 +53,7 @@ $force = array_key_exists('force', $options);
 $replaceTimetables = array_key_exists('replace-timetables', $options);
 $dataDir = rtrim((string) ($options['data-dir'] ?? $root . '/database/official'), '/\\');
 $markerPath = (string) ($options['marker'] ?? dataPath() . '/storage/official-data-seed.json');
-$officialDataVersion = 4;
+$officialDataVersion = 5;
 
 /**
  * Run one importer as a child process, streaming its output into this log.
@@ -82,6 +83,7 @@ function recordCounts(PDO $pdo, int $yearId): array
 {
     return [
         'classes' => (int) $pdo->query('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId)->fetchColumn(),
+        'classes_with_capacity' => (int) $pdo->query('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId . ' AND capacity = 50')->fetchColumn(),
         'students_in_year' => (int) $pdo->query('SELECT COUNT(DISTINCT student_id) FROM student_enrollments WHERE academic_year_id = ' . $yearId)->fetchColumn(),
         'enrollments' => (int) $pdo->query('SELECT COUNT(*) FROM student_enrollments WHERE academic_year_id = ' . $yearId)->fetchColumn(),
         'teachers' => (int) $pdo->query('SELECT COUNT(*) FROM teachers')->fetchColumn(),
@@ -211,7 +213,7 @@ try {
     if ((int) ($rosterAudit['version'] ?? 0) !== $officialDataVersion
         || (int) ($rosterAudit['totals']['students'] ?? 0) !== 778
         || (int) ($rosterAudit['totals']['gender_confirmed'] ?? 0) !== 778) {
-        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-4 package.');
+        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-5 package.');
     }
 
     $rosterRows = 0;
@@ -350,6 +352,9 @@ try {
     $problems = [];
     if ($counts['classes'] < 17) {
         $problems[] = "only {$counts['classes']} of the 17 classes exist";
+    }
+    if ($counts['classes_with_capacity'] !== 17) {
+        $problems[] = "{$counts['classes_with_capacity']} of 17 classes carry the school-confirmed 50-student capacity";
     }
     if ($counts['subjects'] < 17) {
         $problems[] = "only {$counts['subjects']} of the 17 official subjects exist";

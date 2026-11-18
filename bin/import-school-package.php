@@ -12,7 +12,8 @@ declare(strict_types=1);
  *
  * What this imports, and only this:
  *   - the 17 canonical classes A1-A9 / B1-B8 with their exact Arabic pathway
- *     labels, mapped to the first/second secondary grade;
+ *     labels, mapped to the first/second secondary grade, and the school's
+ *     confirmed maximum capacity of 50 students per class;
  *   - the nine A1-A9 weekly assessment distributions (45 weekday rows);
  *   - the subject catalogue those rows reference.
  *
@@ -97,6 +98,7 @@ foreach ([$pathwaysFile, $assessmentsFile] as $file) {
 
 // ---------------------------------------------------------------- pathways
 $pathways = [];
+$classCapacity = null;
 if (str_ends_with(strtolower($pathwaysFile), '.md')) {
     // The supplied prompt file stores a literal \n inside most lines (on top
     // of the real line endings), which keeps its Markdown tables on one
@@ -118,6 +120,8 @@ if (str_ends_with(strtolower($pathwaysFile), '.md')) {
         exit(1);
     }
     $rows = is_array($decoded) ? ($decoded['classes'] ?? $decoded) : [];
+    $capacityRaw = is_array($decoded) ? ($decoded['class_capacity'] ?? null) : null;
+    $classCapacity = is_numeric($capacityRaw) ? max(1, (int) $capacityRaw) : null;
     if (!is_array($rows)) {
         fwrite(STDERR, "{$pathwaysFile} does not contain a class => pathway map.\n");
         exit(1);
@@ -290,8 +294,8 @@ try {
 }
 
 $classSelect = $hasPathway
-    ? 'SELECT id, pathway_ar FROM classes WHERE academic_year_id = :y AND grade_id = :g AND name = :n'
-    : 'SELECT id, NULL AS pathway_ar FROM classes WHERE academic_year_id = :y AND grade_id = :g AND name = :n';
+    ? 'SELECT id, pathway_ar, capacity FROM classes WHERE academic_year_id = :y AND grade_id = :g AND name = :n'
+    : 'SELECT id, NULL AS pathway_ar, capacity FROM classes WHERE academic_year_id = :y AND grade_id = :g AND name = :n';
 
 $classIds = [];
 foreach ($pathways as $className => $pathway) {
@@ -311,6 +315,14 @@ foreach ($pathways as $className => $pathway) {
             $report['classes_updated']++;
             echo "  update {$className}: pathway => {$pathway}\n";
         }
+        if ($classCapacity !== null && (int) ($existing['capacity'] ?? 0) !== $classCapacity) {
+            if (!$dryRun) {
+                $update = $pdo->prepare('UPDATE classes SET capacity = :cap WHERE id = :id');
+                $update->execute(['cap' => $classCapacity, 'id' => $existing['id']]);
+            }
+            $report['classes_updated']++;
+            echo "  update {$className}: capacity => {$classCapacity}\n";
+        }
         continue;
     }
 
@@ -321,10 +333,10 @@ foreach ($pathways as $className => $pathway) {
     }
 
     $insert = $pdo->prepare(
-        'INSERT INTO classes (grade_id, academic_year_id, name, pathway_ar, is_active)
-         VALUES (:g, :y, :n, :p, 1)'
+        'INSERT INTO classes (grade_id, academic_year_id, name, pathway_ar, capacity, is_active)
+         VALUES (:g, :y, :n, :p, :cap, 1)'
     );
-    $insert->execute(['g' => $gradeId, 'y' => $yearId, 'n' => $className, 'p' => $pathway]);
+    $insert->execute(['g' => $gradeId, 'y' => $yearId, 'n' => $className, 'p' => $pathway, 'cap' => $classCapacity]);
     $classIds[$className] = (int) $pdo->lastInsertId();
     $report['classes_created']++;
     echo "  create {$className}: {$pathway}\n";
@@ -403,6 +415,7 @@ foreach ($classes as $className => $rows) {
 
 echo "\n";
 echo "Classes created: {$report['classes_created']}, updated: {$report['classes_updated']}\n";
+echo 'Class capacity: ' . ($classCapacity !== null ? "{$classCapacity} students (school-confirmed)" : 'not declared in this package') . "\n";
 echo "Assessment rows: {$report['assessment_rows']} ({$report['no_assessment_rows']} explicit no-assessment)\n";
 echo 'Subjects created: ' . (count($report['subjects_created']) ? implode(', ', $report['subjects_created']) : 'none') . "\n";
 if ($report['unmapped_subjects'] !== []) {

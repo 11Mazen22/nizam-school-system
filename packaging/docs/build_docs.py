@@ -203,8 +203,8 @@ admin_guide += [
     p("The installer also carries the school's official 2026/2027 data. After finishing the wizard, open "
       "<b>Load Official School Data</b> from the Windows Start menu once. It loads the 17 classes, the 778 "
       "student rosters, the subject catalogue, the weekly assessment plan and all 17 class timetables, then "
-      "verifies the result. The command is safe to run again: it never duplicates a class, student, lesson, "
-      "teacher, subject or assessment."),
+      "verifies the result. Each class carries the school's confirmed maximum of 50 students. The command is "
+      "safe to run again: it never duplicates a class, student, lesson, teacher, subject or assessment."),
     note("The official pages prove gender for all 778 students and religion for all 778 -- 703 from the printed source "
          "rules and 75 from the school's confirmed name-based classification -- plus second language for 424. Every "
          "birth date and every guardian link stays marked as not recorded until the school supplies them; Nizam "

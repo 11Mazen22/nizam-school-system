@@ -267,9 +267,12 @@ try {
     $pathwayCount = $count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND pathway_ar IS NOT NULL AND pathway_ar <> ''");
     seedCheck($pathwayCount === 17, 'Every class carries its official Arabic pathway label', (string) $pathwayCount);
 
+    $capacityCount = $count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND capacity = 50");
+    seedCheck($capacityCount === 17, 'All 17 official classes carry the school-confirmed 50-student capacity', (string) $capacityCount);
+
     $marker = is_file($markerOne) ? json_decode((string) file_get_contents($markerOne), true) : null;
     seedCheck(is_array($marker) && ($marker['academic_year'] ?? '') === '2026/2027', 'The seed marker records the official year');
-    seedCheck(is_array($marker) && (int) ($marker['official_data_version'] ?? 0) === 4, 'The marker records reviewed data version 4');
+    seedCheck(is_array($marker) && (int) ($marker['official_data_version'] ?? 0) === 5, 'The marker records reviewed data version 5');
     seedCheck(is_array($marker) && (int) ($marker['counts']['students_in_year'] ?? 0) === 778, 'The marker records the verified student count');
 
     // Second run with a different marker: exercises the importers' own

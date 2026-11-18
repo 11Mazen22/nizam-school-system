@@ -188,10 +188,14 @@ onlineCheck(
     is_array($pathwaysJson) && count((array) ($pathwaysJson['classes'] ?? [])) === 17,
     'Official package ships the 17 class pathway labels'
 );
+onlineCheck(
+    is_array($pathwaysJson) && (int) ($pathwaysJson['class_capacity'] ?? 0) === 50,
+    'Official package declares the school-confirmed 50-student class capacity'
+);
 onlineCheck(count($officialRosters) === 17, 'Official package ships all 17 student rosters');
 onlineCheck(
     is_array($rosterAuditJson)
-        && (int) ($rosterAuditJson['version'] ?? 0) === 4
+        && (int) ($rosterAuditJson['version'] ?? 0) === 5
         && (int) ($rosterAuditJson['totals']['students'] ?? 0) === 778
         && (int) ($rosterAuditJson['totals']['religion_confirmed'] ?? 0) === 778
         && (int) ($rosterAuditJson['totals']['gender_confirmed'] ?? 0) === 778,
