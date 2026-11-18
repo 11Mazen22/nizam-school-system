@@ -129,7 +129,7 @@ final class RosterImportService
      *   counts: array{ok:int, duplicate:int, error:int}
      * }
      */
-    public function validate(array $rows): array
+    public function validate(array $rows, bool $officialReviewed = false): array
     {
         $pdo = Database::connection();
         $yearId = AcademicYearContext::activeYearId();
@@ -158,6 +158,11 @@ final class RosterImportService
             $gender = $this->normalizeGender((string) ($data['Gender (M/F)'] ?? ''));
             $dob = $this->normalizeDate((string) ($data['Date of Birth (YYYY-MM-DD)'] ?? ''));
             $religion = $this->normalizeReligion((string) ($data['Religion'] ?? ''));
+            [$secondLanguage, $secondLanguageSource] = $this->normalizeSecondLanguage(
+                (string) ($data['Class Attribute'] ?? ''),
+                $className
+            );
+            $officialRow = $officialReviewed && $this->isOfficialReviewedRow((string) ($data['Notes'] ?? ''));
 
             if ($name === '') {
                 $messages[] = 'name_required';
@@ -216,6 +221,13 @@ final class RosterImportService
                     '_gender' => $gender,
                     '_dob' => $dob,
                     '_religion' => $religion,
+                    '_gender_source' => $gender !== null ? ($officialRow ? 'official_roster_layout' : 'imported_csv') : null,
+                    '_religion_source' => $officialRow
+                        ? ($religion !== null ? 'official_roster_rule_v2' : 'official_roster_unconfirmed_v2')
+                        : ($religion !== null ? 'imported_csv' : null),
+                    '_second_language' => $secondLanguage,
+                    '_second_language_source' => $secondLanguageSource,
+                    '_official_reviewed' => $officialRow,
                     '_grade_id' => $classes[$className]['grade_id'] ?? 0,
                     '_class_id' => $classes[$className]['id'] ?? 0,
                     '_existing_id' => $existingId,
@@ -274,10 +286,23 @@ final class RosterImportService
                     );
 
                     $update = $pdo->prepare(
-                        'UPDATE students SET class_attribute_raw = :attr, import_source = :src WHERE id = :id'
+                        'UPDATE students
+                         SET class_attribute_raw = :attr,
+                             class_attribute_source = :attribute_source,
+                             gender_source = :gender_source,
+                             religion_source = :religion_source,
+                             second_language = :second_language,
+                             second_language_source = :second_language_source,
+                             import_source = :src
+                         WHERE id = :id'
                     );
                     $update->execute([
                         'attr' => trim((string) ($row['data']['Class Attribute'] ?? '')) ?: null,
+                        'attribute_source' => trim((string) ($row['data']['Class Attribute'] ?? '')) !== '' ? 'printed' : null,
+                        'gender_source' => $row['data']['_gender_source'] ?? null,
+                        'religion_source' => $row['data']['_religion_source'] ?? null,
+                        'second_language' => $row['data']['_second_language'] ?? null,
+                        'second_language_source' => $row['data']['_second_language_source'] ?? null,
                         'src' => 'roster_csv',
                         'id' => $studentId,
                     ]);
@@ -308,9 +333,17 @@ final class RosterImportService
     {
         $sets = [];
         $params = ['id' => $studentId];
+        $officialReviewed = (bool) ($data['_official_reviewed'] ?? false);
 
         $gender = (string) ($data['_gender'] ?? '');
-        if ($gender !== '') {
+        if ($officialReviewed && $gender !== '') {
+            $sets[] = 'gender = :gender';
+            $sets[] = 'gender_source = :gender_source';
+            $params['gender'] = $gender;
+            $params['gender_source'] = (string) ($data['_gender_source'] ?? 'official_roster_layout');
+        } elseif ($gender !== '') {
+            $sets[] = 'gender_source = CASE WHEN gender IS NULL THEN COALESCE(gender_source, :gender_source) ELSE gender_source END';
+            $params['gender_source'] = (string) ($data['_gender_source'] ?? 'imported_csv');
             $sets[] = 'gender = COALESCE(gender, :gender)';
             $params['gender'] = $gender;
         }
@@ -322,13 +355,37 @@ final class RosterImportService
         }
 
         $religion = (string) ($data['_religion'] ?? '');
-        if ($religion !== '') {
+        if ($officialReviewed) {
+            // Version 2 is the reviewed authoritative roster. This also
+            // clears values an older carry-forward pass inferred on B6/B8 or
+            // unlegended shorthand; leaving those guesses would be worse than
+            // an honest NULL.
+            $sets[] = 'religion = :official_religion';
+            $sets[] = 'religion_source = :religion_source';
+            $params['official_religion'] = $religion !== '' ? $religion : null;
+            $params['religion_source'] = (string) ($data['_religion_source'] ?? 'official_roster_unconfirmed_v2');
+        } elseif ($religion !== '') {
+            $sets[] = 'religion_source = CASE WHEN religion IS NULL THEN COALESCE(religion_source, :religion_source) ELSE religion_source END';
+            $params['religion_source'] = (string) ($data['_religion_source'] ?? 'imported_csv');
             $sets[] = 'religion = COALESCE(religion, :religion)';
             $params['religion'] = $religion;
         }
 
+        $secondLanguage = (string) ($data['_second_language'] ?? '');
+        if ($secondLanguage !== '') {
+            $sets[] = 'second_language_source = CASE WHEN second_language IS NULL THEN COALESCE(second_language_source, :second_language_source) ELSE second_language_source END';
+            $params['second_language_source'] = (string) ($data['_second_language_source'] ?? 'printed_cell');
+            $sets[] = 'second_language = COALESCE(second_language, :second_language)';
+            $params['second_language'] = $secondLanguage;
+        }
+
         $attribute = trim((string) ($data['Class Attribute'] ?? ''));
-        if ($attribute !== '') {
+        if ($officialReviewed) {
+            $sets[] = 'class_attribute_raw = :official_attribute';
+            $sets[] = 'class_attribute_source = :official_attribute_source';
+            $params['official_attribute'] = $attribute !== '' ? $attribute : null;
+            $params['official_attribute_source'] = $attribute !== '' ? 'printed' : null;
+        } elseif ($attribute !== '') {
             $sets[] = "class_attribute_raw = CASE WHEN class_attribute_raw IS NULL OR class_attribute_raw = '' THEN :attribute ELSE class_attribute_raw END";
             $params['attribute'] = $attribute;
         }
@@ -415,5 +472,34 @@ final class RosterImportService
             in_array($value, ['other', 'أخرى', 'اخرى'], true) => 'other',
             default => null,
         };
+    }
+
+    /** @return array{0:?string,1:?string} */
+    private function normalizeSecondLanguage(string $raw, string $className): array
+    {
+        $compact = (string) preg_replace('/\s+/u', '', trim($raw));
+        if (str_contains($compact, 'المانى')) {
+            return ['german', 'printed_cell'];
+        }
+        if (str_contains($compact, 'فرنسى') || str_contains($compact, 'فرنساوى')) {
+            return ['french', 'printed_cell'];
+        }
+        if (str_contains($compact, 'اسبانى')) {
+            return ['spanish', 'printed_cell'];
+        }
+
+        if ($className === 'A7' && trim($raw) === '') {
+            return ['german', 'class_heading'];
+        }
+        if ($className === 'A9') {
+            return ['spanish', 'class_heading'];
+        }
+
+        return [null, null];
+    }
+
+    private function isOfficialReviewedRow(string $notes): bool
+    {
+        return preg_match('/\brow\s+[RL]\d+\b/i', $notes) === 1;
     }
 }

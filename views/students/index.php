@@ -109,10 +109,26 @@ require dirname(__DIR__) . '/layout/start.php';
 
   <?php if ($lastPage > 1): ?>
     <?php $queryString = $q !== '' ? '&q=' . urlencode($q) : ''; if ($gradeId > 0) $queryString .= '&grade_id=' . $gradeId; if ($classId > 0) $queryString .= '&class_id=' . $classId; if ($missing !== '') $queryString .= '&missing=' . urlencode($missing); ?>
-    <nav aria-label="Students pagination" class="mt-3"><ul class="pagination justify-content-center">
-      <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>"><a class="page-link" href="/students?page=<?= $page - 1 ?><?= $queryString ?>"><?= icon('chevron-left', 'n-flip-rtl') ?></a></li>
-      <?php for ($p = 1; $p <= $lastPage; $p++): ?><li class="page-item <?= $p === $page ? 'active' : '' ?>"><a class="page-link" href="/students?page=<?= $p ?><?= $queryString ?>"><?= $p ?></a></li><?php endfor; ?>
-      <li class="page-item <?= $page >= $lastPage ? 'disabled' : '' ?>"><a class="page-link" href="/students?page=<?= $page + 1 ?><?= $queryString ?>"><?= icon('chevron-right', 'n-flip-rtl') ?></a></li>
+    <?php
+    // Keep large schools usable: first/last + a five-page window, with one
+    // ellipsis per gap. Rendering all 39+ page buttons wraps across the card
+    // and makes every in-place page change visually jumpy.
+    $visiblePages = [1, $lastPage];
+    for ($candidate = max(1, $page - 2); $candidate <= min($lastPage, $page + 2); $candidate++) {
+        $visiblePages[] = $candidate;
+    }
+    $visiblePages = array_values(array_unique($visiblePages));
+    sort($visiblePages);
+    ?>
+    <nav aria-label="Students pagination" class="mt-3"><ul class="pagination justify-content-center flex-wrap" data-compact-pagination>
+      <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>"><a class="page-link" href="/students?page=<?= max(1, $page - 1) ?><?= $queryString ?>" aria-label="<?= e(__('common.back')) ?>"><?= icon('chevron-left', 'n-flip-rtl') ?></a></li>
+      <?php $previousPage = null; foreach ($visiblePages as $p): ?>
+        <?php if ($previousPage !== null && $p > $previousPage + 1): ?><li class="page-item disabled" aria-hidden="true"><span class="page-link">…</span></li><?php endif; ?>
+        <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+          <?php if ($p === $page): ?><span class="page-link" aria-current="page"><?= $p ?></span><?php else: ?><a class="page-link" href="/students?page=<?= $p ?><?= $queryString ?>"><?= $p ?></a><?php endif; ?>
+        </li>
+      <?php $previousPage = $p; endforeach; ?>
+      <li class="page-item <?= $page >= $lastPage ? 'disabled' : '' ?>"><a class="page-link" href="/students?page=<?= min($lastPage, $page + 1) ?><?= $queryString ?>" aria-label="<?= e(__('common.next')) ?>"><?= icon('chevron-right', 'n-flip-rtl') ?></a></li>
     </ul></nav>
     <p class="text-center text-muted small" dir="ltr"><?= e(sprintf('%d–%d / %d', ($page - 1) * $perPage + 1, min($page * $perPage, $total), $total)) ?></p>
   <?php endif; ?>

@@ -148,6 +148,11 @@ try {
     check(in_array('mfa_secret', $userColumns, true) && in_array('mfa_enabled_at', $userColumns, true), 'Migration 034 adds the two-factor columns');
     $classColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'classes'")->fetchAll(PDO::FETCH_COLUMN);
     check(in_array('pathway_ar', $classColumns, true), 'Migration 032 adds the class pathway label');
+    $studentColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'students'")->fetchAll(PDO::FETCH_COLUMN);
+    check(
+        count(array_intersect(['gender_source', 'religion_source', 'second_language', 'second_language_source'], $studentColumns)) === 4,
+        'Migration 036 adds the structured roster values and provenance'
+    );
 
     $yearId = (int) $pdo->query('SELECT id FROM academic_years WHERE is_active = 1 LIMIT 1')->fetchColumn();
     $gradeId = (int) $pdo->query('SELECT id FROM grades ORDER BY sort_order LIMIT 1')->fetchColumn();

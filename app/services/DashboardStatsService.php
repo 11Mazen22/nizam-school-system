@@ -52,17 +52,12 @@ final class DashboardStatsService
         $pendingAttendance = hasPermission('attendance.view') ? $this->repository->classesWithoutAttendance($yearId, date('Y-m-d')) : [];
         $capacity = hasPermission('classes.view') ? (new ClassRepository())->densityForYear($yearId, null) : [];
 
-        // Action Center Items
+        // Action Center Items. Missing attendance is deliberately not copied
+        // into this array: the dashboard renders $pendingAttendance itself so
+        // it can show the localized grade/class label and attendance action.
+        // Adding the same rows here made every unrecorded class appear twice
+        // and doubled the attention badge on a new school day.
         $actionItems = [];
-        foreach ($pendingAttendance as $pa) {
-            $actionItems[] = [
-                'type'        => 'attendance',
-                'severity'    => 'warning',
-                'title_key'   => 'dashboard.action_pending_attendance',
-                'description' => ($pa['class_name'] ?? 'Class'),
-                'url'         => '/attendance?class_id=' . (int) ($pa['class_id'] ?? 0),
-            ];
-        }
 
         // Admissions pipeline alerts
         $admissionsCounts = null;

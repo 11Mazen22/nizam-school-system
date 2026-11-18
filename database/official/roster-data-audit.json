@@ -1,0 +1,92 @@
+{
+  "version": 2,
+  "academic_year": "2026/2027",
+  "source": "Rendered official roster pages under docs/source/rosters (human-reviewed)",
+  "rules": {
+    "gender": "M/F is derived from the visually reviewed roster section for each exact R/L row address; never from a name alone.",
+    "religion": "Uses the confirmed page default / exception convention and the confirmed م- Christian marker. B6/B8 and unlegended ج-/ح- shorthand remain null; names are never used.",
+    "second_language": "Normalized only from an explicit language word; A7 blank rows and all A9 rows use their unambiguous class heading. Ambiguous shorthand is not decoded.",
+    "date_of_birth": "Not present in the source; remains null."
+  },
+  "source_rule_confirmations": [
+    "B5 prints مسلم once as the default for every populated student on that page unless another religion is printed.",
+    "The م- prefix in the combined A-page cell is the Christian marker; its suffix remains the printed second language."
+  ],
+  "restored_source_rows": [
+    {
+      "class": "B5",
+      "position": "L17",
+      "full_name": "ريماس فاروق اسماعيل حسن",
+      "reason": "Visible populated row in the official image; absent from the earlier CSV transcription."
+    }
+  ],
+  "totals": {
+    "students": 778,
+    "classes": 17,
+    "gender_confirmed": 778,
+    "gender": {
+      "F": 360,
+      "M": 418
+    },
+    "religion_confirmed": 703,
+    "religion": {
+      "christian": 52,
+      "muslim": 651
+    },
+    "religion_source": {
+      "combined_marker": 37,
+      "page_convention": 373,
+      "page_default": 252,
+      "printed_explicit": 41
+    },
+    "second_language_confirmed": 424,
+    "second_language": {
+      "french": 85,
+      "german": 284,
+      "spanish": 55
+    },
+    "second_language_source": {
+      "class_heading": 71,
+      "printed_cell": 353
+    },
+    "date_of_birth_confirmed": 0
+  },
+  "class_counts": {
+    "A1": 46,
+    "A2": 49,
+    "A3": 47,
+    "A4": 49,
+    "A5": 48,
+    "A6": 48,
+    "A7": 43,
+    "A8": 38,
+    "A9": 49,
+    "B1": 49,
+    "B2": 49,
+    "B3": 49,
+    "B4": 48,
+    "B5": 49,
+    "B6": 47,
+    "B7": 43,
+    "B8": 27
+  },
+  "source_image_sha256": {
+    "A1": "208c0d5866adacdaaae1578501cbacc9b2bc65cacb304174cf24ddb101a28b9e",
+    "A2": "3745dddd1567b083e8739c68aacf35382c98f4b2afa9309a9a6123b3907314df",
+    "A3": "15df6f49220a7574f52304cdc08417d6b1e76003de92937ea14b03a7cd9ffbc2",
+    "A4": "74399f2db98048c5dd0e64048156c6ba05ee1b1c765ac1e33b2c61f85f87f702",
+    "A5": "8c220febb2398c94880e65bb5170949a97ef0a9afb606835ee23d469d53ae0a3",
+    "A6": "6ca37b10b230351be7b891823cf5d644deea1d885c425c31f8106c47b6964e03",
+    "A7": "606429c71bd3def89ac41b74a23290d55bfe8529b60a6ed779c6479c9950435b",
+    "A8": "923dcaf362d8a9d24b780c47ee67a64248dbffbc94732439b7cc1b33a0693165",
+    "A9": "c060e4fea2e66021f8a4aa7e023f2866655f1be97efced93ff624ef51710f654",
+    "B1": "d1ede0ef3a5ecc6ae9387a0c9ed6ef501f9954ab241bc12eca5667ba1be7c3fe",
+    "B2": "f4e94f9894128aeba49838ca4368ecd7cd5145a5d719dd58d233316e4201bfc1",
+    "B3": "514e8baa3fb930732dd60c1b052d22e91df76049f78193ca8c13167bb947cb42",
+    "B4": "1f3b769c7198fb66ba1344b98f944385186f24e11e21d8b84b5615b663bf8422",
+    "B5": "a6d28578d88a26ee116fcea2392b73774559693879b4bb700f492c98257c837b",
+    "B6": "366c5402aaf152570409a52fc2d5d05c010c2659bbb50734927a838aebbaac3b",
+    "B7": "ff8550aa5389ff69e9049cd5afcbc39170459aa8986c5b4756f2c6d24e10097a",
+    "B8": "aec621f86c32a0591e24875bb938ca615ffd91f0388d186d1221ab75c0d1113b"
+  }
+}

@@ -141,7 +141,7 @@ final class StudentRepository
 
     /**
      * Every active student in the year with their class, for the enrichment
-     * template. The template gives the school one file with all 777 names and
+     * template. The template gives the school one file with every active name and
      * blank columns to fill, instead of editing profiles one by one.
      *
      * @return array<int, array<string, mixed>>
@@ -249,10 +249,16 @@ final class StudentRepository
         // built from this id.
         $id = Database::insert(
             $pdo,
-            'INSERT INTO students (student_code, full_name, gender, date_of_birth, religion, phone, guardian_phone, address, notes, status)
-             VALUES (\'\', :name, :gender, :dob, :religion, :phone, :guardian, :address, :notes, \'active\')',
+            'INSERT INTO students
+                (student_code, full_name, gender, gender_source, date_of_birth, religion, religion_source,
+                 phone, guardian_phone, address, notes, status)
+             VALUES
+                (\'\', :name, :gender, :gender_source, :dob, :religion, :religion_source,
+                 :phone, :guardian, :address, :notes, \'active\')',
             [
                 'name' => $fullName, 'gender' => $gender, 'dob' => $dateOfBirth, 'religion' => $religion,
+                'gender_source' => $gender !== null ? 'manual' : null,
+                'religion_source' => $religion !== null ? 'manual' : null,
                 'phone' => $phone, 'guardian' => $guardianPhone, 'address' => $address, 'notes' => $notes,
             ]
         );
@@ -276,8 +282,18 @@ final class StudentRepository
         ?string $notes
     ): void {
         $stmt = Database::connection()->prepare(
-            'UPDATE students SET full_name = :name, gender = :gender, date_of_birth = :dob, religion = :religion,
-             phone = :phone, guardian_phone = :guardian, address = :address, notes = :notes WHERE id = :id'
+            'UPDATE students
+             SET full_name = :name,
+                 gender = :gender,
+                 gender_source = \'manual\',
+                 date_of_birth = :dob,
+                 religion = :religion,
+                 religion_source = \'manual\',
+                 phone = :phone,
+                 guardian_phone = :guardian,
+                 address = :address,
+                 notes = :notes
+             WHERE id = :id'
         );
         $stmt->execute([
             'name' => $fullName, 'gender' => $gender, 'dob' => $dateOfBirth, 'religion' => $religion,

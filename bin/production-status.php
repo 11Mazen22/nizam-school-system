@@ -80,3 +80,30 @@ foreach ($counts as $table => $label) {
         printf("  %-{$width}s : (table missing)\n", $label);
     }
 }
+
+try {
+    $quality = $pdo->query(
+        "SELECT COUNT(DISTINCT s.id) AS students,
+                COUNT(DISTINCT CASE WHEN s.gender IS NOT NULL THEN s.id END) AS genders,
+                COUNT(DISTINCT CASE WHEN s.religion IS NOT NULL THEN s.id END) AS religions,
+                COUNT(DISTINCT CASE WHEN s.second_language IS NOT NULL THEN s.id END) AS second_languages,
+                COUNT(DISTINCT CASE WHEN s.date_of_birth IS NOT NULL THEN s.id END) AS birth_dates,
+                COUNT(DISTINCT CASE WHEN sg.student_id IS NOT NULL THEN s.id END) AS guardian_links
+         FROM students s
+         JOIN student_enrollments e ON e.student_id = s.id AND e.status = 'active'
+         JOIN academic_years ay ON ay.id = e.academic_year_id AND ay.is_active = 1
+         LEFT JOIN student_guardians sg ON sg.student_id = s.id
+         WHERE s.status = 'active'"
+    )->fetch();
+    if (is_array($quality)) {
+        echo "\nSource-backed student fields (active year):\n";
+        printf("  gender            : %d / %d\n", (int) $quality['genders'], (int) $quality['students']);
+        printf("  religion          : %d / %d\n", (int) $quality['religions'], (int) $quality['students']);
+        printf("  second language   : %d / %d\n", (int) $quality['second_languages'], (int) $quality['students']);
+        printf("  birth date        : %d / %d\n", (int) $quality['birth_dates'], (int) $quality['students']);
+        printf("  guardian linked   : %d / %d\n", (int) $quality['guardian_links'], (int) $quality['students']);
+    }
+} catch (Throwable) {
+    // Older schemas can still use this read-only status command; the table
+    // counts above remain useful until migration 032/036 is applied.
+}

@@ -47,7 +47,11 @@ AcademicYearContext::set([
 
 $service = new RosterImportService();
 $parsed = $service->parse($path);
-$result = $service->validate($parsed);
+$officialDir = realpath(dirname(__DIR__) . '/database/official');
+$realPath = realpath($path);
+$officialReviewed = is_string($officialDir) && is_string($realPath)
+    && str_starts_with($realPath, $officialDir . DIRECTORY_SEPARATOR);
+$result = $service->validate($parsed, $officialReviewed);
 
 echo basename($path) . ': ' . count($result['rows']) . " rows\n";
 echo '  ready: ' . $result['counts']['ok']
@@ -77,4 +81,3 @@ if ($commit['errors'] !== []) {
     fwrite(STDERR, 'Aborted: ' . count($commit['errors']) . " row(s) could not be committed.\n");
     exit(1);
 }
-

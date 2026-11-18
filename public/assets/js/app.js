@@ -647,11 +647,13 @@
         return url;
       }
 
-      function run() {
-        var url = buildUrl();
+      function run(requestedUrl, historyMode) {
+        var url = requestedUrl || buildUrl();
         var next = url.toString();
         if (next === lastUrl) return;
         lastUrl = next;
+        var preserveViewport = requestedUrl instanceof URL;
+        var viewportY = window.scrollY;
 
         if (controller) controller.abort();
         controller = new AbortController();
@@ -669,7 +671,18 @@
           var fresh = new DOMParser().parseFromString(html, 'text/html').querySelector(targetSelector);
           if (!fresh) throw new Error('live_filter_target_missing');
           target.innerHTML = fresh.innerHTML;
-          window.history.replaceState({}, '', next);
+          if (historyMode === 'push') window.history.pushState({ liveFilter: targetSelector }, '', next);
+          else if (historyMode !== 'none') window.history.replaceState({ liveFilter: targetSelector }, '', next);
+          if (preserveViewport) {
+            // Replacing one same-sized result page must not throw the user to
+            // the document top. Restore the exact reading position, then move
+            // keyboard focus to the new current-page control without scroll.
+            window.requestAnimationFrame(function () {
+              window.scrollTo({ top: viewportY, left: window.scrollX, behavior: 'auto' });
+              var currentPage = target.querySelector('.pagination .page-item.active .page-link');
+              if (currentPage && typeof currentPage.focus === 'function') currentPage.focus({ preventScroll: true });
+            });
+          }
           target.dispatchEvent(new CustomEvent('livefilter:updated', { bubbles: true }));
         }).catch(function (error) {
           if (error && error.name === 'AbortError') return;
@@ -696,6 +709,28 @@
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         schedule(0);
+      });
+
+      // Pagination belongs to the same server-backed result region. Delegate
+      // the click so links added by each swap continue to work, fetch the next
+      // page in place, preserve filters and viewport, and keep a usable URL.
+      target.addEventListener('click', function (event) {
+        var clicked = event.target instanceof Element ? event.target : null;
+        var link = clicked ? clicked.closest('.pagination a.page-link[href]') : null;
+        if (!link || link.closest('.page-item.disabled')) return;
+        var url = new URL(link.href, window.location.origin);
+        if (url.origin !== window.location.origin) return;
+        event.preventDefault();
+        window.clearTimeout(timer);
+        run(url, 'push');
+      });
+
+      window.addEventListener('popstate', function () {
+        var current = new URL(window.location.href);
+        var action = new URL(form.getAttribute('action') || window.location.pathname, window.location.origin);
+        if (current.pathname !== action.pathname) return;
+        lastUrl = '';
+        run(current, 'none');
       });
     });
   }

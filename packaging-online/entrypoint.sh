@@ -109,18 +109,16 @@ php -r '
 # a half-loaded school is worse than a held deployment.
 if [ "${NIZAM_SEED_OFFICIAL_DATA:-0}" = "1" ]; then
     SEED_MARKER="$DATA_PATH/storage/official-data-seed.json"
-    if [ -f "$SEED_MARKER" ]; then
-        echo "Official school data already loaded ($SEED_MARKER)."
-    else
-        echo "Loading official 2026/2027 school data..."
-        # Apache retains the production disable_functions policy. Grant only
-        # passthru, and only to this trusted first-boot CLI process, because
-        # the seed runner invokes the reviewed importers as isolated PHP
-        # children. Those children inherit the normal production policy and
-        # do not spawn anything themselves.
-        php -d 'disable_functions=exec,shell_exec,system,proc_open,popen' \
-            /var/www/html/bin/seed-official-data.php
-    fi
+    echo "Verifying official 2026/2027 school data ($SEED_MARKER)..."
+    # The seed runner owns its versioned marker check: a later reviewed data
+    # package must enrich an existing installation instead of being hidden by
+    # the mere presence of the old marker. Apache retains the production
+    # disable_functions policy. Grant only passthru, and only to this trusted
+    # boot CLI process, because it invokes the reviewed importers as isolated
+    # PHP children. Those children inherit the normal production policy and do
+    # not spawn anything themselves.
+    php -d 'disable_functions=exec,shell_exec,system,proc_open,popen' \
+        /var/www/html/bin/seed-official-data.php
 fi
 
 # Execute the real dashboard/module read surface with the least-privilege

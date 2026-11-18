@@ -11,7 +11,7 @@ declare(strict_types=1);
  *
  * This is the one command that turns a freshly migrated installation into the
  * real school: 17 classes A1-A9 / B1-B8 with their Arabic pathway labels, the
- * 17 reviewed student rosters (777 students + enrollments), the 45 weekly
+ * 17 reviewed student rosters (778 source students + enrollments), the 45 weekly
  * assessment rows, and the 17 printed class timetables (507 slots) with the
  * teaching load derived from them.
  *
@@ -52,6 +52,7 @@ $force = array_key_exists('force', $options);
 $replaceTimetables = array_key_exists('replace-timetables', $options);
 $dataDir = rtrim((string) ($options['data-dir'] ?? $root . '/database/official'), '/\\');
 $markerPath = (string) ($options['marker'] ?? dataPath() . '/storage/official-data-seed.json');
+$officialDataVersion = 2;
 
 /**
  * Run one importer as a child process, streaming its output into this log.
@@ -87,6 +88,13 @@ function recordCounts(PDO $pdo, int $yearId): array
         'subjects' => (int) $pdo->query('SELECT COUNT(*) FROM subjects')->fetchColumn(),
         'timetables' => (int) $pdo->query('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId)->fetchColumn(),
         'assessment_schedules' => (int) $pdo->query('SELECT COUNT(*) FROM assessment_schedules WHERE academic_year_id = ' . $yearId)->fetchColumn(),
+        'gender_confirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.gender IS NOT NULL")->fetchColumn(),
+        'religion_confirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.religion IS NOT NULL")->fetchColumn(),
+        'second_language_confirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.second_language IS NOT NULL")->fetchColumn(),
+        'gender_provenance' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.gender_source = 'official_roster_layout'")->fetchColumn(),
+        'religion_provenance' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.religion_source = 'official_roster_rule_v2'")->fetchColumn(),
+        'religion_unconfirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.religion IS NULL AND s.religion_source = 'official_roster_unconfirmed_v2'")->fetchColumn(),
+        'second_language_provenance' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.second_language_source IN ('printed_cell', 'class_heading')")->fetchColumn(),
     ];
 }
 
@@ -150,10 +158,14 @@ function pruneUnusedStarterSubject(PDO $pdo, string $code, string $arabicName): 
 
 try {
     if (is_file($markerPath) && !$force && !$dryRun) {
-        echo "Official data was already seeded.\n";
-        echo "Marker: {$markerPath}\n";
-        echo "Nothing to do. Pass --force to run the importers again.\n";
-        exit(0);
+        $existingMarker = json_decode((string) file_get_contents($markerPath), true);
+        if (is_array($existingMarker) && (int) ($existingMarker['official_data_version'] ?? 1) >= $officialDataVersion) {
+            echo "Official data version {$officialDataVersion} was already seeded.\n";
+            echo "Marker: {$markerPath}\n";
+            echo "Nothing to do. Pass --force to run the importers again.\n";
+            exit(0);
+        }
+        echo "Updating the official data marker to version {$officialDataVersion}...\n";
     }
 
     // ----------------------------------------------------- input validation
@@ -161,6 +173,7 @@ try {
         'pathways' => $dataDir . '/pathways.json',
         'assessments' => $dataDir . '/weekly_assessments_A1_A9.json',
         'timetables' => $dataDir . '/timetables_17.json',
+        'roster_audit' => $dataDir . '/roster-data-audit.json',
     ];
     foreach ($required as $label => $file) {
         if (!is_file($file)) {
@@ -194,6 +207,13 @@ try {
         throw new RuntimeException('The timetable file must contain 17 classes.');
     }
 
+    $rosterAudit = json_decode((string) file_get_contents($required['roster_audit']), true, 512, JSON_THROW_ON_ERROR);
+    if ((int) ($rosterAudit['version'] ?? 0) !== $officialDataVersion
+        || (int) ($rosterAudit['totals']['students'] ?? 0) !== 778
+        || (int) ($rosterAudit['totals']['gender_confirmed'] ?? 0) !== 778) {
+        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-2 package.');
+    }
+
     $rosterRows = 0;
     foreach ($rosterFiles as $file) {
         $handle = fopen($file, 'rb');
@@ -206,6 +226,9 @@ try {
         }
         fclose($handle);
         $rosterRows += max(0, $line - 1); // header
+    }
+    if ($rosterRows !== (int) ($rosterAudit['totals']['students'] ?? 0)) {
+        throw new RuntimeException("Roster CSV rows ({$rosterRows}) do not match the reviewed roster audit.");
     }
 
     $pdo = Database::connection();
@@ -337,6 +360,28 @@ try {
     if ($counts['enrollments'] < $rosterRows) {
         $problems[] = "{$counts['enrollments']} of {$rosterRows} enrollments exist";
     }
+    if ($counts['gender_confirmed'] !== (int) ($rosterAudit['totals']['gender_confirmed'] ?? 0)) {
+        $problems[] = "{$counts['gender_confirmed']} of {$rosterRows} reviewed genders exist";
+    }
+    if ($counts['religion_confirmed'] !== (int) ($rosterAudit['totals']['religion_confirmed'] ?? 0)) {
+        $problems[] = "{$counts['religion_confirmed']} source-confirmed religions exist; the audit requires " . (int) ($rosterAudit['totals']['religion_confirmed'] ?? 0);
+    }
+    if ($counts['second_language_confirmed'] !== (int) ($rosterAudit['totals']['second_language_confirmed'] ?? 0)) {
+        $problems[] = "{$counts['second_language_confirmed']} source-confirmed second languages exist; the audit requires " . (int) ($rosterAudit['totals']['second_language_confirmed'] ?? 0);
+    }
+    if ($counts['gender_provenance'] !== $rosterRows) {
+        $problems[] = "{$counts['gender_provenance']} of {$rosterRows} reviewed genders carry official provenance";
+    }
+    if ($counts['religion_provenance'] !== (int) ($rosterAudit['totals']['religion_confirmed'] ?? 0)) {
+        $problems[] = "{$counts['religion_provenance']} confirmed religions carry official provenance";
+    }
+    $expectedUnconfirmedReligion = $rosterRows - (int) ($rosterAudit['totals']['religion_confirmed'] ?? 0);
+    if ($counts['religion_unconfirmed'] !== $expectedUnconfirmedReligion) {
+        $problems[] = "{$counts['religion_unconfirmed']} of {$expectedUnconfirmedReligion} unconfirmed religions are explicitly marked null";
+    }
+    if ($counts['second_language_provenance'] !== (int) ($rosterAudit['totals']['second_language_confirmed'] ?? 0)) {
+        $problems[] = "{$counts['second_language_provenance']} confirmed second languages carry source evidence";
+    }
     if ($counts['assessment_schedules'] !== 45) {
         $problems[] = "{$counts['assessment_schedules']} of 45 assessment rows exist";
     }
@@ -352,6 +397,7 @@ try {
         throw new RuntimeException("Could not create the marker directory {$markerDir}.");
     }
     $marker = [
+        'official_data_version' => $officialDataVersion,
         'seeded_at' => gmdate('c'),
         'academic_year' => (string) $year['label'],
         'source' => 'database/official',
@@ -360,6 +406,7 @@ try {
             'assessments' => basename($required['assessments']),
             'timetables' => basename($required['timetables']),
             'rosters' => count($rosterFiles),
+            'roster_audit' => basename($required['roster_audit']),
         ],
         'expected_students' => $rosterRows,
         'counts' => $counts,

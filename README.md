@@ -124,10 +124,19 @@ php bin/seed-official-data.php
 ```
 
 It creates/activates the 2026/2027 year on an empty installation, imports the
-17 classes, 777 students, the subject catalogue, 45 assessment rows and the 17
+17 classes, 778 populated roster rows, the subject catalogue, 45 assessment rows and the 17
 timetables (507 slots), verifies the resulting counts, and writes
 `storage/official-data-seed.json`. Re-running it on a seeded installation is a
 no-op, and the individual importers are idempotent as a second guard.
+
+The roster enrichment is source-backed and versioned: all 778 students receive
+the gender established by their reviewed roster section, 703 religions follow
+the printed page-default/exception notation (including the confirmed `م-`
+Christian marker), and 424 second-language values come from printed cells or
+an unambiguous class heading. The remaining 75 religions, every birth date and
+every guardian link stay blank because the supplied pages do not prove them;
+names are never used to guess religion. The exact rules, totals and 17 source
+image checksums are committed in `database/official/roster-data-audit.json`.
 
 The Railway image runs the same command once when
 `NIZAM_SEED_OFFICIAL_DATA=1`, so the live site carries exactly the same school

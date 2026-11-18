@@ -292,8 +292,9 @@ try {
     check(($secondRoster['rows'][0]['status'] ?? '') === 'duplicate', 'A returning roster row is recognised as an existing student');
     $secondCommit = $roster->commit($secondRoster['rows']);
     check($secondCommit['created'] === 0 && $secondCommit['updated'] === 1, 'A returning row enriches the existing student instead of skipping it');
-    $enriched = $pdo->query("SELECT gender, date_of_birth, religion, class_attribute_raw FROM students WHERE id = {$enrichedId}")->fetch();
+    $enriched = $pdo->query("SELECT gender, gender_source, date_of_birth, religion, religion_source, class_attribute_raw FROM students WHERE id = {$enrichedId}")->fetch();
     check($enriched['gender'] === 'm' && $enriched['date_of_birth'] === '2010-03-04' && $enriched['religion'] === 'muslim', 'The enriched fields land on the existing student');
+    check($enriched['gender_source'] === 'imported_csv' && $enriched['religion_source'] === 'imported_csv', 'A generic CSV cannot claim official-roster authority from its Notes text');
     check($enriched['class_attribute_raw'] === 'فرنسى', 'Enrichment does not overwrite the printed class attribute');
 
     $thirdCommit = $roster->commit($secondRoster['rows']);

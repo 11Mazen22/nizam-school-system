@@ -255,7 +255,7 @@ exactly the same school data:
 
 - **17 class pathway labels** A1-A9 / B1-B8 (`pathways.json`), mapped to the
   first/second secondary grades.
-- **17 reviewed student rosters** (`roster_*.csv`): 777 students and their
+- **17 reviewed student rosters** (`roster_*.csv`): 778 populated source rows and their
   enrollments in those classes.
 - **17 class timetables** (`timetables_17.json`): 507 teaching slots and the
   teaching load derived from them.
@@ -266,6 +266,16 @@ exactly the same school data:
   Computer, Religion, Philosophy, Second Language, Financial Literacy, Sports,
   Activity, Physics, Chemistry / Business, Psychology / Second Language,
   German and Spanish.
+
+The roster data is separated into structured, auditable fields rather than
+guessing from names. All 778 gender values come from the visually reviewed
+roster sections; 703 religions come from the confirmed page-default/exception
+notation (including the `م-` Christian marker); and 424 second-language values
+come from printed cells or an unambiguous class heading. B6/B8 and one
+unlegended shorthand leave 75 religions null. Birth dates and guardian links
+remain null because the source does not provide them. Version, totals, rules,
+the restored B5 L17 row and all 17 source-image hashes are pinned in
+`database/official/roster-data-audit.json`.
 
 `bin/seed-official-data.php` loads all of it through the same importers the
 browser flows use, verifies the resulting counts, and writes a completion
@@ -282,8 +292,8 @@ Every import step is idempotent: classes are matched by year/grade/name,
 subjects by Arabic name or stable code, assessments upsert on
 (year, class, weekday), already-enrolled students are enriched rather than
 duplicated, and a year that already has timetable slots is left untouched.
-`tests/official-seed.php` proves the exact counts (17 classes, 777 students,
-777 enrollments, 17 subjects, 507 slots, 45 assessment rows) and the
+`tests/official-seed.php` proves the exact counts (17 classes, 778 students,
+778 enrollments, 17 subjects, 507 slots, 45 assessment rows) and the
 second-run no-op on both MySQL and PostgreSQL.
 
 The printed grid lists teachers by first name only, so a handful of cells book

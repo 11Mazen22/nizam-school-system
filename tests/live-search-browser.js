@@ -2,7 +2,8 @@
  * Live-search browser regression.
  *
  * Enforced by npm test: tests/http/run.php starts the real application on a
- * throwaway database, seeds the fixtures this script expects (two students,
+ * throwaway database, seeds the fixtures this script expects (two named
+ * students plus two complete pagination pages,
  * a 25-row backup history whose matching row is on page 2), then invokes:
  *
  *   node tests/live-search-browser.js --base=http://127.0.0.1:PORT \
@@ -88,6 +89,54 @@ const regionText = async (page, selector) => {
     await page.goto(`${BASE}/students`, { waitUntil: 'load' });
     const initialStudents = await regionText(page, '#student-results');
     check(initialStudents.includes(STUDENT_A) && initialStudents.includes(STUDENT_B), 'The student list starts with both fixture rows');
+
+    await page.fill('#student-search', 'Pagination Student');
+    await page.waitForFunction(
+      ([alpha, beta]) => {
+        const text = ((document.querySelector('#student-results') || {}).innerText || '');
+        const url = new URL(window.location.href);
+        return url.searchParams.get('q') === 'Pagination Student'
+          && text.includes('Pagination Student 01')
+          && !text.includes(alpha)
+          && !text.includes(beta);
+      },
+      [STUDENT_A, STUDENT_B],
+      { timeout: 10000 }
+    );
+    const studentPageTwo = page.locator('#student-results .pagination a[href*="page=2"]').first();
+    check(await studentPageTwo.count() === 1, 'The student fixture renders a second page');
+    await studentPageTwo.scrollIntoViewIfNeeded();
+    const studentPageY = await page.evaluate(() => window.scrollY);
+    await page.evaluate(() => { window.__nizamPaginationMarker = 'kept'; });
+    await studentPageTwo.click();
+    await page.waitForURL(/page=2/, { timeout: 10000 });
+    await page.waitForFunction(
+      () => ((document.querySelector('#student-results') || {}).innerText || '').includes('Pagination Student 40'),
+      null,
+      { timeout: 10000 }
+    );
+    check(await page.evaluate(() => window.__nizamPaginationMarker === 'kept'), 'Student pagination replaces only the results region');
+    const studentPageTwoY = await page.evaluate(() => window.scrollY);
+    check(Math.abs(studentPageTwoY - studentPageY) <= 2, 'Student pagination preserves the exact reading position', `${studentPageY} -> ${studentPageTwoY}`);
+    check((await regionText(page, '#student-results')).includes('Pagination Student 40'), 'Student page 2 renders the requested records');
+
+    await page.goBack({ waitUntil: 'commit' });
+    await page.waitForFunction(
+      () => ((document.querySelector('#student-results') || {}).innerText || '').includes('Pagination Student 01'),
+      null,
+      { timeout: 10000 }
+    );
+    check(await page.evaluate(() => window.__nizamPaginationMarker === 'kept'), 'Back navigation restores page 1 without reloading the document');
+
+    await page.fill('#student-search', '');
+    await page.waitForFunction(
+      ([a, b]) => {
+        const text = (document.querySelector('#student-results') || {}).innerText || '';
+        return text.includes(a) && text.includes(b);
+      },
+      [STUDENT_A, STUDENT_B],
+      { timeout: 10000 }
+    );
 
     // A marker proves the live update replaces only the results region; a
     // full navigation would wipe it, which is exactly what Enter would do.

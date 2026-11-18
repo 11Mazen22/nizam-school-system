@@ -37,6 +37,9 @@ if (empty($student['date_of_birth'])) { $missingPersonal[] = __('students.date_o
 if (empty($student['religion'])) { $missingPersonal[] = __('students.religion'); }
 $missingContact = empty($student['phone']) && empty($student['guardian_phone']) && empty($student['address']);
 $classAttribute = trim((string) ($student['class_attribute_raw'] ?? ''));
+$secondLanguage = trim((string) ($student['second_language'] ?? ''));
+$religionEvidence = (string) ($student['religion_source'] ?? '');
+$officialSource = static fn (?string $source): bool => is_string($source) && str_starts_with($source, 'official_roster');
 $publicNotes = trim((string) ($student['notes'] ?? ''));
 if (preg_match('/^(row|L|R)\s*[LR]?\s*\d+$/iu', $publicNotes) === 1) {
     $publicNotes = '';
@@ -63,8 +66,10 @@ if (preg_match('/^(row|L|R)\s*[LR]?\s*\d+$/iu', $publicNotes) === 1) {
           <span class="badge text-bg-primary">
             <?= e(currentLocale() === 'ar' ? $currentHistory['grade_name_ar'] : $currentHistory['grade_name_en']) ?> · <?= e($currentHistory['class_name'] ?? __('promotion.unassigned')) ?>
           </span>
-          <?php if ($classAttribute !== ''): ?>
-            <span class="badge text-bg-light border"<?= ($student['class_attribute_source'] ?? '') === 'carried_forward' ? ' title="' . e(__('verification.carried_help')) . '"' : '' ?>><?= e(__('students.class_attribute')) ?>: <?= e($classAttribute) ?></span>
+          <?php if ($secondLanguage !== ''): ?>
+            <span class="badge text-bg-light border"><?= e(__('students.second_language')) ?>: <?= e(__('students.second_language_' . $secondLanguage)) ?></span>
+          <?php elseif ($classAttribute !== ''): ?>
+            <span class="badge text-bg-light border"><?= e(__('students.class_attribute')) ?>: <?= e($classAttribute) ?></span>
           <?php endif; ?>
           <?php if ($rosterImported): ?>
             <span class="badge text-bg-light border"><?= e(__('students.data_source')) ?>: <?= e(__('students.roster_source')) ?></span>
@@ -118,17 +123,26 @@ if (preg_match('/^(row|L|R)\s*[LR]?\s*\d+$/iu', $publicNotes) === 1) {
           <?php endif; ?>
           <dl class="n-detail-list">
             <dt><?= e(__('students.full_name')) ?></dt><dd><?= e($student['full_name']) ?></dd>
-            <dt><?= e(__('students.gender')) ?></dt><dd><?= $student['gender'] ? e(__('students.gender_' . $student['gender'])) : '<span class="text-muted">—</span> <span class="badge text-bg-light border">' . e($missingLabel) . '</span>' ?></dd>
+            <dt><?= e(__('students.gender')) ?></dt>
+            <dd>
+              <?= $student['gender'] ? e(__('students.gender_' . $student['gender'])) : '<span class="text-muted">—</span> <span class="badge text-bg-light border">' . e($missingLabel) . '</span>' ?>
+              <?php if (!empty($student['gender']) && $officialSource($student['gender_source'] ?? null)): ?><span class="badge text-bg-light border"><?= e(__('students.source_official_roster')) ?></span><?php endif; ?>
+            </dd>
             <dt><?= e(__('students.date_of_birth')) ?></dt><dd dir="ltr"><?= $student['date_of_birth'] ? e($student['date_of_birth']) : '<span class="text-muted">—</span> <span class="badge text-bg-light border">' . e($missingLabel) . '</span>' ?></dd>
             <dt><?= e(__('students.religion')) ?></dt>
             <dd>
               <?php if (!empty($student['religion'])): ?>
                 <?= e(__('students.religion_' . $student['religion'])) ?>
-                <?php if ($religionEvidence === 'inherited'): ?>
-                  <span class="badge text-bg-light border" title="<?= e(__('verification.carried_help')) ?>"><?= e(__('students.religion_inherited')) ?></span>
-                <?php elseif ($religionEvidence === 'shorthand'): ?>
-                  <span class="badge text-bg-warning"><?= e(__('students.religion_shorthand_hint')) ?></span>
-                <?php endif; ?>
+                <?php if ($officialSource($religionEvidence)): ?><span class="badge text-bg-light border"><?= e(__('students.source_official_roster')) ?></span><?php endif; ?>
+              <?php else: ?>
+                <span class="text-muted">—</span> <span class="badge text-bg-light border"><?= e($missingLabel) ?></span>
+              <?php endif; ?>
+            </dd>
+            <dt><?= e(__('students.second_language')) ?></dt>
+            <dd>
+              <?php if ($secondLanguage !== ''): ?>
+                <?= e(__('students.second_language_' . $secondLanguage)) ?>
+                <?php if (in_array((string) ($student['second_language_source'] ?? ''), ['printed_cell', 'class_heading'], true)): ?><span class="badge text-bg-light border"><?= e(__('students.source_official_roster')) ?></span><?php endif; ?>
               <?php else: ?>
                 <span class="text-muted">—</span> <span class="badge text-bg-light border"><?= e($missingLabel) ?></span>
               <?php endif; ?>

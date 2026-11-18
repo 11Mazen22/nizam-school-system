@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 require $root . '/app/bootstrap.php';
+restore_exception_handler();
 
 use App\Services\MigrationService;
 use App\Services\SeedService;
@@ -207,6 +208,9 @@ try {
         'subjects' => $count('SELECT COUNT(*) FROM subjects'),
         'timetables' => $count('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId),
         'assessments' => $count('SELECT COUNT(*) FROM assessment_schedules WHERE academic_year_id = ' . $yearId),
+        'gender_confirmed' => $count('SELECT COUNT(*) FROM students WHERE gender IS NOT NULL'),
+        'religion_confirmed' => $count('SELECT COUNT(*) FROM students WHERE religion IS NOT NULL'),
+        'second_language_confirmed' => $count('SELECT COUNT(*) FROM students WHERE second_language IS NOT NULL'),
     ];
 
     foreach ($counts as $name => $value) {
@@ -214,12 +218,39 @@ try {
     }
 
     seedCheck($counts['classes'] === 17, 'Exactly 17 official classes exist', (string) $counts['classes']);
-    seedCheck($counts['students'] === 777, 'Exactly 777 students exist', (string) $counts['students']);
-    seedCheck($counts['enrollments'] === 777, 'Exactly 777 active enrollments exist', (string) $counts['enrollments']);
+    seedCheck($counts['students'] === 778, 'Exactly 778 populated source students exist', (string) $counts['students']);
+    seedCheck($counts['enrollments'] === 778, 'Exactly 778 active enrollments exist', (string) $counts['enrollments']);
     seedCheck($counts['subjects'] === 17, 'The 17-subject catalogue is complete', (string) $counts['subjects']);
     seedCheck($counts['timetables'] === 507, 'Exactly 507 timetable slots exist', (string) $counts['timetables']);
     seedCheck($counts['assessments'] === 45, 'Exactly 45 assessment rows exist', (string) $counts['assessments']);
     seedCheck($counts['teachers'] >= 29, 'The printed teachers were created', (string) $counts['teachers']);
+    seedCheck($counts['gender_confirmed'] === 778, 'Every source student has the reviewed roster gender', (string) $counts['gender_confirmed']);
+    seedCheck($counts['religion_confirmed'] === 703, 'Exactly 703 religions are proved by the source rules', (string) $counts['religion_confirmed']);
+    seedCheck($counts['second_language_confirmed'] === 424, 'Exactly 424 second-language values are proved by the source', (string) $counts['second_language_confirmed']);
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE gender_source = 'official_roster_layout'") === 778,
+        'Every reviewed gender carries official-roster provenance'
+    );
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE religion_source = 'official_roster_rule_v2'") === 703,
+        'Every confirmed religion carries the versioned source rule'
+    );
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE religion IS NULL AND religion_source = 'official_roster_unconfirmed_v2'") === 75,
+        'Every unsupported religion remains an explicitly sourced NULL'
+    );
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE second_language_source IN ('printed_cell', 'class_heading')") === 424,
+        'Every second language records printed-cell or class-heading evidence'
+    );
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE full_name = 'ريماس فاروق اسماعيل حسن'") === 1,
+        'The populated B5 L17 source row is restored exactly once'
+    );
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE date_of_birth IS NOT NULL") === 0,
+        'The source does not fabricate any birth date'
+    );
 
     $classNames = $pdo->query('SELECT name FROM classes WHERE academic_year_id = ' . $yearId . ' ORDER BY name')
         ->fetchAll(PDO::FETCH_COLUMN);
@@ -238,7 +269,8 @@ try {
 
     $marker = is_file($markerOne) ? json_decode((string) file_get_contents($markerOne), true) : null;
     seedCheck(is_array($marker) && ($marker['academic_year'] ?? '') === '2026/2027', 'The seed marker records the official year');
-    seedCheck(is_array($marker) && (int) ($marker['counts']['students_in_year'] ?? 0) === 777, 'The marker records the verified student count');
+    seedCheck(is_array($marker) && (int) ($marker['official_data_version'] ?? 0) === 2, 'The marker records reviewed data version 2');
+    seedCheck(is_array($marker) && (int) ($marker['counts']['students_in_year'] ?? 0) === 778, 'The marker records the verified student count');
 
     // Second run with a different marker: exercises the importers' own
     // idempotency rather than the marker shortcut.
@@ -274,7 +306,7 @@ try {
     );
 
     $activeEnrollments = $count("SELECT COUNT(*) FROM student_enrollments WHERE academic_year_id = {$yearId} AND status = 'active'");
-    seedCheck($activeEnrollments === 777, 'All seeded enrollments are active', (string) $activeEnrollments);
+    seedCheck($activeEnrollments === 778, 'All seeded enrollments are active', (string) $activeEnrollments);
 } catch (Throwable $e) {
     fwrite(STDERR, 'BLOCKED: ' . $e->getMessage() . "\n");
     $failed++;

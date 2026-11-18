@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "php tests/import-contract.php && php tests/roster-religion-decode.php && php tests/exam-integrity.php && php tests/authorization-refresh.php && php tests/academic-calculation.php && php tests/academic-configuration.php && php tests/module-integrity.php && php tests/scheduled-auth.php && php tests/redesign-checks.php && php tests/live-search-contract.php && php tests/online-readiness.php && php tests/teacher-load-sync.php && php tests/official-seed.php && php tests/http/run.php"
+    "test": "php tests/import-contract.php && php tests/roster-religion-decode.php && php tests/official-roster-data.php && php tests/exam-integrity.php && php tests/authorization-refresh.php && php tests/academic-calculation.php && php tests/academic-configuration.php && php tests/module-integrity.php && php tests/scheduled-auth.php && php tests/redesign-checks.php && php tests/live-search-contract.php && php tests/online-readiness.php && php tests/teacher-load-sync.php && php tests/official-seed.php && php tests/http/run.php"
   },
   "repository": {
     "type": "git",

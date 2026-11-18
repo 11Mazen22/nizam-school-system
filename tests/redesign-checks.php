@@ -15,6 +15,18 @@ $fail = 0;
 $en = require __DIR__ . '/../lang/en.php';
 $ar = require __DIR__ . '/../lang/ar.php';
 
+// Pending attendance has its own localized renderer in views/dashboard.php.
+// It must not also be copied into actionItems, or every missing class appears
+// twice and the attention badge doubles (visible immediately after the
+// official 17-class package is loaded).
+$dashboardStatsService = (string) file_get_contents(__DIR__ . '/../app/services/DashboardStatsService.php');
+if (!str_contains($dashboardStatsService, 'dashboard.action_pending_attendance')) {
+    echo "PASS: dashboard pending-attendance rows are not duplicated\n";
+} else {
+    $fail++;
+    echo "FAIL: dashboard copies pending attendance into actionItems and renders it twice\n";
+}
+
 $onlyEn = array_diff(array_keys($en), array_keys($ar));
 $onlyAr = array_diff(array_keys($ar), array_keys($en));
 

@@ -93,6 +93,26 @@ check(str_contains($appJs, 'AbortController'), 'Stale server-backed filter reque
 check(str_contains($appJs, 'normalize(\'NFKD\')'), 'Arabic letter variants are matched consistently');
 check(str_contains($appJs, 'n-filter-empty'), 'No-match rows are rendered explicitly');
 check(str_contains($appJs, 'initJsOnly'), 'JS-only controls are revealed only when scripting is available');
+check(
+    str_contains($appJs, "closest('.pagination a.page-link[href]')")
+        && str_contains($appJs, "run(url, 'push')"),
+    'Live-result pagination swaps the requested page in place'
+);
+check(
+    str_contains($appJs, 'var viewportY = window.scrollY')
+        && str_contains($appJs, 'top: viewportY')
+        && str_contains($appJs, 'preventScroll: true'),
+    'In-place pagination preserves the reading position and keyboard focus'
+);
+check(str_contains($appJs, "window.addEventListener('popstate'"), 'Back/forward navigation refreshes the live result page');
+$studentList = (string) file_get_contents($root . '/views/students/index.php');
+check(
+    str_contains($studentList, 'data-compact-pagination')
+        && str_contains($studentList, '$page - 2')
+        && str_contains($studentList, '$page + 2')
+        && str_contains($studentList, 'aria-current="page"'),
+    'Student pagination uses a compact accessible window instead of every page number'
+);
 
 echo "\nServer-side filters (work without JavaScript)\n";
 $serverFilteredControllers = [

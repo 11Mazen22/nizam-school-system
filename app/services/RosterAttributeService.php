@@ -75,7 +75,6 @@ final class RosterAttributeService
 
         $rows = [];
         $lastAttribute = '';
-        $lastReligion = '';
         $currentClass = null;
         $counts = ['rows' => 0, 'printed' => 0, 'carried' => 0, 'religion' => 0, 'classes' => 0];
         $seenClasses = [];
@@ -100,7 +99,6 @@ final class RosterAttributeService
                 // value must not leak into it.
                 $currentClass = $className;
                 $lastAttribute = '';
-                $lastReligion = '';
                 if (!isset($seenClasses[$className])) {
                     $seenClasses[$className] = true;
                     $counts['classes']++;
@@ -121,12 +119,12 @@ final class RosterAttributeService
                 $source = '';
             }
 
-            if ($printedReligion !== '') {
-                $lastReligion = $printedReligion;
-            }
-
             $attribute = $printedAttribute !== '' ? $printedAttribute : $lastAttribute;
-            $religionRaw = $printedReligion !== '' ? $printedReligion : $lastReligion;
+            // The dedicated Religion column is already one value per student
+            // (the official reviewed CSV expands its page rules before it is
+            // shipped). Never carry this field into an unconfirmed row. The
+            // combined printed attribute retains its historical carry rule.
+            $religionRaw = $printedReligion;
             $religion = $this->decodeReligion($religionRaw !== '' ? $religionRaw : $attribute);
             if ($religion !== null) {
                 $counts['religion']++;

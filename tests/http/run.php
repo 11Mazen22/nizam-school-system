@@ -1369,6 +1369,20 @@ try {
     );
     $insertEnrollment->execute([$alphaId, $fixtureYear, $fixtureGrade, $classId]);
     $insertEnrollment->execute([$betaId, $fixtureYear, $fixtureGrade, $classId]);
+    // Forty matching rows make two complete 20-row filtered pages for the
+    // browser pagination check. A partial last page can shorten the document
+    // and force the browser to clamp scrollY even when the application
+    // correctly restores it.
+    for ($fixture = 1; $fixture <= 40; $fixture++) {
+        $insertStudent->execute([
+            'code' => sprintf('QA-LIVE-PAGE-%02d', $fixture),
+            'name' => sprintf('Pagination Student %02d', $fixture),
+            'gender' => $fixture % 2 === 0 ? 'f' : 'm',
+            'dob' => '2012-03-03',
+            'religion' => 'muslim',
+        ]);
+        $insertEnrollment->execute([(int) $pdo->lastInsertId(), $fixtureYear, $fixtureGrade, $classId]);
+    }
 
     $insertAttendance = $pdo->prepare(
         "INSERT INTO attendance_records (academic_year_id, class_id, student_id, record_date, status)

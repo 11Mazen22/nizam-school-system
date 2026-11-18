@@ -179,6 +179,7 @@ $officialRosters = glob($officialDir . '/roster_*.csv') ?: [];
 $pathwaysJson = json_decode((string) @file_get_contents($officialDir . '/pathways.json'), true);
 $timetablesJson = json_decode((string) @file_get_contents($officialDir . '/timetables_17.json'), true);
 $assessmentsJson = json_decode((string) @file_get_contents($officialDir . '/weekly_assessments_A1_A9.json'), true);
+$rosterAuditJson = json_decode((string) @file_get_contents($officialDir . '/roster-data-audit.json'), true);
 $assessmentRows = 0;
 foreach (($assessmentsJson['classes'] ?? []) as $rows) {
     $assessmentRows += count((array) $rows);
@@ -188,6 +189,13 @@ onlineCheck(
     'Official package ships the 17 class pathway labels'
 );
 onlineCheck(count($officialRosters) === 17, 'Official package ships all 17 student rosters');
+onlineCheck(
+    is_array($rosterAuditJson)
+        && (int) ($rosterAuditJson['version'] ?? 0) === 2
+        && (int) ($rosterAuditJson['totals']['students'] ?? 0) === 778
+        && (int) ($rosterAuditJson['totals']['gender_confirmed'] ?? 0) === 778,
+    'Official package ships the versioned 778-row roster enrichment audit'
+);
 onlineCheck(
     is_array($timetablesJson) && count((array) ($timetablesJson['classes'] ?? [])) === 17,
     'Official package ships all 17 class timetables'
