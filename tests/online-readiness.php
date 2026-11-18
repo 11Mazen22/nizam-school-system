@@ -195,7 +195,7 @@ onlineCheck(
 onlineCheck(count($officialRosters) === 17, 'Official package ships all 17 student rosters');
 onlineCheck(
     is_array($rosterAuditJson)
-        && (int) ($rosterAuditJson['version'] ?? 0) === 6
+        && (int) ($rosterAuditJson['version'] ?? 0) === 7
         && (int) ($rosterAuditJson['totals']['students'] ?? 0) === 778
         && (int) ($rosterAuditJson['totals']['religion_confirmed'] ?? 0) === 778
         && (int) ($rosterAuditJson['totals']['gender_confirmed'] ?? 0) === 778,
@@ -206,6 +206,19 @@ onlineCheck(
     'Official package ships all 17 class timetables'
 );
 onlineCheck($assessmentRows === 45, 'Official package ships the 45 weekly assessment rows');
+onlineCheck(
+    is_file($officialDir . '/third_secondary_students.xlsx')
+        && is_file($officialDir . '/third-secondary-audit.json'),
+    'Official package ships the third-secondary spreadsheet and its audit'
+);
+$thirdAudit = json_decode((string) @file_get_contents($officialDir . '/third-secondary-audit.json'), true);
+onlineCheck(
+    is_array($thirdAudit)
+        && (int) ($thirdAudit['totals']['students'] ?? 0) === 540
+        && (int) ($thirdAudit['totals']['classes'] ?? 0) === 12
+        && (int) ($thirdAudit['totals']['with_religion'] ?? 0) === 540,
+    'Third-secondary audit pins 540 fully classified students in 12 classes'
+);
 
 $dockerIgnore = (string) file_get_contents($root . '/.dockerignore');
 $officialDataExcluded = false;

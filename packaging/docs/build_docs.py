@@ -201,14 +201,16 @@ admin_guide += [
     p("Once finished, the Setup Wizard is permanently locked and Nizam goes straight to the sign-in screen from "
       "then on."),
     p("The installer also carries the school's official 2026/2027 data. After finishing the wizard, open "
-      "<b>Load Official School Data</b> from the Windows Start menu once. It loads the 17 classes, the 778 "
-      "student rosters, the subject catalogue, the weekly assessment plan and all 17 class timetables, then "
-      "verifies the result. Each class carries the school's confirmed maximum of 50 students. The command is "
-      "safe to run again: it never duplicates a class, student, lesson, teacher, subject or assessment."),
-    note("The official pages prove gender for all 778 students and religion for all 778 -- 672 from the printed source "
-         "rules and 106 from the school's confirmed name-based classification -- plus second language for 424. Every "
-         "birth date and every guardian link stays marked as not recorded until the school supplies them; Nizam "
-         "never guesses a value it cannot prove."),
+      "<b>Load Official School Data</b> from the Windows Start menu once. It loads the 29 classes (17 first/second "
+      "secondary and 12 third secondary), the 1,318 students, the subject catalogue, the weekly assessment plan "
+      "and all 17 class timetables, then verifies the result. Each class carries the school's confirmed maximum "
+      "of 50 students. The command is safe to run again: it never duplicates a class, student, lesson, teacher, "
+      "subject or assessment."),
+    note("The official pages prove gender for all 778 first/second-secondary students and religion for all 778 -- "
+         "672 from the printed source rules and 106 from the school's confirmed name-based classification -- plus "
+         "second language for 425. The third-secondary spreadsheet supplies 540 more students: each has a name, "
+         "gender and birth date from the national ID and a name-classified religion. Nizam never guesses a value "
+         "it cannot prove."),
 
     h1("3. Users & Permissions"),
     p("From the Users screen (Administrator only), add an account for every staff member who needs access, "
@@ -276,16 +278,18 @@ release_notes += [
 
     h2("New in this release"),
     bullets([
-        "The official 2026/2027 school data ships with the installer: 17 classes, 778 populated roster rows, the subject "
-        "catalogue, the weekly assessment plan and all 17 class timetables.",
+        "The official 2026/2027 school data ships with the installer: 29 classes, 1,318 students (778 roster rows "
+        "plus 540 third-secondary students), the subject catalogue, the weekly assessment plan and all 17 class "
+        "timetables.",
         "A Load Official School Data shortcut in the Start menu loads and verifies that package in one step. "
         "It is idempotent -- running it again never duplicates a class, student, lesson, teacher, subject or "
         "assessment.",
         "Student rosters, class timetables and weekly assessments import through the same validated paths the "
         "screens use, with source document, class and version recorded on every row.",
         "Source-backed roster enrichment records all 778 reviewed genders, 778 confirmed religions (672 from the "
-        "printed source plus 106 from the school's confirmed name-based classification) and 424 confirmed "
-        "second-language choices while deliberately leaving unsupported values blank.",
+        "printed source plus 106 from the school's confirmed name-based classification) and 425 confirmed "
+        "second-language choices while deliberately leaving unsupported values blank. Third-secondary students "
+        "carry source-derived gender, birth date and religion as well.",
         "The same official package can be loaded automatically by the online (Railway) deployment, so the live "
         "site carries the same school data as the offline installation.",
     ]),

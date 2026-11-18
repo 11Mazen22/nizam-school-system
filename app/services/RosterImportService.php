@@ -484,6 +484,11 @@ final class RosterImportService
     private function normalizeSecondLanguage(string $raw, string $className): array
     {
         $compact = (string) preg_replace('/\s+/u', '', trim($raw));
+        // A4 R18 prints "المالم", an evident typo of "المانى" (German). Keep
+        // the source cell verbatim but decode it with explicit provenance.
+        if ($className === 'A4' && $compact === 'المالم') {
+            return ['german', 'source_typo_corrected'];
+        }
         if (str_contains($compact, 'المانى')) {
             return ['german', 'printed_cell'];
         }

@@ -135,12 +135,12 @@ foreach ($all as $row) {
         $languageSources[$source]++;
     }
 }
-rosterDataCheck($languages === ['german' => 284, 'french' => 85, 'spanish' => 55], 'Second-language totals match the reviewed cells/headings', json_encode($languages));
-rosterDataCheck($languageSources === ['printed_cell' => 353, 'class_heading' => 71], 'Every normalized language records its evidence source', json_encode($languageSources));
+rosterDataCheck($languages === ['german' => 285, 'french' => 85, 'spanish' => 55], 'Second-language totals match the reviewed cells/headings', json_encode($languages));
+rosterDataCheck($languageSources === ['printed_cell' => 353, 'class_heading' => 71, 'source_typo_corrected' => 1], 'Every normalized language records its evidence source', json_encode($languageSources));
 
 $auditPath = $root . '/database/official/roster-data-audit.json';
 $audit = is_file($auditPath) ? json_decode((string) file_get_contents($auditPath), true) : null;
-rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 6, 'The committed roster audit is version 6', 'version=' . ($audit['version'] ?? 'null'));
+rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 7, 'The committed roster audit is version 7', 'version=' . ($audit['version'] ?? 'null'));
 rosterDataCheck(is_array($audit) && count((array) ($audit['source_image_sha256'] ?? [])) === 17, 'The audit pins all 17 source-image checksums');
 rosterDataCheck(is_array($audit) && ($audit['totals']['students'] ?? 0) === 778, 'The audit records the exact source total');
 

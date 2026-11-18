@@ -258,6 +258,9 @@ exactly the same school data:
   capacity applied to every section.
 - **17 reviewed student rosters** (`roster_*.csv`): 778 populated source rows and their
   enrollments in those classes.
+- **Third secondary** (`third_secondary_students.xlsx` + `third-secondary-audit.json`):
+  12 classes C01-C12 and 540 students with their school code, national ID,
+  name, ID-derived gender and birth date, and name-classified religion.
 - **17 class timetables** (`timetables_17.json`): 507 teaching slots and the
   teaching load derived from them.
 - **45 assessment weekday rows** for A1-A9
@@ -295,9 +298,9 @@ Every import step is idempotent: classes are matched by year/grade/name,
 subjects by Arabic name or stable code, assessments upsert on
 (year, class, weekday), already-enrolled students are enriched rather than
 duplicated, and a year that already has timetable slots is left untouched.
-`tests/official-seed.php` proves the exact counts (17 classes, 778 students,
-778 enrollments, 17 subjects, 507 slots, 45 assessment rows) and the
-second-run no-op on both MySQL and PostgreSQL.
+`tests/official-seed.php` proves the exact counts (17 A/B classes, 778 A/B
+students, 12 third-secondary classes with 540 students, 17 subjects, 507 slots,
+45 assessment rows) and the second-run no-op on both MySQL and PostgreSQL.
 
 The printed grid lists teachers by first name only, so a handful of cells book
 the same name in two classes during one period. A teacher cannot be in two

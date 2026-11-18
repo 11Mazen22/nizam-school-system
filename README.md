@@ -124,22 +124,28 @@ php bin/seed-official-data.php
 ```
 
 It creates/activates the 2026/2027 year on an empty installation, imports the
-17 classes, 778 populated roster rows, the subject catalogue, 45 assessment rows and the 17
-timetables (507 slots), sets the school-confirmed maximum of 50 students per
-class, verifies the resulting counts, and writes
-`storage/official-data-seed.json`. Re-running it on a seeded installation is a
-no-op, and the individual importers are idempotent as a second guard.
+17 first/second-secondary classes with 778 roster rows, the 12 third-secondary
+classes with 540 spreadsheet students (1,318 students in total), the subject
+catalogue, 45 assessment rows and the 17 timetables (507 slots), sets the
+school-confirmed maximum of 50 students per class, verifies the resulting
+counts, and writes `storage/official-data-seed.json`. Re-running it on a seeded
+installation is a no-op, and the individual importers are idempotent as a second
+guard.
 
-The roster enrichment is source-backed and versioned: all 778 students receive
+The roster enrichment is source-backed and versioned: all 778 A/B students receive
 the gender established by their reviewed roster section, 778 religions follow
 the printed page-default/exception notation (including the confirmed A-page
 Christian `م-` marker) plus the school's confirmed name-based classification for
 the 106 students whose printed cell proves no religion (B6/B8 print pathways,
-and B7's shorthand is a pathway code, not the Christian marker), and 424
-second-language values come from printed cells or an unambiguous class heading.
-Every birth date and every guardian link stays blank because the supplied pages
-do not provide them; nothing else is ever guessed. The exact rules, totals and
-17 source image checksums are committed in `database/official/roster-data-audit.json`.
+and B7's shorthand is a pathway code, not the Christian marker), and 425
+second-language values come from printed cells, an unambiguous class heading, or
+one documented A4 source typo. For the third secondary, gender and birth date
+come from each Egyptian national ID and religion from the confirmed name
+classification (20 Christians, 520 Muslims), so every one of those 540 students
+has a name, gender, birth date and religion. A/B birth dates and guardians stay
+blank because the printed rosters do not provide them. The exact rules, totals
+and source hashes are committed in `database/official/roster-data-audit.json`
+and `database/official/third-secondary-audit.json`.
 
 The Railway image runs the same command once when
 `NIZAM_SEED_OFFICIAL_DATA=1`, so the live site carries exactly the same school

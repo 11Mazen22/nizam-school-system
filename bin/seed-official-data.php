@@ -53,7 +53,7 @@ $force = array_key_exists('force', $options);
 $replaceTimetables = array_key_exists('replace-timetables', $options);
 $dataDir = rtrim((string) ($options['data-dir'] ?? $root . '/database/official'), '/\\');
 $markerPath = (string) ($options['marker'] ?? dataPath() . '/storage/official-data-seed.json');
-$officialDataVersion = 6;
+$officialDataVersion = 7;
 
 /**
  * Run one importer as a child process, streaming its output into this log.
@@ -81,25 +81,33 @@ function runStep(string $label, array $arguments): void
 /** @return array<string,int> */
 function recordCounts(PDO $pdo, int $yearId): array
 {
+    // The first/second-secondary package is verified against its own 778-row
+    // audit; third-secondary students are counted separately by their importer.
+    $abJoin = " FROM students s
+                JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = {$yearId} AND e.status = 'active'
+                JOIN classes c ON c.id = e.class_id
+                WHERE (c.name LIKE 'A%' OR c.name LIKE 'B%')";
+    $count = static fn (string $sql): int => (int) $pdo->query($sql)->fetchColumn();
     return [
-        'classes' => (int) $pdo->query('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId)->fetchColumn(),
-        'classes_with_capacity' => (int) $pdo->query('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId . ' AND capacity = 50')->fetchColumn(),
-        'students_in_year' => (int) $pdo->query('SELECT COUNT(DISTINCT student_id) FROM student_enrollments WHERE academic_year_id = ' . $yearId)->fetchColumn(),
-        'enrollments' => (int) $pdo->query('SELECT COUNT(*) FROM student_enrollments WHERE academic_year_id = ' . $yearId)->fetchColumn(),
-        'teachers' => (int) $pdo->query('SELECT COUNT(*) FROM teachers')->fetchColumn(),
-        'subjects' => (int) $pdo->query('SELECT COUNT(*) FROM subjects')->fetchColumn(),
-        'timetables' => (int) $pdo->query('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId)->fetchColumn(),
-        'assessment_schedules' => (int) $pdo->query('SELECT COUNT(*) FROM assessment_schedules WHERE academic_year_id = ' . $yearId)->fetchColumn(),
-        'gender_confirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.gender IS NOT NULL")->fetchColumn(),
-        'religion_confirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.religion IS NOT NULL")->fetchColumn(),
-        'second_language_confirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.second_language IS NOT NULL")->fetchColumn(),
-        'gender_provenance' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.gender_source = 'official_roster_layout'")->fetchColumn(),
-        'religion_provenance' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.religion_source = 'official_roster_rule_v2'")->fetchColumn(),
-        'religion_unconfirmed' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.religion IS NULL AND s.religion_source = 'official_roster_unconfirmed_v2'")->fetchColumn(),
-        'second_language_provenance' => (int) $pdo->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN student_enrollments e ON e.student_id = s.id WHERE e.academic_year_id = {$yearId} AND s.second_language_source IN ('printed_cell', 'class_heading')")->fetchColumn(),
+        'classes' => $count('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId . " AND (name LIKE 'A%' OR name LIKE 'B%')"),
+        'classes_with_capacity' => $count('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId . " AND capacity = 50 AND (name LIKE 'A%' OR name LIKE 'B%')"),
+        'third_secondary_classes' => $count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND name LIKE 'C%'"),
+        'third_secondary_students' => $count("SELECT COUNT(*) FROM students s JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = {$yearId} WHERE s.national_id IS NOT NULL"),
+        'students_in_year' => $count('SELECT COUNT(DISTINCT student_id) FROM student_enrollments WHERE academic_year_id = ' . $yearId),
+        'enrollments' => $count('SELECT COUNT(*) FROM student_enrollments WHERE academic_year_id = ' . $yearId),
+        'teachers' => $count('SELECT COUNT(*) FROM teachers'),
+        'subjects' => $count('SELECT COUNT(*) FROM subjects'),
+        'timetables' => $count('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId),
+        'assessment_schedules' => $count('SELECT COUNT(*) FROM assessment_schedules WHERE academic_year_id = ' . $yearId),
+        'gender_confirmed' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . ' AND s.gender IS NOT NULL'),
+        'religion_confirmed' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . ' AND s.religion IS NOT NULL'),
+        'second_language_confirmed' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . ' AND s.second_language IS NOT NULL'),
+        'gender_provenance' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . " AND s.gender_source = 'official_roster_layout'"),
+        'religion_provenance' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . " AND s.religion_source = 'official_roster_rule_v2'"),
+        'religion_unconfirmed' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . " AND s.religion IS NULL AND s.religion_source = 'official_roster_unconfirmed_v2'"),
+        'second_language_provenance' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . " AND s.second_language_source IN ('printed_cell', 'class_heading', 'source_typo_corrected')"),
     ];
 }
-
 /** @param array<string,int> $counts */
 function printCounts(string $label, array $counts): void
 {
@@ -176,6 +184,8 @@ try {
         'assessments' => $dataDir . '/weekly_assessments_A1_A9.json',
         'timetables' => $dataDir . '/timetables_17.json',
         'roster_audit' => $dataDir . '/roster-data-audit.json',
+        'third_secondary_xlsx' => $dataDir . '/third_secondary_students.xlsx',
+        'third_secondary_audit' => $dataDir . '/third-secondary-audit.json',
     ];
     foreach ($required as $label => $file) {
         if (!is_file($file)) {
@@ -213,7 +223,7 @@ try {
     if ((int) ($rosterAudit['version'] ?? 0) !== $officialDataVersion
         || (int) ($rosterAudit['totals']['students'] ?? 0) !== 778
         || (int) ($rosterAudit['totals']['gender_confirmed'] ?? 0) !== 778) {
-        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-6 package.');
+        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-7 package.');
     }
 
     $rosterRows = 0;
@@ -331,6 +341,10 @@ try {
         runStep('Roster ' . basename($rosterFile), $rosterArgs);
     }
 
+    if (!$dryRun) {
+        runStep('Third secondary (الصف الثالث) spreadsheet', [$root . '/bin/import-third-secondary.php']);
+    }
+
     $timetableArgs = [$root . '/bin/import-timetables.php'];
     if ($dryRun) {
         $timetableArgs[] = '--dry-run';
@@ -355,6 +369,12 @@ try {
     }
     if ($counts['classes_with_capacity'] !== 17) {
         $problems[] = "{$counts['classes_with_capacity']} of 17 classes carry the school-confirmed 50-student capacity";
+    }
+    if ($counts['third_secondary_classes'] !== 12) {
+        $problems[] = "{$counts['third_secondary_classes']} of 12 third-secondary classes exist";
+    }
+    if ($counts['third_secondary_students'] !== 540) {
+        $problems[] = "{$counts['third_secondary_students']} of 540 third-secondary students exist";
     }
     if ($counts['subjects'] < 17) {
         $problems[] = "only {$counts['subjects']} of the 17 official subjects exist";

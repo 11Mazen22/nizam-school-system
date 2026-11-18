@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "academic_year": "2026/2027",
   "source": "Rendered official roster pages under docs/source/rosters (human-reviewed) + the school's confirmed name-based religion classification for the rows whose printed cell proves no religion.",
   "rules": {
@@ -711,15 +711,16 @@
       "page_default": 252,
       "printed_explicit": 41
     },
-    "second_language_confirmed": 424,
+    "second_language_confirmed": 425,
     "second_language": {
       "french": 85,
-      "german": 284,
+      "german": 285,
       "spanish": 55
     },
     "second_language_source": {
       "class_heading": 71,
-      "printed_cell": 353
+      "printed_cell": 353,
+      "source_typo_corrected": 1
     },
     "date_of_birth_confirmed": 0
   },

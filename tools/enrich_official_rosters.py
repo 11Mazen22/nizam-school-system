@@ -167,6 +167,8 @@ def normalized_second_language(class_name: str, raw: str) -> tuple[str | None, s
     """Return only a language proved by the printed cell or class heading."""
 
     compact = re.sub(r"\s+", "", raw)
+    if class_name == "A4" and compact == "المالم":
+        return "german", "source_typo_corrected"
     if "المانى" in compact:
         return "german", "printed_cell"
     if "فرنسى" in compact or "فرنساوى" in compact:
@@ -301,7 +303,7 @@ def main() -> int:
     inferred_religion = len(name_inference)
 
     audit = {
-        "version": 6,
+        "version": 7,
         "academic_year": "2026/2027",
         "source": "Rendered official roster pages under docs/source/rosters (human-reviewed) + the school's confirmed name-based religion classification for the rows whose printed cell proves no religion.",
         "rules": {

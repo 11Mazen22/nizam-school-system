@@ -155,6 +155,10 @@ try {
     );
     $teacherColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'teachers'")->fetchAll(PDO::FETCH_COLUMN);
     check(in_array('religion', $teacherColumns, true), 'Migration 037 adds the teacher religion field');
+    check(
+        in_array('national_id', $studentColumns, true) && in_array('source_student_code', $studentColumns, true),
+        'Migration 038 adds student source identity columns'
+    );
 
     $yearId = (int) $pdo->query('SELECT id FROM academic_years WHERE is_active = 1 LIMIT 1')->fetchColumn();
     $gradeId = (int) $pdo->query('SELECT id FROM grades ORDER BY sort_order LIMIT 1')->fetchColumn();

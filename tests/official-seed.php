@@ -200,17 +200,21 @@ try {
     }
 
     $count = static fn (string $sql): int => (int) $pdo->query($sql)->fetchColumn();
+    $abJoin = " FROM students s
+                JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = {$yearId} AND e.status = 'active'
+                JOIN classes c ON c.id = e.class_id
+                WHERE (c.name LIKE 'A%' OR c.name LIKE 'B%')";
     $counts = [
-        'classes' => $count('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId),
-        'students' => $count('SELECT COUNT(*) FROM students'),
-        'enrollments' => $count('SELECT COUNT(*) FROM student_enrollments WHERE academic_year_id = ' . $yearId),
+        'classes' => $count('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId . " AND (name LIKE 'A%' OR name LIKE 'B%')"),
+        'students' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin),
+        'enrollments' => $count("SELECT COUNT(*) FROM student_enrollments e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = e.class_id WHERE e.academic_year_id = {$yearId} AND (c.name LIKE 'A%' OR c.name LIKE 'B%')"),
         'teachers' => $count('SELECT COUNT(*) FROM teachers'),
         'subjects' => $count('SELECT COUNT(*) FROM subjects'),
         'timetables' => $count('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId),
         'assessments' => $count('SELECT COUNT(*) FROM assessment_schedules WHERE academic_year_id = ' . $yearId),
-        'gender_confirmed' => $count('SELECT COUNT(*) FROM students WHERE gender IS NOT NULL'),
-        'religion_confirmed' => $count('SELECT COUNT(*) FROM students WHERE religion IS NOT NULL'),
-        'second_language_confirmed' => $count('SELECT COUNT(*) FROM students WHERE second_language IS NOT NULL'),
+        'gender_confirmed' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . ' AND s.gender IS NOT NULL'),
+        'religion_confirmed' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . ' AND s.religion IS NOT NULL'),
+        'second_language_confirmed' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin . ' AND s.second_language IS NOT NULL'),
     ];
 
     foreach ($counts as $name => $value) {
@@ -226,7 +230,7 @@ try {
     seedCheck($counts['teachers'] >= 29, 'The printed teachers were created', (string) $counts['teachers']);
     seedCheck($counts['gender_confirmed'] === 778, 'Every source student has the reviewed roster gender', (string) $counts['gender_confirmed']);
     seedCheck($counts['religion_confirmed'] === 778, 'All 778 students carry a religion (672 source-backed + 106 name-inferred)', (string) $counts['religion_confirmed']);
-    seedCheck($counts['second_language_confirmed'] === 424, 'Exactly 424 second-language values are proved by the source', (string) $counts['second_language_confirmed']);
+    seedCheck($counts['second_language_confirmed'] === 425, 'Exactly 425 second-language values are proved by the source', (string) $counts['second_language_confirmed']);
     seedCheck(
         $count("SELECT COUNT(*) FROM students WHERE gender_source = 'official_roster_layout'") === 778,
         'Every reviewed gender carries official-roster provenance'
@@ -240,7 +244,7 @@ try {
         'No religion remains explicitly unconfirmed after name inference'
     );
     seedCheck(
-        $count("SELECT COUNT(*) FROM students WHERE second_language_source IN ('printed_cell', 'class_heading')") === 424,
+        $count("SELECT COUNT(*) FROM students WHERE second_language_source IN ('printed_cell', 'class_heading', 'source_typo_corrected')") === 425,
         'Every second language records printed-cell or class-heading evidence'
     );
     seedCheck(
@@ -248,11 +252,11 @@ try {
         'The populated B5 L17 source row is restored exactly once'
     );
     seedCheck(
-        $count("SELECT COUNT(*) FROM students WHERE date_of_birth IS NOT NULL") === 0,
-        'The source does not fabricate any birth date'
+        $count("SELECT COUNT(*) FROM students s JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = {$yearId} JOIN classes c ON c.id = e.class_id WHERE (c.name LIKE 'A%' OR c.name LIKE 'B%') AND s.date_of_birth IS NOT NULL") === 0,
+        'The source does not fabricate any birth date for A/B students'
     );
 
-    $classNames = $pdo->query('SELECT name FROM classes WHERE academic_year_id = ' . $yearId . ' ORDER BY name')
+    $classNames = $pdo->query("SELECT name FROM classes WHERE academic_year_id = {$yearId} AND (name LIKE 'A%' OR name LIKE 'B%') ORDER BY name")
         ->fetchAll(PDO::FETCH_COLUMN);
     $expectedClasses = [];
     for ($number = 1; $number <= 9; $number++) {
@@ -267,16 +271,27 @@ try {
     $pathwayCount = $count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND pathway_ar IS NOT NULL AND pathway_ar <> ''");
     seedCheck($pathwayCount === 17, 'Every class carries its official Arabic pathway label', (string) $pathwayCount);
 
-    $capacityCount = $count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND capacity = 50");
+    $capacityCount = $count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND capacity = 50 AND (name LIKE 'A%' OR name LIKE 'B%')");
     seedCheck($capacityCount === 17, 'All 17 official classes carry the school-confirmed 50-student capacity', (string) $capacityCount);
 
     $b7Christians = $count("SELECT COUNT(*) FROM students s JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = {$yearId} JOIN classes c ON c.id = e.class_id WHERE c.name = 'B7' AND s.religion = 'christian'");
     seedCheck($b7Christians === 1, 'B7 has only its one name-inferred Christian (يؤنا), not the A4 marker rule', (string) $b7Christians);
 
+    seedCheck($count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND name LIKE 'C%'") === 12, 'All 12 third-secondary classes exist');
+    seedCheck($count('SELECT COUNT(*) FROM students WHERE national_id IS NOT NULL') === 540, 'All 540 third-secondary students were imported');
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE national_id IS NOT NULL AND gender IS NOT NULL AND date_of_birth IS NOT NULL AND religion IS NOT NULL") === 540,
+        'Every third-secondary student has gender, birth date and religion from the source ID/name'
+    );
+    seedCheck(
+        $count("SELECT COUNT(*) FROM students WHERE national_id IS NOT NULL AND religion = 'christian'") === 20,
+        '20 third-secondary students carry a Christian name marker'
+    );
+
     $marker = is_file($markerOne) ? json_decode((string) file_get_contents($markerOne), true) : null;
     seedCheck(is_array($marker) && ($marker['academic_year'] ?? '') === '2026/2027', 'The seed marker records the official year');
-    seedCheck(is_array($marker) && (int) ($marker['official_data_version'] ?? 0) === 6, 'The marker records reviewed data version 6');
-    seedCheck(is_array($marker) && (int) ($marker['counts']['students_in_year'] ?? 0) === 778, 'The marker records the verified student count');
+    seedCheck(is_array($marker) && (int) ($marker['official_data_version'] ?? 0) === 7, 'The marker records reviewed data version 7');
+    seedCheck(is_array($marker) && (int) ($marker['counts']['students_in_year'] ?? 0) === 1318, 'The marker records the verified student count');
 
     // Second run with a different marker: exercises the importers' own
     // idempotency rather than the marker shortcut.
@@ -287,9 +302,9 @@ try {
     seedCheck($second['status'] === 0, 'A forced second seed succeeds', $logTail($second['output']));
 
     $after = [
-        'classes' => $count('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId),
-        'students' => $count('SELECT COUNT(*) FROM students'),
-        'enrollments' => $count('SELECT COUNT(*) FROM student_enrollments WHERE academic_year_id = ' . $yearId),
+        'classes' => $count('SELECT COUNT(*) FROM classes WHERE academic_year_id = ' . $yearId . " AND (name LIKE 'A%' OR name LIKE 'B%')"),
+        'students' => $count('SELECT COUNT(DISTINCT s.id)' . $abJoin),
+        'enrollments' => $count("SELECT COUNT(*) FROM student_enrollments e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = e.class_id WHERE e.academic_year_id = {$yearId} AND (c.name LIKE 'A%' OR c.name LIKE 'B%')"),
         'timetables' => $count('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId),
         'assessments' => $count('SELECT COUNT(*) FROM assessment_schedules WHERE academic_year_id = ' . $yearId),
         'subjects' => $count('SELECT COUNT(*) FROM subjects'),
@@ -312,7 +327,7 @@ try {
     );
 
     $activeEnrollments = $count("SELECT COUNT(*) FROM student_enrollments WHERE academic_year_id = {$yearId} AND status = 'active'");
-    seedCheck($activeEnrollments === 778, 'All seeded enrollments are active', (string) $activeEnrollments);
+    seedCheck($activeEnrollments === 1318, 'All seeded enrollments are active', (string) $activeEnrollments);
 } catch (Throwable $e) {
     fwrite(STDERR, 'BLOCKED: ' . $e->getMessage() . "\n");
     $failed++;
