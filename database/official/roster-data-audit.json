@@ -1,16 +1,21 @@
 {
-  "version": 2,
+  "version": 4,
   "academic_year": "2026/2027",
-  "source": "Rendered official roster pages under docs/source/rosters (human-reviewed)",
+  "source": "Rendered official roster pages under docs/source/rosters (human-reviewed) + the school's confirmed name-based religion classification for the 75 rows whose printed cell proves no religion.",
   "rules": {
     "gender": "M/F is derived from the visually reviewed roster section for each exact R/L row address; never from a name alone.",
-    "religion": "Uses the confirmed page default / exception convention and the confirmed م- Christian marker. B6/B8 and unlegended ج-/ح- shorthand remain null; names are never used.",
+    "religion": "703 from the confirmed page default / exception convention and the confirmed م- Christian marker. 75 from the school's confirmed name-based classification (4 Christians identified from Coptic names, 71 Muslims with no Christian marker): B6 (47) and B8 (27) print academic specializations instead of religions, and one B7 cell uses the unlegended ج- س shorthand, so the source cannot prove those values.",
     "second_language": "Normalized only from an explicit language word; A7 blank rows and all A9 rows use their unambiguous class heading. Ambiguous shorthand is not decoded.",
-    "date_of_birth": "Not present in the source; remains null."
+    "date_of_birth": "Not present in the source; remains null.",
+    "guardian": "Not present in the source; remains null."
   },
   "source_rule_confirmations": [
     "B5 prints مسلم once as the default for every populated student on that page unless another religion is printed.",
-    "The م- prefix in the combined A-page cell is the Christian marker; its suffix remains the printed second language."
+    "The م- prefix in the combined A-page cell is the Christian marker; its suffix remains the printed second language.",
+    "B6/B8 pages print academic specializations (كيمياء، ادارة اعمال، برمجة، برمجه، رياضة، محاسبة، فيزياء، علم نفس), never a religion.",
+    "One B7 cell prints the unlegended ج- س shorthand; the school confirmed that row is classified from the name (جرجس = Christian).",
+    "The school confirmed in writing: classify the 75 students on B6/B8 and the B7 shorthand row from their names - 4 Christians (Coptic names: موريس، صموئيل، جورج/حنا/فوزى، جرجس) and 71 Muslims.",
+    "No other value (date of birth, guardian) is ever inferred."
   ],
   "restored_source_rows": [
     {
@@ -18,6 +23,485 @@
       "position": "L17",
       "full_name": "ريماس فاروق اسماعيل حسن",
       "reason": "Visible populated row in the official image; absent from the earlier CSV transcription."
+    }
+  ],
+  "name_inference_details": {
+    "christian_count": 4,
+    "christian_students": [
+      {
+        "full_name": "مريم جورج حنا فوزى",
+        "class": "B6",
+        "reason": "جورج / حنا / فوزى - Coptic Christian names"
+      },
+      {
+        "full_name": "سامر صموئيل فكرى بنى",
+        "class": "B6",
+        "reason": "صموئيل (Samuel) - Biblical Christian name"
+      },
+      {
+        "full_name": "ايهاب مسامح موريس نجيب",
+        "class": "B6",
+        "reason": "موريس (Maurice) - Coptic Christian name"
+      },
+      {
+        "full_name": "يؤنا ماجد ظريف جرجس",
+        "class": "B7",
+        "reason": "جرجس (Girgis) - Coptic Christian name"
+      }
+    ],
+    "muslim_count": 71,
+    "muslim_students_note": "No Christian name marker; recorded as Muslim per the school's confirmed classification."
+  },
+  "name_inference_students": [
+    {
+      "class": "B6",
+      "full_name": "جنى سيد شحاته ابراهيم",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "جومانه احمد عبدالنعيم سيد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "رؤيا امجد احمد العشماوى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مريم جورج حنا فوزى",
+      "religion": "christian",
+      "religion_source": "name_inference_christian"
+    },
+    {
+      "class": "B6",
+      "full_name": "مريم عبدالله على عبدالقادر",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ميار وليد احمد محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "نوران احمد سعيد عبدالحميد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ليلى اسلام فكرى احمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "حبيبة اسامة صبرى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ريم احمد ابو السعود حسن",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "سما مازن محمد محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "فرح عماد محمد حسين",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مريم المحمود سعيد حسن",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "لوجين ايمن سيد احمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "لميس وليد محمد نوالدين",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مريم السيد عبدالحميد السيد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مريم السيد عبدالحليم السيد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مريم علاء محمد احمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مروه محمد زهرى احمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ملك ياسر محمد عبدالعليم",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ندى ايهاب محمود عبدالفتاح",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ندى عبدالحميد سعيد عبدالحميد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "اسماعيل وليد اسماعيل محمود",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "سامر صموئيل فكرى بنى",
+      "religion": "christian",
+      "religion_source": "name_inference_christian"
+    },
+    {
+      "class": "B6",
+      "full_name": "معاذ عمرو عطا درويش",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "خالد احمد محمد عبدالقادر",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "احمد محمد السيد عبدالسلام",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ايهاب مسامح موريس نجيب",
+      "religion": "christian",
+      "religion_source": "name_inference_christian"
+    },
+    {
+      "class": "B6",
+      "full_name": "حمد محمد احمد حماد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "زياد وليد محمد حامد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "على عمر عمار حسين",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مازن عمرو مهدى الدربى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "محمد ابوبكر بشير حسن",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "محمد احمد محمد عبدالمجيد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ياسين حسين فاروق حسين",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ادهم احمد رشاد رمضان",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "احمد امير محمد محمود حجازى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "احمد سامح فوزى سيد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "ادهم يحي احمد مصيلحى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "زياد عزاى كمال الدين عزاى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "عبدالرحمن محمد عبدالرحمن مصطفى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "عبدالعزيز طارق طه",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "على وائل على منصور",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "عمر تامر على عبدالمطلب",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "محمد علاء محمد محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "محمود عمرو محمود محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B6",
+      "full_name": "مهند زياد اسماعيل",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B7",
+      "full_name": "يؤنا ماجد ظريف جرجس",
+      "religion": "christian",
+      "religion_source": "name_inference_christian"
+    },
+    {
+      "class": "B8",
+      "full_name": "جومانه عمر ابراهيم حسن",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "مريم محمد عبدالوهاب رزق",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "جنى احمد مصلح حامد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "جودى سعودى طلعت همام",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "حبيبة ايمن احمد على",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "كادى عماد محمد ابراهيم",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "لوجين حاتم سعيد عبدالباقى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "مريم احمد فتحى عبدالرحمن",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "مريم احمد محمد سعيد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "مريم محمد احمد حسن",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "هنا محمد محمود محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "على نادر على حسنى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "احمد حسام على محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "باسم وليد حمدى توفيق",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "مازن محمد حسن محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "مروان محمود ماجد محمود",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "مهند محمد كمال محمد",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "احمد محمد احمد تميم",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "حمزه محمد حسن عبدالحافظ",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "محمد السيد محمد السيد محمد نصار",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "محمد سامح محمد محمود",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "اسيل عمر عوض على",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "حلا خالد فكرى زكى",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "جومانا محمد محمد امام",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "لينا احمد محمد نظير",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "ملك ياسر احمد بهاء الدين",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
+    },
+    {
+      "class": "B8",
+      "full_name": "ملك ابراهيم محمد عبد الرحمن",
+      "religion": "muslim",
+      "religion_source": "name_inference_muslim"
     }
   ],
   "totals": {
@@ -28,13 +512,15 @@
       "F": 360,
       "M": 418
     },
-    "religion_confirmed": 703,
+    "religion_confirmed": 778,
     "religion": {
-      "christian": 52,
-      "muslim": 651
+      "christian": 56,
+      "muslim": 722
     },
     "religion_source": {
       "combined_marker": 37,
+      "name_inference_christian": 4,
+      "name_inference_muslim": 71,
       "page_convention": 373,
       "page_default": 252,
       "printed_explicit": 41

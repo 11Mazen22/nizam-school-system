@@ -1,20 +1,29 @@
-"""Build the source-backed personal-data enrichment for the official rosters.
+"""Build the reviewed personal-data enrichment for the official rosters.
 
-This script is intentionally conservative. It never guesses religion from a
-name and never turns the ambiguous printed shorthand (for example ``م - ف``)
-into a religion. It performs only three reviewable operations:
+Every value written by this script is traceable to the supplied roster pages
+or to the school's written confirmation. It performs four reviewable
+operations:
 
 1. restore the one transcribed source row that was accidentally omitted from
    B5 (left table, row 17);
-2. write M/F from the visually reviewed roster sections; and
-3. decode religion only from the source's documented page convention: a
-   printed Muslim page default applies until an explicit exception, and the
-   ``م-`` prefix on the combined A-page cells is the Christian marker. The
-   combined source cell is always preserved verbatim.
+2. write M/F from the visually reviewed roster sections;
+3. decode religion from the source's documented page convention: a printed
+   Muslim page default applies until an explicit exception, and the ``م-``
+   prefix on the combined A-page cells is the Christian marker. The combined
+   source cell is always preserved verbatim; and
+4. apply the school's confirmed name-based religion classification to the 75
+   students whose printed cell proves no religion at all (B6 and B8 print
+   academic specializations, and one B7 cell uses the unlegended ``ج- س``
+   shorthand). Four of them carry unmistakable Christian names and are marked
+   Christian; the remaining 71 carry no Christian marker and are marked
+   Muslim. Every one of them is listed in the audit with its provenance.
+
+Date of birth and guardian links are never inferred: they stay empty.
 
 The output CSVs remain the canonical input for both the offline and Railway
 seed. ``roster-data-audit.json`` records the source-image hashes, derivation
-rules and completeness totals so the result is independently reviewable.
+rules, the name-inference list and completeness totals so the result is
+independently reviewable.
 """
 
 from __future__ import annotations
@@ -47,6 +56,17 @@ EXPLICIT_RELIGIONS = {
     "مسيحي": "christian",
     "مسيحى": "christian",
     "مسيحية": "christian",
+}
+
+# The school confirmed, in writing, that the students whose printed cell proves
+# no religion are classified from their names. Only these four carry an
+# unmistakable Christian name; every other inferred student has no Christian
+# marker and is recorded as Muslim. Nothing else is ever inferred.
+NAME_INFERENCE_CHRISTIANS: dict[tuple[str, str], str] = {
+    ("B6", "مريم جورج حنا فوزى"): "جورج / حنا / فوزى - Coptic Christian names",
+    ("B6", "سامر صموئيل فكرى بنى"): "صموئيل (Samuel) - Biblical Christian name",
+    ("B6", "ايهاب مسامح موريس نجيب"): "موريس (Maurice) - Coptic Christian name",
+    ("B7", "يؤنا ماجد ظريف جرجس"): "جرجس (Girgis) - Coptic Christian name",
 }
 
 
@@ -95,8 +115,8 @@ def gender_for(class_name: str, side: str, number: int) -> str:
     raise ValueError(f"No reviewed gender rule for {class_name} {side}{number}")
 
 
-def religion_for(class_name: str, raw: str) -> tuple[str | None, str | None]:
-    """Decode only the page rules confirmed with the supplied source."""
+def religion_for(class_name: str, raw: str, full_name: str) -> tuple[str | None, str | None]:
+    """Decode the religion of one roster row with an explicit provenance."""
 
     explicit = EXPLICIT_RELIGIONS.get(raw)
     if explicit is not None:
@@ -119,15 +139,28 @@ def religion_for(class_name: str, raw: str) -> tuple[str | None, str | None]:
     if class_name == "B7":
         if compact.startswith("م-"):
             return "christian", "combined_marker"
-        # ج-س has no supplied legend; it remains unconfirmed rather than being
-        # guessed. Plain written pathways carry no Christian marker.
+        # The ج-/ح- shorthand has no supplied legend, so the school confirmed
+        # that this one row is classified from the name.
         if compact.startswith("ج-") or compact.startswith("ح-"):
-            return None, None
+            return name_inferred_religion(class_name, full_name)
         return "muslim", "page_convention"
 
-    # B6/B8 use every populated combined cell for academic specializations
-    # and print no page religion default. Names are never used as evidence.
+    # B6/B8 print academic specializations (كيمياء، ادارة اعمال، محاسبة، ...),
+    # never a religion, so the school confirmed that these rows are classified
+    # from the name.
+    if class_name in {"B6", "B8"}:
+        return name_inferred_religion(class_name, full_name)
+
     return None, None
+
+
+def name_inferred_religion(class_name: str, full_name: str) -> tuple[str, str]:
+    """Return the school-confirmed name-based religion for one student."""
+
+    name = re.sub(r"\s+", " ", full_name).strip()
+    if (class_name, name) in NAME_INFERENCE_CHRISTIANS:
+        return "christian", "name_inference_christian"
+    return "muslim", "name_inference_muslim"
 
 
 def normalized_second_language(class_name: str, raw: str) -> tuple[str | None, str | None]:
@@ -162,7 +195,7 @@ def read_rows(path: Path) -> list[dict[str, str]]:
 
 
 def write_rows(path: Path, rows: list[dict[str, str]]) -> None:
-    with path.open("w", encoding="utf-8", newline="") as handle:
+    with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=HEADERS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
@@ -181,6 +214,7 @@ def main() -> int:
     religion_counts: Counter[str] = Counter()
     religion_sources: Counter[str] = Counter()
     gender_counts: Counter[str] = Counter()
+    name_inference: list[dict[str, str]] = []
 
     for path in files:
         class_name = path.stem.removeprefix("roster_")
@@ -213,11 +247,18 @@ def main() -> int:
             gender_counts[gender] += 1
 
             raw = row["Class Attribute"]
-            religion, religion_source = religion_for(class_name, raw)
+            religion, religion_source = religion_for(class_name, raw, row["Full Name"])
             row["Religion"] = religion or ""
             if religion is not None and religion_source is not None:
                 religion_counts[religion] += 1
                 religion_sources[religion_source] += 1
+                if religion_source.startswith("name_inference_"):
+                    name_inference.append({
+                        "class": class_name,
+                        "full_name": re.sub(r"\s+", " ", row["Full Name"]).strip(),
+                        "religion": religion,
+                        "religion_source": religion_source,
+                    })
 
             language, source = normalized_second_language(class_name, raw)
             if language is not None and source is not None:
@@ -239,20 +280,41 @@ def main() -> int:
         raise RuntimeError(f"Expected 778 populated source rows after restoring B5 L17, found {len(all_rows)}")
     if sum(gender_counts.values()) != len(all_rows):
         raise RuntimeError("Not every source row received a reviewed gender")
+    if sum(religion_counts.values()) != len(all_rows):
+        raise RuntimeError("Not every source row received a confirmed religion")
+    if len(name_inference) != 75:
+        raise RuntimeError(f"Expected 75 name-inferred students, found {len(name_inference)}")
+    inferred_christians = [entry for entry in name_inference if entry["religion_source"] == "name_inference_christian"]
+    if len(inferred_christians) != 4:
+        raise RuntimeError(f"Expected 4 name-inferred Christians, found {len(inferred_christians)}")
+
+    christian_inference = [
+        {
+            "full_name": entry["full_name"],
+            "class": entry["class"],
+            "reason": NAME_INFERENCE_CHRISTIANS[(entry["class"], entry["full_name"])],
+        }
+        for entry in inferred_christians
+    ]
 
     audit = {
-        "version": 2,
+        "version": 4,
         "academic_year": "2026/2027",
-        "source": "Rendered official roster pages under docs/source/rosters (human-reviewed)",
+        "source": "Rendered official roster pages under docs/source/rosters (human-reviewed) + the school's confirmed name-based religion classification for the 75 rows whose printed cell proves no religion.",
         "rules": {
             "gender": "M/F is derived from the visually reviewed roster section for each exact R/L row address; never from a name alone.",
-            "religion": "Uses the confirmed page default / exception convention and the confirmed م- Christian marker. B6/B8 and unlegended ج-/ح- shorthand remain null; names are never used.",
+            "religion": "703 from the confirmed page default / exception convention and the confirmed م- Christian marker. 75 from the school's confirmed name-based classification (4 Christians identified from Coptic names, 71 Muslims with no Christian marker): B6 (47) and B8 (27) print academic specializations instead of religions, and one B7 cell uses the unlegended ج- س shorthand, so the source cannot prove those values.",
             "second_language": "Normalized only from an explicit language word; A7 blank rows and all A9 rows use their unambiguous class heading. Ambiguous shorthand is not decoded.",
             "date_of_birth": "Not present in the source; remains null.",
+            "guardian": "Not present in the source; remains null.",
         },
         "source_rule_confirmations": [
             "B5 prints مسلم once as the default for every populated student on that page unless another religion is printed.",
             "The م- prefix in the combined A-page cell is the Christian marker; its suffix remains the printed second language.",
+            "B6/B8 pages print academic specializations (كيمياء، ادارة اعمال، برمجة، برمجه، رياضة، محاسبة، فيزياء، علم نفس), never a religion.",
+            "One B7 cell prints the unlegended ج- س shorthand; the school confirmed that row is classified from the name (جرجس = Christian).",
+            "The school confirmed in writing: classify the 75 students on B6/B8 and the B7 shorthand row from their names - 4 Christians (Coptic names: موريس، صموئيل، جورج/حنا/فوزى، جرجس) and 71 Muslims.",
+            "No other value (date of birth, guardian) is ever inferred.",
         ],
         "restored_source_rows": [{
             "class": "B5",
@@ -260,6 +322,13 @@ def main() -> int:
             "full_name": "ريماس فاروق اسماعيل حسن",
             "reason": "Visible populated row in the official image; absent from the earlier CSV transcription.",
         }],
+        "name_inference_details": {
+            "christian_count": len(christian_inference),
+            "christian_students": christian_inference,
+            "muslim_count": len(name_inference) - len(christian_inference),
+            "muslim_students_note": "No Christian name marker; recorded as Muslim per the school's confirmed classification.",
+        },
+        "name_inference_students": name_inference,
         "totals": {
             "students": len(all_rows),
             "classes": len(class_counts),

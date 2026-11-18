@@ -52,7 +52,7 @@ $force = array_key_exists('force', $options);
 $replaceTimetables = array_key_exists('replace-timetables', $options);
 $dataDir = rtrim((string) ($options['data-dir'] ?? $root . '/database/official'), '/\\');
 $markerPath = (string) ($options['marker'] ?? dataPath() . '/storage/official-data-seed.json');
-$officialDataVersion = 2;
+$officialDataVersion = 4;
 
 /**
  * Run one importer as a child process, streaming its output into this log.
@@ -211,7 +211,7 @@ try {
     if ((int) ($rosterAudit['version'] ?? 0) !== $officialDataVersion
         || (int) ($rosterAudit['totals']['students'] ?? 0) !== 778
         || (int) ($rosterAudit['totals']['gender_confirmed'] ?? 0) !== 778) {
-        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-2 package.');
+        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-4 package.');
     }
 
     $rosterRows = 0;
@@ -372,12 +372,18 @@ try {
     if ($counts['gender_provenance'] !== $rosterRows) {
         $problems[] = "{$counts['gender_provenance']} of {$rosterRows} reviewed genders carry official provenance";
     }
-    if ($counts['religion_provenance'] !== (int) ($rosterAudit['totals']['religion_confirmed'] ?? 0)) {
-        $problems[] = "{$counts['religion_provenance']} confirmed religions carry official provenance";
+    $sourceReligionProvenance = 0;
+    foreach ((array) ($rosterAudit['totals']['religion_source'] ?? []) as $source => $count) {
+        if (in_array($source, ['combined_marker', 'page_convention', 'page_default', 'printed_explicit'], true)) {
+            $sourceReligionProvenance += (int) $count;
+        }
     }
-    $expectedUnconfirmedReligion = $rosterRows - (int) ($rosterAudit['totals']['religion_confirmed'] ?? 0);
+    if ($counts['religion_provenance'] !== $sourceReligionProvenance) {
+        $problems[] = "{$counts['religion_provenance']} confirmed religions carry official provenance (expected {$sourceReligionProvenance})";
+    }
+    $expectedUnconfirmedReligion = 0; // All 75 previously-unconfirmed rows were name-inferred in v4
     if ($counts['religion_unconfirmed'] !== $expectedUnconfirmedReligion) {
-        $problems[] = "{$counts['religion_unconfirmed']} of {$expectedUnconfirmedReligion} unconfirmed religions are explicitly marked null";
+        $problems[] = "{$counts['religion_unconfirmed']} of {$expectedUnconfirmedReligion} unconfirmed religions remain";
     }
     if ($counts['second_language_provenance'] !== (int) ($rosterAudit['totals']['second_language_confirmed'] ?? 0)) {
         $problems[] = "{$counts['second_language_provenance']} confirmed second languages carry source evidence";

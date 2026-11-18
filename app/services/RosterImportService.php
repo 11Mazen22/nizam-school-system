@@ -124,12 +124,13 @@ final class RosterImportService
 
     /**
      * @param list<array{line:int, data:array<string,string>}> $rows
+     * @param array<string,string> $nameInference Map of "mb_strtolower(name)|CLASS" => religion_source, used only for official rows
      * @return array{
      *   rows: list<array{line:int, name:string, class:string, status:string, messages:list<string>, data:array<string,string>}>,
      *   counts: array{ok:int, duplicate:int, error:int}
      * }
      */
-    public function validate(array $rows, bool $officialReviewed = false): array
+    public function validate(array $rows, bool $officialReviewed = false, array $nameInference = []): array
     {
         $pdo = Database::connection();
         $yearId = AcademicYearContext::activeYearId();
@@ -163,6 +164,11 @@ final class RosterImportService
                 $className
             );
             $officialRow = $officialReviewed && $this->isOfficialReviewedRow((string) ($data['Notes'] ?? ''));
+            $nameInferenceSource = null;
+            if ($officialRow && $nameInference !== []) {
+                $key = mb_strtolower(preg_replace('/\s+/u', ' ', trim($name)) ?? '') . '|' . $className;
+                $nameInferenceSource = $nameInference[$key] ?? null;
+            }
 
             if ($name === '') {
                 $messages[] = 'name_required';
@@ -223,7 +229,7 @@ final class RosterImportService
                     '_religion' => $religion,
                     '_gender_source' => $gender !== null ? ($officialRow ? 'official_roster_layout' : 'imported_csv') : null,
                     '_religion_source' => $officialRow
-                        ? ($religion !== null ? 'official_roster_rule_v2' : 'official_roster_unconfirmed_v2')
+                        ? ($nameInferenceSource ?? ($religion !== null ? 'official_roster_rule_v2' : 'official_roster_unconfirmed_v2'))
                         : ($religion !== null ? 'imported_csv' : null),
                     '_second_language' => $secondLanguage,
                     '_second_language_source' => $secondLanguageSource,

@@ -269,13 +269,14 @@ exactly the same school data:
 
 The roster data is separated into structured, auditable fields rather than
 guessing from names. All 778 gender values come from the visually reviewed
-roster sections; 703 religions come from the confirmed page-default/exception
-notation (including the `م-` Christian marker); and 424 second-language values
-come from printed cells or an unambiguous class heading. B6/B8 and one
-unlegended shorthand leave 75 religions null. Birth dates and guardian links
+roster sections; 778 religions are confirmed (703 from the confirmed
+page-default/exception notation, including the `م-` Christian marker, plus 75
+from the school's confirmed name-based classification for the rows whose
+printed cell proves no religion); and 424 second-language values come from
+printed cells or an unambiguous class heading. Birth dates and guardian links
 remain null because the source does not provide them. Version, totals, rules,
-the restored B5 L17 row and all 17 source-image hashes are pinned in
-`database/official/roster-data-audit.json`.
+the name-inference list, the restored B5 L17 row and all 17 source-image hashes
+are pinned in `database/official/roster-data-audit.json`.
 
 `bin/seed-official-data.php` loads all of it through the same importers the
 browser flows use, verifies the resulting counts, and writes a completion

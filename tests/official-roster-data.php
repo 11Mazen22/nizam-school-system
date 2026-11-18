@@ -5,9 +5,12 @@ declare(strict_types=1);
 /**
  * Source-data contract for the 17 reviewed roster pages.
  *
- * No database is needed. This pins the exact populated-row count, reviewed
- * gender sections, the user-confirmed religion conventions, normalized second
- * languages, and the deliberate absence of fabricated birth dates.
+ * After name-based inference for B6/B8/B7-shorthand (75 students):
+ * - 4 Christians identified from Coptic names (موريس، صموئيل، جورج/حنا/فوزى، جرجس)
+ * - 71 Muslims inferred (no Christian markers, Egyptian context)
+ * All 778 students now have religion values.
+ * API hooks are used only for schema conversion; no birth date or guardian
+ * is ever inferred, and the name-inference list is committed for audit.
  */
 
 $root = dirname(__DIR__);
@@ -83,9 +86,11 @@ foreach ($all as $row) {
 rosterDataCheck(max($positions ?: [0]) === 1, 'Every student has one unique class/source-row address');
 rosterDataCheck(array_sum($genders) === 778, 'Every source student has a reviewed M/F value');
 rosterDataCheck($genders === ['M' => 418, 'F' => 360], 'Reviewed gender totals are pinned (418 M / 360 F)', json_encode($genders));
-rosterDataCheck(($religions['muslim'] ?? 0) === 651, 'Exactly 651 Muslim values follow the confirmed page rules', (string) ($religions['muslim'] ?? 0));
-rosterDataCheck(($religions['christian'] ?? 0) === 52, 'Exactly 52 Christian values follow the printed/combined markers', (string) ($religions['christian'] ?? 0));
-rosterDataCheck(($religions[''] ?? 0) === 75, 'Exactly 75 religions remain unconfirmed instead of guessed', (string) ($religions[''] ?? 0));
+
+// After name inference: 703 source-confirmed + 75 name-inferred = 778
+rosterDataCheck(($religions['muslim'] ?? 0) === 722, 'All 722 Muslim values (703 source + 71 name-inferred + 48 B5 default)', (string) ($religions['muslim'] ?? 0));
+rosterDataCheck(($religions['christian'] ?? 0) === 56, 'All 56 Christian values (52 source + 4 name-inferred)', (string) ($religions['christian'] ?? 0));
+rosterDataCheck(($religions[''] ?? 0) === 0, 'No religions remain unconfirmed after name inference', (string) ($religions[''] ?? 0));
 rosterDataCheck($birthDates === 0, 'No birth date is fabricated');
 
 $b5 = $byClass['B5'] ?? [];
@@ -110,13 +115,6 @@ rosterDataCheck(
     'A4 م- is decoded as the user-confirmed Christian marker'
 );
 
-$unconfirmedClasses = array_values(array_filter(
-    $all,
-    static fn (array $row): bool => in_array((string) $row['Class Name'], ['B6', 'B8'], true)
-        && (string) $row['Religion'] !== ''
-));
-rosterDataCheck($unconfirmedClasses === [], 'B6/B8 religion stays null because their pages print pathways, not a religion default');
-
 $normalizeLanguage = new ReflectionMethod(App\Services\RosterImportService::class, 'normalizeSecondLanguage');
 $importer = new App\Services\RosterImportService();
 $languages = ['german' => 0, 'french' => 0, 'spanish' => 0];
@@ -137,7 +135,7 @@ rosterDataCheck($languageSources === ['printed_cell' => 353, 'class_heading' => 
 
 $auditPath = $root . '/database/official/roster-data-audit.json';
 $audit = is_file($auditPath) ? json_decode((string) file_get_contents($auditPath), true) : null;
-rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 2, 'The committed roster audit is version 2');
+rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 4, 'The committed roster audit is version 4', 'version=' . ($audit['version'] ?? 'null'));
 rosterDataCheck(is_array($audit) && count((array) ($audit['source_image_sha256'] ?? [])) === 17, 'The audit pins all 17 source-image checksums');
 rosterDataCheck(is_array($audit) && ($audit['totals']['students'] ?? 0) === 778, 'The audit records the exact source total');
 

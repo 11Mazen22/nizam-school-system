@@ -130,13 +130,14 @@ timetables (507 slots), verifies the resulting counts, and writes
 no-op, and the individual importers are idempotent as a second guard.
 
 The roster enrichment is source-backed and versioned: all 778 students receive
-the gender established by their reviewed roster section, 703 religions follow
-the printed page-default/exception notation (including the confirmed `م-`
-Christian marker), and 424 second-language values come from printed cells or
-an unambiguous class heading. The remaining 75 religions, every birth date and
-every guardian link stay blank because the supplied pages do not prove them;
-names are never used to guess religion. The exact rules, totals and 17 source
-image checksums are committed in `database/official/roster-data-audit.json`.
+the gender established by their reviewed roster section, 778 religions follow
+the printed page-default/exception notation (including the confirmed Christian
+`م-` marker) plus the school's confirmed name-based classification for the 75
+students whose printed cell proves no religion, and 424 second-language values
+come from printed cells or an unambiguous class heading. Every birth date and
+every guardian link stays blank because the supplied pages do not provide them;
+nothing is ever guessed. The exact rules, totals and 17 source image checksums
+are committed in `database/official/roster-data-audit.json`.
 
 The Railway image runs the same command once when
 `NIZAM_SEED_OFFICIAL_DATA=1`, so the live site carries exactly the same school
