@@ -16,6 +16,8 @@ use App\Middleware\CsrfMiddleware;
 
 <div class="row g-4">
   <div class="col-lg-7">
+    <?php $structures = filterRowsBySearch($structures, (string) ($_GET['q'] ?? ''), ['name_ar', 'name_en', 'grade_name_ar', 'grade_name_en', 'category_name_ar', 'category_name_en']); ?>
+    <?php if (!empty($structures)) { $listSearchTarget = '#structures-table'; $listSearchAction = '/finance/structures'; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
     <div class="card">
       <div class="card-header fw-semibold"><?= e(__('finance.active_structures')) ?></div>
       <div class="card-body p-0">
@@ -26,7 +28,7 @@ use App\Middleware\CsrfMiddleware;
           </div>
         <?php else: ?>
           <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table id="structures-table" class="table table-hover align-middle mb-0">
               <thead class="table-light">
                 <tr>
                   <th><?= e(__('finance.fee_title')) ?></th>

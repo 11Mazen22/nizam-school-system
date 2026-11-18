@@ -75,9 +75,9 @@ final class ImportService
     /**
      * Generates a blank Excel template with the specified headers.
      */
-    public function generateTemplate(array $headers, string $filename, string $locale, array $referenceRows = []): void
+    public function generateTemplate(array $headers, string $filename, string $locale, array $referenceRows = [], array $dataRows = []): void
     {
-        $bytes = $this->templateBytes($headers, $locale, $referenceRows);
+        $bytes = $this->templateBytes($headers, $locale, $referenceRows, $dataRows);
 
         header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         header("Content-Disposition: attachment; filename=\"{$filename}.xlsx\"");
@@ -94,7 +94,7 @@ final class ImportService
      * directly testable and reusable while generateTemplate() preserves the
      * existing download endpoint behavior.
      */
-    public function templateBytes(array $headers, string $locale, array $referenceRows = []): string
+    public function templateBytes(array $headers, string $locale, array $referenceRows = [], array $dataRows = []): string
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -109,6 +109,13 @@ final class ImportService
         }
         
         $sheet->getStyle("A1:" . $sheet->getHighestColumn() . "1")->getFont()->setBold(true);
+
+        foreach ($dataRows as $rowIndex => $row) {
+            foreach (array_values($row) as $columnIndex => $value) {
+                $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+                $sheet->setCellValue($column . ($rowIndex + 2), $value);
+            }
+        }
 
         if ($referenceRows !== []) {
             $reference = $spreadsheet->createSheet();

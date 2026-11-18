@@ -8,7 +8,7 @@ if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'mysql') {
     throw new RuntimeException('This fixture requires MySQL/MariaDB');
 }
 foreach ([
-    'users' => 'id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(80) UNIQUE, full_name TEXT, email TEXT, role_id INT, is_active INT, password_hash TEXT',
+    'users' => 'id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(80) UNIQUE, full_name TEXT, email TEXT, role_id INT, is_active INT, password_hash TEXT, mfa_secret VARCHAR(64), mfa_enabled_at DATETIME',
     'roles' => 'id INT, code VARCHAR(30)',
     'permissions' => 'id INT, code VARCHAR(60)',
     'role_permissions' => 'role_id INT, permission_id INT',
@@ -16,7 +16,7 @@ foreach ([
 ] as $table => $columns) {
     $pdo->exec("CREATE TEMPORARY TABLE {$table} ({$columns}) ENGINE=InnoDB");
 }
-$pdo->exec("INSERT INTO users VALUES (1,'test','Test',NULL,1,1,'unchanged')");
+$pdo->exec("INSERT INTO users (id, username, full_name, email, role_id, is_active, password_hash) VALUES (1,'test','Test',NULL,1,1,'unchanged')");
 $pdo->exec("INSERT INTO roles VALUES (1,'admin'),(2,'staff')");
 $pdo->exec("INSERT INTO permissions VALUES (1,'users.manage')");
 $pdo->exec('INSERT INTO role_permissions VALUES (1,1)');

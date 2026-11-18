@@ -20,6 +20,9 @@ ob_start(); ?>
         <a href="/timetable/gaps" class="btn btn-outline-secondary btn-sm no-print">
           <?= icon('alert-triangle') ?> <?= e(__('timetable.gaps_title')) ?><?= (int) ($openGaps ?? 0) > 0 ? ' (' . (int) $openGaps . ')' : '' ?>
         </a>
+        <a href="/timetable/covers" class="btn btn-outline-secondary btn-sm no-print">
+          <?= icon('calendar') ?> <?= e(__('timetable.covers_title')) ?>
+        </a>
         <a href="/timetable/staff" class="btn btn-outline-secondary btn-sm no-print">
           <?= icon('users-group') ?> <?= e(__('timetable.staff_title')) ?>
         </a>

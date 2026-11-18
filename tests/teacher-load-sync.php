@@ -192,6 +192,165 @@ try {
 
     $links = (int) $pdo->query("SELECT COUNT(*) FROM teacher_subjects WHERE teacher_id = {$teacherId}")->fetchColumn();
     check($links === 2, 'Both teaching pairs are linked to the teacher');
+
+    $sources = $pdo->query("SELECT source, COUNT(*) AS c FROM teacher_subjects WHERE teacher_id = {$teacherId} GROUP BY source")->fetchAll(PDO::FETCH_KEY_PAIR);
+    check((int) ($sources['timetable'] ?? 0) === 2, 'Derived links are marked as timetable evidence');
+
+    fwrite(STDOUT, "\nQualification versus teaching evidence\n");
+    $subjects = new App\Repositories\SubjectRepository();
+    check(!$subjects->teacherIsQualified($teacherId, $subjectA), 'Teaching a subject does not claim a qualification');
+
+    $subjects->setTeacherQualifications($teacherId, [$subjectA]);
+    check($subjects->teacherIsQualified($teacherId, $subjectA), 'A declared qualification satisfies the warning check');
+    $declared = (int) $pdo->query("SELECT COUNT(*) FROM teacher_subjects WHERE teacher_id = {$teacherId} AND source = 'declared'")->fetchColumn();
+    $derived = (int) $pdo->query("SELECT COUNT(*) FROM teacher_subjects WHERE teacher_id = {$teacherId} AND source = 'timetable'")->fetchColumn();
+    check($declared === 1 && $derived === 1, 'Declaring one subject keeps the other teaching evidence');
+
+    $subjects->setTeacherQualifications($teacherId, []);
+    check((int) $pdo->query("SELECT COUNT(*) FROM teacher_subjects WHERE teacher_id = {$teacherId} AND source = 'timetable'")->fetchColumn() === 2, 'Clearing declarations restores both timetable evidence rows');
+    check((int) $pdo->query("SELECT COUNT(*) FROM teacher_subjects WHERE teacher_id = {$teacherId} AND source = 'declared'")->fetchColumn() === 0, 'Clearing declarations removes the qualification');
+
+    fwrite(STDOUT, "\nSubstitute cover\n");
+    $pdo->prepare("INSERT INTO teachers (teacher_code, full_name, status) VALUES ('TCH-TL2', 'Cover Teacher', 'active')")->execute();
+    $coverTeacherId = (int) $pdo->lastInsertId();
+    $pdo->prepare("INSERT INTO teachers (teacher_code, full_name, status) VALUES ('TCH-TL3', 'Free Teacher', 'active')")->execute();
+    $freeTeacherId = (int) $pdo->lastInsertId();
+
+    $pdo->prepare('INSERT INTO classes (grade_id, academic_year_id, name, capacity, is_active) VALUES (?, ?, ?, 30, 1)')
+        ->execute([$gradeId, $yearId, 'TL2']);
+    $classB = (int) $pdo->lastInsertId();
+    $pdo->prepare('INSERT INTO timetables (academic_year_id, class_id, day_of_week, period_number, subject_id, teacher_id) VALUES (?, ?, 2, 1, ?, ?)')
+        ->execute([$yearId, $classB, $subjectA, $coverTeacherId]);
+    $lessonB = (int) $pdo->lastInsertId();
+    $lessonA = (int) $pdo->query("SELECT id FROM timetables WHERE class_id = {$classId} AND day_of_week = 2 AND period_number = 1")->fetchColumn();
+
+    $date = (new DateTimeImmutable('next Sunday'))->format('Y-m-d');
+    check(App\Services\LessonCoverService::schoolDay($date) === 2, 'The cover date maps to the school Sunday');
+    $pdo->prepare("INSERT INTO staff_leaves (teacher_id, leave_type, start_date, end_date, reason, status, created_at) VALUES (?, 'sick', ?, ?, 'Cover test', 'approved', NOW())")
+        ->execute([$teacherId, $date, $date]);
+
+    $coverService = new App\Services\LessonCoverService();
+    $board = $coverService->board($yearId, $date);
+    check(count($board['lessons']) === 2, 'The cover board lists both lessons of the day');
+    $leaveSeen = false;
+    foreach ($board['lessons'] as $boardLesson) {
+        if ((int) $boardLesson['id'] === (int) $lessonA && (int) $boardLesson['on_leave'] === 1) {
+            $leaveSeen = true;
+        }
+    }
+    check($leaveSeen, 'The absent teacher is marked on approved leave');
+    $dayBookings = (new App\Repositories\LessonCoverRepository())->bookingsForDate($yearId, 2, $date);
+    check(($dayBookings[1][$teacherId] ?? null) === 'TL1', 'The cover board reuses the weekly free/busy evidence');
+
+    $busyRejected = false;
+    try {
+        $coverService->assign($yearId, $date, (int) $lessonA, $coverTeacherId, null, 'busy');
+    } catch (RuntimeException $e) {
+        $busyRejected = $e->getMessage() === 'teacher_busy';
+    }
+    check($busyRejected, 'A teacher already teaching that period cannot cover');
+
+    $coverService->assign($yearId, $date, (int) $lessonA, $freeTeacherId, null, 'cover');
+    check((int) $pdo->query('SELECT COUNT(*) FROM lesson_covers')->fetchColumn() === 1, 'A free teacher can cover the lesson');
+
+    $doubleCoverRejected = false;
+    try {
+        $coverService->assign($yearId, $date, (int) $lessonB, $freeTeacherId, null, 'double');
+    } catch (RuntimeException $e) {
+        $doubleCoverRejected = $e->getMessage() === 'teacher_busy';
+    }
+    check($doubleCoverRejected, 'A substitute cannot cover two classes in one period');
+
+    $coverService->remove($date, (int) $lessonA);
+    check((int) $pdo->query('SELECT COUNT(*) FROM lesson_covers')->fetchColumn() === 0, 'Removing the cover restores the regular teacher');
+
+    fwrite(STDOUT, "\nRoster enrichment for existing students\n");
+    $yearRow = $pdo->query("SELECT * FROM academic_years WHERE id = {$yearId}")->fetch();
+    App\Middleware\AcademicYearContext::set($yearRow);
+    $roster = new App\Services\RosterImportService();
+    $rosterRow = static fn (array $overrides): array => ['line' => 2, 'data' => array_merge([
+        'Full Name' => 'Roster Enrichment Student',
+        'Class Name' => 'TL1',
+        'Gender (M/F)' => '',
+        'Date of Birth (YYYY-MM-DD)' => '',
+        'Religion' => '',
+        'Class Attribute' => 'فرنسى',
+        'Notes' => 'Row L1',
+    ], $overrides)];
+
+    $firstRoster = $roster->validate([$rosterRow([])]);
+    check(($firstRoster['rows'][0]['status'] ?? '') === 'ok', 'A new roster row is importable');
+    $firstCommit = $roster->commit($firstRoster['rows']);
+    check($firstCommit['created'] === 1, 'The roster row creates the student');
+    $enrichedId = (int) $pdo->query("SELECT id FROM students WHERE full_name = 'Roster Enrichment Student'")->fetchColumn();
+
+    $secondRoster = $roster->validate([$rosterRow([
+        'Gender (M/F)' => 'M',
+        'Date of Birth (YYYY-MM-DD)' => '2010-03-04',
+        'Religion' => 'muslim',
+    ])]);
+    check(($secondRoster['rows'][0]['status'] ?? '') === 'duplicate', 'A returning roster row is recognised as an existing student');
+    $secondCommit = $roster->commit($secondRoster['rows']);
+    check($secondCommit['created'] === 0 && $secondCommit['updated'] === 1, 'A returning row enriches the existing student instead of skipping it');
+    $enriched = $pdo->query("SELECT gender, date_of_birth, religion, class_attribute_raw FROM students WHERE id = {$enrichedId}")->fetch();
+    check($enriched['gender'] === 'm' && $enriched['date_of_birth'] === '2010-03-04' && $enriched['religion'] === 'muslim', 'The enriched fields land on the existing student');
+    check($enriched['class_attribute_raw'] === 'فرنسى', 'Enrichment does not overwrite the printed class attribute');
+
+    $thirdCommit = $roster->commit($secondRoster['rows']);
+    check($thirdCommit['updated'] === 0, 'A repeat enriched import changes nothing');
+
+    $enrichedCode = (string) $pdo->query("SELECT student_code FROM students WHERE id = {$enrichedId}")->fetchColumn();
+    $guardianConfig = (new ReflectionMethod(App\Controllers\ImportController::class, 'getEntityConfig'))
+        ->invoke(new App\Controllers\ImportController(), 'guardians');
+    $guardianRow = [
+        'Student Code' => $enrichedCode,
+        'Guardian Name' => 'Roster Guardian',
+        'Phone' => '01000000001',
+        'Relationship' => 'father',
+        'Email' => '',
+    ];
+    ($guardianConfig['process'])($guardianRow);
+    check((int) $pdo->query('SELECT COUNT(*) FROM guardians')->fetchColumn() === 1, 'The guardian import creates a guardian');
+    check((int) $pdo->query('SELECT COUNT(*) FROM student_guardians WHERE student_id = ' . $enrichedId)->fetchColumn() === 1, 'The guardian import links the guardian to the student');
+    ($guardianConfig['process'])($guardianRow);
+    check((int) $pdo->query('SELECT COUNT(*) FROM guardians')->fetchColumn() === 1, 'Re-importing the same guardian phone does not duplicate them');
+
+    fwrite(STDOUT, "\nTwo-factor authentication\n");
+    $totp = new App\Services\TotpService();
+    $rfcSecret = App\Services\TotpService::base32Encode('12345678901234567890');
+    check($totp->code($rfcSecret, 59) === '287082', 'TOTP matches the RFC 6238 reference vector');
+    check($totp->verify($rfcSecret, '287082', 59), 'A code is accepted inside its time step');
+    check(!$totp->verify($rfcSecret, '000000', 59), 'A wrong code is rejected');
+    check(App\Services\TotpService::base32Decode($rfcSecret) === '12345678901234567890', 'Base32 secrets round-trip');
+
+    $roleId = (int) $pdo->query('SELECT id FROM roles ORDER BY id LIMIT 1')->fetchColumn();
+    $pdo->prepare("INSERT INTO users (username, password_hash, full_name, role_id, is_active) VALUES ('mfa_test', ?, 'MFA Test', ?, 1)")
+        ->execute([password_hash('Str0ng!Pass', PASSWORD_DEFAULT), $roleId]);
+    $mfaUserId = (int) $pdo->lastInsertId();
+    $mfa = new App\Services\MfaService($totp);
+    $secret = $totp->generateSecret();
+    $codes = $mfa->enable($mfaUserId, $secret, $totp->code($secret));
+    check(count($codes) === 8, 'Enabling two-factor issues eight recovery codes');
+    $userRow = $pdo->query("SELECT * FROM users WHERE id = {$mfaUserId}")->fetch();
+    check($mfa->enabled($userRow), 'The account is marked as protected only after a valid code');
+    check($mfa->verify($userRow, $codes[0]), 'A recovery code can stand in for the authenticator');
+    check(!$mfa->verify($userRow, $codes[0]), 'A recovery code cannot be reused');
+
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $_SESSION = [];
+    $_SESSION['mfa_pending_user_id'] = $mfaUserId;
+    $_SESSION['mfa_pending_at'] = time();
+    $_SESSION['mfa_attempts'] = 0;
+    $secondFactor = (new App\Services\AuthService())->verifyMfa($totp->code($secret), '127.0.0.1');
+    check($secondFactor['status'] === 'ok', 'A correct second factor completes the sign-in');
+    check((int) ($_SESSION['user_id'] ?? 0) === $mfaUserId, 'The authenticated session is established after the code');
+
+    $_SESSION = [];
+    check(!$mfa->disable($mfaUserId, 'wrong-password', $totp->code($secret)), 'Disabling needs the correct password');
+    check($mfa->disable($mfaUserId, 'Str0ng!Pass', $totp->code($secret)), 'Disabling needs a current code and clears protection');
+    check((int) $pdo->query('SELECT COUNT(*) FROM mfa_recovery_codes WHERE user_id = ' . $mfaUserId)->fetchColumn() === 0, 'Disabling removes the recovery codes');
 } finally {
     try {
         $base->exec("DROP DATABASE IF EXISTS `{$database}`");

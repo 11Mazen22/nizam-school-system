@@ -149,13 +149,22 @@ final class ExamController extends Controller
         $yearId  = AcademicYearContext::activeYearId();
         $classId = (int) ($request->query('class_id') ?? 0);
         $classes = $yearId ? $this->classes->allForYear($yearId) : [];
+        $q       = trim((string) ($request->query('q') ?? ''));
         $ranking = ($classId > 0 && $yearId)
             ? $this->service->getClassRanking($classId, $yearId) : [];
+        $rankingTotal = count($ranking);
+        if ($q !== '') {
+            // Filtering happens on the server so ?q= also works with scripts
+            // off and survives a refresh; the ranks keep their real positions.
+            $ranking = filterRowsBySearch($ranking, $q, ['full_name', 'student_code']);
+        }
 
         $this->view('exams/ranking', [
             'classes'  => $classes,
             'classId'  => $classId,
+            'q'        => $q,
             'ranking'  => $ranking,
+            'rankingTotal' => $rankingTotal,
         ]);
     }
 

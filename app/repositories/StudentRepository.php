@@ -27,7 +27,7 @@ final class StudentRepository
      *
      * @return array<int, array<string, mixed>>
      */
-    public function paginate(int $page, int $perPage, string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0): array
+    public function paginate(int $page, int $perPage, string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0, string $missing = ''): array
     {
         // O-25: cap regardless of caller-supplied value.
         $perPage = max(1, min($perPage, self::MAX_PER_PAGE));
@@ -36,15 +36,17 @@ final class StudentRepository
 
         $pdo = Database::connection();
         
-        $sql = 'SELECT s.*, c.name as class_name, g.name_en as grade_name_en, g.name_ar as grade_name_ar 
-                FROM students s 
+        $sql = 'SELECT s.*, c.name as class_name, g.name_en as grade_name_en, g.name_ar as grade_name_ar
+                FROM students s
                 LEFT JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = :year_id
                 LEFT JOIN classes c ON c.id = e.class_id
                 LEFT JOIN grades g ON g.id = c.grade_id
                 WHERE s.status = :status';
-        
+
         if ($term !== '') {
-            $sql .= ' AND (s.full_name LIKE :term1 OR s.student_code LIKE :term2)';
+            // LOWER() on both sides: MySQL's collation folds case inside LIKE,
+            // PostgreSQL's does not -- the same term must find the same rows.
+            $sql .= ' AND (LOWER(s.full_name) LIKE LOWER(:term1) OR LOWER(s.student_code) LIKE LOWER(:term2))';
         }
         if ($gradeId > 0) {
             $sql .= ' AND c.grade_id = :grade_id';
@@ -52,6 +54,7 @@ final class StudentRepository
         if ($classId > 0) {
             $sql .= ' AND e.class_id = :class_id';
         }
+        $sql .= $this->missingCondition($missing);
         
         $sql .= ' ORDER BY s.full_name ASC LIMIT :limit OFFSET :offset';
 
@@ -80,7 +83,7 @@ final class StudentRepository
      * Return the total count of students matching the same status + search filter used
      * by paginate() — ensures pagination math stays consistent with the displayed rows.
      */
-    public function countFiltered(string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0): int
+    public function countFiltered(string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0, string $missing = ''): int
     {
         $pdo = Database::connection();
         
@@ -91,15 +94,18 @@ final class StudentRepository
                 WHERE s.status = :status';
                 
         if ($term !== '') {
-            $sql .= ' AND (s.full_name LIKE :term1 OR s.student_code LIKE :term2)';
+            // Same LOWER() folding as paginate(): the search must match the
+            // same rows on both engines.
+            $sql .= ' AND (LOWER(s.full_name) LIKE LOWER(:term1) OR LOWER(s.student_code) LIKE LOWER(:term2))';
         }
         if ($gradeId > 0) {
             $sql .= ' AND c.grade_id = :grade_id';
         }
-        if ($classId > 0) {
+                if ($classId > 0) {
             $sql .= ' AND e.class_id = :class_id';
         }
-
+        $sql .= $this->missingCondition($missing);
+        
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':year_id', $academicYearId, \PDO::PARAM_INT);
         $stmt->bindValue(':status', $status);
@@ -118,12 +124,96 @@ final class StudentRepository
         return (int) $stmt->fetchColumn();
     }
 
+    public function findActiveByCode(string $studentCode): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT s.id, s.student_code, s.full_name
+             FROM students s
+             JOIN student_enrollments e ON e.student_id = s.id
+             WHERE s.student_code = :code AND s.status = 'active' AND e.status = 'active'
+             LIMIT 1"
+        );
+        $stmt->execute(['code' => $studentCode]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
+    /**
+     * Every active student in the year with their class, for the enrichment
+     * template. The template gives the school one file with all 777 names and
+     * blank columns to fill, instead of editing profiles one by one.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function allActiveWithClass(int $academicYearId): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT s.student_code, s.full_name, s.gender, s.date_of_birth, s.religion,
+                    s.class_attribute_raw, c.name AS class_name
+             FROM students s
+             JOIN student_enrollments e ON e.student_id = s.id
+             JOIN classes c ON c.id = e.class_id
+             WHERE s.status = 'active' AND e.status = 'active' AND e.academic_year_id = :year
+             ORDER BY c.name ASC, s.full_name ASC"
+        );
+        $stmt->execute(['year' => $academicYearId]);
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * The completeness picture for the active year: how many students still
+     * lack the fields the printed rosters never carried, and how many have
+     * no linked guardian at all. Shown on the list so the school can work
+     * through all of them instead of discovering gaps one profile at a time.
+     *
+     * @return array{total:int,no_gender:int,no_dob:int,no_religion:int,no_personal:int,no_guardian:int}
+     */
+    public function dataQuality(int $academicYearId): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT COUNT(*) AS total,
+                    SUM(CASE WHEN s.gender IS NULL THEN 1 ELSE 0 END) AS no_gender,
+                    SUM(CASE WHEN s.date_of_birth IS NULL THEN 1 ELSE 0 END) AS no_dob,
+                    SUM(CASE WHEN s.religion IS NULL THEN 1 ELSE 0 END) AS no_religion,
+                    SUM(CASE WHEN s.gender IS NULL OR s.date_of_birth IS NULL OR s.religion IS NULL THEN 1 ELSE 0 END) AS no_personal,
+                    SUM(CASE WHEN NOT EXISTS (
+                        SELECT 1 FROM student_guardians sg WHERE sg.student_id = s.id
+                    ) THEN 1 ELSE 0 END) AS no_guardian
+             FROM students s
+             JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = :year
+             WHERE s.status = 'active' AND e.status = 'active'"
+        );
+        $stmt->execute(['year' => $academicYearId]);
+        $row = $stmt->fetch() ?: [];
+
+        return [
+            'total' => (int) ($row['total'] ?? 0),
+            'no_gender' => (int) ($row['no_gender'] ?? 0),
+            'no_dob' => (int) ($row['no_dob'] ?? 0),
+            'no_religion' => (int) ($row['no_religion'] ?? 0),
+            'no_personal' => (int) ($row['no_personal'] ?? 0),
+            'no_guardian' => (int) ($row['no_guardian'] ?? 0),
+        ];
+    }
+
+    private function missingCondition(string $missing): string
+    {
+        return match ($missing) {
+            'personal' => ' AND (s.gender IS NULL OR s.date_of_birth IS NULL OR s.religion IS NULL)',
+            'guardian' => ' AND NOT EXISTS (SELECT 1 FROM student_guardians sg WHERE sg.student_id = s.id)',
+            'contact' => ' AND (s.phone IS NULL OR s.guardian_phone IS NULL OR s.address IS NULL)',
+            default => '',
+        };
+    }
+
     /** @return array<int, array<string, mixed>> */
     public function search(string $term, string $status = 'active'): array
     {
         $stmt = Database::connection()->prepare(
             'SELECT * FROM students WHERE status = :status
-             AND (full_name LIKE :term1 OR student_code LIKE :term2)
+             AND (LOWER(full_name) LIKE LOWER(:term1) OR LOWER(student_code) LIKE LOWER(:term2))
              ORDER BY full_name ASC'
         );
         $like = '%' . $term . '%';
@@ -153,15 +243,19 @@ final class StudentRepository
         string $codeYear
     ): int {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare(
+        // Database::insert() returns the generated id on both engines:
+        // PostgreSQL needs RETURNING (PDO::lastInsertId() without a sequence
+        // name is not portable there), and the rendered student code is
+        // built from this id.
+        $id = Database::insert(
+            $pdo,
             'INSERT INTO students (student_code, full_name, gender, date_of_birth, religion, phone, guardian_phone, address, notes, status)
-             VALUES (\'\', :name, :gender, :dob, :religion, :phone, :guardian, :address, :notes, \'active\')'
+             VALUES (\'\', :name, :gender, :dob, :religion, :phone, :guardian, :address, :notes, \'active\')',
+            [
+                'name' => $fullName, 'gender' => $gender, 'dob' => $dateOfBirth, 'religion' => $religion,
+                'phone' => $phone, 'guardian' => $guardianPhone, 'address' => $address, 'notes' => $notes,
+            ]
         );
-        $stmt->execute([
-            'name' => $fullName, 'gender' => $gender, 'dob' => $dateOfBirth, 'religion' => $religion,
-            'phone' => $phone, 'guardian' => $guardianPhone, 'address' => $address, 'notes' => $notes,
-        ]);
-        $id = (int) $pdo->lastInsertId();
 
         $code = IdPattern::render($codePattern, $id, $codeYear);
         $update = $pdo->prepare('UPDATE students SET student_code = :code WHERE id = :id');

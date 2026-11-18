@@ -35,12 +35,18 @@ final class BackupController extends Controller
     {
         $page = max(1, (int) $request->query('page', '1'));
         $limit = 20;
+        // The search is applied in SQL, so a term reaches the whole history
+        // rather than only the rows of the current pagination page.
+        $q = trim((string) $request->query('q', ''));
+        $q = mb_substr($q, 0, 100, 'UTF-8');
 
         $this->view('backups/index', [
-            'backups' => $this->repo->getPaginated($limit, ($page - 1) * $limit),
+            'backups' => $this->repo->getPaginated($limit, ($page - 1) * $limit, $q),
             'page' => $page,
             'limit' => $limit,
-            'total' => $this->repo->getTotalCount(),
+            'q' => $q,
+            'total' => $this->repo->getTotalCount($q),
+            'totalAll' => $this->repo->getTotalCount(),
         ]);
     }
 

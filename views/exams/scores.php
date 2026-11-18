@@ -57,6 +57,22 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
 <?php endif; ?>
 
 <?php if ($classId > 0 && !empty($sheet)): ?>
+<?php /* In-page only: this sheet holds unsaved scores, so the field must never
+   submit a GET form (a reload would discard typed marks). It is revealed only
+   when scripting can filter the rows in place. */ ?>
+<div class="n-filter-panel n-list-search no-print" data-js-only hidden>
+  <div class="n-filter-row">
+    <div class="n-filter-field n-search-field flex-grow-1">
+      <?= icon('search') ?>
+      <label class="visually-hidden" for="score-search"><?= e(__('common.search')) ?></label>
+      <input id="score-search" type="search" class="form-control"
+             placeholder="<?= e(__('common.search')) ?>"
+             autocomplete="off"
+             data-table-filter="#scores-table"
+             data-filter-empty="<?= e(__('common.no_results')) ?>">
+    </div>
+  </div>
+</div>
 <form method="post" action="/exams/<?= (int)$exam['id'] ?>/scores" data-unsaved-guard data-loading-submit>
   <?= CsrfMiddleware::field() ?>
   <input type="hidden" name="class_id" value="<?= $classId ?>">
@@ -64,7 +80,7 @@ $examLabel = currentLocale() === 'ar' ? $exam['name_ar'] : $exam['name_en'];
 
   <div class="card">
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
+      <table id="scores-table" class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
             <th>#</th>

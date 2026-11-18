@@ -63,9 +63,11 @@ require dirname(__DIR__) . '/layout/start.php';
     <p class="n-empty-description"><?= e(__('verification.empty_text')) ?></p>
   </div>
 <?php else: ?>
+  <?php $classes = filterRowsBySearch($classes, (string) ($_GET['q'] ?? ''), ['name', 'pathway_ar', 'pathway_en']); ?>
+  <?php $listSearchTarget = '#verification-table'; $listSearchAction = '/students/verification'; require dirname(__DIR__) . '/partials/list-search.php'; ?>
   <div class="n-data-panel">
     <div class="table-responsive">
-      <table class="table table-hover align-middle n-table-stack">
+      <table id="verification-table" class="table table-hover align-middle n-table-stack">
         <thead>
           <tr>
             <th><?= e(__('verification.class')) ?></th>

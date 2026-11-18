@@ -75,7 +75,7 @@ final class RosterVerificationService
         $shorthand = 0;
         foreach ($students as $student) {
             $raw = trim((string) ($student['class_attribute_raw'] ?? ''));
-            if ($raw !== '' && preg_match('/^\s*[محيج]\s*[-–—]\s*/u', $raw) === 1) {
+            if ($raw !== '' && $this->attributes->isShorthand($raw)) {
                 $shorthand++;
             }
         }
@@ -169,10 +169,11 @@ final class RosterVerificationService
                  SET full_name = :name,
                      class_attribute_raw = :attribute,
                      class_attribute_source = :source,
-                     -- A deliberate correction of the roster column is the
-                     -- strongest evidence available, so a decoded religion
-                     -- replaces a stale/default value; an attribute that
-                     -- does not name a religion leaves the column alone.
+                     -- A deliberate correction that explicitly names a
+                     -- religion (مسلم/مسلمة/مسيحى/مسيحية) is the strongest
+                     -- evidence available, so it replaces a stale/default
+                     -- value; shorthand or a subject/track value names no
+                     -- religion and leaves the column alone.
                      religion = COALESCE(:religion, religion)
                  WHERE id = :id'
             );

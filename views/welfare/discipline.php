@@ -51,6 +51,8 @@ use App\Middleware\CsrfMiddleware;
   </div>
 </form>
 
+<?php $records = filterRowsBySearch($records, (string) ($_GET['q'] ?? ''), ['full_name', 'type', 'severity', 'title', 'action_taken', 'reporter_name', 'incident_date']); ?>
+<?php if (!empty($records)) { $listSearchTarget = '#discipline-table'; $listSearchAction = '/welfare/discipline'; $listSearchHidden = ['type' => $type ?? '', 'severity' => $severity ?? '']; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <?php if (empty($records)): ?>
   <div class="n-empty-state">
     <div class="n-empty-icon"><?= icon('alert-triangle', 'n-icon-xl') ?></div>
@@ -59,7 +61,7 @@ use App\Middleware\CsrfMiddleware;
 <?php else: ?>
   <div class="card">
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
+      <table id="discipline-table" class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
             <th><?= e(__('welfare.incident_date')) ?></th>

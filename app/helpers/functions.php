@@ -271,6 +271,51 @@ function navItems(): array
  *     empty rather than throwing -- a missing icon is a small cosmetic gap,
  *     never worth a fatal error on a real screen)
  */
+/**
+ * Normalizes a search term the same way the browser-side list filter does:
+ * case-insensitive, Arabic alef/yaa/taa-marbuta variants unified, diacritics
+ * and tatweel removed, and Arabic-Indic digits folded to ASCII.
+ */
+function searchText(?string $value): string
+{
+    $value = mb_strtolower(trim((string) $value), 'UTF-8');
+    $value = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{0640}]/u', '', $value) ?? $value;
+    $value = strtr($value, [
+        'أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ٱ' => 'ا',
+        'ى' => 'ي', 'ة' => 'ه', 'ؤ' => 'و', 'ئ' => 'ي',
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+    ]);
+
+    return trim(preg_replace('/\s+/u', ' ', $value) ?? $value);
+}
+
+/**
+ * Filters an already-loaded list for the non-JavaScript GET fallback. The
+ * browser path is instant and does the same matching client-side; this keeps
+ * a submitted ?q= honest when scripts are unavailable.
+ *
+ * @param array<int, array<string, mixed>> $rows
+ * @param array<int, string> $fields
+ * @return array<int, array<string, mixed>>
+ */
+function filterRowsBySearch(array $rows, string $term, array $fields): array
+{
+    $needle = searchText($term);
+    if ($needle === '') {
+        return $rows;
+    }
+
+    return array_values(array_filter($rows, static function (array $row) use ($needle, $fields): bool {
+        $haystack = '';
+        foreach ($fields as $field) {
+            $haystack .= ' ' . (string) ($row[$field] ?? '');
+        }
+
+        return str_contains(searchText($haystack), $needle);
+    }));
+}
+
 function icon(string $name, string $class = ''): string
 {
     static $paths = [

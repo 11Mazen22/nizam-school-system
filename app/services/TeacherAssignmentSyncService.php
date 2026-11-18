@@ -21,7 +21,9 @@ use Throwable;
  * The pass only adds what the grid proves:
  *  - an assignment row per distinct (teacher, subject, class) with
  *    weekly_periods = the number of printed cells;
- *  - the matching teacher_subjects link.
+ *  - the matching teacher_subjects link, marked 'timetable'. That table also
+ *    holds declared qualifications, and only 'declared' rows satisfy the
+ *    assignment warning, so teaching evidence never poses as a qualification.
  * It never deletes an assignment the school created itself, it does not touch
  * a row's status (an assignment archived on purpose stays archived), and it
  * never overwrites weekly periods the school edited by hand. An assignment is
@@ -70,8 +72,8 @@ final class TeacherAssignmentSyncService
         }
 
         $linked = [];
-        foreach ($pdo->query('SELECT teacher_id, subject_id FROM teacher_subjects')->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $linked[$row['teacher_id'] . ':' . $row['subject_id']] = true;
+        foreach ($pdo->query('SELECT teacher_id, subject_id, source FROM teacher_subjects')->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $linked[$row['teacher_id'] . ':' . $row['subject_id']] = (string) $row['source'];
         }
 
         $insert = $pdo->prepare(
@@ -81,7 +83,7 @@ final class TeacherAssignmentSyncService
         $update = $pdo->prepare(
             'UPDATE teacher_assignments SET weekly_periods = :periods, updated_at = CURRENT_TIMESTAMP WHERE id = :id'
         );
-        $link = $pdo->prepare('INSERT INTO teacher_subjects (teacher_id, subject_id) VALUES (:teacher, :subject)');
+        $link = $pdo->prepare("INSERT INTO teacher_subjects (teacher_id, subject_id, source) VALUES (:teacher, :subject, 'timetable')");
 
         $classes = [];
         if ($triples !== [] && !$dryRun) {
@@ -130,7 +132,7 @@ final class TeacherAssignmentSyncService
                     $result['subjects_linked']++;
                     if (!$dryRun) {
                         $link->execute(['teacher' => $teacherId, 'subject' => $subjectId]);
-                        $linked[$linkKey] = true;
+                        $linked[$linkKey] = 'timetable';
                     }
                 }
             }

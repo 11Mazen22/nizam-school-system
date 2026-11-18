@@ -62,8 +62,10 @@ use App\Middleware\CsrfMiddleware;
             <p class="text-muted small mb-0"><?= e(__('hr.no_leaves_yet')) ?></p>
           </div>
         <?php else: ?>
+          <?php $leaves = filterRowsBySearch($leaves, (string) ($_GET['q'] ?? ''), ['teacher_name', 'teacher_code', 'reason', 'status', 'start_date', 'end_date']); ?>
+          <?php $listSearchTarget = '#recent-leaves-table'; $listSearchAction = '/hr'; require dirname(__DIR__) . '/partials/list-search.php'; ?>
           <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table id="recent-leaves-table" class="table table-hover align-middle mb-0">
               <thead class="table-light">
                 <tr>
                   <th><?= e(__('teachers.name')) ?></th>

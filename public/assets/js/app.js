@@ -13,7 +13,10 @@
     initDensity();
     initCommandPalette(reduceMotion);
     initNotificationMenu();
+    initLiveFilters();
+    initSearchAutoSubmit();
     initTableFilters();
+    initJsOnly();
     initUnsavedGuards();
     initLoadingForms();
     initCopyButtons();
@@ -181,13 +184,6 @@
   function initCommonActions() {
     document.querySelectorAll('[data-print-report]').forEach(function (button) {
       button.addEventListener('click', function () { window.print(); });
-    });
-    document.querySelectorAll('[data-auto-submit]').forEach(function (control) {
-      control.addEventListener('change', function () {
-        if (!control.form) return;
-        if (typeof control.form.requestSubmit === 'function') control.form.requestSubmit();
-        else control.form.submit();
-      });
     });
     document.querySelectorAll('[data-history-back]').forEach(function (button) {
       button.addEventListener('click', function () { window.history.back(); });
@@ -621,17 +617,243 @@
     window.setInterval(poll, 60000);
   }
 
+  /**
+   * Instant, server-backed filtering. A form marked data-live-filter fetches
+   * the same URL after a short pause, swaps only its results region, and
+   * updates the address bar. No Enter key, no full-page flash, and the
+   * server remains the source of truth for permissions and totals. Requests
+   * are aborted when the user keeps typing, so a slow response can never
+   * replace newer results.
+   */
+  function initLiveFilters() {
+    document.querySelectorAll('form[data-live-filter]').forEach(function (form) {
+      var targetSelector = form.getAttribute('data-live-target');
+      var target = targetSelector ? document.querySelector(targetSelector) : null;
+      if (!target) return;
+
+      var field = form.querySelector('input[type="search"][name], input[name="q"]');
+      var timer = null;
+      var lastUrl = '';
+      var controller = null;
+
+      function buildUrl() {
+        var url = new URL(form.getAttribute('action') || window.location.pathname, window.location.origin);
+        new FormData(form).forEach(function (value, key) {
+          var text = String(value).trim();
+          if (text === '') url.searchParams.delete(key);
+          else url.searchParams.set(key, text);
+        });
+        url.searchParams.delete('page');
+        return url;
+      }
+
+      function run() {
+        var url = buildUrl();
+        var next = url.toString();
+        if (next === lastUrl) return;
+        lastUrl = next;
+
+        if (controller) controller.abort();
+        controller = new AbortController();
+        form.classList.add('is-live-loading');
+        target.setAttribute('aria-busy', 'true');
+
+        fetch(url.toString(), {
+          credentials: 'same-origin',
+          headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' },
+          signal: controller.signal
+        }).then(function (response) {
+          if (!response.ok) throw new Error('live_filter_failed');
+          return response.text();
+        }).then(function (html) {
+          var fresh = new DOMParser().parseFromString(html, 'text/html').querySelector(targetSelector);
+          if (!fresh) throw new Error('live_filter_target_missing');
+          target.innerHTML = fresh.innerHTML;
+          window.history.replaceState({}, '', next);
+          target.dispatchEvent(new CustomEvent('livefilter:updated', { bubbles: true }));
+        }).catch(function (error) {
+          if (error && error.name === 'AbortError') return;
+          // If the fetch path is unavailable, the form still works normally.
+          form.submit();
+        }).finally(function () {
+          form.classList.remove('is-live-loading');
+          target.removeAttribute('aria-busy');
+        });
+      }
+
+      function schedule(delay) {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(run, delay);
+      }
+
+      if (field) {
+        field.addEventListener('input', function () { schedule(field.value.trim() === '' ? 180 : 320); });
+        field.addEventListener('search', function () { schedule(120); });
+      }
+      form.querySelectorAll('select').forEach(function (select) {
+        select.addEventListener('change', function () { schedule(0); });
+      });
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        schedule(0);
+      });
+    });
+  }
+
+  /**
+   * Every GET filter control submits itself: selects and dates on change,
+   * text boxes after a short typing pause. Pages that opt into
+   * data-live-filter keep their faster partial update above, and tables that
+   * use data-table-filter never reload at all, so typing keeps its focus.
+   */
+  function initSearchAutoSubmit() {
+    document.querySelectorAll('form[method="get"]').forEach(function (form) {
+      if (form.hasAttribute('data-live-filter')) return;
+
+      form.querySelectorAll('input[name], select[name]').forEach(function (field) {
+        if (field.hasAttribute('data-table-filter')) return;
+        if (field.type === 'hidden' || field.type === 'submit' || field.type === 'button'
+          || field.type === 'reset' || field.type === 'file' || field.disabled) return;
+
+        var timer = null;
+        var lastValue = field.value;
+
+        function submit() {
+          if (field.value === lastValue) return;
+          lastValue = field.value;
+          if (typeof form.requestSubmit === 'function') form.requestSubmit();
+          else form.submit();
+        }
+
+        if (field.tagName === 'SELECT' || field.type === 'date' || field.type === 'checkbox' || field.type === 'radio') {
+          field.addEventListener('change', function () {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(submit, 0);
+          });
+          return;
+        }
+
+        if (field.type === 'search' || field.type === 'text') {
+          field.addEventListener('input', function () {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(submit, 450);
+          });
+          field.addEventListener('change', function () {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(submit, 0);
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * In-page list lookup. Works for tables, activity timelines and card lists:
+   * filters the rows already rendered, keeps focus while typing, restores the
+   * query from ?q= on refresh, writes it back for shareable URLs, and shows a
+   * real "no results" row instead of an empty table. Debounced and matched
+   * with Arabic letter normalization so alef/hamza/taa-marbuta variants and
+   * diacritics do not hide an otherwise exact match.
+   */
   function initTableFilters() {
+    function normalize(value) {
+      return String(value || '')
+        .toLocaleLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+        .replace(/[\u0623\u0625\u0622\u0671]/g, '\u0627')
+        .replace(/\u0649/g, '\u064A')
+        .replace(/\u0629/g, '\u0647')
+        .replace(/\u0624/g, '\u0648')
+        .replace(/\u0626/g, '\u064A')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function emptyNode(target, message) {
+      var table = target.tagName === 'TABLE' ? target : target.closest('table');
+      if (table) {
+        var row = document.createElement('tr');
+        row.className = 'n-filter-empty';
+        var cell = document.createElement('td');
+        cell.colSpan = Math.max(1, (table.tHead ? table.tHead.rows[0].cells.length : 1));
+        cell.className = 'text-center text-muted py-4';
+        cell.textContent = message;
+        row.appendChild(cell);
+        return row;
+      }
+      if (target.tagName === 'UL' || target.tagName === 'OL') {
+        var item = document.createElement('li');
+        item.className = 'n-filter-empty text-center text-muted py-4';
+        item.textContent = message;
+        return item;
+      }
+      var box = document.createElement('div');
+      box.className = 'n-filter-empty text-center text-muted py-4';
+      box.textContent = message;
+      return box;
+    }
+
     document.querySelectorAll('[data-table-filter]').forEach(function (input) {
       var target = document.querySelector(input.dataset.tableFilter);
       if (!target) return;
-      var rows = target.querySelectorAll('tbody tr');
-      input.addEventListener('input', function () {
-        var query = input.value.trim().toLocaleLowerCase();
-        rows.forEach(function (row) {
-          row.hidden = !!query && row.textContent.toLocaleLowerCase().indexOf(query) === -1;
+
+      var items = target.tagName === 'TABLE'
+        ? target.querySelectorAll('tbody tr:not(.n-filter-empty)')
+        : target.querySelectorAll('[data-filter-item], li, .notification-card');
+      var empty = emptyNode(target, input.getAttribute('data-filter-empty') || input.placeholder || 'No results');
+      empty.hidden = true;
+      var container = target.tagName === 'TABLE' ? target.tBodies[0] : target;
+      container.appendChild(empty);
+
+      var param = input.getAttribute('data-filter-param') || 'q';
+      var timer = null;
+      var url = new URL(window.location.href);
+      var stored = url.searchParams.get(param);
+      if (!input.value && stored) input.value = stored;
+
+      function apply() {
+        var query = normalize(input.value);
+        var visible = 0;
+        items.forEach(function (item) {
+          var match = query === '' || normalize(item.textContent).indexOf(query) !== -1;
+          item.hidden = !match;
+          item.setAttribute('aria-hidden', match ? 'false' : 'true');
+          if (match) visible++;
         });
+        empty.hidden = !(query !== '' && visible === 0);
+
+        var next = new URL(window.location.href);
+        if (query === '') next.searchParams.delete(param);
+        else next.searchParams.set(param, input.value.trim());
+        if (next.toString() !== window.location.href) {
+          window.history.replaceState({}, '', next.toString());
+        }
+      }
+
+      input.addEventListener('input', function () {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(apply, 120);
       });
+      input.addEventListener('search', function () {
+        window.clearTimeout(timer);
+        apply();
+      });
+      apply();
+    });
+  }
+
+  /**
+   * Controls that only make sense with scripting enabled are rendered with
+   * [data-js-only][hidden] and revealed here. Without JavaScript they never
+   * appear, so a screen never offers a control that cannot work -- this is
+   * how the in-page filters over unsaved attendance / score sheets stay
+   * honest: they must never submit a form, because a reload would discard
+   * edits the teacher has already typed.
+   */
+  function initJsOnly() {
+    document.querySelectorAll('[data-js-only]').forEach(function (element) {
+      element.hidden = false;
     });
   }
 

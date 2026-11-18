@@ -13,7 +13,7 @@ ob_start(); ?>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
 <div class="n-grades-stats-mini">
         <div class="n-stat-mini">
-          <span class="n-stat-mini-value"><?= (int)$total ?></span>
+          <span class="n-stat-mini-value"><?= (int) ($totalAll ?? $total) ?></span>
           <span class="n-stat-mini-label"><?= e(__('backups.total_backups')) ?></span>
         </div>
       </div>
@@ -87,15 +87,33 @@ $lastPage = max(1, (int) ceil($total / $limit));
   </div>
 </div>
 
+<?php if ((int) ($totalAll ?? $total) > 0): ?>
+<form method="get" action="/backups" class="n-filter-panel n-list-search no-print" data-live-filter data-live-target="#backup-results">
+  <div class="n-filter-row">
+    <div class="n-filter-field n-search-field flex-grow-1">
+      <?= icon('search') ?>
+      <label class="visually-hidden" for="backup-search"><?= e(__('common.search')) ?></label>
+      <input id="backup-search" type="search" class="form-control" name="q"
+             value="<?= e($q ?? '') ?>"
+             placeholder="<?= e(__('common.search')) ?>"
+             autocomplete="off">
+    </div>
+    <button type="submit" class="btn btn-primary"><?= icon('search') ?><?= e(__('common.search')) ?></button>
+    <?php if (($q ?? '') !== ''): ?><a href="/backups" class="btn btn-outline-secondary"><?= icon('close') ?><?= e(__('common.clear_filters')) ?></a><?php endif; ?>
+  </div>
+</form>
+<?php endif; ?>
+
+<div id="backup-results" data-live-results>
 <div class="card mt-4">
   <div class="card-header d-flex align-items-center gap-2">
     <?= icon('clock') ?>
     <span><?= e(__('backups.history')) ?></span>
-    <span class="badge text-bg-light border ms-auto"><?= (int) $total ?></span>
+    <span class="badge text-bg-light border ms-auto"><?= (int) $total ?><?php if (($q ?? '') !== '' && (int) $total !== (int) ($totalAll ?? $total)): ?> / <?= (int) ($totalAll ?? $total) ?><?php endif; ?></span>
   </div>
   <div class="card-body p-0">
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0 n-table-stack">
+      <table id="backups-table" class="table table-hover align-middle mb-0 n-table-stack">
         <thead class="table-light">
           <tr>
             <th><?= e(__('backups.table.created_at')) ?></th>
@@ -165,21 +183,23 @@ $lastPage = max(1, (int) ceil($total / $limit));
 </div>
 
 <?php if ($lastPage > 1): ?>
+  <?php $querySuffix = ($q ?? '') !== '' ? '&q=' . rawurlencode($q) : ''; ?>
   <nav aria-label="Backups pagination">
     <ul class="pagination justify-content-center mt-3">
       <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-        <a class="page-link" href="/backups?page=<?= $page - 1 ?>">&laquo;</a>
+        <a class="page-link" href="/backups?page=<?= $page - 1 ?><?= e($querySuffix) ?>">&laquo;</a>
       </li>
       <?php for ($p = 1; $p <= $lastPage; $p++): ?>
         <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-          <a class="page-link" href="/backups?page=<?= $p ?>"><?= $p ?></a>
+          <a class="page-link" href="/backups?page=<?= $p ?><?= e($querySuffix) ?>"><?= $p ?></a>
         </li>
       <?php endfor; ?>
       <li class="page-item <?= $page >= $lastPage ? 'disabled' : '' ?>">
-        <a class="page-link" href="/backups?page=<?= $page + 1 ?>">&raquo;</a>
+        <a class="page-link" href="/backups?page=<?= $page + 1 ?><?= e($querySuffix) ?>">&raquo;</a>
       </li>
     </ul>
   </nav>
 <?php endif; ?>
+</div>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

@@ -19,11 +19,13 @@ use RuntimeException;
  * value itself or inherited it.
  *
  * The printed text is never rewritten: `class_attribute_raw` keeps exactly
- * what the page says (including the shorthand "م - ف" / "ح - س"). Only the
- * `religion` column is derived, and only from values whose meaning is
- * unambiguous (مسلم/مسلمة, مسيحى/مسيحية, and the م/ح prefix the pages use for
- * the same two religions). A value such as "رياضة", "معفى" or "المانى" is a
- * pathway/language/exemption, not a religion, so religion stays untouched.
+ * what the page says, including the shorthand ("م - ف", "م- فرنسى"). Only
+ * the `religion` column is derived, and only from a value that explicitly
+ * names a religion: مسلم/مسلمة or مسيحى/مسيحية. Shorthand is ambiguous (its
+ * letters also start subjects, tracks and exemptions, and the same shapes
+ * appear on students of both religions), so it never derives a religion --
+ * and neither does a value such as "رياضة", "معفى" or "المانى". The
+ * religion column stays empty until an explicit value is confirmed.
  */
 final class RosterAttributeService
 {
@@ -271,7 +273,14 @@ final class RosterAttributeService
 
     /**
      * The one place that decides what a printed attribute value means for the
-     * religion column. Returns null when the value does not name a religion.
+     * religion column. Only an explicit printed value counts: the words
+     * مسلم/مسلمة (muslim) and مسيحى/مسيحية (christian), in any of their
+     * printed spellings. Returns null for everything else -- shorthand such
+     * as "م - ف" or "م- فرنسى" (the same leading letters also start
+     * subjects, tracks and exemptions, and they appear on students of both
+     * religions), and non-religion values such as "رياضة", "معفى" or
+     * "المانى". A null here means "not confirmed", so the religion column
+     * is left as-is.
      */
     public function decodeReligion(string $value): ?string
     {
@@ -280,23 +289,29 @@ final class RosterAttributeService
             return null;
         }
 
+        // Normalise spelling variants (hamza seats, final ى/ي, ة/ه) and
+        // collapse whitespace, so every printed form of the explicit words
+        // matches.
         $normalized = str_replace(['أ', 'إ', 'آ', 'ى', 'ة'], ['ا', 'ا', 'ا', 'ي', 'ه'], $value);
-        $normalized = (string) preg_replace('/\s+/u', ' ', $normalized);
+        $normalized = trim((string) preg_replace('/\s+/u', ' ', $normalized));
 
-        if (str_contains($normalized, 'مسيح')) {
-            return 'christian';
-        }
-        if (str_contains($normalized, 'مسلم')) {
-            return 'muslim';
-        }
+        return match ($normalized) {
+            'مسلم', 'مسلمه' => 'muslim',
+            'مسيحي', 'مسيحيه' => 'christian',
+            default => null,
+        };
+    }
 
-        // The pages shorten the religion to one letter in mixed columns:
-        // "م - ف" = مسلم + a language/track, "ح - س" = مسيحي + a language/track.
-        if (preg_match('/^\s*([مح])\s*[-–—]\s*/u', $normalized, $match) === 1) {
-            return $match[1] === 'م' ? 'muslim' : 'christian';
-        }
-
-        return null;
+    /**
+     * Whether an attribute value is the pages' shorthand ("م - ف",
+     * "م- فرنسى", "ج - س"): a leading letter followed by a dash that can
+     * stand for a religion, a subject, a track or an exemption. Because the
+     * same shapes appear on students of both religions, shorthand never
+     * names a religion and is only ever stored verbatim.
+     */
+    public function isShorthand(string $value): bool
+    {
+        return preg_match('/^\s*[محيج]\s*[-–—]\s*/u', trim($value)) === 1;
     }
 
     private function nameKey(string $name): string

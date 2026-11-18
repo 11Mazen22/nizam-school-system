@@ -20,6 +20,8 @@ use App\Middleware\CsrfMiddleware;
     <p class="mb-0"><?= e(__('common.no_results')) ?></p>
   </div>
 <?php else: ?>
+  <?php $teachers = filterRowsBySearch($teachers, (string) ($_GET['q'] ?? ''), ['full_name', 'teacher_code', 'phone', 'email']); ?>
+  <?php $listSearchTarget = '#archived-teachers-table'; $listSearchAction = '/teachers/archived'; require dirname(__DIR__) . '/partials/list-search.php'; ?>
   <div class="card">
     <div class="card-header d-flex align-items-center gap-2">
       <?= icon('archive') ?>
@@ -28,7 +30,7 @@ use App\Middleware\CsrfMiddleware;
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 n-table-stack">
+        <table id="archived-teachers-table" class="table table-hover align-middle mb-0 n-table-stack">
           <thead>
             <tr>
               <th><?= e(__('teachers.code')) ?></th>

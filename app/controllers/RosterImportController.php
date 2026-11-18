@@ -104,11 +104,13 @@ final class RosterImportController extends Controller
 
         $result = (new RosterImportService())->commit($staged['rows']);
 
-        if ($result['created'] === 0) {
+        $updated = (int) ($result['updated'] ?? 0);
+        if ($result['created'] === 0 && $updated === 0) {
             Flash::set('warning', __('roster.nothing_imported'));
         } else {
             Flash::set('success', strtr(__('roster.imported'), [
                 '{created}' => (string) $result['created'],
+                '{updated}' => (string) $updated,
                 '{skipped}' => (string) $result['skipped'],
             ]));
         }

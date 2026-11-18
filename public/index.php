@@ -52,7 +52,20 @@ if ((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) === '/ready
     header('Content-Type: text/plain; charset=UTF-8');
     header('Cache-Control: no-store');
     try {
-        \App\Database::connection()->query('SELECT 1')->fetchColumn();
+        $pdo = \App\Database::connection();
+        $pdo->query('SELECT 1')->fetchColumn();
+
+        // A reachable database with an old schema still breaks screens (the
+        // assessments page 500s when migration 032 has not run). Readiness
+        // must mean "this build's schema is present", not just "MySQL answers".
+        $migrationsDir = dirname(__DIR__) . '/database/' . ($pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql' ? 'migrations-pg' : 'migrations');
+        $pending = (new \App\Services\MigrationService())->pendingCount($pdo, $migrationsDir);
+        if ($pending > 0) {
+            http_response_code(503);
+            echo 'schema_pending:' . $pending;
+            exit;
+        }
+
         http_response_code(200);
         echo 'ready';
     } catch (\Throwable) {
@@ -80,6 +93,7 @@ use App\Controllers\GuardianController;
 use App\Controllers\HrController;
 use App\Controllers\ImportController;
 use App\Controllers\LibraryController;
+use App\Controllers\MfaController;
 use App\Controllers\ModuleController;
 use App\Controllers\NotificationController;
 use App\Controllers\PortalController;
@@ -95,6 +109,7 @@ use App\Controllers\SubjectController;
 use App\Controllers\TeacherController;
 use App\Controllers\TimetableController;
 use App\Controllers\TimetableGapController;
+use App\Controllers\LessonCoverController;
 use App\Controllers\TransportController;
 use App\Controllers\UserController;
 use App\Controllers\WelfareController;
@@ -176,7 +191,16 @@ $router->post('/setup/recover-admin/reset', [SetupController::class, 'resetAdmin
 // ---------------------------------------------------------------- Auth
 $router->get('/login', [AuthController::class, 'showLogin'], [$session, $csrf]);
 $router->post('/login', [AuthController::class, 'login'], [$session, $csrf]);
+$router->get('/login/mfa', [AuthController::class, 'showMfa'], [$session, $csrf]);
+$router->post('/login/mfa', [AuthController::class, 'verifyMfa'], [$session, $csrf]);
+$router->post('/login/mfa/cancel', [AuthController::class, 'cancelMfa'], [$session, $csrf]);
 $router->post('/logout', [AuthController::class, 'logout'], [$session, $csrf, RoleGuardMiddleware::requiresAuth()]);
+
+// --------------------------------------------------- Own two-factor setup
+$router->get('/mfa', [MfaController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->post('/mfa/setup', [MfaController::class, 'start'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->post('/mfa/enable', [MfaController::class, 'enable'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->post('/mfa/disable', [MfaController::class, 'disable'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 
 // ---------------------------------------------------------------- Dashboard
 $router->get('/dashboard', [DashboardController::class, 'index'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
@@ -242,6 +266,7 @@ $router->get('/students', [StudentController::class, 'index'], [$session, $csrf,
 $router->get('/students/archived', [StudentController::class, 'archived'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.view')]);
 $router->get('/students/create', [StudentController::class, 'create'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.create')]);
 $router->post('/students', [StudentController::class, 'store'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.create')]);
+$router->get('/students/export/enrichment', [StudentController::class, 'exportEnrichment'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('students.edit')]);
 // /students/promotion must be registered before /students/{id} -- both are
 // literal-vs-\d+ so they can't actually collide, but this keeps the two
 // "families" of student routes visually grouped in registration order.
@@ -322,6 +347,7 @@ $router->get('/settings/localization', [SettingsController::class, 'localization
 $router->post('/settings/localization', [SettingsController::class, 'saveLocalization'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->get('/settings/academic', [SettingsController::class, 'academic'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->post('/settings/academic', [SettingsController::class, 'saveAcademic'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
+$router->get('/settings/privacy', [SettingsController::class, 'privacy'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->get('/settings/security', [SettingsController::class, 'security'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->post('/settings/security', [SettingsController::class, 'saveSecurity'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
 $router->get('/settings/offline', [SettingsController::class, 'offlineQueue'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresPermission('settings.manage')]);
@@ -441,6 +467,9 @@ $router->post('/welfare/health/{id}/delete',     [WelfareController::class, 'del
 // Gaps and printed-name mapping are part of the timetable module: a cell the
 // source printed without a teacher (or with a first name two teachers share)
 // stays visible here until the school fills it in.
+$router->get('/timetable/covers',             [LessonCoverController::class, 'index'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.view')]);
+$router->post('/timetable/covers/assign',     [LessonCoverController::class, 'assign'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
+$router->post('/timetable/covers/remove',     [LessonCoverController::class, 'remove'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
 $router->get('/timetable/gaps',               [TimetableGapController::class, 'index'],  [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.view')]);
 $router->post('/timetable/gaps/{id}/resolve', [TimetableGapController::class, 'resolve'],[$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);
 $router->post('/timetable/gaps/{id}/ignore',  [TimetableGapController::class, 'ignore'], [$session, $csrf, $yearContext, ModuleGateMiddleware::for('timetable'), RoleGuardMiddleware::requiresPermission('timetable.manage')]);

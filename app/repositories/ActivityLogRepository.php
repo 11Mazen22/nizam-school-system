@@ -22,17 +22,29 @@ final class ActivityLogRepository
      *
      * @return array<int, array{id:int, action:string, entity_type:?string, entity_id:?int, description:?string, created_at:string, full_name:?string}>
      */
-    public function paginate(int $limit, int $offset, ?int $onlyUserId): array
+    public function paginate(int $limit, int $offset, ?int $onlyUserId, ?string $term = null): array
     {
         $limit = max(1, min($limit, self::MAX_PER_PAGE));
         $offset = max(0, $offset);
 
         $sql = 'SELECT a.id, a.action, a.entity_type, a.entity_id, a.description, a.created_at, u.full_name
                 FROM activity_logs a LEFT JOIN users u ON u.id = a.user_id';
+        $where = [];
         $params = [];
         if ($onlyUserId !== null) {
-            $sql .= ' WHERE a.user_id = :uid';
+            $where[] = 'a.user_id = :uid';
             $params['uid'] = $onlyUserId;
+        }
+        $term = trim((string) $term);
+        if ($term !== '') {
+            $where[] = '(a.action LIKE :term1 OR a.description LIKE :term2 OR u.full_name LIKE :term3)';
+            $like = '%' . $term . '%';
+            $params['term1'] = $like;
+            $params['term2'] = $like;
+            $params['term3'] = $like;
+        }
+        if ($where !== []) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
         }
         $sql .= ' ORDER BY a.created_at DESC, a.id DESC LIMIT :limit OFFSET :offset';
 
@@ -47,12 +59,29 @@ final class ActivityLogRepository
     }
 
     /** Same $onlyUserId scoping as paginate() -- kept consistent so pagination math never disagrees with what was actually fetched. */
-    public function count(?int $onlyUserId): int
+    public function count(?int $onlyUserId, ?string $term = null): int
     {
-        $sql = 'SELECT COUNT(*) FROM activity_logs' . ($onlyUserId !== null ? ' WHERE user_id = :uid' : '');
-        $stmt = Database::connection()->prepare($sql);
+        $sql = 'SELECT COUNT(*) FROM activity_logs a LEFT JOIN users u ON u.id = a.user_id';
+        $where = [];
+        $params = [];
         if ($onlyUserId !== null) {
-            $stmt->bindValue(':uid', $onlyUserId);
+            $where[] = 'a.user_id = :uid';
+            $params['uid'] = $onlyUserId;
+        }
+        $term = trim((string) $term);
+        if ($term !== '') {
+            $where[] = '(a.action LIKE :term1 OR a.description LIKE :term2 OR u.full_name LIKE :term3)';
+            $like = '%' . $term . '%';
+            $params['term1'] = $like;
+            $params['term2'] = $like;
+            $params['term3'] = $like;
+        }
+        if ($where !== []) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
+        }
+        $stmt = Database::connection()->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value);
         }
         $stmt->execute();
         return (int) $stmt->fetchColumn();

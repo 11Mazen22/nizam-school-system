@@ -44,6 +44,8 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
   </div>
 </form>
 
+<?php $records = filterRowsBySearch($records, (string) ($_GET['q'] ?? ''), ['full_name', 'record_type', 'title', 'details', 'logger_name', 'date_logged']); ?>
+<?php if (!empty($records)) { $listSearchTarget = '#health-table'; $listSearchAction = '/welfare/health'; $listSearchHidden = ['type' => $type ?? '']; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <?php if (empty($records)): ?>
   <div class="n-empty-state">
     <div class="n-empty-icon"><?= icon('inbox', 'n-icon-xl') ?></div>
@@ -52,7 +54,7 @@ $typeColors = ['allergy' => 'danger', 'medication' => 'warning', 'clinic_visit' 
 <?php else: ?>
   <div class="card">
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
+      <table id="health-table" class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
             <th><?= e(__('welfare.date_logged')) ?></th>

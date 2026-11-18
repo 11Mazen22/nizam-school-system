@@ -342,7 +342,7 @@ try {
             2 => ['file', $serverLog, 'a'],
         ];
         $process = proc_open(
-            [PHP_BINARY, '-S', '127.0.0.1:' . $candidate, $root . '/public/index.php'],
+            [PHP_BINARY, '-S', '127.0.0.1:' . $candidate, '-t', $root . '/public', $root . '/public/index.php'],
             $descriptors,
             $pipes,
             $root,
@@ -908,6 +908,14 @@ try {
     same(0, (int) $scalar("SELECT COUNT(*) FROM roster_verifications WHERE class_id = {$classId}"), 'Editing the roster invalidates the sign-off');
     same('christian', $scalar("SELECT religion FROM students WHERE id = {$studentId}"), 'Changing the attribute updates the derived religion');
 
+    $admin->post('/students/verification/' . $classId, [
+        'name' => [(string) $studentId => 'HTTP Applicant'],
+        'attribute' => [(string) $studentId => 'م - ن'],
+        '_csrf_token' => $verificationToken,
+    ]);
+    same('م - ن', $scalar("SELECT class_attribute_raw FROM students WHERE id = {$studentId}"), 'Shorthand is stored verbatim');
+    same('christian', $scalar("SELECT religion FROM students WHERE id = {$studentId}"), 'Shorthand never overwrites the religion');
+
     same(302, $admin->post('/students/verification/' . $classId . '/reopen', ['_csrf_token' => $verificationToken])['status'], 'Reopening verification redirects');
 
     // --- timetable gaps (027) ---------------------------------------------
@@ -1321,6 +1329,148 @@ try {
     same(0, $roundtripStatus, 'Backup/restore child process completes' . ($roundtripError !== '' ? ': ' . trim($roundtripError) : ''));
     ok(str_contains($roundtripOutput, 'PASS: backup and restore round-trip'), 'Backup checksum, tamper rejection, and restore assertions pass');
     ok((int) $scalar("SELECT COUNT(*) FROM users u JOIN roles r ON r.id = u.role_id WHERE r.code = 'admin' AND u.is_active = 1") > 0, 'Restored database retains an active administrator');
+
+    // -------------------------------------------------------- live search
+    // Seed a known, disposable data set after the restore round-trip: two
+    // students with distinguishable names, a 25-row backup history whose
+    // matching row sits on page 2, and mark/report fixtures for the
+    // server-side filters. This block is the only test that mutates these
+    // tables deliberately, and only in the throwaway database.
+    http_out();
+    http_out('Live search: full-history and server-side filtering');
+
+    $fixtureClass = $pdo->query('SELECT id, grade_id, academic_year_id FROM classes ORDER BY id LIMIT 1')->fetch();
+    if ($fixtureClass === false) {
+        fwrite(STDERR, "BLOCKED: live-search fixtures need one class.\n");
+        exit(2);
+    }
+    $classId = (int) $fixtureClass['id'];
+    $fixtureYear = (int) $fixtureClass['academic_year_id'];
+    $fixtureGrade = (int) $fixtureClass['grade_id'];
+
+    $pdo->exec("DELETE FROM attendance_records WHERE student_id IN (SELECT id FROM students WHERE student_code LIKE 'QA-LIVE-%')");
+    $pdo->exec("DELETE FROM exam_scores WHERE student_id IN (SELECT id FROM students WHERE student_code LIKE 'QA-LIVE-%')");
+    $pdo->exec("DELETE FROM student_enrollments WHERE student_id IN (SELECT id FROM students WHERE student_code LIKE 'QA-LIVE-%')");
+    $pdo->exec("DELETE FROM students WHERE student_code LIKE 'QA-LIVE-%'");
+    $pdo->exec('DELETE FROM backups');
+
+    $insertStudent = $pdo->prepare(
+        'INSERT INTO students (student_code, full_name, gender, date_of_birth, religion, status)
+         VALUES (:code, :name, :gender, :dob, :religion, \'active\')'
+    );
+    $insertStudent->execute(['code' => 'QA-LIVE-0001', 'name' => 'Live Search Alpha', 'gender' => 'm', 'dob' => '2012-01-01', 'religion' => 'muslim']);
+    $alphaId = (int) $pdo->lastInsertId();
+    $insertStudent->execute(['code' => 'QA-LIVE-0002', 'name' => 'Live Search Beta', 'gender' => 'f', 'dob' => '2012-02-02', 'religion' => 'christian']);
+    $betaId = (int) $pdo->lastInsertId();
+
+    $insertEnrollment = $pdo->prepare(
+        "INSERT INTO student_enrollments (student_id, academic_year_id, grade_id, class_id, enrollment_date, status)
+         VALUES (?, ?, ?, ?, '2026-09-01', 'active')"
+    );
+    $insertEnrollment->execute([$alphaId, $fixtureYear, $fixtureGrade, $classId]);
+    $insertEnrollment->execute([$betaId, $fixtureYear, $fixtureGrade, $classId]);
+
+    $insertAttendance = $pdo->prepare(
+        "INSERT INTO attendance_records (academic_year_id, class_id, student_id, record_date, status)
+         VALUES (?, ?, ?, '2026-11-03', ?)"
+    );
+    $insertAttendance->execute([$fixtureYear, $classId, $alphaId, 'present']);
+    $insertAttendance->execute([$fixtureYear, $classId, $betaId, 'late']);
+
+    if ($examId > 0 && $subjectId > 0) {
+        $insertScore = $pdo->prepare('INSERT INTO exam_scores (exam_id, student_id, subject_id, score) VALUES (?, ?, ?, ?)');
+        $insertScore->execute([$examId, $alphaId, $subjectId, 88.00]);
+        $insertScore->execute([$examId, $betaId, $subjectId, 72.00]);
+    }
+
+    $insertBackup = $pdo->prepare(
+        "INSERT INTO backups (filename, file_size, type, status, created_by, notes, created_at)
+         VALUES (?, ?, 'auto', 'success', NULL, 'Nightly fixture', ?)"
+    );
+    for ($night = 1; $night <= 24; $night++) {
+        $insertBackup->execute([
+            sprintf('nightly-backup-2026-01-%02d.sql', $night),
+            1024 * $night,
+            sprintf('2026-01-%02d 02:00:00', $night),
+        ]);
+    }
+    $pdo->prepare(
+        "INSERT INTO backups (filename, file_size, type, status, created_by, notes, created_at)
+         VALUES ('needle-backup-2026-02-01.sql', 4096, 'manual', 'success', NULL, 'Only reachable through search', '2020-01-01 02:00:00')"
+    )->execute();
+
+    $studentSearch = $admin->get('/students?q=Live+Search+Alpha');
+    same(200, $studentSearch['status'], 'Student search responds');
+    ok(str_contains($studentSearch['body'], 'Live Search Alpha') && !str_contains($studentSearch['body'], 'Live Search Beta'), 'Student search filters on the server');
+    $studentSearchLower = $admin->get('/students?q=live+search+alpha');
+    ok(str_contains($studentSearchLower['body'], 'Live Search Alpha'), 'Student search is case-insensitive on the server');
+
+    $backupPage = $admin->get('/backups');
+    ok(!str_contains($backupPage['body'], 'needle-backup-2026-02-01.sql'), 'Backup page 1 does not contain the older matching row');
+    $backupSearch = $admin->get('/backups?q=needle');
+    same(200, $backupSearch['status'], 'Backup search responds');
+    ok(str_contains($backupSearch['body'], 'needle-backup-2026-02-01.sql'), 'Backup search reaches a row that lives on a later pagination page');
+    ok(str_contains($backupSearch['body'], 'value="needle"'), 'Backup search keeps the term in the field');
+    $backupNoMatch = $admin->get('/backups?q=zzz-no-such-backup');
+    ok(str_contains($backupNoMatch['body'], 'n-empty') && !str_contains($backupNoMatch['body'], 'needle-backup-2026-02-01.sql'), 'Backup search shows an explicit no-match state');
+    $backupPaged = $admin->get('/backups?q=nightly');
+    ok(str_contains($backupPaged['body'], 'page=2') && str_contains($backupPaged['body'], 'q=nightly'), 'Filtered backup pagination keeps the search term');
+
+    $attendanceUrl = '/attendance/report?class_id=' . $classId . '&from=2026-11-01&to=2026-11-30';
+    $attendanceAll = $admin->get($attendanceUrl);
+    ok(str_contains($attendanceAll['body'], 'Live Search Alpha') && str_contains($attendanceAll['body'], 'Live Search Beta'), 'Attendance report lists the class rows');
+    $attendanceFiltered = $admin->get($attendanceUrl . '&q=Alpha');
+    ok(str_contains($attendanceFiltered['body'], 'Live Search Alpha') && !str_contains($attendanceFiltered['body'], 'Live Search Beta'), 'Attendance report filters on the server by q');
+    $attendanceNoMatch = $admin->get($attendanceUrl . '&q=zzz-no-such-student');
+    ok(str_contains($attendanceNoMatch['body'], 'n-empty') && !str_contains($attendanceNoMatch['body'], 'Live Search Alpha'), 'Attendance report shows an explicit no-match state');
+
+    if ($examId > 0 && $subjectId > 0) {
+        $rankingAll = $admin->get('/exams/ranking?class_id=' . $classId);
+        ok(str_contains($rankingAll['body'], 'Live Search Alpha') && str_contains($rankingAll['body'], 'Live Search Beta'), 'Class ranking lists the scored students');
+        $rankingFiltered = $admin->get('/exams/ranking?class_id=' . $classId . '&q=Beta');
+        ok(str_contains($rankingFiltered['body'], 'Live Search Beta') && !str_contains($rankingFiltered['body'], 'Live Search Alpha'), 'Class ranking filters on the server by q');
+    }
+
+    $activeYear = (int) $scalar('SELECT id FROM academic_years WHERE is_active = 1 LIMIT 1');
+    $religionReport = $admin->get('/reports/religion?year=' . $activeYear);
+    ok(str_contains($religionReport['body'], 'id="report-table"'), 'Religion report renders its table');
+    $religionNoMatch = $admin->get('/reports/religion?year=' . $activeYear . '&q=zzz-no-such-cell');
+    ok(!str_contains($religionNoMatch['body'], 'id="report-table"'), 'Report search filters the table on the server');
+    ok(str_contains($religionNoMatch['body'], 'name="q"'), 'Report search keeps its field available after a no-match term');
+
+    // The browser pass proves what the HTTP assertions cannot: typing with no
+    // Enter, a partial region update (no navigation), URL synchronisation,
+    // refresh restoration and no-match states on the real rendered screens.
+    http_out();
+    http_out('Live search in a real browser');
+    $browserArgs = [
+        'node',
+        $root . '/tests/live-search-browser.js',
+        '--base=' . $base,
+        '--user=http_admin',
+        '--password=' . $password,
+        '--class=' . $classId,
+    ];
+    $browserDescriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+    $browserProcess = proc_open($browserArgs, $browserDescriptors, $browserPipes, $root, $env);
+    $browserStatus = -1;
+    $browserOutput = '';
+    $browserError = '';
+    if (is_resource($browserProcess)) {
+        fclose($browserPipes[0]);
+        $browserOutput = (string) stream_get_contents($browserPipes[1]);
+        $browserError = (string) stream_get_contents($browserPipes[2]);
+        fclose($browserPipes[1]);
+        fclose($browserPipes[2]);
+        $browserStatus = proc_close($browserProcess);
+    }
+    if ($browserOutput !== '') {
+        http_out(rtrim($browserOutput));
+    }
+    if ($browserError !== '') {
+        http_out(rtrim($browserError));
+    }
+    same(0, $browserStatus, 'The browser pass enforces no-Enter typing, URL refresh and no-match states');
 
     // ------------------------------------------------------------- logout
     http_out();

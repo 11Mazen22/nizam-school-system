@@ -43,6 +43,10 @@ final class StudentController extends Controller
         $term = trim($request->query('q', '') ?? '');
         $gradeId = (int) $request->query('grade_id', '0');
         $classId = (int) $request->query('class_id', '0');
+        $missing = (string) ($request->query('missing', '') ?? '');
+        if (!in_array($missing, ['personal', 'guardian', 'contact'], true)) {
+            $missing = '';
+        }
         
         $yearId = AcademicYearContext::activeYearId() ?? 0;
 
@@ -51,14 +55,15 @@ final class StudentController extends Controller
         $perPage = min($requestedPerPage, StudentRepository::MAX_PER_PAGE); // hard cap
         $page    = max(1, (int) $request->query('page', '1'));
 
-        $total    = $this->students->countFiltered('active', $term, $yearId, $gradeId, $classId);
+        $total    = $this->students->countFiltered('active', $term, $yearId, $gradeId, $classId, $missing);
         $lastPage = $total > 0 ? (int) ceil($total / $perPage) : 1;
         $page     = min($page, $lastPage); // clamp to valid range
 
-        $students = $this->students->paginate($page, $perPage, 'active', $term, $yearId, $gradeId, $classId);
+        $students = $this->students->paginate($page, $perPage, 'active', $term, $yearId, $gradeId, $classId, $missing);
         
         $grades = $this->grades->all(true);
         $classes = $yearId > 0 ? $this->classes->allForYear($yearId) : [];
+        $quality = $yearId > 0 ? $this->students->dataQuality($yearId) : ['total' => 0, 'no_gender' => 0, 'no_dob' => 0, 'no_religion' => 0, 'no_guardian' => 0];
 
         $this->view('students/index', [
             'students'    => $students,
@@ -69,9 +74,52 @@ final class StudentController extends Controller
             'lastPage'    => $lastPage,
             'gradeId'     => $gradeId,
             'classId'     => $classId,
+            'missing'     => $missing,
+            'quality'     => $quality,
             'grades'      => $grades,
             'classes'     => $classes,
         ]);
+    }
+
+    /**
+     * Download every active student as the roster CSV the import already
+     * understands, with the known values filled and the missing fields blank.
+     * The school can fill the blanks once and re-import; existing students are
+     * enriched rather than treated as duplicates.
+     */
+    public function exportEnrichment(Request $request): void
+    {
+        $yearId = AcademicYearContext::activeYearId();
+        if ($yearId === null) {
+            $this->redirect('/students');
+            return;
+        }
+
+        $rows = $this->students->allActiveWithClass($yearId);
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="students-enrichment-' . date('Y-m-d') . '.csv"');
+        header('Cache-Control: no-store');
+
+        $out = fopen('php://output', 'w');
+        if ($out === false) {
+            $this->redirect('/students');
+            return;
+        }
+        fwrite($out, "\xEF\xBB\xBF");
+        fputcsv($out, \App\Services\RosterImportService::HEADERS, ',', '"', '');
+        foreach ($rows as $row) {
+            fputcsv($out, [
+                (string) $row['full_name'],
+                (string) $row['class_name'],
+                $row['gender'] !== null ? strtoupper((string) $row['gender']) : '',
+                (string) ($row['date_of_birth'] ?? ''),
+                (string) ($row['religion'] ?? ''),
+                (string) ($row['class_attribute_raw'] ?? ''),
+                '',
+            ], ',', '"', '');
+        }
+        fclose($out);
+        exit;
     }
 
     public function archived(Request $request): void
@@ -113,6 +161,27 @@ final class StudentController extends Controller
         $studentGuardians = $guardianRepo->getForStudent($id);
         $allGuardians = hasPermission('guardians.manage') ? $guardianRepo->all() : [];
 
+        // How the stored religion relates to the printed roster column: an
+        // explicit printed value confirms it, an inherited one only follows
+        // the page rule from the row above, and shorthand confirms nothing.
+        // Everything else was entered deliberately, so it needs no label.
+        $religionEvidence = null;
+        if ($student['religion'] !== null) {
+            $attributes = new \App\Services\RosterAttributeService();
+            $classAttributeRaw = trim((string) ($student['class_attribute_raw'] ?? ''));
+            $decoded = $classAttributeRaw !== ''
+                ? $attributes->decodeReligion($classAttributeRaw)
+                : null;
+            if ($decoded === $student['religion']) {
+                $religionEvidence = ($student['class_attribute_source'] ?? '') === 'carried_forward'
+                    ? 'inherited'
+                    : 'printed';
+            } elseif ($classAttributeRaw !== '' && $decoded === null
+                && $attributes->isShorthand($classAttributeRaw)) {
+                $religionEvidence = 'shorthand';
+            }
+        }
+
         $invoices = [];
         if (hasPermission('finance.view') && (new \App\Services\ModuleManager())->isEnabled('finance')) {
             $invoices = (new \App\Repositories\FinanceRepository())->allInvoices(null, $id);
@@ -129,6 +198,7 @@ final class StudentController extends Controller
             'studentGuardians' => $studentGuardians,
             'allGuardians' => $allGuardians,
             'invoices' => $invoices,
+            'religionEvidence' => $religionEvidence,
         ]);
     }
 

@@ -25,16 +25,18 @@ final class ActivityLogController extends Controller
     {
         $onlyUserId = ($_SESSION['role_code'] ?? null) === 'admin' ? null : (int) ($_SESSION['user_id'] ?? 0);
 
+        $q = trim((string) ($request->query('q', '') ?? ''));
         $perPage = ActivityLogRepository::MAX_PER_PAGE;
-        $total = $this->logs->count($onlyUserId);
+        $total = $this->logs->count($onlyUserId, $q);
         $lastPage = $total > 0 ? (int) ceil($total / $perPage) : 1;
         $page = min(max(1, (int) ($request->query('page', '1') ?: 1)), $lastPage);
 
         $this->view('activity-log/index', [
-            'entries' => $this->logs->paginate($perPage, ($page - 1) * $perPage, $onlyUserId),
+            'entries' => $this->logs->paginate($perPage, ($page - 1) * $perPage, $onlyUserId, $q),
             'page' => $page,
             'lastPage' => $lastPage,
             'total' => $total,
+            'q' => $q,
             'scopedToSelf' => $onlyUserId !== null,
         ]);
     }

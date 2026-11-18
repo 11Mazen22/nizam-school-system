@@ -149,6 +149,7 @@ const check = (condition, label, detail = '') => {
     [`/students/verification/${CLASS_ID}`, 'class verification screen'],
     ['/timetable/gaps', 'timetable gaps'],
     ['/timetable/staff', 'printed-name mapping'],
+    ['/timetable/covers', 'substitute cover'],
     ['/timetable', 'timetable grid'],
     ['/assignments', 'teaching assignments'],
     ['/assignments/workload', 'teaching workload'],

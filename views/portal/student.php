@@ -1,5 +1,5 @@
 <?php
-/** @var array $students @var ?array $student @var array $scores @var array $timetable */
+/** @var array $students @var ?array $student @var array $scores @var array $timetable @var array $assessments @var array $dayLabels */
 $pageTitle = __('portal.student_title');
 $activeNav = 'portal-student';
 ob_start(); ?>
@@ -59,6 +59,8 @@ require dirname(__DIR__) . '/layout/start.php';
       <?php endif; ?>
     </div>
   </div>
+
+  <?php require __DIR__ . '/_assessments.php'; ?>
 <?php endif; ?>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

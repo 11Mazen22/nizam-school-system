@@ -70,6 +70,8 @@ use App\Middleware\CsrfMiddleware;
 
   <!-- LIST TAB -->
   <div class="tab-pane fade show active" id="list-panel" role="tabpanel">
+    <?php if ($q = trim((string) ($_GET['q'] ?? ''))) { foreach ($byTerm as $term => $termExams) { $byTerm[$term] = filterRowsBySearch($termExams, $q, ['name_ar', 'name_en']); if ($byTerm[$term] === []) unset($byTerm[$term]); } } ?>
+    <?php if (!empty($exams)) { $listSearchTarget = '#exams-results'; $listSearchAction = '/exams'; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
     <?php if (empty($exams)): ?>
       <!-- EMPTY STATE -->
       <div class="n-empty-powerful">
@@ -88,9 +90,12 @@ use App\Middleware\CsrfMiddleware;
         </div>
       </div>
     <?php else: ?>
-      <div class="n-reveal-group d-flex flex-column gap-3">
+      <div id="exams-results" class="n-reveal-group d-flex flex-column gap-3">
+        <?php if ($byTerm === []): ?>
+          <div class="n-empty py-4"><p class="mb-0 text-muted"><?= e(__('common.no_results')) ?></p></div>
+        <?php endif; ?>
         <?php foreach ($byTerm as $term => $termExams): ?>
-          <section class="card n-exam-term">
+          <section data-filter-item class="card n-exam-term">
             <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
               <div class="d-flex align-items-center gap-2">
                 <span class="badge text-bg-light border d-inline-flex align-items-center justify-content-center"

@@ -9,12 +9,20 @@ ob_start(); ?>
         <?= icon('plus') ?>
         <span><?= e(__('guardians.add')) ?></span>
       </a>
+      <?php if (hasPermission('guardians.manage')): ?>
+        <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importModal">
+          <?= icon('upload') ?>
+          <span><?= e(__('app.import')) ?></span>
+        </button>
+      <?php endif; ?>
 <?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
 
 
 
+<?php $guardians = filterRowsBySearch($guardians, (string) ($_GET['q'] ?? ''), ['full_name', 'phone', 'email', 'national_id', 'occupation']); ?>
+<?php if (!empty($guardians)) { $listSearchTarget = '#guardians-table'; $listSearchAction = '/guardians'; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <div class="card">
   <div class="card-body p-0">
     <?php if (empty($guardians)): ?>
@@ -28,7 +36,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </div>
     <?php else: ?>
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table id="guardians-table" class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th><?= e(__('guardians.name')) ?></th>
@@ -77,4 +85,14 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 </div>
 
-<?php require dirname(__DIR__) . '/layout/end.php'; ?>
+<?php
+if (hasPermission('guardians.manage')) {
+    ob_start();
+    $title = __('app.import') . ' — ' . __('guardians.title');
+    $action = '/import/guardians';
+    $templateUrl = '/import/guardians/template';
+    require dirname(__DIR__) . '/partials/import_modal.php';
+    $pageModals = ob_get_clean();
+}
+require dirname(__DIR__) . '/layout/end.php';
+?>

@@ -24,7 +24,10 @@ if (PHP_SAPI !== 'cli') {
  *  - RosterVerificationRepository::save twice (ON CONFLICT update);
  *  - TeacherAliasRepository::attach twice (ON CONFLICT update);
  *  - TimetableGapRepository::upsert twice, including status preservation;
- *  - the teaching-load sync and its manual-edit protection on PostgreSQL.
+ *  - the teaching-load sync and its manual-edit protection on PostgreSQL;
+ *  - migration 035's nullable roster fields, the student data-quality
+ *    counters, the missing-field filters and the student lookups
+ *    (create-by-id rendering, code/name search, paginate).
  *
  * It drops that database and its temporary data path when it finishes.
  *
@@ -130,10 +133,21 @@ try {
 
     $columns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'teacher_assignments'")->fetchAll(PDO::FETCH_COLUMN);
     check(in_array('weekly_periods_source', $columns, true), 'Migration 030 adds the load-source column');
+    $subjectColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'teacher_subjects'")->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('source', $subjectColumns, true), 'Migration 031 adds the qualification source');
     $tables = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")->fetchAll(PDO::FETCH_COLUMN);
     foreach (['roster_verifications', 'teacher_aliases', 'timetable_gaps'] as $table) {
         check(in_array($table, $tables, true), "Migration 029 creates {$table}");
     }
+    foreach (['assessment_schedules', 'import_batches'] as $table) {
+        check(in_array($table, $tables, true), "Migration 032 creates {$table}");
+    }
+    check(in_array('lesson_covers', $tables, true), 'Migration 033 creates lesson_covers');
+    check(in_array('mfa_recovery_codes', $tables, true), 'Migration 034 creates mfa_recovery_codes');
+    $userColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'users'")->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('mfa_secret', $userColumns, true) && in_array('mfa_enabled_at', $userColumns, true), 'Migration 034 adds the two-factor columns');
+    $classColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'classes'")->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('pathway_ar', $classColumns, true), 'Migration 032 adds the class pathway label');
 
     $yearId = (int) $pdo->query('SELECT id FROM academic_years WHERE is_active = 1 LIMIT 1')->fetchColumn();
     $gradeId = (int) $pdo->query('SELECT id FROM grades ORDER BY sort_order LIMIT 1')->fetchColumn();
@@ -143,6 +157,18 @@ try {
     $pdo->prepare('INSERT INTO classes (grade_id, academic_year_id, name, capacity, is_active) VALUES (?, ?, ?, 30, 1) RETURNING id')
         ->execute([$gradeId, $yearId, 'PG1']);
     $classId = (int) $pdo->query("SELECT id FROM classes WHERE name = 'PG1'")->fetchColumn();
+
+    // The exact join the assessments screen runs; it failed on PostgreSQL
+    // before migration 032 because the table and pathway column were absent.
+    $pdo->prepare('INSERT INTO assessment_schedules (academic_year_id, class_id, day_of_week, sequence, subjects_raw, no_assessment, source_document, source_class, source_version) VALUES (?, ?, 2, 1, ?, 0, ?, ?, ?)')
+        ->execute([$yearId, $classId, 'اختبار', 'doc', 'PG1', '2026/2027']);
+    $assessment = $pdo->query(
+        'SELECT a.subjects_raw, c.name AS class_name, c.pathway_ar, g.name_ar AS grade_name_ar
+         FROM assessment_schedules a
+         JOIN classes c ON c.id = a.class_id
+         JOIN grades g ON g.id = c.grade_id LIMIT 1'
+    )->fetch();
+    check($assessment !== false && $assessment['subjects_raw'] === 'اختبار', 'The assessments screen query works on PostgreSQL');
 
     $pdo->prepare("INSERT INTO teachers (teacher_code, full_name, status) VALUES ('TCH-PG', 'PG Teacher', 'active') RETURNING id")
         ->execute();
@@ -203,6 +229,98 @@ try {
     $slot->execute([$yearId, $classId, 5, 1, $subjectIds['PGB'], $teacherId]);
     $second = $sync->sync($yearId);
     check($second['updated'] === 1, 'The sync corrects a derived load on PostgreSQL');
+
+    $sources = $pdo->query("SELECT source, COUNT(*) AS c FROM teacher_subjects WHERE teacher_id = {$teacherId} GROUP BY source")->fetchAll(PDO::FETCH_KEY_PAIR);
+    check((int) ($sources['timetable'] ?? 0) === 2, 'Derived links are marked as teaching evidence on PostgreSQL');
+    $subjectsRepo = new App\Repositories\SubjectRepository();
+    check(!$subjectsRepo->teacherIsQualified($teacherId, $subjectIds['PGA']), 'Taught subjects do not satisfy the qualification check');
+    $subjectsRepo->setTeacherQualifications($teacherId, [$subjectIds['PGA']]);
+    check($subjectsRepo->teacherIsQualified($teacherId, $subjectIds['PGA']), 'A declared qualification satisfies the check on PostgreSQL');
+    check((int) $pdo->query("SELECT COUNT(*) FROM teacher_subjects WHERE teacher_id = {$teacherId} AND source = 'timetable'")->fetchColumn() === 1, 'Declaring one subject keeps the other teaching evidence');
+
+    $pdo->prepare("INSERT INTO teachers (teacher_code, full_name, status) VALUES ('TCH-PG2', 'PG Cover', 'active')")->execute();
+    $coverTeacherId = (int) $pdo->query("SELECT id FROM teachers WHERE teacher_code = 'TCH-PG2'")->fetchColumn();
+    $lessonId = (int) $pdo->query("SELECT id FROM timetables WHERE class_id = {$classId} AND day_of_week = 2 AND period_number = 1")->fetchColumn();
+    $coverDate = (new DateTimeImmutable('next Sunday'))->format('Y-m-d');
+    $coverRepo = new App\Repositories\LessonCoverRepository();
+    $coverRepo->assign($yearId, $coverDate, $lessonId, $classId, 1, $teacherId, $coverTeacherId, 'first', null);
+    $coverRepo->assign($yearId, $coverDate, $lessonId, $classId, 1, $teacherId, $coverTeacherId, 'second', null);
+    $coverRow = $pdo->query('SELECT COUNT(*) AS c, MAX(note) AS n FROM lesson_covers')->fetch();
+    check((int) $coverRow['c'] === 1, 'Lesson cover assign updates instead of duplicating on PostgreSQL');
+    check($coverRow['n'] === 'second', 'The cover upsert writes the new note');
+    $coverRepo->remove($coverDate, $lessonId);
+    check((int) $pdo->query('SELECT COUNT(*) FROM lesson_covers')->fetchColumn() === 0, 'Removing a cover works on PostgreSQL');
+
+    fwrite(STDOUT, "\nStudent data quality and lookups on PostgreSQL\n");
+    $nullColumns = $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.columns
+         WHERE table_name = 'students'
+           AND column_name IN ('gender', 'date_of_birth', 'religion')
+           AND is_nullable = 'YES'"
+    )->fetchColumn();
+    check((int) $nullColumns === 3, 'Migration 035 allows NULL roster fields on students');
+    $timetableColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'timetables'")->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('note', $timetableColumns, true), 'Migration 035 adds the timetable group note');
+
+    $students = new App\Repositories\StudentRepository();
+
+    // The manual create path: the generated id must come back so the
+    // rendered student code can be written from it.
+    $newId = $students->create('طالب متكامل', 'm', '2010-01-01', 'muslim', '01000000000', '01100000000', 'عنوان الاختبار', null, 'NIZ-{seq:5}-{year}', '2026');
+    check($newId > 0, 'Creating a student returns its generated id on PostgreSQL');
+    $expectedCode = 'NIZ-' . str_pad((string) $newId, 5, '0', STR_PAD_LEFT) . '-2026';
+    check($pdo->query("SELECT student_code FROM students WHERE id = {$newId}")->fetchColumn() === $expectedCode, 'The student code is rendered from the returned id on PostgreSQL');
+
+    // The roster-import path: the printed pages carry neither gender nor
+    // birth date, and the printed religion column is ambiguous shorthand
+    // for some rows, so a roster row stores all three as NULL until the
+    // school confirms them.
+    $stmt = $pdo->prepare(
+        "INSERT INTO students (student_code, full_name, class_attribute_raw, class_attribute_source)
+         VALUES ('PGROSTER1', 'طالب بدون بيانات', 'م - ن', 'printed') RETURNING id"
+    );
+    $stmt->execute();
+    $rosterId = (int) $stmt->fetchColumn();
+    check($rosterId > 0, 'A roster row without gender, birth date or religion is stored on PostgreSQL');
+
+    $enroll = $pdo->prepare("INSERT INTO student_enrollments (student_id, academic_year_id, grade_id, class_id, enrollment_date) VALUES (?, ?, ?, ?, '2026-09-01')");
+    $enroll->execute([$newId, $yearId, $gradeId, $classId]);
+    $enroll->execute([$rosterId, $yearId, $gradeId, $classId]);
+
+    $quality = $students->dataQuality($yearId);
+    check($quality['total'] === 2, 'The data-quality counters see both students on PostgreSQL');
+    check($quality['no_gender'] === 1 && $quality['no_dob'] === 1, 'A missing gender and birth date are counted on PostgreSQL');
+    check($quality['no_religion'] === 1, 'A missing religion is counted on PostgreSQL');
+    check($quality['no_personal'] === 1, 'The combined personal gap is counted once on PostgreSQL');
+    check($quality['no_guardian'] === 2, 'Both students start without a linked guardian');
+
+    $stmt = $pdo->prepare("INSERT INTO guardians (full_name, phone) VALUES ('ولي أمر الاختبار', '01100000001') RETURNING id");
+    $stmt->execute();
+    $guardianId = (int) $stmt->fetchColumn();
+    $pdo->prepare('INSERT INTO student_guardians (student_id, guardian_id) VALUES (?, ?)')->execute([$newId, $guardianId]);
+    check($students->dataQuality($yearId)['no_guardian'] === 1, 'A linked guardian clears its student from the gap count');
+
+    $personal = $students->countFiltered('active', '', $yearId, 0, 0, 'personal');
+    check($personal === 1, 'The personal filter matches only the roster student on PostgreSQL');
+    $guardianGap = $students->countFiltered('active', '', $yearId, 0, 0, 'guardian');
+    check($guardianGap === 1, 'The guardian filter matches the unlinked student on PostgreSQL');
+    $contact = $students->countFiltered('active', '', $yearId, 0, 0, 'contact');
+    check($contact === 1, 'The contact filter matches the student without contact data on PostgreSQL');
+
+    $page = $students->paginate(1, 20, 'active', '', $yearId, 0, 0, 'personal');
+    check(count($page) === 1 && $page[0]['full_name'] === 'طالب بدون بيانات', 'The list screen renders the filtered roster student on PostgreSQL');
+
+    $byCode = $students->findActiveByCode($expectedCode);
+    check($byCode !== null && (int) $byCode['id'] === $newId, 'The code lookup finds the active student on PostgreSQL');
+
+    $byName = $students->search('متكامل');
+    check(count($byName) === 1 && (int) $byName[0]['id'] === $newId, 'An Arabic term searches names on PostgreSQL');
+
+    $lowercase = $students->search('niz-');
+    check(count($lowercase) === 1, 'A lowercase code fragment finds the uppercased code on PostgreSQL');
+
+    $profile = $students->find($newId);
+    check($profile !== null && $profile['gender'] === 'm' && $profile['religion'] === 'muslim', 'The profile lookup returns the stored row on PostgreSQL');
 } catch (Throwable $e) {
     $failed++;
     $failures[] = 'exception: ' . $e->getMessage();

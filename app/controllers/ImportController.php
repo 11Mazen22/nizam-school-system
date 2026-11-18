@@ -10,6 +10,8 @@ use App\Flash;
 use App\Middleware\AcademicYearContext;
 use App\Request;
 use App\Repositories\ClassRepository;
+use App\Repositories\GuardianRepository;
+use App\Repositories\StudentRepository;
 use App\Services\ImportService;
 use App\Services\GradeService;
 use App\Services\ClassService;
@@ -105,6 +107,36 @@ final class ImportController extends Controller
                 "permission" => "students.create",
                 "redirect" => "/students"
             ],
+            "guardians" => [
+                "headers" => ["Student Code", "Guardian Name", "Phone", "Relationship", "Email"],
+                "process" => function (array $row) {
+                    $studentCode = trim((string) ($row["Student Code"] ?? ""));
+                    $name = trim((string) ($row["Guardian Name"] ?? ""));
+                    $phone = trim((string) ($row["Phone"] ?? ""));
+                    $relationship = strtolower(trim((string) ($row["Relationship"] ?? ""))) ?: "father";
+                    $email = trim((string) ($row["Email"] ?? "")) ?: null;
+                    if ($studentCode === "" || $name === "" || $phone === "") throw new RuntimeException("Missing data");
+                    if (!in_array($relationship, ["father", "mother", "guardian", "sponsor", "other"], true)) {
+                        throw new RuntimeException("Unknown relationship");
+                    }
+                    $student = (new StudentRepository())->findActiveByCode($studentCode);
+                    if ($student === null) throw new RuntimeException("Unknown student code");
+
+                    $guardians = new GuardianRepository();
+                    $guardian = $guardians->findByPhone($phone);
+                    $guardianId = $guardian !== null
+                        ? (int) $guardian["id"]
+                        : $guardians->create([
+                            "full_name" => $name,
+                            "phone" => $phone,
+                            "email" => $email,
+                            "relationship_type" => $relationship,
+                        ]);
+                    $guardians->linkStudent((int) $student["id"], $guardianId, $relationship);
+                },
+                "permission" => "guardians.manage",
+                "redirect" => "/guardians"
+            ],
             "users" => [
                 "headers" => ["Username", "Password", "Full Name", "Role"],
                 "process" => function (array $row) {
@@ -153,6 +185,17 @@ final class ImportController extends Controller
         }
 
         $referenceRows = [];
+        $dataRows = [];
+        if ($entity === 'guardians') {
+            $yearId = AcademicYearContext::activeYearId();
+            if ($yearId !== null) {
+                foreach ((new StudentRepository())->allActiveWithClass($yearId) as $student) {
+                    // The code is the only required value: the school fills the
+                    // guardian columns beside each student and re-imports.
+                    $dataRows[] = [(string) $student['student_code'], '', '', '', ''];
+                }
+            }
+        }
         if ($entity === 'students') {
             $yearId = AcademicYearContext::activeYearId();
             if ($yearId !== null) {
@@ -168,7 +211,7 @@ final class ImportController extends Controller
             }
         }
 
-        (new ImportService())->generateTemplate($config["headers"], $entity . "_template", currentLocale(), $referenceRows);
+        (new ImportService())->generateTemplate($config["headers"], $entity . "_template", currentLocale(), $referenceRows, $dataRows);
     }
 
     public function import(Request $request): void

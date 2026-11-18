@@ -42,10 +42,11 @@ require dirname(__DIR__) . '/layout/start.php';
     <p class="n-empty-description"><?= e(__('assessments.empty_text')) ?></p>
   </div>
 <?php else: ?>
-  <div class="row row-cols-1 row-cols-lg-2 g-3">
+  <?php $listSearchTarget = '#assessments-grid'; $listSearchAction = '/assessments'; require dirname(__DIR__) . '/partials/list-search.php'; ?>
+  <div id="assessments-grid" class="row row-cols-1 row-cols-lg-2 g-3">
     <?php foreach ($byClass as $className => $rows): ?>
       <?php $first = $rows[0]; ?>
-      <div class="col">
+      <div class="col" data-filter-item>
         <div class="card h-100 n-assessment-card">
           <div class="card-header d-flex align-items-center justify-content-between gap-2 flex-wrap">
             <div class="d-flex align-items-center gap-2">

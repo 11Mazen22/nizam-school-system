@@ -179,6 +179,25 @@ final class SettingsController extends Controller
         $this->redirect('/settings/localization');
     }
 
+    // ------------------------------------------------- Privacy and retention
+    /**
+     * A factual page, not a legal promise: it lists what this installation
+     * actually stores and the retention windows the scheduled maintenance
+     * already enforces. School-specific retention choices still belong to the
+     * school, but nobody should have to read the source to find the defaults.
+     */
+    public function privacy(Request $request): void
+    {
+        $this->view('settings/privacy', [
+            'activityLogDays' => 90,
+            'failedBackupDays' => 30,
+            'successfulBackupDays' => 30,
+            'backupsAlwaysKept' => 7,
+            'sessionHours' => 24,
+            'mfaEnabledUsers' => (int) Database::connection()->query('SELECT COUNT(*) FROM users WHERE mfa_enabled_at IS NOT NULL')->fetchColumn(),
+        ]);
+    }
+
     // -------------------------------------------------------- Academic
     public function academic(Request $request): void
     {

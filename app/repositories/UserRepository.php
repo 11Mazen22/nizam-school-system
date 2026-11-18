@@ -12,7 +12,8 @@ final class UserRepository
     {
         $stmt = Database::connection()->prepare(
             'SELECT u.id, u.username, u.password_hash, u.full_name, u.role_id, u.is_active,
-                    u.failed_attempts, u.locked_until, r.code AS role_code
+                    u.failed_attempts, u.locked_until, u.mfa_secret, u.mfa_enabled_at,
+                    r.code AS role_code
              FROM users u JOIN roles r ON r.id = u.role_id
              WHERE u.username = :username'
         );
@@ -22,6 +23,21 @@ final class UserRepository
     }
 
     /** @return string[] permission codes granted to this user's role */
+    public function findForAuth(int $id): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT u.id, u.username, u.password_hash, u.full_name, u.role_id, u.is_active,
+                    u.failed_attempts, u.locked_until, u.mfa_secret, u.mfa_enabled_at,
+                    r.code AS role_code
+             FROM users u JOIN roles r ON r.id = u.role_id
+             WHERE u.id = :id'
+        );
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
     public function permissionCodesFor(int $userId): array
     {
         $stmt = Database::connection()->prepare(
@@ -65,7 +81,8 @@ final class UserRepository
     public function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT u.id, u.username, u.full_name, u.email, u.role_id, u.is_active, r.code AS role_code
+            'SELECT u.id, u.username, u.full_name, u.email, u.role_id, u.is_active,
+                    u.mfa_secret, u.mfa_enabled_at, r.code AS role_code
              FROM users u JOIN roles r ON r.id = u.role_id
              WHERE u.id = :id'
         );

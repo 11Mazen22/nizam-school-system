@@ -1,5 +1,5 @@
 <?php
-/** @var array $guardians @var ?array $guardian @var array $children @var ?array $student @var array $scores @var ?array $attendanceStats */
+/** @var array $guardians @var ?array $guardian @var array $children @var ?array $student @var array $scores @var ?array $attendanceStats @var array $assessments @var array $dayLabels */
 $pageTitle = __('portal.family_title');
 $activeNav = 'portal-family';
 ob_start(); ?>
@@ -141,6 +141,8 @@ require dirname(__DIR__) . '/layout/start.php';
         </div>
       </div>
     </div>
+
+    <?php require __DIR__ . '/_assessments.php'; ?>
   <?php endif; ?>
 <?php endif; ?>
 

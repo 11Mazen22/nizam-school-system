@@ -78,6 +78,8 @@ require dirname(__DIR__) . '/layout/start.php';
   <?php endforeach; ?>
 </div>
 
+<?php $applications = filterRowsBySearch($applications, (string) ($_GET['q'] ?? ''), ['application_number', 'applicant_name', 'guardian_name', 'guardian_phone', 'status']); ?>
+<?php if (!empty($applications)) { $listSearchTarget = '#applications-table'; $listSearchAction = '/admissions'; $listSearchHidden = ['status' => $activeStatus ?? '']; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <div class="n-data-panel">
   <div class="card-header d-flex justify-content-between align-items-center gap-3">
     <span class="fw-semibold">
@@ -104,7 +106,7 @@ require dirname(__DIR__) . '/layout/start.php';
     </div>
   <?php else: ?>
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
+      <table id="applications-table" class="table table-hover align-middle mb-0">
         <thead>
           <tr>
             <th><?= e(__('admissions.app_number')) ?></th>

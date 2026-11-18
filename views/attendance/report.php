@@ -48,14 +48,32 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 </form>
 
-<?php if ($classId > 0 && !empty($summary)): ?>
+<?php if ($classId > 0 && ($summaryTotal ?? count($summary)) > 0): ?>
+<form method="get" action="/attendance/report" class="n-filter-panel n-list-search no-print" data-live-filter data-live-target="#attendance-summary-results">
+  <div class="n-filter-row">
+    <div class="n-filter-field n-search-field flex-grow-1">
+      <?= icon('search') ?>
+      <label class="visually-hidden" for="attendance-report-search"><?= e(__('common.search')) ?></label>
+      <input id="attendance-report-search" type="search" class="form-control" name="q"
+             value="<?= e($q ?? '') ?>"
+             placeholder="<?= e(__('common.search')) ?>"
+             autocomplete="off">
+    </div>
+    <input type="hidden" name="class_id" value="<?= (int) $classId ?>">
+    <input type="hidden" name="from" value="<?= e($from) ?>">
+    <input type="hidden" name="to" value="<?= e($to) ?>">
+    <button type="submit" class="btn btn-primary"><?= icon('search') ?><?= e(__('common.search')) ?></button>
+    <?php if (($q ?? '') !== ''): ?><a href="/attendance/report?class_id=<?= (int) $classId ?>&from=<?= e(urlencode($from)) ?>&to=<?= e(urlencode($to)) ?>" class="btn btn-outline-secondary"><?= icon('close') ?><?= e(__('common.clear_filters')) ?></a><?php endif; ?>
+  </div>
+</form>
+<div id="attendance-summary-results" data-live-results>
 <div class="card mb-4">
   <div class="card-header bg-white py-3 fw-semibold">
     <?= e($classRow ? (currentLocale() === 'ar' ? $classRow['grade_name_ar'] : $classRow['grade_name_en']) . ' — ' . $classRow['name'] : '') ?>
     <span class="text-muted ms-2"><?= e($from) ?> → <?= e($to) ?></span>
   </div>
   <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
+    <table id="attendance-summary-table" class="table table-hover align-middle mb-0">
       <thead class="table-light">
         <tr>
           <th><?= e(__('students.full_name')) ?></th>
@@ -68,6 +86,16 @@ require dirname(__DIR__) . '/layout/start.php';
         </tr>
       </thead>
       <tbody>
+        <?php if (empty($summary)): ?>
+          <tr>
+            <td colspan="7" class="p-0">
+              <div class="n-empty py-4">
+                <div class="n-empty-icon"><?= icon('search') ?></div>
+                <p class="mb-0"><?= e(__('common.no_results')) ?></p>
+              </div>
+            </td>
+          </tr>
+        <?php endif; ?>
         <?php foreach ($summary as $row): ?>
           <?php
             $total = (int)$row['total_records'];
@@ -95,6 +123,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </tbody>
     </table>
   </div>
+</div>
 </div>
 <?php endif; ?>
 

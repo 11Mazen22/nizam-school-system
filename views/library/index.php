@@ -21,6 +21,8 @@ require dirname(__DIR__) . '/layout/start.php';
 
 
 
+<?php $books = filterRowsBySearch($books, (string) ($_GET['q'] ?? ''), ['title', 'author', 'category', 'isbn', 'shelf_location']); ?>
+<?php if (!empty($books)) { $listSearchTarget = '#library-table'; $listSearchAction = '/library'; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <div class="card">
   <div class="card-body p-0">
     <?php if (empty($books)): ?>
@@ -33,7 +35,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </div>
     <?php else: ?>
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table id="library-table" class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th><?= e(__('library.book_title')) ?></th>

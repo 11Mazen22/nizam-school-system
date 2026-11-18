@@ -189,14 +189,17 @@ final class RosterImportService
 
             $status = $messages === [] ? 'ok' : 'error';
 
+            $existingId = 0;
             if ($status === 'ok') {
                 $stmt = $pdo->prepare(
-                    'SELECT COUNT(*) FROM students s
+                    'SELECT s.id FROM students s
                      JOIN student_enrollments e ON e.student_id = s.id
-                     WHERE s.full_name = :n AND e.class_id = :c AND e.status = \'active\''
+                     WHERE s.full_name = :n AND e.class_id = :c AND e.status = \'active\'
+                     LIMIT 1'
                 );
                 $stmt->execute(['n' => $name, 'c' => $classes[$className]['id']]);
-                if ((int) $stmt->fetchColumn() > 0) {
+                $existingId = (int) ($stmt->fetchColumn() ?: 0);
+                if ($existingId > 0) {
                     $status = 'duplicate';
                     $messages[] = 'already_enrolled';
                 }
@@ -215,6 +218,7 @@ final class RosterImportService
                     '_religion' => $religion,
                     '_grade_id' => $classes[$className]['grade_id'] ?? 0,
                     '_class_id' => $classes[$className]['id'] ?? 0,
+                    '_existing_id' => $existingId,
                 ],
             ];
         }
@@ -223,22 +227,34 @@ final class RosterImportService
     }
 
     /**
-     * Insert the validated rows that are safe. Errors and duplicates are
-     * skipped; the caller reports the counts back to the user.
+     * Insert new students, and enrich existing ones without overwriting any
+     * value the school already has. The printed rosters omit gender, birth
+     * date and religion, so a later enriched CSV can fill those blanks for
+     * every already-enrolled student instead of reporting them as duplicates
+     * and doing nothing.
      *
      * @param list<array<string, mixed>> $validatedRows
-     * @return array{created:int, skipped:int, errors:list<string>}
+     * @return array{created:int, updated:int, skipped:int, errors:list<string>}
      */
     public function commit(array $validatedRows): array
     {
         $pdo = Database::connection();
         $pdo->beginTransaction();
         $created = 0;
+        $updated = 0;
         $skipped = 0;
         $errors = [];
 
         try {
             foreach ($validatedRows as $row) {
+                if ($row['status'] === 'duplicate' && !empty($row['data']['_existing_id'])) {
+                    if ($this->enrichExisting((int) $row['data']['_existing_id'], $row['data'])) {
+                        $updated++;
+                    } else {
+                        $skipped++;
+                    }
+                    continue;
+                }
                 if ($row['status'] !== 'ok') {
                     $skipped++;
                     continue;
@@ -278,7 +294,56 @@ final class RosterImportService
             throw $e;
         }
 
-        return ['created' => $created, 'skipped' => $skipped, 'errors' => $errors];
+        return ['created' => $created, 'updated' => $updated, 'skipped' => $skipped, 'errors' => $errors];
+    }
+
+    /**
+     * Fill only blanks on an existing student. Supplied values never replace
+     * a value that is already recorded -- the roster is an enrichment source,
+     * not an overwrite of work the school has already done.
+     *
+     * @param array<string,string> $data
+     */
+    private function enrichExisting(int $studentId, array $data): bool
+    {
+        $sets = [];
+        $params = ['id' => $studentId];
+
+        $gender = (string) ($data['_gender'] ?? '');
+        if ($gender !== '') {
+            $sets[] = 'gender = COALESCE(gender, :gender)';
+            $params['gender'] = $gender;
+        }
+
+        $dob = (string) ($data['_dob'] ?? '');
+        if ($dob !== '') {
+            $sets[] = 'date_of_birth = COALESCE(date_of_birth, :dob)';
+            $params['dob'] = $dob;
+        }
+
+        $religion = (string) ($data['_religion'] ?? '');
+        if ($religion !== '') {
+            $sets[] = 'religion = COALESCE(religion, :religion)';
+            $params['religion'] = $religion;
+        }
+
+        $attribute = trim((string) ($data['Class Attribute'] ?? ''));
+        if ($attribute !== '') {
+            $sets[] = "class_attribute_raw = CASE WHEN class_attribute_raw IS NULL OR class_attribute_raw = '' THEN :attribute ELSE class_attribute_raw END";
+            $params['attribute'] = $attribute;
+        }
+
+        if ($sets === []) {
+            return false;
+        }
+
+        $sets[] = "import_source = COALESCE(import_source, 'roster_csv')";
+        $stmt = Database::connection()->prepare(
+            'UPDATE students SET ' . implode(', ', $sets) . ' WHERE id = :id'
+        );
+        $stmt->execute($params);
+
+        return $stmt->rowCount() > 0;
     }
 
     private function detectDelimiter(string $line): string
@@ -346,7 +411,7 @@ final class RosterImportService
         $value = mb_strtolower(trim($value));
         return match (true) {
             in_array($value, ['muslim', 'islam', 'مسلم', 'مسلمة'], true) => 'muslim',
-            in_array($value, ['christian', 'christianity', 'مسيحي', 'مسيحية'], true) => 'christian',
+            in_array($value, ['christian', 'christianity', 'مسيحي', 'مسيحية', 'مسيحى'], true) => 'christian',
             in_array($value, ['other', 'أخرى', 'اخرى'], true) => 'other',
             default => null,
         };

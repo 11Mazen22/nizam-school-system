@@ -17,6 +17,7 @@ $tabs = [
     'academic' => ['icon' => 'calendar', 'label' => 'settings.tab.academic'],
     'structure' => ['icon' => 'layers', 'label' => 'settings.tab.structure'],
     'security' => ['icon' => 'lock', 'label' => 'settings.tab.security'],
+    'privacy' => ['icon' => 'shield-check', 'label' => 'settings.tab.privacy'],
     'backup' => ['icon' => 'database', 'label' => 'settings.tab.backup'],
     'offline' => ['icon' => 'inbox', 'label' => 'settings.tab.offline'],
 ];

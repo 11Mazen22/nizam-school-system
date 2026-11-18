@@ -57,12 +57,17 @@ Required PHP extensions: `pdo_mysql`, `mbstring`, `gd`, `zip`, `intl`,
 ```bash
 composer install
 npm install
+npx playwright install chromium
 npm test
 ```
 
 `npm test` runs service/repository contracts, authorization, academic and
 operational invariants, scheduled-endpoint authentication, design consistency,
-online deployment contracts, and the full disposable-database HTTP suite.
+online deployment contracts, and the full disposable-database HTTP suite. The
+HTTP suite also drives a real headless Chromium through the shared live-search
+behaviour -- typing without Enter, URL refresh restoration, pagination and
+no-match states -- so a broken filter fails the suite, not only a static
+contract. Install the browser once with `npx playwright install chromium`.
 GitHub CI runs the same suite on PHP 8.2 and 8.3 with MySQL 8.4.
 
 Useful focused commands:
@@ -90,8 +95,24 @@ $PG/pg_ctl -D /tmp/nizam-pg -m immediate stop
 ```
 
 It applies `database/migrations-pg/`, runs the seeds, and verifies migrations
-029/030 plus the roster-verification, teacher-alias, timetable-gap and
-teaching-load upserts against real PostgreSQL, then drops its database.
+029/030 and 035 plus the roster-verification, teacher-alias, timetable-gap,
+teaching-load, assessment-schedule and lesson-cover upserts, the student
+data-quality counters, the missing-field filters and the student lookups
+(generated-id code rendering, code/name search) against real PostgreSQL, then
+drops its database.
+
+**Upgrading an existing PostgreSQL deployment:** run the PostgreSQL migration
+runner before serving the new code:
+
+```bash
+php database/migrate-pg.php
+```
+
+`GET /readyz` returns `schema_pending:N` (HTTP 503) while any migration is
+missing, so a deployment that skipped this step is visible instead of failing
+later with a 500. Migration 032 is the one that adds `assessment_schedules`,
+`import_batches` and `classes.pathway_ar`; without it `/assessments` and every
+class query that reads the pathway return a 500 on PostgreSQL.
 
 ### Official 2026/2027 package
 
@@ -110,6 +131,20 @@ The load sync never overwrites periods the school edited on the assignment
 screen: those rows are marked manual, while rows derived from the grid are
 corrected when the grid changes.
 
+### Substitute cover
+
+`/timetable/covers` answers "who takes this lesson on this date?" without
+touching the weekly grid. Pick a date and the board lists every lesson of that
+weekday with its regular teacher, an approved-leave marker when HR has one,
+and only the teachers who are genuinely free in that period (the same
+free/busy evidence used on `/timetable/gaps`). Assigning writes one
+`lesson_covers` row for that date; removing it restores the regular teacher.
+The weekly timetable is never edited by a cover, and a teacher cannot cover
+their own lesson, a lesson while on approved leave, or two classes in one
+period. Double-booked gaps link to the same board so a collision can be
+covered for a specific day while the permanent grid decision stays with the
+school.
+
 Roster pages print a repeated value once and leave the rows below blank; the
 expansion writes that value to every student while keeping the printed text
 verbatim and recording whether it was printed on the row or inherited.
@@ -127,6 +162,13 @@ teacher printed, or a teacher already booked elsewhere in the same period), and
   triggered by `.github/workflows/`; see `AUTOMATION_GUIDE.md`.
 - **Logs:** local files under the mutable data root and stderr for Railway's
   log capture. User-facing pages never expose exception/SQL details.
+- **Two-step verification:** each staff member can enable TOTP from `/mfa`;
+  recovery codes are single-use and hashed, and disabling requires the
+  password plus a current code.
+- **Readiness:** `/healthz` is the liveness probe; `/readyz` also checks the
+database and reports `schema_pending:N` when migrations are missing. Run
+`php database/migrate.php` (MySQL) or `php database/migrate-pg.php`
+(PostgreSQL) before serving new code.
 - **Admin recovery:** run `php bin/recover-admin.php` on a trusted host; the
   one-time code is hashed in the database and expires after 20 minutes.
 

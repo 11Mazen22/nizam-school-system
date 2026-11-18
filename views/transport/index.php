@@ -15,6 +15,8 @@ require dirname(__DIR__) . '/layout/start.php';
 
 
 
+<?php $routes = filterRowsBySearch($routes, (string) ($_GET['q'] ?? ''), ['route_name', 'vehicle_no', 'driver_name', 'driver_phone']); ?>
+<?php if (!empty($routes)) { $listSearchTarget = '#routes-table'; $listSearchAction = '/transport'; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <div class="card">
   <div class="card-body p-0">
     <?php if (empty($routes)): ?>
@@ -27,7 +29,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </div>
     <?php else: ?>
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table id="routes-table" class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th><?= e(__('transport.route_name')) ?></th>

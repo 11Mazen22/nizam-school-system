@@ -56,6 +56,11 @@ final class AuthController extends Controller
             return;
         }
 
+        if ($result['status'] === 'mfa_required') {
+            $this->redirect('/login/mfa');
+            return;
+        }
+
         $error = match ($result['status']) {
             'locked' => __('auth.login.locked', ['minutes' => $this->minutesUntil($result['lockedUntil'] ?? null)]),
             'throttled' => __('auth.login.throttled'),
@@ -68,6 +73,45 @@ final class AuthController extends Controller
             'username' => $username,
             'recoveredUsername' => null,
         ]);
+    }
+
+    public function showMfa(Request $request): void
+    {
+        Response::noStore();
+
+        if (!(new AuthService())->hasPendingMfa()) {
+            $this->redirect('/login');
+            return;
+        }
+
+        $this->view('auth/mfa', ['error' => null]);
+    }
+
+    public function verifyMfa(Request $request): void
+    {
+        Response::noStore();
+
+        $code = (string) ($request->post('code', '') ?? '');
+        $result = (new AuthService())->verifyMfa($code, $request->ip());
+
+        if ($result['status'] === 'ok') {
+            $this->redirect('/dashboard');
+            return;
+        }
+
+        $error = match ($result['status']) {
+            'locked' => __('auth.mfa.locked', ['minutes' => $this->minutesUntil($result['lockedUntil'] ?? null)]),
+            'expired' => __('auth.mfa.expired'),
+            default => __('auth.mfa.invalid'),
+        };
+
+        $this->view('auth/mfa', ['error' => $error]);
+    }
+
+    public function cancelMfa(Request $request): void
+    {
+        (new AuthService())->clearPendingMfa();
+        $this->redirect('/login');
     }
 
     public function logout(Request $request): void

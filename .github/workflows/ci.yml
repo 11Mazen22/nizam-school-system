@@ -54,6 +54,11 @@ jobs:
           composer audit --locked
           composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
 
+      - name: Install browser test tooling
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
       - name: Configure disposable test database
         run: |
           cat > config/config.php <<'PHP'
@@ -76,6 +81,44 @@ jobs:
 
       - name: Run contract and HTTP suites
         run: npm test
+
+  postgres:
+    name: PostgreSQL parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine@sha256:81e77a4833487b8132fe4b00bedd39dc3f74b8641e387f19312a48f7de218c2e
+        env:
+          POSTGRES_PASSWORD: nizam_ci_pg
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_pgsql
+          coverage: none
+
+      - name: Run PostgreSQL parity suite
+        env:
+          NIZAM_PG_HOST: 127.0.0.1
+          NIZAM_PG_PORT: '5432'
+          NIZAM_PG_USER: postgres
+          NIZAM_PG_PASSWORD: nizam_ci_pg
+        run: php tests/postgres-parity.php
 
   container:
     name: Production container build

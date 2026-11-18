@@ -19,6 +19,8 @@ require dirname(__DIR__) . '/layout/start.php';
 
 
 
+<?php $invoices = filterRowsBySearch($invoices, (string) ($_GET['q'] ?? ''), ['invoice_number', 'student_name', 'title', 'status', 'due_date']); ?>
+<?php if (!empty($invoices)) { $listSearchTarget = '#invoices-table'; $listSearchAction = '/finance/invoices'; $listSearchHidden = ['status' => $activeStatus ?? '']; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
     <div class="btn-group btn-group-sm" role="group">
@@ -36,7 +38,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </div>
     <?php else: ?>
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table id="invoices-table" class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th><?= e(__('finance.invoice_number')) ?></th>

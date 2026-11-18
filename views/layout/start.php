@@ -315,6 +315,7 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
             </div>
             <div class="dropdown-divider"></div>
             <?php if (hasPermission('settings.manage')): ?>
+              <a class="dropdown-item" href="/mfa"><?= icon('shield-check') ?><span><?= e(__('mfa.title')) ?></span></a>
               <a class="dropdown-item" href="/settings/profile"><?= icon('settings') ?><span><?= e(__('nav.settings')) ?></span></a>
             <?php endif; ?>
             <button class="dropdown-item" type="button" id="densityToggle"

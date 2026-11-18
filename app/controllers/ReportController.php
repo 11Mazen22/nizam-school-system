@@ -52,10 +52,12 @@ final class ReportController extends Controller
         }
 
         $filters = $this->collectFilters($request);
+        $q = trim((string) ($request->query('q') ?? ''));
         $locale = currentLocale();
 
         $report = null;
         $error = null;
+        $reportHasRows = false;
         // A required filter is simply not yet chosen on first load (e.g. no
         // year picked) -- that's a normal empty filter form, not an error;
         // only an actually-invalid value (a nonexistent or cross-scope id)
@@ -63,6 +65,8 @@ final class ReportController extends Controller
         if (!empty($filters)) {
             try {
                 $report = $this->reports->build($key, $filters, $locale);
+                $reportHasRows = !empty($report['rows']);
+                $report = $this->filterReportRows($report, $q);
             } catch (RuntimeException $e) {
                 if ($e->getMessage() !== 'missing_filter') {
                     $error = $e->getMessage() === 'invalid_filter' ? __('reports.invalid_filter') : __('error.500.title');
@@ -73,6 +77,8 @@ final class ReportController extends Controller
         $this->view('reports/show', [
             'key' => $key,
             'report' => $report,
+            'reportHasRows' => $reportHasRows,
+            'q' => $q,
             'error' => $error,
             'filters' => $filters,
             'years' => $this->years->all(),
@@ -100,10 +106,12 @@ final class ReportController extends Controller
         }
 
         $filters = $this->collectFilters($request);
+        $q = trim((string) ($request->query('q') ?? ''));
         $locale = currentLocale();
 
         try {
             $report = $this->reports->build($key, $filters, $locale);
+            $report = $this->filterReportRows($report, $q);
         } catch (RuntimeException $e) {
             ErrorHandler::renderNotFound();
             return;
@@ -121,6 +129,26 @@ final class ReportController extends Controller
         } else {
             ErrorHandler::renderNotFound();
         }
+    }
+
+    /**
+     * Apply a view term to an already-built report. Rows are plain string
+     * arrays (one cell per header), so every displayed cell is searched --
+     * the same shape the browser filter used to see. The screen and the
+     * export path share this method, so a downloaded report always matches
+     * the filtered table the user is looking at.
+     *
+     * @param array<string,mixed> $report
+     * @return array<string,mixed>
+     */
+    private function filterReportRows(array $report, string $q): array
+    {
+        if ($q === '' || empty($report['rows'])) {
+            return $report;
+        }
+        $fields = array_map('strval', array_keys($report['rows'][0]));
+        $report['rows'] = filterRowsBySearch($report['rows'], $q, $fields);
+        return $report;
     }
 
     private function keyFromPath(Request $request): ?string

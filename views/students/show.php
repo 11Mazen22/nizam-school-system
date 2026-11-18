@@ -29,6 +29,18 @@ $attLate = $attendanceSummary['late_count'] ?? 0;
 $attAbsent = $attendanceSummary['absent_count'] ?? 0;
 $attExcused = $attendanceSummary['excused_count'] ?? 0;
 $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 100) : null;
+$rosterImported = ($student['import_source'] ?? '') === 'roster_csv';
+$missingLabel = $rosterImported ? __('students.not_printed') : __('students.not_recorded');
+$missingPersonal = [];
+if (empty($student['gender'])) { $missingPersonal[] = __('students.gender'); }
+if (empty($student['date_of_birth'])) { $missingPersonal[] = __('students.date_of_birth'); }
+if (empty($student['religion'])) { $missingPersonal[] = __('students.religion'); }
+$missingContact = empty($student['phone']) && empty($student['guardian_phone']) && empty($student['address']);
+$classAttribute = trim((string) ($student['class_attribute_raw'] ?? ''));
+$publicNotes = trim((string) ($student['notes'] ?? ''));
+if (preg_match('/^(row|L|R)\s*[LR]?\s*\d+$/iu', $publicNotes) === 1) {
+    $publicNotes = '';
+}
 ?>
 
 <section class="n-profile-hero" aria-labelledby="student-name">
@@ -47,10 +59,16 @@ $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 
       </div>
       <div class="n-profile-code mono" dir="ltr"><?= e($student['student_code']) ?></div>
       <?php if ($currentHistory !== null): ?>
-        <div class="mt-2">
+        <div class="mt-2 d-flex flex-wrap gap-1">
           <span class="badge text-bg-primary">
             <?= e(currentLocale() === 'ar' ? $currentHistory['grade_name_ar'] : $currentHistory['grade_name_en']) ?> · <?= e($currentHistory['class_name'] ?? __('promotion.unassigned')) ?>
           </span>
+          <?php if ($classAttribute !== ''): ?>
+            <span class="badge text-bg-light border"<?= ($student['class_attribute_source'] ?? '') === 'carried_forward' ? ' title="' . e(__('verification.carried_help')) . '"' : '' ?>><?= e(__('students.class_attribute')) ?>: <?= e($classAttribute) ?></span>
+          <?php endif; ?>
+          <?php if ($rosterImported): ?>
+            <span class="badge text-bg-light border"><?= e(__('students.data_source')) ?>: <?= e(__('students.roster_source')) ?></span>
+          <?php endif; ?>
         </div>
       <?php endif; ?>
     </div>
@@ -81,11 +99,40 @@ $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 
       <section class="card" aria-labelledby="personal-info-title">
         <div class="card-header"><?= icon('user') ?><span id="personal-info-title"><?= e(__('students.personal_information')) ?></span></div>
         <div class="card-body">
+          <?php if ($missingPersonal !== []): ?>
+            <div class="alert alert-warning d-flex flex-column gap-1 mb-3" role="status">
+              <div class="fw-semibold d-flex align-items-center gap-2">
+                <?= icon('alert-triangle') ?>
+                <?= e(__('students.missing_fields_title')) ?>
+              </div>
+              <div class="small">
+                <?= e(__('students.missing_fields_hint')) ?>
+                <strong><?= e(implode(currentLocale() === 'ar' ? '، ' : ', ', $missingPersonal)) ?></strong>
+              </div>
+              <?php if (hasPermission('students.edit')): ?>
+                <a class="btn btn-sm btn-warning align-self-start" href="/students/<?= (int) $student['id'] ?>/edit">
+                  <?= icon('edit') ?><span><?= e(__('students.complete_data')) ?></span>
+                </a>
+              <?php endif; ?>
+            </div>
+          <?php endif; ?>
           <dl class="n-detail-list">
             <dt><?= e(__('students.full_name')) ?></dt><dd><?= e($student['full_name']) ?></dd>
-            <dt><?= e(__('students.gender')) ?></dt><dd><?= $student['gender'] ? e(__('students.gender_' . $student['gender'])) : e(__('students.not_recorded')) ?></dd>
-            <dt><?= e(__('students.date_of_birth')) ?></dt><dd dir="ltr"><?= $student['date_of_birth'] ? e($student['date_of_birth']) : e(__('students.not_recorded')) ?></dd>
-            <dt><?= e(__('students.religion')) ?></dt><dd><?= $student['religion'] ? e(__('students.religion_' . $student['religion'])) : e(__('students.not_recorded')) ?></dd>
+            <dt><?= e(__('students.gender')) ?></dt><dd><?= $student['gender'] ? e(__('students.gender_' . $student['gender'])) : '<span class="text-muted">—</span> <span class="badge text-bg-light border">' . e($missingLabel) . '</span>' ?></dd>
+            <dt><?= e(__('students.date_of_birth')) ?></dt><dd dir="ltr"><?= $student['date_of_birth'] ? e($student['date_of_birth']) : '<span class="text-muted">—</span> <span class="badge text-bg-light border">' . e($missingLabel) . '</span>' ?></dd>
+            <dt><?= e(__('students.religion')) ?></dt>
+            <dd>
+              <?php if (!empty($student['religion'])): ?>
+                <?= e(__('students.religion_' . $student['religion'])) ?>
+                <?php if ($religionEvidence === 'inherited'): ?>
+                  <span class="badge text-bg-light border" title="<?= e(__('verification.carried_help')) ?>"><?= e(__('students.religion_inherited')) ?></span>
+                <?php elseif ($religionEvidence === 'shorthand'): ?>
+                  <span class="badge text-bg-warning"><?= e(__('students.religion_shorthand_hint')) ?></span>
+                <?php endif; ?>
+              <?php else: ?>
+                <span class="text-muted">—</span> <span class="badge text-bg-light border"><?= e($missingLabel) ?></span>
+              <?php endif; ?>
+            </dd>
           </dl>
         </div>
       </section>
@@ -93,11 +140,14 @@ $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 
       <section class="card" aria-labelledby="contact-info-title">
         <div class="card-header"><?= icon('phone') ?><span id="contact-info-title"><?= e(__('students.contact_information')) ?></span></div>
         <div class="card-body">
+          <?php if ($missingContact): ?>
+            <p class="small text-muted mb-3"><?= e(__('students.contact_missing_hint')) ?></p>
+          <?php endif; ?>
           <dl class="n-detail-list">
             <dt><?= e(__('students.phone')) ?></dt><dd dir="ltr"><?= e($student['phone'] ?? '—') ?></dd>
             <dt><?= e(__('students.guardian_phone')) ?></dt><dd dir="ltr"><?= e($student['guardian_phone'] ?? '—') ?></dd>
             <dt><?= e(__('students.address')) ?></dt><dd><?= e($student['address'] ?? '—') ?></dd>
-            <?php if (!empty($student['notes'])): ?><dt><?= e(__('students.notes')) ?></dt><dd><?= nl2br(e($student['notes'])) ?></dd><?php endif; ?>
+            <?php if ($publicNotes !== ''): ?><dt><?= e(__('students.notes')) ?></dt><dd><?= nl2br(e($publicNotes)) ?></dd><?php endif; ?>
           </dl>
         </div>
       </section>
@@ -119,7 +169,10 @@ $attRate = $attTotal > 0 ? (int) round((($attPresent + $attLate) / $attTotal) * 
           <?php if (empty($studentGuardians)): ?>
             <div class="n-empty border-0 py-3">
               <div class="n-empty-icon"><?= icon('users-group') ?></div>
-              <p class="text-muted small mb-0"><?= e(__('guardians.no_linked_guardians')) ?></p>
+              <p class="text-muted small mb-2"><?= e(__('students.guardian_missing_hint')) ?></p>
+              <?php if (hasPermission('guardians.manage')): ?>
+                <a href="/guardians/create" class="btn btn-sm btn-outline-primary"><?= icon('plus') ?><span><?= e(__('students.add_guardian')) ?></span></a>
+              <?php endif; ?>
             </div>
           <?php else: ?>
             <ul class="list-group list-group-flush">

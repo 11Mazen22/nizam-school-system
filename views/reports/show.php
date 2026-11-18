@@ -132,25 +132,46 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
     </div>
   </div>
 <?php else: ?>
+  <?php $exportQuery = http_build_query($filters + ((($q ?? '') !== '') ? ['q' => $q] : [])); ?>
   <div class="n-report-toolbar no-print">
     <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" data-print-report>
       <?= icon('printer', 'n-icon-sm') ?>
       <span><?= e(__('reports.print')) ?></span>
     </button>
     <?php if (in_array('pdf', $report['formats'], true)): ?>
-      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/pdf?<?= e(http_build_query($filters)) ?>">
+      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/pdf?<?= e($exportQuery) ?>">
         <?= icon('download', 'n-icon-sm') ?>
         <span><?= e(__('reports.export_pdf')) ?></span>
       </a>
     <?php endif; ?>
     <?php if (in_array('excel', $report['formats'], true)): ?>
-      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/excel?<?= e(http_build_query($filters)) ?>">
+      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/excel?<?= e($exportQuery) ?>">
         <?= icon('download', 'n-icon-sm') ?>
         <span><?= e(__('reports.export_excel')) ?></span>
       </a>
     <?php endif; ?>
   </div>
 
+  <?php if (!empty($reportHasRows)): ?>
+  <form method="get" action="/reports/<?= e($key) ?>" class="n-filter-panel n-list-search no-print" data-live-filter data-live-target="#report-results">
+    <div class="n-filter-row">
+      <div class="n-filter-field n-search-field flex-grow-1">
+        <?= icon('search') ?>
+        <label class="visually-hidden" for="report-search"><?= e(__('common.search')) ?></label>
+        <input id="report-search" type="search" class="form-control" name="q"
+               value="<?= e($q ?? '') ?>"
+               placeholder="<?= e(__('common.search')) ?>"
+               autocomplete="off">
+      </div>
+      <?php foreach ($filters as $filterKey => $filterValue): ?>
+        <input type="hidden" name="<?= e((string) $filterKey) ?>" value="<?= e((string) $filterValue) ?>">
+      <?php endforeach; ?>
+      <button type="submit" class="btn btn-primary"><?= icon('search') ?><?= e(__('common.search')) ?></button>
+      <?php if (($q ?? '') !== ''): ?><a href="/reports/<?= e($key) ?>?<?= e(http_build_query($filters)) ?>" class="btn btn-outline-secondary"><?= icon('close') ?><?= e(__('common.clear_filters')) ?></a><?php endif; ?>
+    </div>
+  </form>
+  <?php endif; ?>
+  <div id="report-results" data-live-results>
   <div id="reportPrintArea" class="n-report-document">
     <div class="n-report-document-head">
       <h2 class="h5 mb-1"><?= e($report['title']) ?></h2>
@@ -170,7 +191,7 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
       </div>
     <?php else: ?>
       <div class="table-responsive n-report-table-wrap">
-        <table class="table table-sm table-bordered">
+        <table id="report-table" class="table table-sm table-bordered">
           <thead>
             <tr>
               <?php foreach ($report['headers'] as $header): ?>
@@ -191,6 +212,7 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
         </table>
       </div>
     <?php endif; ?>
+  </div>
   </div>
 <?php endif; ?>
 

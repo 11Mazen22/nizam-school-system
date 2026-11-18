@@ -59,6 +59,8 @@ use App\Middleware\CsrfMiddleware;
 
   <!-- LIST TAB -->
   <div class="tab-pane fade show active" id="list-panel" role="tabpanel">
+    <?php $users = filterRowsBySearch($users, (string) ($_GET['q'] ?? ''), ['username', 'full_name', 'email', 'role_name_ar', 'role_name_en', 'role_code']); ?>
+    <?php if (!empty($users)) { $listSearchTarget = '#users-table'; $listSearchAction = '/users'; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
     <?php if (empty($users)): ?>
       <div class="card">
         <div class="card-body">
@@ -72,7 +74,7 @@ use App\Middleware\CsrfMiddleware;
       <div class="card">
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 n-table-stack">
+            <table id="users-table" class="table table-hover align-middle mb-0 n-table-stack">
               <thead>
                 <tr>
                   <th><?= e(__('users.username')) ?></th>

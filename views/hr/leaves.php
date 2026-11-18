@@ -18,6 +18,8 @@ use App\Middleware\CsrfMiddleware;
 
 
 
+<?php $leaves = filterRowsBySearch($leaves, (string) ($_GET['q'] ?? ''), ['teacher_name', 'teacher_code', 'reason', 'status', 'start_date', 'end_date']); ?>
+<?php if (!empty($leaves)) { $listSearchTarget = '#leaves-table'; $listSearchAction = '/hr/leaves'; $listSearchHidden = ['status' => $activeStatus ?? '']; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
     <div class="btn-group btn-group-sm" role="group">
@@ -35,7 +37,7 @@ use App\Middleware\CsrfMiddleware;
       </div>
     <?php else: ?>
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table id="leaves-table" class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th><?= e(__('teachers.name')) ?></th>

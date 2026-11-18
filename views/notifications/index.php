@@ -56,6 +56,7 @@ $locale = currentLocale();
   </ul>
 </div>
 
+<?php $notifications = filterRowsBySearch($notifications, (string) ($_GET['q'] ?? ''), ['title_ar', 'title_en', 'body_ar', 'body_en']); ?>
 <?php if (empty($notifications)): ?>
   <div class="n-empty-state">
     <div class="n-empty-icon"><?= icon('inbox', 'n-icon-xl') ?></div>
@@ -63,6 +64,7 @@ $locale = currentLocale();
     <p class="n-empty-description"><?= e(__('notifications.empty_description')) ?></p>
   </div>
 <?php else: ?>
+  <?php $listSearchTarget = '.notifications-container'; $listSearchAction = '/notifications'; $listSearchHidden = ['category' => $currentCategory ?? '']; require dirname(__DIR__) . '/partials/list-search.php'; ?>
   <!-- Notifications List -->
   <div class="notifications-container">
     <?php foreach ($notifications as $n): ?>
@@ -72,7 +74,7 @@ $locale = currentLocale();
         $body = $locale === 'ar' ? $n['body_ar'] : $n['body_en'];
         $hasLink = !empty($n['link']);
       ?>
-      <div class="notification-card <?= !$isRead ? 'notification-unread' : '' ?>" data-notification-id="<?= (int)$n['id'] ?>">
+      <div data-filter-item class="notification-card <?= !$isRead ? 'notification-unread' : '' ?>" data-notification-id="<?= (int)$n['id'] ?>">
         <div class="notification-icon">
           <div class="notification-icon-circle <?= !$isRead ? 'notification-icon-active' : '' ?>">
             <?= icon('inbox') ?>

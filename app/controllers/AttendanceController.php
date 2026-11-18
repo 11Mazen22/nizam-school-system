@@ -95,14 +95,22 @@ final class AttendanceController extends Controller
         $classId = (int) ($request->query('class_id') ?? 0);
         $from    = $request->query('from') ?? date('Y-m-01');
         $to      = $request->query('to')   ?? date('Y-m-d');
+        $q       = trim((string) ($request->query('q') ?? ''));
 
         $summary   = [];
         $chronic   = [];
         $classRow  = null;
+        $summaryTotal = 0;
 
         if ($classId > 0) {
             $classRow = $this->classes->find($classId);
             $summary  = $this->service->getSummary($classId, $from, $to);
+            $summaryTotal = count($summary);
+            if ($q !== '') {
+                // Server-side so the filter also works without JavaScript and
+                // a refreshed ?q= URL restores exactly this view.
+                $summary = filterRowsBySearch($summary, $q, ['full_name', 'student_code']);
+            }
         }
 
         if ($yearId) {
@@ -115,7 +123,9 @@ final class AttendanceController extends Controller
             'classRow' => $classRow,
             'from'     => $from,
             'to'       => $to,
+            'q'        => $q,
             'summary'  => $summary,
+            'summaryTotal' => $summaryTotal,
             'chronic'  => $chronic,
         ]);
     }

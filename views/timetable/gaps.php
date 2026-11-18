@@ -43,6 +43,7 @@ ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('timetable.gaps_subtitle')) ?></p>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
 <a href="/timetable" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?><?= e(__('timetable.title')) ?></a>
+<a href="/timetable/covers" class="btn btn-outline-secondary"><?= icon('calendar') ?><?= e(__('timetable.covers_title')) ?></a>
 <a href="/timetable/staff" class="btn btn-outline-secondary"><?= icon('users-group') ?><?= e(__('timetable.staff_title')) ?></a>
 <?php
 $pageActions = (string) ob_get_clean();
@@ -61,7 +62,7 @@ require dirname(__DIR__) . '/layout/start.php';
   <div class="small"><?= e(__('timetable.gaps_hint')) ?></div>
 </div>
 
-<form method="get" action="/timetable/gaps" class="n-filter-panel no-print">
+<form method="get" action="/timetable/gaps" class="n-filter-panel no-print" data-live-filter data-live-target="#gap-results">
   <div class="n-filter-row">
     <div class="n-filter-field">
       <label class="visually-hidden" for="gapStatus"><?= e(__('verification.status')) ?></label>
@@ -99,6 +100,7 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 </form>
 
+<div id="gap-results">
 <?php if ($gaps === []): ?>
   <div class="n-empty-state">
     <div class="n-empty-icon"><?= icon('check-circle', 'n-icon-xl') ?></div>
@@ -154,6 +156,7 @@ require dirname(__DIR__) . '/layout/start.php';
                     <strong><?= e(__('timetable.gaps_held_by')) ?>:</strong>
                     <?= e((string) $held['class_name']) ?> — <?= e($bookingSubject($held)) ?>
                   </div>
+                  <a class="small" href="/timetable/covers"><?= e(__('timetable.covers_from_gap')) ?></a>
                 <?php endif; ?>
               </td>
               <td data-label="<?= e(__('timetable.gaps_reason')) ?>">
@@ -230,5 +233,6 @@ require dirname(__DIR__) . '/layout/start.php';
     </div>
   </div>
 <?php endif; ?>
+</div>
 
 <?php require dirname(__DIR__) . '/layout/end.php'; ?>

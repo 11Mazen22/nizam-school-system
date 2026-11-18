@@ -4,6 +4,7 @@ $pageTitle = __('academic_years.title');
 $activeNav = 'academic-years';
 $canManage = hasPermission('academic_years.manage');
 $canClose = hasPermission('academic_years.close');
+$years = filterRowsBySearch($years, (string) ($_GET['q'] ?? ''), ['label', 'start_date', 'end_date']);
 $activeYears = array_filter($years, static fn (array $year): bool => (int) $year['is_active'] === 1);
 $closedYears = array_filter($years, static fn (array $year): bool => (int) $year['is_closed'] === 1);
 $openYears = array_filter($years, static fn (array $year): bool => (int) $year['is_closed'] === 0);
@@ -23,10 +24,11 @@ use App\Middleware\CsrfMiddleware;
 
 <div class="tab-content">
   <div class="tab-pane fade show active" id="list-panel" role="tabpanel">
+    <?php if (!empty($years)) { $listSearchTarget = '.n-year-list'; $listSearchAction = '/academic-years'; require dirname(__DIR__) . '/partials/list-search.php'; } ?>
     <?php if (empty($years)): ?><div class="n-empty-state"><div class="n-empty-icon"><?= icon('calendar') ?></div><h2 class="n-empty-title"><?= e(__('academic_years.empty_title')) ?></h2><p class="n-empty-description"><?= e(__('academic_years.empty_description')) ?></p><?php if ($canManage): ?><button class="btn btn-primary" type="button" data-tab-switch="add-tab"><?= icon('plus') ?><?= e(__('academic_years.add')) ?></button><?php endif; ?></div>
     <?php else: ?><div class="n-year-list">
       <?php foreach ($years as $year): ?>
-        <article class="n-year-row <?= (int) $year['is_active'] === 1 ? 'active' : '' ?> <?= (int) $year['is_closed'] === 1 ? 'closed' : '' ?>">
+        <article data-filter-item class="n-year-row <?= (int) $year['is_active'] === 1 ? 'active' : '' ?> <?= (int) $year['is_closed'] === 1 ? 'closed' : '' ?>">
           <div class="n-year-marker"><?= icon((int) $year['is_closed'] === 1 ? 'lock' : 'calendar') ?></div>
           <div class="n-year-main"><div class="d-flex align-items-center gap-2 flex-wrap"><h2 dir="ltr"><?= e($year['label']) ?></h2><?php if ((int) $year['is_active'] === 1): ?><span class="badge text-bg-primary"><?= icon('check-circle') ?><?= e(__('academic_years.active_badge')) ?></span><?php endif; ?><span class="badge <?= (int) $year['is_closed'] === 1 ? 'text-bg-secondary' : 'text-bg-success' ?>"><?= e((int) $year['is_closed'] === 1 ? __('academic_years.closed_badge') : __('academic_years.open_badge')) ?></span></div><div class="n-year-dates" dir="ltr"><?= icon('calendar') ?><time><?= e($year['start_date']) ?></time><span>→</span><time><?= e($year['end_date']) ?></time></div></div>
           <div class="n-year-actions">

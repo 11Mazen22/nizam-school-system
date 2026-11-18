@@ -34,10 +34,26 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 </form>
 
-<?php if (!empty($ranking)): ?>
+<?php if ($classId > 0 && ($rankingTotal ?? count($ranking)) > 0): ?>
+<form method="get" action="/exams/ranking" class="n-filter-panel n-list-search no-print" data-live-filter data-live-target="#ranking-results">
+  <div class="n-filter-row">
+    <div class="n-filter-field n-search-field flex-grow-1">
+      <?= icon('search') ?>
+      <label class="visually-hidden" for="ranking-search"><?= e(__('common.search')) ?></label>
+      <input id="ranking-search" type="search" class="form-control" name="q"
+             value="<?= e($q ?? '') ?>"
+             placeholder="<?= e(__('common.search')) ?>"
+             autocomplete="off">
+    </div>
+    <input type="hidden" name="class_id" value="<?= (int) $classId ?>">
+    <button type="submit" class="btn btn-primary"><?= icon('search') ?><?= e(__('common.search')) ?></button>
+    <?php if (($q ?? '') !== ''): ?><a href="/exams/ranking?class_id=<?= (int) $classId ?>" class="btn btn-outline-secondary"><?= icon('close') ?><?= e(__('common.clear_filters')) ?></a><?php endif; ?>
+  </div>
+</form>
+<div id="ranking-results" data-live-results>
 <div class="card">
   <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
+    <table id="ranking-table" class="table table-hover align-middle mb-0">
       <thead class="table-light">
         <tr>
           <th style="width:60px;"><?= e(__('exams.rank')) ?></th>
@@ -49,6 +65,16 @@ require dirname(__DIR__) . '/layout/start.php';
         </tr>
       </thead>
       <tbody>
+        <?php if (empty($ranking)): ?>
+          <tr>
+            <td colspan="6" class="p-0">
+              <div class="n-empty py-4">
+                <div class="n-empty-icon"><?= icon('search') ?></div>
+                <p class="mb-0"><?= e(__('common.no_results')) ?></p>
+              </div>
+            </td>
+          </tr>
+        <?php endif; ?>
         <?php foreach ($ranking as $row): ?>
           <?php
             $avg = $row['weighted_avg'] !== null ? (float) $row['weighted_avg'] : 0.0;
@@ -82,6 +108,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </tbody>
     </table>
   </div>
+</div>
 </div>
 <?php elseif ($classId > 0): ?>
   <div class="n-empty-powerful">

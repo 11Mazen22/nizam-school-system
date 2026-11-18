@@ -15,6 +15,7 @@ use App\Repositories\StudentRepository;
 use App\Repositories\TeacherRepository;
 use App\Repositories\TimetableRepository;
 use App\Services\AcademicCalculationService;
+use App\Services\TimetableService;
 
 final class PortalController extends Controller
 {
@@ -34,6 +35,7 @@ final class PortalController extends Controller
         $teacher = (new TeacherRepository())->all()[0] ?? null; // default to first teacher if not mapped
         $assignments = [];
         $todayTimetable = [];
+        $assessments = [];
 
         if ($teacher !== null && $activeYearId !== null) {
             $pdo = Database::connection();
@@ -61,12 +63,18 @@ final class PortalController extends Controller
             );
             $ttStmt->execute(['t_id' => $teacher['id'], 'y_id' => $activeYearId, 'dow' => $dow]);
             $todayTimetable = $ttStmt->fetchAll() ?: [];
+            $assessments = $this->assessmentsForClasses(
+                $activeYearId,
+                array_map(static fn (array $row): int => (int) $row['class_id'], $assignments)
+            );
         }
 
         $this->view('portal/teacher', [
             'teacher'        => $teacher,
             'assignments'    => $assignments,
             'todayTimetable' => $todayTimetable,
+            'assessments'    => $assessments,
+            'dayLabels'      => (new TimetableService())->getDayLabels(),
         ]);
     }
 
@@ -86,6 +94,7 @@ final class PortalController extends Controller
         $selectedStudentId = $request->query('student_id') ? (int) $request->query('student_id') : ($children[0]['id'] ?? 0);
         $student = null;
         $scores = [];
+        $assessments = [];
         $attendanceStats = null;
 
         if ($selectedStudentId > 0) {
@@ -123,6 +132,11 @@ final class PortalController extends Controller
                     $attendanceStats[$ar['status']] = (int) $ar['cnt'];
                     $attendanceStats['total'] += (int) $ar['cnt'];
                 }
+
+                $classId = $this->classIdForStudent($selectedStudentId, $activeYearId);
+                if ($classId !== null) {
+                    $assessments = $this->assessmentsForClasses($activeYearId, [$classId]);
+                }
             }
         }
 
@@ -132,6 +146,8 @@ final class PortalController extends Controller
             'children'        => $children,
             'student'         => $student,
             'scores'          => $scores,
+            'assessments'     => $assessments,
+            'dayLabels'       => (new TimetableService())->getDayLabels(),
             'attendanceStats' => $attendanceStats,
         ]);
     }
@@ -148,6 +164,7 @@ final class PortalController extends Controller
         $activeYearId = AcademicYearContext::activeYearId();
         $scores = [];
         $timetable = [];
+        $assessments = [];
 
         if ($student !== null && $activeYearId !== null) {
             $pdo = Database::connection();
@@ -162,13 +179,61 @@ final class PortalController extends Controller
             );
             $scStmt->execute(['s_id' => $student['id'], 'y_id' => $activeYearId]);
             $scores = $this->calculator->decorateRows($scStmt->fetchAll() ?: []);
+
+            $classId = $this->classIdForStudent((int) $student['id'], $activeYearId);
+            if ($classId !== null) {
+                $assessments = $this->assessmentsForClasses($activeYearId, [$classId]);
+            }
         }
 
         $this->view('portal/student', [
-            'students'  => $students,
-            'student'   => $student,
-            'scores'    => $scores,
-            'timetable' => $timetable,
+            'students'    => $students,
+            'student'     => $student,
+            'scores'      => $scores,
+            'timetable'   => $timetable,
+            'assessments' => $assessments,
+            'dayLabels'   => (new TimetableService())->getDayLabels(),
         ]);
+    }
+
+    /**
+     * The weekly assessment distribution for the classes a person belongs to.
+     * It is not the timetable: a subject can be assessed on a day it is not
+     * taught, which is exactly what families and teachers keep asking about.
+     *
+     * @param list<int> $classIds
+     * @return list<array<string,mixed>>
+     */
+    private function assessmentsForClasses(int $yearId, array $classIds): array
+    {
+        $classIds = array_values(array_unique(array_filter(array_map('intval', $classIds))));
+        if ($classIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($classIds), '?'));
+        $stmt = Database::connection()->prepare(
+            "SELECT a.*, c.name AS class_name
+             FROM assessment_schedules a
+             JOIN classes c ON c.id = a.class_id
+             WHERE a.academic_year_id = ? AND a.class_id IN ({$placeholders})
+             ORDER BY a.day_of_week ASC, a.sequence ASC, c.name ASC"
+        );
+        $stmt->execute([$yearId, ...$classIds]);
+
+        return $stmt->fetchAll() ?: [];
+    }
+
+    private function classIdForStudent(int $studentId, int $yearId): ?int
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT class_id FROM student_enrollments
+             WHERE student_id = :student AND academic_year_id = :year AND status = 'active'
+               AND class_id IS NOT NULL LIMIT 1"
+        );
+        $stmt->execute(['student' => $studentId, 'year' => $yearId]);
+        $classId = $stmt->fetchColumn();
+
+        return $classId !== false ? (int) $classId : null;
     }
 }

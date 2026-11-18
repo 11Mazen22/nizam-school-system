@@ -14,13 +14,14 @@ require dirname(__DIR__) . '/layout/start.php';
 
 
 
-<form method="get" action="/teachers" class="n-filter-panel"><div class="n-filter-row">
-  <div class="n-filter-field n-search-field"><?= icon('search') ?><label class="visually-hidden" for="teacher-search"><?= e(__('common.search')) ?></label><input id="teacher-search" type="search" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>"></div>
+<form method="get" action="/teachers" class="n-filter-panel" data-live-filter data-live-target="#teacher-results"><div class="n-filter-row">
+  <div class="n-filter-field n-search-field"><?= icon('search') ?><label class="visually-hidden" for="teacher-search"><?= e(__('common.search')) ?></label><input id="teacher-search" type="search" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>" autocomplete="off"></div>
   <button type="submit" class="btn btn-primary"><?= icon('search') ?><?= e(__('common.search')) ?></button>
   <?php if ($q !== ''): ?><a href="/teachers" class="btn btn-outline-secondary"><?= icon('close') ?><?= e(__('common.clear_filters')) ?></a><?php endif; ?>
   <a href="/teachers/archived" class="btn btn-ghost ms-auto"><?= icon('archive') ?><?= e(__('common.archived_list')) ?></a>
 </div></form>
 
+<div id="teacher-results" data-live-results>
 <?php if (empty($teachers)): ?>
   <div class="n-empty-state"><div class="n-empty-icon"><?= icon('graduation-cap', 'n-icon-xl') ?></div><h2 class="n-empty-title"><?= e(__('teachers.empty_title')) ?></h2><p class="n-empty-description"><?= e($q !== '' ? __('common.no_results') : __('teachers.empty_description')) ?></p><?php if ($canCreate && $q === ''): ?><a href="/teachers/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('teachers.add')) ?></a><?php endif; ?></div>
 <?php else: ?>
@@ -35,6 +36,7 @@ require dirname(__DIR__) . '/layout/start.php';
     </tr><?php endforeach; ?></tbody>
   </table></div></div>
 <?php endif; ?>
+</div>
 
 <?php
 if ($canCreate) {

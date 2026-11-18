@@ -59,24 +59,50 @@ final class SubjectRepository
     public function qualifiedForTeacher(int $teacherId): array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT s.* FROM subjects s
+            "SELECT s.* FROM subjects s
              JOIN teacher_subjects ts ON ts.subject_id = s.id
-             WHERE ts.teacher_id = :tid ORDER BY s.name_en ASC'
+             WHERE ts.teacher_id = :tid AND ts.source = 'declared'
+             ORDER BY s.name_en ASC"
         );
         $stmt->execute(['tid' => $teacherId]);
         return $stmt->fetchAll();
     }
 
-    /** @param int[] $subjectIds */
+    /**
+     * Replace the teacher's declared qualifications without erasing what the
+     * timetable says they teach. A pair can only occupy one row (the table's
+     * primary key is teacher+subject), so a declared pair is stored as
+     * 'declared' and every other taught pair is restored as 'timetable'.
+     *
+     * @param int[] $subjectIds
+     */
     public function setTeacherQualifications(int $teacherId, array $subjectIds): void
     {
         $pdo = Database::connection();
-        $del = $pdo->prepare('DELETE FROM teacher_subjects WHERE teacher_id = :tid');
-        $del->execute(['tid' => $teacherId]);
+        $taught = $pdo->prepare('SELECT DISTINCT subject_id FROM timetables WHERE teacher_id = :tid');
+        $taught->execute(['tid' => $teacherId]);
+        $taughtIds = array_map('intval', $taught->fetchAll(\PDO::FETCH_COLUMN));
 
-        $ins = $pdo->prepare('INSERT INTO teacher_subjects (teacher_id, subject_id) VALUES (:tid, :sid)');
-        foreach (array_unique($subjectIds) as $subjectId) {
-            $ins->execute(['tid' => $teacherId, 'sid' => $subjectId]);
+        $declared = array_values(array_unique(array_map('intval', $subjectIds)));
+
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare('DELETE FROM teacher_subjects WHERE teacher_id = :tid')->execute(['tid' => $teacherId]);
+
+            $insert = $pdo->prepare('INSERT INTO teacher_subjects (teacher_id, subject_id, source) VALUES (:tid, :sid, :source)');
+            foreach ($declared as $subjectId) {
+                $insert->execute(['tid' => $teacherId, 'sid' => $subjectId, 'source' => 'declared']);
+            }
+            foreach (array_diff($taughtIds, $declared) as $subjectId) {
+                $insert->execute(['tid' => $teacherId, 'sid' => $subjectId, 'source' => 'timetable']);
+            }
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
         }
     }
 
@@ -84,7 +110,8 @@ final class SubjectRepository
     public function teacherIsQualified(int $teacherId, int $subjectId): bool
     {
         $stmt = Database::connection()->prepare(
-            'SELECT COUNT(*) FROM teacher_subjects WHERE teacher_id = :tid AND subject_id = :sid'
+            "SELECT COUNT(*) FROM teacher_subjects
+             WHERE teacher_id = :tid AND subject_id = :sid AND source = 'declared'"
         );
         $stmt->execute(['tid' => $teacherId, 'sid' => $subjectId]);
         return ((int) $stmt->fetchColumn()) > 0;

@@ -1,5 +1,5 @@
 <?php
-/** @var array $students @var string $q @var int $page @var int $perPage @var int $total @var int $lastPage */
+/** @var array $students @var string $q @var int $page @var int $perPage @var int $total @var int $lastPage @var string $missing @var array{total:int,no_gender:int,no_dob:int,no_religion:int,no_personal:int,no_guardian:int} $quality */
 $pageTitle = __('students.title');
 $activeNav = 'students';
 $locale = currentLocale();
@@ -9,6 +9,7 @@ ob_start(); ?>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
 <div class="n-stat-mini"><span class="n-stat-mini-value" data-count-up><?= (int) $total ?></span><span class="n-stat-mini-label"><?= e(__('students.total_students')) ?></span></div>
       <?php if ($canCreate): ?><a class="btn btn-outline-secondary" href="/students/import/roster"><?= icon('file-text') ?><?= e(__('roster.short')) ?></a><button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><span><?= e(__('app.import')) ?></span></button><?php endif; ?>
+      <?php if (hasPermission('students.edit')): ?><a class="btn btn-outline-secondary" href="/students/export/enrichment"><?= icon('download') ?><?= e(__('students.enrichment_template')) ?></a><?php endif; ?>
       <?php if (hasPermission('students.promote')): ?><a href="/students/promotion" class="btn btn-outline-primary"><?= icon('trending-up') ?><span><?= e(__('promotion.title')) ?></span></a><?php endif; ?>
       <?php if ($canCreate): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><span><?= e(__('students.add')) ?></span></a><?php endif; ?>
 <?php
@@ -18,12 +19,13 @@ require dirname(__DIR__) . '/layout/start.php';
 
 
 
-<form method="get" action="/students" class="n-filter-panel" aria-label="<?= e(__('common.filter')) ?>">
+<form method="get" action="/students" class="n-filter-panel" aria-label="<?= e(__('common.filter')) ?>" data-live-filter data-live-target="#student-results">
   <div class="n-filter-row">
     <div class="n-filter-field n-search-field">
       <?= icon('search') ?>
       <label class="visually-hidden" for="student-search"><?= e(__('common.search')) ?></label>
-      <input id="student-search" type="search" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>">
+      <input id="student-search" type="search" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>" autocomplete="off" aria-describedby="student-search-hint">
+      <span id="student-search-hint" class="visually-hidden"><?= e(__('students.search_instant')) ?></span>
     </div>
     <div class="n-filter-field">
       <label class="visually-hidden" for="student-grade-filter"><?= e(__('classes.grade')) ?></label>
@@ -44,18 +46,39 @@ require dirname(__DIR__) . '/layout/start.php';
         <?php endforeach; ?>
       </select>
     </div>
+    <div class="n-filter-field">
+      <label class="visually-hidden" for="student-missing-filter"><?= e(__('students.data_quality')) ?></label>
+      <select id="student-missing-filter" name="missing" class="form-select">
+        <option value=""><?= e(__('students.all_records')) ?></option>
+        <option value="personal" <?= $missing === 'personal' ? 'selected' : '' ?>><?= e(__('students.missing_personal')) ?></option>
+        <option value="guardian" <?= $missing === 'guardian' ? 'selected' : '' ?>><?= e(__('students.missing_guardian')) ?></option>
+        <option value="contact" <?= $missing === 'contact' ? 'selected' : '' ?>><?= e(__('students.missing_contact')) ?></option>
+      </select>
+    </div>
     <button type="submit" class="btn btn-primary"><?= icon('filter') ?><span><?= e(__('common.filter')) ?></span></button>
     <?php if ($q !== '' || $gradeId > 0 || $classId > 0): ?><a href="/students" class="btn btn-outline-secondary"><?= icon('close') ?><span><?= e(__('common.clear_filters')) ?></span></a><?php endif; ?>
     <a href="/students/archived" class="btn btn-ghost ms-auto"><?= icon('archive') ?><span><?= e(__('common.archived_list')) ?></span></a>
   </div>
 </form>
 
+<?php if ($quality['total'] > 0 && ($quality['no_gender'] > 0 || $quality['no_guardian'] > 0)): ?>
+  <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2" role="status">
+    <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
+    <span class="flex-grow-1">
+      <?= e(__('students.data_quality_hint')) ?>
+      <a href="/students?missing=personal" class="alert-link"><?= e(__('students.missing_personal_count', ['count' => $quality['no_personal']])) ?></a>
+      · <a href="/students?missing=guardian" class="alert-link"><?= e(__('students.missing_guardian_count', ['count' => $quality['no_guardian']])) ?></a>
+    </span>
+  </div>
+<?php endif; ?>
+
+<div id="student-results" data-live-results>
 <?php if (empty($students)): ?>
   <div class="n-empty-state">
     <div class="n-empty-icon"><?= icon('users', 'n-icon-xl') ?></div>
     <h2 class="n-empty-title"><?= e(__('students.empty_title')) ?></h2>
-    <p class="n-empty-description"><?= e($q !== '' || $gradeId > 0 || $classId > 0 ? __('common.no_results') : __('students.empty_description')) ?></p>
-    <?php if ($canCreate && $q === '' && $gradeId === 0 && $classId === 0): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('students.add')) ?></a><?php endif; ?>
+    <p class="n-empty-description"><?= e($q !== '' || $gradeId > 0 || $classId > 0 || $missing !== '' ? __('common.no_results') : __('students.empty_description')) ?></p>
+    <?php if ($canCreate && $q === '' && $gradeId === 0 && $classId === 0 && $missing === ''): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('students.add')) ?></a><?php endif; ?>
   </div>
 <?php else: ?>
   <div class="n-data-panel">
@@ -75,7 +98,7 @@ require dirname(__DIR__) . '/layout/start.php';
               <td data-label="<?= e(__('classes.grade')) ?> / <?= e(__('classes.class')) ?>">
                 <?php if (!empty($student['grade_name_en'])): ?><span class="badge text-bg-light border"><?= e($locale === 'ar' ? $student['grade_name_ar'] : $student['grade_name_en']) ?> · <?= e($student['class_name']) ?></span><?php else: ?><span class="text-muted">—</span><?php endif; ?>
               </td>
-              <td data-label="<?= e(__('students.religion')) ?>"><?= e(__('students.religion_' . $student['religion'])) ?></td>
+              <td data-label="<?= e(__('students.religion')) ?>"><?= $student['religion'] ? e(__('students.religion_' . $student['religion'])) : '<span class="text-muted">—</span>' ?></td>
               <td data-label="<?= e(__('common.actions')) ?>"><div class="n-table-actions"><a href="/students/<?= (int) $student['id'] ?>" class="btn btn-sm btn-outline-secondary"><?= icon('eye') ?><span><?= e(__('common.view')) ?></span></a><?php if (hasPermission('students.edit')): ?><a href="/students/<?= (int) $student['id'] ?>/edit" class="btn btn-sm btn-ghost" aria-label="<?= e(__('common.edit')) ?>"><?= icon('edit') ?></a><?php endif; ?></div></td>
             </tr>
           <?php endforeach; ?>
@@ -85,7 +108,7 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 
   <?php if ($lastPage > 1): ?>
-    <?php $queryString = $q !== '' ? '&q=' . urlencode($q) : ''; if ($gradeId > 0) $queryString .= '&grade_id=' . $gradeId; if ($classId > 0) $queryString .= '&class_id=' . $classId; ?>
+    <?php $queryString = $q !== '' ? '&q=' . urlencode($q) : ''; if ($gradeId > 0) $queryString .= '&grade_id=' . $gradeId; if ($classId > 0) $queryString .= '&class_id=' . $classId; if ($missing !== '') $queryString .= '&missing=' . urlencode($missing); ?>
     <nav aria-label="Students pagination" class="mt-3"><ul class="pagination justify-content-center">
       <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>"><a class="page-link" href="/students?page=<?= $page - 1 ?><?= $queryString ?>"><?= icon('chevron-left', 'n-flip-rtl') ?></a></li>
       <?php for ($p = 1; $p <= $lastPage; $p++): ?><li class="page-item <?= $p === $page ? 'active' : '' ?>"><a class="page-link" href="/students?page=<?= $p ?><?= $queryString ?>"><?= $p ?></a></li><?php endfor; ?>
@@ -94,6 +117,7 @@ require dirname(__DIR__) . '/layout/start.php';
     <p class="text-center text-muted small" dir="ltr"><?= e(sprintf('%d–%d / %d', ($page - 1) * $perPage + 1, min($page * $perPage, $total), $total)) ?></p>
   <?php endif; ?>
 <?php endif; ?>
+</div>
 
 <?php
 if ($canCreate) {

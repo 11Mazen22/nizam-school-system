@@ -36,7 +36,7 @@ final class AuthService
     ) {
     }
 
-    /** @return array{status: 'ok'|'invalid'|'locked'|'throttled', lockedUntil?: string} */
+    /** @return array{status: 'ok'|'mfa_required'|'invalid'|'locked'|'throttled', lockedUntil?: string} */
     public function attempt(string $username, string $password, string $ip): array
     {
         if ($this->throttle->isIpThrottled($ip)) {
@@ -63,10 +63,79 @@ final class AuthService
             return ['status' => 'invalid'];
         }
 
+        if ((new MfaService())->enabled($user)) {
+            // Password is correct, but the session is not authenticated yet:
+            // user_id is deliberately absent, so every protected route still
+            // redirects to /login until the second factor is verified.
+            session_regenerate_id(true);
+            $_SESSION['mfa_pending_user_id'] = (int) $user['id'];
+            $_SESSION['mfa_pending_at'] = time();
+            $_SESSION['mfa_attempts'] = 0;
+            unset($_SESSION['user_id'], $_SESSION['permissions']);
+            ActivityLogger::log('mfa.challenge', 'users', (int) $user['id'], "Two-factor challenge issued for '{$user['username']}'");
+
+            return ['status' => 'mfa_required'];
+        }
+
         $this->throttle->recordSuccess($user, $ip);
         $this->establishSession($user);
 
         return ['status' => 'ok'];
+    }
+
+    /**
+     * Complete a sign-in that stopped at the two-factor challenge.
+     *
+     * @return array{status: 'ok'|'invalid'|'expired'|'locked', lockedUntil?: string}
+     */
+    public function verifyMfa(string $code, string $ip): array
+    {
+        $userId = (int) ($_SESSION['mfa_pending_user_id'] ?? 0);
+        $issuedAt = (int) ($_SESSION['mfa_pending_at'] ?? 0);
+        if ($userId <= 0 || $issuedAt <= 0 || (time() - $issuedAt) > 600) {
+            $this->clearPendingMfa();
+            return ['status' => 'expired'];
+        }
+
+        $user = $this->users->findForAuth($userId);
+        if ($user === null || (int) $user['is_active'] !== 1) {
+            $this->clearPendingMfa();
+            return ['status' => 'expired'];
+        }
+
+        if ($this->throttle->isAccountLocked($user)) {
+            return ['status' => 'locked', 'lockedUntil' => $this->throttle->accountLockedUntil($user)];
+        }
+
+        if (!(new MfaService())->verify($user, $code)) {
+            $attempts = (int) ($_SESSION['mfa_attempts'] ?? 0) + 1;
+            $_SESSION['mfa_attempts'] = $attempts;
+            $this->throttle->recordFailure($user, $ip);
+            ActivityLogger::log('mfa.failed', 'users', $userId, 'A two-factor code was rejected');
+
+            if ($attempts >= 5) {
+                $this->clearPendingMfa();
+                return ['status' => 'expired'];
+            }
+
+            return ['status' => 'invalid'];
+        }
+
+        $this->clearPendingMfa();
+        $this->throttle->recordSuccess($user, $ip);
+        $this->establishSession($user);
+
+        return ['status' => 'ok'];
+    }
+
+    public function hasPendingMfa(): bool
+    {
+        return !empty($_SESSION['mfa_pending_user_id']);
+    }
+
+    public function clearPendingMfa(): void
+    {
+        unset($_SESSION['mfa_pending_user_id'], $_SESSION['mfa_pending_at'], $_SESSION['mfa_attempts']);
     }
 
     private function establishSession(array $user): void
