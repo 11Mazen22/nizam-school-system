@@ -58,8 +58,15 @@ function runSeedCommand(array $arguments, string $dataPath): array
     }
     $env['NIZAM_DATA_PATH'] = $dataPath;
     $env['PATH'] = getenv('PATH') ?: '';
+    // Match the production entrypoint exactly: web PHP keeps every process
+    // function disabled, while this trusted CLI runner receives passthru only
+    // so it can invoke each importer in an isolated PHP process.
     $process = proc_open(
-        array_merge([PHP_BINARY], $arguments),
+        array_merge([
+            PHP_BINARY,
+            '-d',
+            'disable_functions=exec,shell_exec,system,proc_open,popen',
+        ], $arguments),
         $descriptors,
         $pipes,
         $root,

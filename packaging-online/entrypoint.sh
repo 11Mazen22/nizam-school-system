@@ -113,7 +113,13 @@ if [ "${NIZAM_SEED_OFFICIAL_DATA:-0}" = "1" ]; then
         echo "Official school data already loaded ($SEED_MARKER)."
     else
         echo "Loading official 2026/2027 school data..."
-        php /var/www/html/bin/seed-official-data.php
+        # Apache retains the production disable_functions policy. Grant only
+        # passthru, and only to this trusted first-boot CLI process, because
+        # the seed runner invokes the reviewed importers as isolated PHP
+        # children. Those children inherit the normal production policy and
+        # do not spawn anything themselves.
+        php -d 'disable_functions=exec,shell_exec,system,proc_open,popen' \
+            /var/www/html/bin/seed-official-data.php
     fi
 fi
 

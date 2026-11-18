@@ -220,6 +220,14 @@ onlineCheck(
     'Official seed marker lives on the persistent volume'
 );
 onlineCheck(
+    str_contains($entrypoint, "disable_functions=exec,shell_exec,system,proc_open,popen")
+        && str_contains(
+            (string) file_get_contents($root . '/packaging-online/php-production.ini'),
+            'disable_functions = exec,passthru,shell_exec,system,proc_open,popen'
+        ),
+    'Only the trusted seed CLI receives passthru; Apache keeps process spawning disabled'
+);
+onlineCheck(
     strpos($entrypoint, 'bin/seed-official-data.php') !== false
         && strpos($entrypoint, 'bin/seed-official-data.php') < strpos($entrypoint, 'bin/production-smoke.php'),
     'Official data is seeded before the production smoke check'
