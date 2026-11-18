@@ -59,7 +59,7 @@ if ((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) === '/ready
         // assessments page 500s when migration 032 has not run). Readiness
         // must mean "this build's schema is present", not just "MySQL answers".
         $migrationsDir = dirname(__DIR__) . '/database/' . ($pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql' ? 'migrations-pg' : 'migrations');
-        $pending = (new \App\Services\MigrationService())->pendingCount($pdo, $migrationsDir);
+        $pending = (new \App\Services\MigrationService())->pendingCountReadOnly($pdo, $migrationsDir);
         if ($pending > 0) {
             http_response_code(503);
             echo 'schema_pending:' . $pending;

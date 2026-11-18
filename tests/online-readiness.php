@@ -161,5 +161,15 @@ onlineCheck(
     'Example configuration contains no credential-like password literal'
 );
 
+// The readiness probe runs as the least-privilege runtime role. It must never
+// issue DDL -- pendingCount() bootstraps the table it counts, which turned a
+// healthy production database into a 503 until this was separated.
+$frontController = (string) file_get_contents($root . '/public/index.php');
+onlineCheck(
+    str_contains($frontController, 'pendingCountReadOnly')
+        && !str_contains($frontController, '->pendingCount('),
+    'The readiness probe checks the schema without needing CREATE privileges'
+);
+
 echo "\n{$passed} passed, {$failed} failed.\n";
 exit($failed === 0 ? 0 : 1);

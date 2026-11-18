@@ -101,6 +101,33 @@ final class MigrationService
         return $total - count($applied);
     }
 
+    /**
+     * Read-only variant for the readiness probe.
+     *
+     * pendingCount() bootstraps the table it counts, which needs CREATE -- fine
+     * for the setup wizard and the migration runner, wrong for a health check:
+     * production connects as the least-privilege nizam_app role, so the CREATE
+     * threw and /readyz answered 503 on a perfectly healthy database. This
+     * variant never writes. A database without a migrations table is honestly
+     * "everything is pending", not "ready".
+     */
+    public function pendingCountReadOnly(PDO $pdo, string $migrationsDir): int
+    {
+        $files = glob(rtrim($migrationsDir, '/\\') . '/*.sql') ?: [];
+        $total = count(array_map('basename', $files));
+        if ($total === 0) {
+            return 0;
+        }
+
+        try {
+            $applied = $this->getAppliedMigrations($pdo);
+        } catch (PDOException) {
+            return $total;
+        }
+
+        return max(0, $total - count($applied));
+    }
+
     public function bootstrapMigrationsTable(PDO $pdo): void
     {
         // Driver read straight from the PDO handle itself (PDO::ATTR_DRIVER_NAME
