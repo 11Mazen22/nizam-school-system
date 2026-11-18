@@ -27,7 +27,7 @@ final class StudentRepository
      *
      * @return array<int, array<string, mixed>>
      */
-    public function paginate(int $page, int $perPage, string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0, string $missing = ''): array
+    public function paginate(int $page, int $perPage, string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0, string $missing = '', string $religion = ''): array
     {
         // O-25: cap regardless of caller-supplied value.
         $perPage = max(1, min($perPage, self::MAX_PER_PAGE));
@@ -54,6 +54,9 @@ final class StudentRepository
         if ($classId > 0) {
             $sql .= ' AND e.class_id = :class_id';
         }
+        if ($religion !== '') {
+            $sql .= ' AND s.religion = :religion';
+        }
         $sql .= $this->missingCondition($missing);
         
         $sql .= ' ORDER BY s.full_name ASC LIMIT :limit OFFSET :offset';
@@ -72,6 +75,9 @@ final class StudentRepository
         if ($classId > 0) {
             $stmt->bindValue(':class_id', $classId, \PDO::PARAM_INT);
         }
+        if ($religion !== '') {
+            $stmt->bindValue(':religion', $religion);
+        }
         $stmt->bindValue(':limit',  $perPage, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset,  \PDO::PARAM_INT);
         $stmt->execute();
@@ -83,7 +89,7 @@ final class StudentRepository
      * Return the total count of students matching the same status + search filter used
      * by paginate() — ensures pagination math stays consistent with the displayed rows.
      */
-    public function countFiltered(string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0, string $missing = ''): int
+    public function countFiltered(string $status = 'active', string $term = '', int $academicYearId = 0, int $gradeId = 0, int $classId = 0, string $missing = '', string $religion = ''): int
     {
         $pdo = Database::connection();
         
@@ -104,6 +110,9 @@ final class StudentRepository
                 if ($classId > 0) {
             $sql .= ' AND e.class_id = :class_id';
         }
+        if ($religion !== '') {
+            $sql .= ' AND s.religion = :religion';
+        }
         $sql .= $this->missingCondition($missing);
         
         $stmt = $pdo->prepare($sql);
@@ -119,6 +128,9 @@ final class StudentRepository
         }
         if ($classId > 0) {
             $stmt->bindValue(':class_id', $classId, \PDO::PARAM_INT);
+        }
+        if ($religion !== '') {
+            $stmt->bindValue(':religion', $religion);
         }
         $stmt->execute();
         return (int) $stmt->fetchColumn();

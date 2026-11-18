@@ -19,17 +19,17 @@ final class TeacherService
     ) {
     }
 
-    public function create(string $fullName, ?string $phone, ?string $email): int
+    public function create(string $fullName, ?string $phone, ?string $email, ?string $religion = null): int
     {
         $pattern = SettingsService::get('academic.teacher_id_pattern', 'TCH-{seq:6}');
-        $id = $this->teachers->create($fullName, $phone, $email, (string) $pattern);
+        $id = $this->teachers->create($fullName, $phone, $email, (string) $pattern, $religion);
         ActivityLogger::log('teacher.create', 'teachers', $id, "Teacher '{$fullName}' created");
         return $id;
     }
 
-    public function update(int $id, string $fullName, ?string $phone, ?string $email): void
+    public function update(int $id, string $fullName, ?string $phone, ?string $email, ?string $religion = null): void
     {
-        $this->teachers->update($id, $fullName, $phone, $email);
+        $this->teachers->update($id, $fullName, $phone, $email, $religion);
         ActivityLogger::log('teacher.update', 'teachers', $id, "Teacher '{$fullName}' updated");
     }
 

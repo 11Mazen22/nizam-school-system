@@ -195,7 +195,7 @@ onlineCheck(
 onlineCheck(count($officialRosters) === 17, 'Official package ships all 17 student rosters');
 onlineCheck(
     is_array($rosterAuditJson)
-        && (int) ($rosterAuditJson['version'] ?? 0) === 5
+        && (int) ($rosterAuditJson['version'] ?? 0) === 6
         && (int) ($rosterAuditJson['totals']['students'] ?? 0) === 778
         && (int) ($rosterAuditJson['totals']['religion_confirmed'] ?? 0) === 778
         && (int) ($rosterAuditJson['totals']['gender_confirmed'] ?? 0) === 778,

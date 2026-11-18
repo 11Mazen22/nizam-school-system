@@ -225,14 +225,14 @@ try {
     seedCheck($counts['assessments'] === 45, 'Exactly 45 assessment rows exist', (string) $counts['assessments']);
     seedCheck($counts['teachers'] >= 29, 'The printed teachers were created', (string) $counts['teachers']);
     seedCheck($counts['gender_confirmed'] === 778, 'Every source student has the reviewed roster gender', (string) $counts['gender_confirmed']);
-    seedCheck($counts['religion_confirmed'] === 778, 'All 778 students now carry a religion (703 source-backed + 75 name-inferred)', (string) $counts['religion_confirmed']);
+    seedCheck($counts['religion_confirmed'] === 778, 'All 778 students carry a religion (672 source-backed + 106 name-inferred)', (string) $counts['religion_confirmed']);
     seedCheck($counts['second_language_confirmed'] === 424, 'Exactly 424 second-language values are proved by the source', (string) $counts['second_language_confirmed']);
     seedCheck(
         $count("SELECT COUNT(*) FROM students WHERE gender_source = 'official_roster_layout'") === 778,
         'Every reviewed gender carries official-roster provenance'
     );
     seedCheck(
-        $count("SELECT COUNT(*) FROM students WHERE religion_source = 'official_roster_rule_v2'") === 703,
+        $count("SELECT COUNT(*) FROM students WHERE religion_source = 'official_roster_rule_v2'") === 672,
         'Every confirmed religion carries the versioned source rule'
     );
     seedCheck(
@@ -270,9 +270,12 @@ try {
     $capacityCount = $count("SELECT COUNT(*) FROM classes WHERE academic_year_id = {$yearId} AND capacity = 50");
     seedCheck($capacityCount === 17, 'All 17 official classes carry the school-confirmed 50-student capacity', (string) $capacityCount);
 
+    $b7Christians = $count("SELECT COUNT(*) FROM students s JOIN student_enrollments e ON e.student_id = s.id AND e.academic_year_id = {$yearId} JOIN classes c ON c.id = e.class_id WHERE c.name = 'B7' AND s.religion = 'christian'");
+    seedCheck($b7Christians === 1, 'B7 has only its one name-inferred Christian (يؤنا), not the A4 marker rule', (string) $b7Christians);
+
     $marker = is_file($markerOne) ? json_decode((string) file_get_contents($markerOne), true) : null;
     seedCheck(is_array($marker) && ($marker['academic_year'] ?? '') === '2026/2027', 'The seed marker records the official year');
-    seedCheck(is_array($marker) && (int) ($marker['official_data_version'] ?? 0) === 5, 'The marker records reviewed data version 5');
+    seedCheck(is_array($marker) && (int) ($marker['official_data_version'] ?? 0) === 6, 'The marker records reviewed data version 6');
     seedCheck(is_array($marker) && (int) ($marker['counts']['students_in_year'] ?? 0) === 778, 'The marker records the verified student count');
 
     // Second run with a different marker: exercises the importers' own

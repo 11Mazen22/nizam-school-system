@@ -826,12 +826,15 @@ try {
 
     // Teachers (create)
     $before = $count('teachers');
-    same(302, $admin->post('/teachers', ['full_name' => 'HTTP Teacher', 'phone' => '0100000000', 'email' => 'http.teacher@example.com', '_csrf_token' => $formToken])['status'], 'POST /teachers redirects');
+    same(302, $admin->post('/teachers', ['full_name' => 'HTTP Teacher', 'phone' => '0100000000', 'email' => 'http.teacher@example.com', 'religion' => 'christian', '_csrf_token' => $formToken])['status'], 'POST /teachers redirects');
     same($before + 1, $count('teachers'), 'POST /teachers persisted one teacher');
     same(200, $admin->post('/teachers', ['full_name' => '', 'phone' => '', 'email' => '', '_csrf_token' => $formToken])['status'], 'Invalid teacher re-renders the form');
     same($before + 1, $count('teachers'), 'Invalid teacher created no row');
     $teacherId = (int) $scalar("SELECT id FROM teachers WHERE full_name = 'HTTP Teacher' LIMIT 1");
     ok($teacherId > 0, 'Created teacher is retrievable');
+    same('christian', $scalar("SELECT religion FROM teachers WHERE id = {$teacherId}"), 'Teacher religion is stored when recorded');
+    ok(str_contains($admin->get('/teachers?religion=christian')['body'], 'HTTP Teacher'), 'Teacher religion filter finds the matching teacher');
+    ok(!str_contains($admin->get('/teachers?religion=muslim')['body'], 'HTTP Teacher'), 'Teacher religion filter excludes other religions');
 
     // Classes (create + duplicate + edit)
     $before = $count('classes');
@@ -1099,6 +1102,8 @@ try {
         'class_id' => (string) $classId, '_csrf_token' => $formToken,
     ])['status'], 'Edit student redirects');
     same('HTTP Direct Student Edited', $scalar("SELECT full_name FROM students WHERE id = {$directStudentId}"), 'Edit student persisted');
+    ok(str_contains($admin->get('/students?religion=muslim')['body'], 'HTTP Direct Student Edited'), 'Student religion filter finds the matching student');
+    ok(!str_contains($admin->get('/students?religion=christian')['body'], 'HTTP Direct Student Edited'), 'Student religion filter excludes other religions');
 
     $attendanceSheet = $admin->get('/attendance?class_id=' . $classId);
     same(200, $attendanceSheet['status'], 'Populated attendance sheet renders');

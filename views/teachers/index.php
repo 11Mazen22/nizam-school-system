@@ -1,5 +1,5 @@
 <?php
-/** @var array $teachers @var string $q */
+/** @var array $teachers @var string $q @var string $religion */
 $pageTitle = __('teachers.title');
 $activeNav = 'teachers';
 $canCreate = hasPermission('teachers.create');
@@ -16,20 +16,22 @@ require dirname(__DIR__) . '/layout/start.php';
 
 <form method="get" action="/teachers" class="n-filter-panel" data-live-filter data-live-target="#teacher-results"><div class="n-filter-row">
   <div class="n-filter-field n-search-field"><?= icon('search') ?><label class="visually-hidden" for="teacher-search"><?= e(__('common.search')) ?></label><input id="teacher-search" type="search" class="form-control" name="q" value="<?= e($q) ?>" placeholder="<?= e(__('common.search')) ?>" autocomplete="off"></div>
+  <div class="n-filter-field"><label class="visually-hidden" for="teacher-religion-filter"><?= e(__('teachers.religion')) ?></label><select id="teacher-religion-filter" name="religion" class="form-select"><option value=""><?= e(__('teachers.all_religions')) ?></option><?php foreach (['muslim', 'christian', 'other'] as $option): ?><option value="<?= e($option) ?>" <?= $religion === $option ? 'selected' : '' ?>><?= e(__('students.religion_' . $option)) ?></option><?php endforeach; ?></select></div>
   <button type="submit" class="btn btn-primary"><?= icon('search') ?><?= e(__('common.search')) ?></button>
-  <?php if ($q !== ''): ?><a href="/teachers" class="btn btn-outline-secondary"><?= icon('close') ?><?= e(__('common.clear_filters')) ?></a><?php endif; ?>
+  <?php if ($q !== '' || $religion !== ''): ?><a href="/teachers" class="btn btn-outline-secondary"><?= icon('close') ?><?= e(__('common.clear_filters')) ?></a><?php endif; ?>
   <a href="/teachers/archived" class="btn btn-ghost ms-auto"><?= icon('archive') ?><?= e(__('common.archived_list')) ?></a>
 </div></form>
 
 <div id="teacher-results" data-live-results>
 <?php if (empty($teachers)): ?>
-  <div class="n-empty-state"><div class="n-empty-icon"><?= icon('graduation-cap', 'n-icon-xl') ?></div><h2 class="n-empty-title"><?= e(__('teachers.empty_title')) ?></h2><p class="n-empty-description"><?= e($q !== '' ? __('common.no_results') : __('teachers.empty_description')) ?></p><?php if ($canCreate && $q === ''): ?><a href="/teachers/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('teachers.add')) ?></a><?php endif; ?></div>
+  <div class="n-empty-state"><div class="n-empty-icon"><?= icon('graduation-cap', 'n-icon-xl') ?></div><h2 class="n-empty-title"><?= e(__('teachers.empty_title')) ?></h2><p class="n-empty-description"><?= e($q !== '' || $religion !== '' ? __('common.no_results') : __('teachers.empty_description')) ?></p><?php if ($canCreate && $q === '' && $religion === ''): ?><a href="/teachers/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('teachers.add')) ?></a><?php endif; ?></div>
 <?php else: ?>
   <div class="n-data-panel"><div class="table-responsive"><table class="table table-hover align-middle n-table-stack">
-    <thead><tr><th><?= e(__('teachers.full_name')) ?></th><th><?= e(__('teachers.code')) ?></th><th><?= e(__('teachers.phone')) ?></th><th><?= e(__('teachers.email')) ?></th><th class="text-end"><?= e(__('common.actions')) ?></th></tr></thead>
+    <thead><tr><th><?= e(__('teachers.full_name')) ?></th><th><?= e(__('teachers.code')) ?></th><th><?= e(__('teachers.religion')) ?></th><th><?= e(__('teachers.phone')) ?></th><th><?= e(__('teachers.email')) ?></th><th class="text-end"><?= e(__('common.actions')) ?></th></tr></thead>
     <tbody><?php foreach ($teachers as $teacher): ?><tr>
       <td data-label="<?= e(__('teachers.full_name')) ?>"><a href="/teachers/<?= (int) $teacher['id'] ?>" class="n-person-cell"><?php if (!empty($teacher['photo_path'])): ?><img src="/teachers/<?= (int) $teacher['id'] ?>/photo" alt="" class="n-person-avatar"><?php else: ?><span class="n-person-avatar n-person-initial"><?= e(mb_substr($teacher['full_name'], 0, 1)) ?></span><?php endif; ?><span><strong><?= e($teacher['full_name']) ?></strong><small><?= e(__('common.status_active')) ?></small></span></a></td>
       <td data-label="<?= e(__('teachers.code')) ?>" class="mono" dir="ltr"><?= e($teacher['teacher_code']) ?></td>
+      <td data-label="<?= e(__('teachers.religion')) ?>"><?= !empty($teacher['religion']) ? e(__('students.religion_' . $teacher['religion'])) : '<span class="text-muted">—</span>' ?></td>
       <td data-label="<?= e(__('teachers.phone')) ?>" dir="ltr"><?= e($teacher['phone'] ?? '—') ?></td>
       <td data-label="<?= e(__('teachers.email')) ?>"><?= e($teacher['email'] ?? '—') ?></td>
       <td data-label="<?= e(__('common.actions')) ?>"><div class="n-table-actions"><a href="/teachers/<?= (int) $teacher['id'] ?>" class="btn btn-sm btn-outline-secondary"><?= icon('eye') ?><?= e(__('common.view')) ?></a><?php if (hasPermission('teachers.edit')): ?><a href="/teachers/<?= (int) $teacher['id'] ?>/edit" class="btn btn-sm btn-ghost" aria-label="<?= e(__('common.edit')) ?>"><?= icon('edit') ?></a><?php endif; ?></div></td>

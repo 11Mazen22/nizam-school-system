@@ -270,10 +270,11 @@ exactly the same school data:
 
 The roster data is separated into structured, auditable fields rather than
 guessing from names. All 778 gender values come from the visually reviewed
-roster sections; 778 religions are confirmed (703 from the confirmed
-page-default/exception notation, including the `م-` Christian marker, plus 75
-from the school's confirmed name-based classification for the rows whose
-printed cell proves no religion); and 424 second-language values come from
+roster sections; 778 religions are confirmed (672 from the confirmed
+page-default/exception notation, including the A-page `م-` Christian marker,
+plus 106 from the school's confirmed name-based classification for the rows
+whose printed cell proves no religion - B6/B8 pathways and the B7 shorthand,
+which is not the Christian marker); and 424 second-language values come from
 printed cells or an unambiguous class heading. Birth dates and guardian links
 remain null because the source does not provide them. Version, totals, rules,
 the name-inference list, the restored B5 L17 row and all 17 source-image hashes

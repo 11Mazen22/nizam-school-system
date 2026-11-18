@@ -15,6 +15,8 @@ use RuntimeException;
 
 final class TeacherController extends Controller
 {
+    private const RELIGIONS = ['muslim', 'christian', 'other'];
+
     public function __construct(
         private readonly TeacherRepository $teachers = new TeacherRepository(),
         private readonly SubjectRepository $subjects = new SubjectRepository(),
@@ -26,8 +28,14 @@ final class TeacherController extends Controller
     public function index(Request $request): void
     {
         $term = $request->query('q', '') ?: '';
-        $rows = $term !== '' ? $this->teachers->search($term) : $this->teachers->all('active');
-        $this->view('teachers/index', ['teachers' => $rows, 'q' => $term]);
+        $religion = (string) ($request->query('religion', '') ?? '');
+        if (!in_array($religion, self::RELIGIONS, true)) {
+            $religion = '';
+        }
+        $rows = $term !== ''
+            ? $this->teachers->search($term, 'active', $religion)
+            : $this->teachers->all('active', $religion);
+        $this->view('teachers/index', ['teachers' => $rows, 'q' => $term, 'religion' => $religion]);
     }
 
     public function archived(Request $request): void
@@ -69,7 +77,7 @@ final class TeacherController extends Controller
 
     public function store(Request $request): void
     {
-        [$fullName, $phone, $email, $error] = $this->fields($request);
+        [$fullName, $phone, $email, $religion, $error] = $this->fields($request);
         $subjectIds = $this->subjectIds($request);
         if ($error !== null) {
             $this->view('teachers/form', [
@@ -78,7 +86,7 @@ final class TeacherController extends Controller
             return;
         }
 
-        $id = $this->service->create($fullName, $phone, $email);
+        $id = $this->service->create($fullName, $phone, $email, $religion);
         $this->subjects->setTeacherQualifications($id, $subjectIds);
         $this->handlePhotoUpload($request, $id);
         Flash::set('success', __('teachers.created'));
@@ -108,7 +116,7 @@ final class TeacherController extends Controller
             return;
         }
 
-        [$fullName, $phone, $email, $error] = $this->fields($request);
+        [$fullName, $phone, $email, $religion, $error] = $this->fields($request);
         $subjectIds = $this->subjectIds($request);
         if ($error !== null) {
             $this->view('teachers/form', [
@@ -117,7 +125,7 @@ final class TeacherController extends Controller
             return;
         }
 
-        $this->service->update($id, $fullName, $phone, $email);
+        $this->service->update($id, $fullName, $phone, $email, $religion);
         $this->subjects->setTeacherQualifications($id, $subjectIds);
         $this->handlePhotoUpload($request, $id);
         Flash::set('success', __('teachers.updated'));
@@ -176,23 +184,27 @@ final class TeacherController extends Controller
         }
     }
 
-    /** @return array{0:string,1:?string,2:?string,3:?string} */
+    /** @return array{0:string,1:?string,2:?string,3:?string,4:?string} */
     private function fields(Request $request): array
     {
         $fullName = $request->post('full_name', '') ?: '';
         $phone = $request->post('phone', '') ?: null;
         $email = $request->post('email', '') ?: null;
+        $religion = $request->post('religion', '') ?: null;
+        if ($religion !== null && !in_array($religion, self::RELIGIONS, true)) {
+            $religion = null;
+        }
 
         if ($fullName === '' || mb_strlen($fullName) < 2) {
-            return [$fullName, $phone, $email, __('validation.required')];
+            return [$fullName, $phone, $email, $religion, __('validation.required')];
         }
         if ($phone !== null && !preg_match('/^[\d\s+\-]{7,20}$/', $phone)) {
-            return [$fullName, $phone, $email, __('validation.phone_format')];
+            return [$fullName, $phone, $email, $religion, __('validation.phone_format')];
         }
         if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return [$fullName, $phone, $email, __('validation.email_format')];
+            return [$fullName, $phone, $email, $religion, __('validation.email_format')];
         }
-        return [$fullName, $phone, $email, null];
+        return [$fullName, $phone, $email, $religion, null];
     }
 
     /** @return int[] */

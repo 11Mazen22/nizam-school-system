@@ -1,5 +1,5 @@
 <?php
-/** @var array $students @var string $q @var int $page @var int $perPage @var int $total @var int $lastPage @var string $missing @var array{total:int,no_gender:int,no_dob:int,no_religion:int,no_personal:int,no_guardian:int} $quality */
+/** @var array $students @var string $q @var int $page @var int $perPage @var int $total @var int $lastPage @var string $missing @var string $religion @var array{total:int,no_gender:int,no_dob:int,no_religion:int,no_personal:int,no_guardian:int} $quality */
 $pageTitle = __('students.title');
 $activeNav = 'students';
 $locale = currentLocale();
@@ -47,6 +47,15 @@ require dirname(__DIR__) . '/layout/start.php';
       </select>
     </div>
     <div class="n-filter-field">
+      <label class="visually-hidden" for="student-religion-filter"><?= e(__('students.religion')) ?></label>
+      <select id="student-religion-filter" name="religion" class="form-select">
+        <option value=""><?= e(__('students.all_religions')) ?></option>
+        <?php foreach (['muslim', 'christian', 'other'] as $option): ?>
+          <option value="<?= e($option) ?>" <?= $religion === $option ? 'selected' : '' ?>><?= e(__('students.religion_' . $option)) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+    <div class="n-filter-field">
       <label class="visually-hidden" for="student-missing-filter"><?= e(__('students.data_quality')) ?></label>
       <select id="student-missing-filter" name="missing" class="form-select">
         <option value=""><?= e(__('students.all_records')) ?></option>
@@ -56,7 +65,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </select>
     </div>
     <button type="submit" class="btn btn-primary"><?= icon('filter') ?><span><?= e(__('common.filter')) ?></span></button>
-    <?php if ($q !== '' || $gradeId > 0 || $classId > 0): ?><a href="/students" class="btn btn-outline-secondary"><?= icon('close') ?><span><?= e(__('common.clear_filters')) ?></span></a><?php endif; ?>
+    <?php if ($q !== '' || $gradeId > 0 || $classId > 0 || $religion !== ''): ?><a href="/students" class="btn btn-outline-secondary"><?= icon('close') ?><span><?= e(__('common.clear_filters')) ?></span></a><?php endif; ?>
     <a href="/students/archived" class="btn btn-ghost ms-auto"><?= icon('archive') ?><span><?= e(__('common.archived_list')) ?></span></a>
   </div>
 </form>
@@ -77,8 +86,8 @@ require dirname(__DIR__) . '/layout/start.php';
   <div class="n-empty-state">
     <div class="n-empty-icon"><?= icon('users', 'n-icon-xl') ?></div>
     <h2 class="n-empty-title"><?= e(__('students.empty_title')) ?></h2>
-    <p class="n-empty-description"><?= e($q !== '' || $gradeId > 0 || $classId > 0 || $missing !== '' ? __('common.no_results') : __('students.empty_description')) ?></p>
-    <?php if ($canCreate && $q === '' && $gradeId === 0 && $classId === 0 && $missing === ''): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('students.add')) ?></a><?php endif; ?>
+    <p class="n-empty-description"><?= e($q !== '' || $gradeId > 0 || $classId > 0 || $missing !== '' || $religion !== '' ? __('common.no_results') : __('students.empty_description')) ?></p>
+    <?php if ($canCreate && $q === '' && $gradeId === 0 && $classId === 0 && $missing === '' && $religion === ''): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('students.add')) ?></a><?php endif; ?>
   </div>
 <?php else: ?>
   <div class="n-data-panel">
@@ -108,7 +117,7 @@ require dirname(__DIR__) . '/layout/start.php';
   </div>
 
   <?php if ($lastPage > 1): ?>
-    <?php $queryString = $q !== '' ? '&q=' . urlencode($q) : ''; if ($gradeId > 0) $queryString .= '&grade_id=' . $gradeId; if ($classId > 0) $queryString .= '&class_id=' . $classId; if ($missing !== '') $queryString .= '&missing=' . urlencode($missing); ?>
+    <?php $queryString = $q !== '' ? '&q=' . urlencode($q) : ''; if ($gradeId > 0) $queryString .= '&grade_id=' . $gradeId; if ($classId > 0) $queryString .= '&class_id=' . $classId; if ($missing !== '') $queryString .= '&missing=' . urlencode($missing); if ($religion !== '') $queryString .= '&religion=' . urlencode($religion); ?>
     <?php
     // Keep large schools usable: first/last + a five-page window, with one
     // ellipsis per gap. Rendering all 39+ page buttons wraps across the card

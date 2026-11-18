@@ -205,8 +205,8 @@ admin_guide += [
       "student rosters, the subject catalogue, the weekly assessment plan and all 17 class timetables, then "
       "verifies the result. Each class carries the school's confirmed maximum of 50 students. The command is "
       "safe to run again: it never duplicates a class, student, lesson, teacher, subject or assessment."),
-    note("The official pages prove gender for all 778 students and religion for all 778 -- 703 from the printed source "
-         "rules and 75 from the school's confirmed name-based classification -- plus second language for 424. Every "
+    note("The official pages prove gender for all 778 students and religion for all 778 -- 672 from the printed source "
+         "rules and 106 from the school's confirmed name-based classification -- plus second language for 424. Every "
          "birth date and every guardian link stays marked as not recorded until the school supplies them; Nizam "
          "never guesses a value it cannot prove."),
 
@@ -283,8 +283,8 @@ release_notes += [
         "assessment.",
         "Student rosters, class timetables and weekly assessments import through the same validated paths the "
         "screens use, with source document, class and version recorded on every row.",
-        "Source-backed roster enrichment records all 778 reviewed genders, 778 confirmed religions (703 from the "
-        "printed source plus 75 from the school's confirmed name-based classification) and 424 confirmed "
+        "Source-backed roster enrichment records all 778 reviewed genders, 778 confirmed religions (672 from the "
+        "printed source plus 106 from the school's confirmed name-based classification) and 424 confirmed "
         "second-language choices while deliberately leaving unsupported values blank.",
         "The same official package can be loaded automatically by the online (Railway) deployment, so the live "
         "site carries the same school data as the offline installation.",

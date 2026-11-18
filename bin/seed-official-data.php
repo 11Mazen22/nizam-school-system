@@ -53,7 +53,7 @@ $force = array_key_exists('force', $options);
 $replaceTimetables = array_key_exists('replace-timetables', $options);
 $dataDir = rtrim((string) ($options['data-dir'] ?? $root . '/database/official'), '/\\');
 $markerPath = (string) ($options['marker'] ?? dataPath() . '/storage/official-data-seed.json');
-$officialDataVersion = 5;
+$officialDataVersion = 6;
 
 /**
  * Run one importer as a child process, streaming its output into this log.
@@ -213,7 +213,7 @@ try {
     if ((int) ($rosterAudit['version'] ?? 0) !== $officialDataVersion
         || (int) ($rosterAudit['totals']['students'] ?? 0) !== 778
         || (int) ($rosterAudit['totals']['gender_confirmed'] ?? 0) !== 778) {
-        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-5 package.');
+        throw new RuntimeException('roster-data-audit.json does not describe the reviewed 778-student version-6 package.');
     }
 
     $rosterRows = 0;

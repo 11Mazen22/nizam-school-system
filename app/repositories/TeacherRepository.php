@@ -10,20 +10,36 @@ use App\Services\IdPattern;
 final class TeacherRepository
 {
     /** @return array<int, array<string, mixed>> */
-    public function all(string $status = 'active'): array
+    public function all(string $status = 'active', string $religion = ''): array
     {
-        $stmt = Database::connection()->prepare('SELECT * FROM teachers WHERE status = :status ORDER BY full_name ASC');
-        $stmt->execute(['status' => $status]);
+        $sql = 'SELECT * FROM teachers WHERE status = :status';
+        if ($religion !== '') {
+            $sql .= ' AND religion = :religion';
+        }
+        $sql .= ' ORDER BY full_name ASC';
+        $stmt = Database::connection()->prepare($sql);
+        $params = ['status' => $status];
+        if ($religion !== '') {
+            $params['religion'] = $religion;
+        }
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 
     /** @return array<int, array<string, mixed>> case-insensitive full_name search, list screen's search box */
-    public function search(string $term, string $status = 'active'): array
+    public function search(string $term, string $status = 'active', string $religion = ''): array
     {
-        $stmt = Database::connection()->prepare(
-            'SELECT * FROM teachers WHERE status = :status AND full_name LIKE :term ORDER BY full_name ASC'
-        );
-        $stmt->execute(['status' => $status, 'term' => '%' . $term . '%']);
+        $sql = 'SELECT * FROM teachers WHERE status = :status AND full_name LIKE :term';
+        if ($religion !== '') {
+            $sql .= ' AND religion = :religion';
+        }
+        $sql .= ' ORDER BY full_name ASC';
+        $stmt = Database::connection()->prepare($sql);
+        $params = ['status' => $status, 'term' => '%' . $term . '%'];
+        if ($religion !== '') {
+            $params['religion'] = $religion;
+        }
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 
@@ -36,15 +52,15 @@ final class TeacherRepository
     }
 
     /** §O-7: insert first, then assign the code from the row's own id -- never a precomputed MAX+1. */
-    public function create(string $fullName, ?string $phone, ?string $email, string $codePattern): int
+    public function create(string $fullName, ?string $phone, ?string $email, string $codePattern, ?string $religion = null): int
     {
         $pdo = Database::connection();
         $stmt = $pdo->prepare(
-            'INSERT INTO teachers (teacher_code, full_name, phone, email, status)
-             VALUES (:code, :name, :phone, :email, \'active\')'
+            'INSERT INTO teachers (teacher_code, full_name, phone, email, religion, status)
+             VALUES (:code, :name, :phone, :email, :religion, \'active\')'
         );
         // Placeholder code, immediately overwritten below once the real id exists (§O-7).
-        $stmt->execute(['code' => '', 'name' => $fullName, 'phone' => $phone, 'email' => $email]);
+        $stmt->execute(['code' => '', 'name' => $fullName, 'phone' => $phone, 'email' => $email, 'religion' => $religion]);
         $id = (int) $pdo->lastInsertId();
 
         $code = IdPattern::render($codePattern, $id);
@@ -54,12 +70,12 @@ final class TeacherRepository
         return $id;
     }
 
-    public function update(int $id, string $fullName, ?string $phone, ?string $email): void
+    public function update(int $id, string $fullName, ?string $phone, ?string $email, ?string $religion = null): void
     {
         $stmt = Database::connection()->prepare(
-            'UPDATE teachers SET full_name = :name, phone = :phone, email = :email WHERE id = :id'
+            'UPDATE teachers SET full_name = :name, phone = :phone, email = :email, religion = :religion WHERE id = :id'
         );
-        $stmt->execute(['name' => $fullName, 'phone' => $phone, 'email' => $email, 'id' => $id]);
+        $stmt->execute(['name' => $fullName, 'phone' => $phone, 'email' => $email, 'religion' => $religion, 'id' => $id]);
     }
 
     public function setStatus(int $id, string $status): void

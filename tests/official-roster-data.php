@@ -87,10 +87,15 @@ rosterDataCheck(max($positions ?: [0]) === 1, 'Every student has one unique clas
 rosterDataCheck(array_sum($genders) === 778, 'Every source student has a reviewed M/F value');
 rosterDataCheck($genders === ['M' => 418, 'F' => 360], 'Reviewed gender totals are pinned (418 M / 360 F)', json_encode($genders));
 
-// After name inference: 703 source-confirmed + 75 name-inferred = 778
-rosterDataCheck(($religions['muslim'] ?? 0) === 722, 'All 722 Muslim values (703 source + 71 name-inferred + 48 B5 default)', (string) ($religions['muslim'] ?? 0));
-rosterDataCheck(($religions['christian'] ?? 0) === 56, 'All 56 Christian values (52 source + 4 name-inferred)', (string) ($religions['christian'] ?? 0));
+// After name inference: 672 source-confirmed + 106 name-inferred = 778
+rosterDataCheck(($religions['muslim'] ?? 0) === 753, 'All 753 Muslim values (672 source + 102 name-inferred)', (string) ($religions['muslim'] ?? 0));
+rosterDataCheck(($religions['christian'] ?? 0) === 25, 'All 25 Christian values (21 source + 4 name-inferred)', (string) ($religions['christian'] ?? 0));
 rosterDataCheck(($religions[''] ?? 0) === 0, 'No religions remain unconfirmed after name inference', (string) ($religions[''] ?? 0));
+$b7Christians = array_values(array_filter($byClass['B7'] ?? [], static fn (array $row): bool => (string) $row['Religion'] === 'christian'));
+rosterDataCheck(
+    count($b7Christians) === 1 && ($b7Christians[0]['Full Name'] ?? '') === 'يؤنا ماجد ظريف جرجس',
+    'B7 shorthand is never decoded as the A4 Christian marker'
+);
 rosterDataCheck($birthDates === 0, 'No birth date is fabricated');
 
 $b5 = $byClass['B5'] ?? [];
@@ -135,7 +140,7 @@ rosterDataCheck($languageSources === ['printed_cell' => 353, 'class_heading' => 
 
 $auditPath = $root . '/database/official/roster-data-audit.json';
 $audit = is_file($auditPath) ? json_decode((string) file_get_contents($auditPath), true) : null;
-rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 5, 'The committed roster audit is version 5', 'version=' . ($audit['version'] ?? 'null'));
+rosterDataCheck(is_array($audit) && (int) ($audit['version'] ?? 0) === 6, 'The committed roster audit is version 6', 'version=' . ($audit['version'] ?? 'null'));
 rosterDataCheck(is_array($audit) && count((array) ($audit['source_image_sha256'] ?? [])) === 17, 'The audit pins all 17 source-image checksums');
 rosterDataCheck(is_array($audit) && ($audit['totals']['students'] ?? 0) === 778, 'The audit records the exact source total');
 

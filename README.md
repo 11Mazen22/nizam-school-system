@@ -132,13 +132,14 @@ no-op, and the individual importers are idempotent as a second guard.
 
 The roster enrichment is source-backed and versioned: all 778 students receive
 the gender established by their reviewed roster section, 778 religions follow
-the printed page-default/exception notation (including the confirmed Christian
-`م-` marker) plus the school's confirmed name-based classification for the 75
-students whose printed cell proves no religion, and 424 second-language values
-come from printed cells or an unambiguous class heading. Every birth date and
-every guardian link stays blank because the supplied pages do not provide them;
-nothing is ever guessed. The exact rules, totals and 17 source image checksums
-are committed in `database/official/roster-data-audit.json`.
+the printed page-default/exception notation (including the confirmed A-page
+Christian `م-` marker) plus the school's confirmed name-based classification for
+the 106 students whose printed cell proves no religion (B6/B8 print pathways,
+and B7's shorthand is a pathway code, not the Christian marker), and 424
+second-language values come from printed cells or an unambiguous class heading.
+Every birth date and every guardian link stays blank because the supplied pages
+do not provide them; nothing else is ever guessed. The exact rules, totals and
+17 source image checksums are committed in `database/official/roster-data-audit.json`.
 
 The Railway image runs the same command once when
 `NIZAM_SEED_OFFICIAL_DATA=1`, so the live site carries exactly the same school

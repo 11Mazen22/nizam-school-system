@@ -11,12 +11,12 @@ operations:
    Muslim page default applies until an explicit exception, and the ``م-``
    prefix on the combined A-page cells is the Christian marker. The combined
    source cell is always preserved verbatim; and
-4. apply the school's confirmed name-based religion classification to the 75
-   students whose printed cell proves no religion at all (B6 and B8 print
-   academic specializations, and one B7 cell uses the unlegended ``ج- س``
-   shorthand). Four of them carry unmistakable Christian names and are marked
-   Christian; the remaining 71 carry no Christian marker and are marked
-   Muslim. Every one of them is listed in the audit with its provenance.
+4. apply the school's confirmed name-based religion classification to the 106
+   students whose printed cell proves no religion (B6 and B8 print academic
+   specializations, and the B7 ``م-`` / ``ج-`` shorthand is a pathway/language
+   code rather than a religion marker). Four carry unmistakable Christian
+   names and are marked Christian; the remaining 102 carry no Christian marker
+   and are marked Muslim. Every one of them is listed in the audit.
 
 Date of birth and guardian links are never inferred: they stay empty.
 
@@ -137,11 +137,11 @@ def religion_for(class_name: str, raw: str, full_name: str) -> tuple[str | None,
         return "muslim", "page_default"
 
     if class_name == "B7":
-        if compact.startswith("م-"):
-            return "christian", "combined_marker"
-        # The ج-/ح- shorthand has no supplied legend, so the school confirmed
-        # that this one row is classified from the name.
-        if compact.startswith("ج-") or compact.startswith("ح-"):
+        # The م- / ج- shorthand on B7 is a pathway/language code, NOT the
+        # Christian marker confirmed for A4. The source never decodes it as a
+        # religion, so every shorthand row is classified from the student's
+        # name (only يؤنا, whose name carries جرجس, is Christian).
+        if compact.startswith("م-") or compact.startswith("ج-") or compact.startswith("ح-"):
             return name_inferred_religion(class_name, full_name)
         return "muslim", "page_convention"
 
@@ -282,8 +282,8 @@ def main() -> int:
         raise RuntimeError("Not every source row received a reviewed gender")
     if sum(religion_counts.values()) != len(all_rows):
         raise RuntimeError("Not every source row received a confirmed religion")
-    if len(name_inference) != 75:
-        raise RuntimeError(f"Expected 75 name-inferred students, found {len(name_inference)}")
+    if len(name_inference) != 106:
+        raise RuntimeError(f"Expected 106 name-inferred students, found {len(name_inference)}")
     inferred_christians = [entry for entry in name_inference if entry["religion_source"] == "name_inference_christian"]
     if len(inferred_christians) != 4:
         raise RuntimeError(f"Expected 4 name-inferred Christians, found {len(inferred_christians)}")
@@ -297,23 +297,31 @@ def main() -> int:
         for entry in inferred_christians
     ]
 
+    source_religion = sum(count for source, count in religion_sources.items() if not source.startswith("name_inference_"))
+    inferred_religion = len(name_inference)
+
     audit = {
-        "version": 5,
+        "version": 6,
         "academic_year": "2026/2027",
-        "source": "Rendered official roster pages under docs/source/rosters (human-reviewed) + the school's confirmed name-based religion classification for the 75 rows whose printed cell proves no religion.",
+        "source": "Rendered official roster pages under docs/source/rosters (human-reviewed) + the school's confirmed name-based religion classification for the rows whose printed cell proves no religion.",
         "rules": {
             "gender": "M/F is derived from the visually reviewed roster section for each exact R/L row address; never from a name alone.",
-            "religion": "703 from the confirmed page default / exception convention and the confirmed م- Christian marker. 75 from the school's confirmed name-based classification (4 Christians identified from Coptic names, 71 Muslims with no Christian marker): B6 (47) and B8 (27) print academic specializations instead of religions, and one B7 cell uses the unlegended ج- س shorthand, so the source cannot prove those values.",
+            "religion": (
+                f"{source_religion} from the confirmed page default / exception convention and the confirmed A-page م- Christian marker. "
+                f"{inferred_religion} from the school's confirmed name-based classification (4 Christians, {inferred_religion - 4} Muslims): "
+                "B6 and B8 print academic specializations instead of religions; B7's م- / ج- shorthand is a pathway/language code, "
+                "not a religion marker, so the source cannot prove those values."
+            ),
             "second_language": "Normalized only from an explicit language word; A7 blank rows and all A9 rows use their unambiguous class heading. Ambiguous shorthand is not decoded.",
             "date_of_birth": "Not present in the source; remains null.",
             "guardian": "Not present in the source; remains null.",
         },
         "source_rule_confirmations": [
             "B5 prints مسلم once as the default for every populated student on that page unless another religion is printed.",
-            "The م- prefix in the combined A-page cell is the Christian marker; its suffix remains the printed second language.",
+            "The م- prefix in the combined A-page cell is the Christian marker; its suffix remains the printed second language. This is confirmed for A3/A4, whose م- rows all carry unmistakably Christian names.",
             "B6/B8 pages print academic specializations (كيمياء، ادارة اعمال، برمجة، برمجه، رياضة، محاسبة، فيزياء، علم نفس), never a religion.",
-            "One B7 cell prints the unlegended ج- س shorthand; the school confirmed that row is classified from the name (جرجس = Christian).",
-            "The school confirmed in writing: classify the 75 students on B6/B8 and the B7 shorthand row from their names - 4 Christians (Coptic names: موريس، صموئيل، جورج/حنا/فوزى، جرجس) and 71 Muslims.",
+            "B7's م- / ج- shorthand is a pathway/language code and was wrongly decoded as the Christian marker in earlier data; it is never used as religion evidence.",
+            "The school confirmed in writing: classify the 106 students on B6/B8 and the B7 shorthand rows from their names - 4 Christians (Coptic names: موريس، صموئيل، جورج/حنا/فوزى، جرجس) and 102 Muslims.",
             "No other value (date of birth, guardian) is ever inferred.",
         ],
         "restored_source_rows": [{

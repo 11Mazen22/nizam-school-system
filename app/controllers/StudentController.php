@@ -47,6 +47,10 @@ final class StudentController extends Controller
         if (!in_array($missing, ['personal', 'guardian', 'contact'], true)) {
             $missing = '';
         }
+        $religion = (string) ($request->query('religion', '') ?? '');
+        if (!in_array($religion, self::RELIGIONS, true)) {
+            $religion = '';
+        }
         
         $yearId = AcademicYearContext::activeYearId() ?? 0;
 
@@ -55,11 +59,11 @@ final class StudentController extends Controller
         $perPage = min($requestedPerPage, StudentRepository::MAX_PER_PAGE); // hard cap
         $page    = max(1, (int) $request->query('page', '1'));
 
-        $total    = $this->students->countFiltered('active', $term, $yearId, $gradeId, $classId, $missing);
+        $total    = $this->students->countFiltered('active', $term, $yearId, $gradeId, $classId, $missing, $religion);
         $lastPage = $total > 0 ? (int) ceil($total / $perPage) : 1;
         $page     = min($page, $lastPage); // clamp to valid range
 
-        $students = $this->students->paginate($page, $perPage, 'active', $term, $yearId, $gradeId, $classId, $missing);
+        $students = $this->students->paginate($page, $perPage, 'active', $term, $yearId, $gradeId, $classId, $missing, $religion);
         
         $grades = $this->grades->all(true);
         $classes = $yearId > 0 ? $this->classes->allForYear($yearId) : [];
@@ -75,6 +79,7 @@ final class StudentController extends Controller
             'gradeId'     => $gradeId,
             'classId'     => $classId,
             'missing'     => $missing,
+            'religion'    => $religion,
             'quality'     => $quality,
             'grades'      => $grades,
             'classes'     => $classes,

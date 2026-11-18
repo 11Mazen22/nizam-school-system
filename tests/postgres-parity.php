@@ -153,6 +153,8 @@ try {
         count(array_intersect(['gender_source', 'religion_source', 'second_language', 'second_language_source'], $studentColumns)) === 4,
         'Migration 036 adds the structured roster values and provenance'
     );
+    $teacherColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'teachers'")->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('religion', $teacherColumns, true), 'Migration 037 adds the teacher religion field');
 
     $yearId = (int) $pdo->query('SELECT id FROM academic_years WHERE is_active = 1 LIMIT 1')->fetchColumn();
     $gradeId = (int) $pdo->query('SELECT id FROM grades ORDER BY sort_order LIMIT 1')->fetchColumn();
