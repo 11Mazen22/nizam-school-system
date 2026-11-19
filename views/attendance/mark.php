@@ -62,6 +62,13 @@ require dirname(__DIR__) . '/layout/start.php';
 
 
 
+<?php if (isset($isWorkingDay) && !$isWorkingDay): ?>
+  <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+    <?= icon('alert-triangle', 'n-icon-lg flex-shrink-0') ?>
+    <span><?= e(__('attendance.non_working_day_hint')) ?></span>
+  </div>
+<?php endif; ?>
+
 <!-- Filter bar -->
 <form method="get" action="/attendance" class="n-filter-panel">
   <div class="n-filter-row">
@@ -172,7 +179,7 @@ require dirname(__DIR__) . '/layout/start.php';
       </table>
     </div>
     <?php if ($canManage): ?><div class="card-footer d-flex justify-content-end gap-2 n-attendance-save">
-      <button type="submit" class="btn btn-primary px-4">
+      <button type="submit" class="btn btn-primary px-4" <?= (isset($isWorkingDay) && !$isWorkingDay) ? 'disabled' : '' ?>>
         <?= icon('check') ?> <?= e(__('attendance.save_sheet')) ?>
       </button>
     </div><?php endif; ?>

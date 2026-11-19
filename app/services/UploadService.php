@@ -41,10 +41,13 @@ final class UploadService
     /**
      * @param array{name:string,type:string,tmp_name:string,error:int,size:int} $file one $_FILES[...] entry
      * @param 'students'|'teachers'|'school' $type subfolder under storage/uploads/
+     * @param int $maxDimension optional longest-edge cap; signature/stamp art
+     *   is embedded into documents, so a 4000px phone photo of a signature
+     *   would inflate every printed page for no visible gain
      * @return string relative path to store in the DB, e.g. "students/ab12....jpg"
      * @throws RuntimeException 'no_file'|'upload_error'|'too_large'|'invalid_type'|'not_an_image'|'write_failed'
      */
-    public function store(array $file, string $type): string
+    public function store(array $file, string $type, int $maxDimension = 0): string
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
             throw new RuntimeException('no_file');
@@ -89,6 +92,34 @@ final class UploadService
         $image = $realMime === 'image/png' ? @imagecreatefrompng($file['tmp_name']) : @imagecreatefromjpeg($file['tmp_name']);
         if ($image === false) {
             throw new RuntimeException('not_an_image');
+        }
+
+        // A signature is usually transparent PNG line art. imagepng() only
+        // writes the alpha channel when imagesavealpha is on; without it the
+        // transparent background round-trips to a solid block, which would
+        // print behind every signature.
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+
+        if ($maxDimension > 0) {
+            $width = imagesx($image);
+            $height = imagesy($image);
+            $longest = max($width, $height);
+            if ($longest > $maxDimension) {
+                $ratio = $maxDimension / $longest;
+                $scaled = imagescale(
+                    $image,
+                    max(1, (int) round($width * $ratio)),
+                    max(1, (int) round($height * $ratio)),
+                    IMG_BICUBIC
+                );
+                if ($scaled !== false) {
+                    imagedestroy($image);
+                    $image = $scaled;
+                    imagealphablending($image, false);
+                    imagesavealpha($image, true);
+                }
+            }
         }
 
         // §O-18 layer 1: a randomly generated filename, never the name the

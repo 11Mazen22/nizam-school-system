@@ -1,0 +1,623 @@
+/*
+ * NIZAM Document Design System
+ * ---------------------------------------------------------------------------
+ * The design language for every officially produced NIZAM document: school
+ * reports, timetables, registers, financial statements and student records.
+ *
+ * Deliberately self-contained and millimetre-based. It is never loaded by the
+ * application shell, and the application shell's stylesheet is never loaded
+ * by a document -- the two share data, not layout. Every dimension below is
+ * real paper geometry, which is what makes the same HTML valid for the
+ * on-screen preview, the Chromium PDF and a 3x PNG.
+ */
+
+:root {
+  --emerald: #0F5132;
+  --emerald-dark: #083D26;
+  --emerald-soft: #EAF3ED;
+  --gold: #C8A45D;
+  --ink: #17251F;
+  --muted: #64748B;
+  --border: #DCE4DE;
+  --surface: #F7F8F5;
+  --zebra: #F8FAF8;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #E9EDEA;
+  color: var(--ink);
+  font-family: 'Nizam Sans', 'Nizam Latin', 'Segoe UI', Tahoma, sans-serif;
+  font-size: 8.4pt;
+  line-height: 1.45;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  text-rendering: geometricPrecision;
+}
+
+body.doc-body-shell { padding: 6mm 0; }
+
+.doc-page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto 6mm;
+  padding: 9mm 11mm 7mm;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 2mm 6mm rgba(15, 81, 50, .12);
+}
+
+.doc-page--landscape {
+  width: 297mm;
+  height: 210mm;
+  padding: 7mm 10mm 6mm;
+}
+
+/* ------------------------------------------------------------------ header */
+
+.doc-header {
+  display: grid;
+  grid-template-columns: 1fr 44mm 1fr;
+  gap: 4mm;
+  align-items: start;
+  padding-bottom: 2.6mm;
+  border-bottom: 0.9mm solid var(--emerald);
+  position: relative;
+}
+
+.doc-header::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1.5mm;
+  height: 0.35mm;
+  background: var(--gold);
+}
+
+.doc-page--landscape .doc-header { grid-template-columns: 1fr 40mm 1fr; }
+
+.doc-head-right { text-align: start; }
+.doc-head-left { text-align: end; }
+
+.doc-head-line {
+  font-size: 7.7pt;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.doc-head-line--strong {
+  font-size: 9.4pt;
+  font-weight: 700;
+  color: var(--emerald-dark);
+  line-height: 1.45;
+}
+
+.doc-head-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.2mm;
+  text-align: center;
+}
+
+.doc-logo {
+  height: 15mm;
+  width: 34mm;
+  display: block;
+}
+
+.doc-brand-name {
+  font-size: 8.1pt;
+  font-weight: 700;
+  color: var(--emerald);
+  line-height: 1.3;
+}
+
+.doc-year-badge {
+  display: inline-block;
+  padding: 0.7mm 2.4mm;
+  border: 0.22mm solid var(--gold);
+  border-radius: 1.4mm;
+  font-size: 7.2pt;
+  font-weight: 600;
+  color: var(--emerald-dark);
+  direction: ltr;
+  letter-spacing: .2pt;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------- title band */
+
+.doc-titleband {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 5mm;
+  padding: 3mm 0 2.4mm;
+  border-bottom: 0.22mm solid var(--border);
+  margin-bottom: 3.2mm;
+}
+
+.doc-title {
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--emerald-dark);
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.15pt;
+}
+
+.doc-subtitle {
+  margin: 0.6mm 0 0;
+  font-size: 8.6pt;
+  color: var(--muted);
+}
+
+.doc-scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1mm 4mm;
+  justify-content: flex-end;
+  font-size: 7.6pt;
+  color: var(--muted);
+  max-width: 88mm;
+  text-align: end;
+}
+
+.doc-scope-pair { white-space: nowrap; }
+.doc-scope-label { color: #8592A0; }
+.doc-scope-value { color: var(--ink); font-weight: 600; }
+
+/* -------------------------------------------------------------------- body */
+
+.doc-flow {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3.4mm;
+  min-height: 0;
+}
+
+.doc-block { min-width: 0; }
+
+.doc-block-title {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--emerald);
+  margin: 0 0 1.4mm;
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+}
+
+.doc-block-title::before {
+  content: "";
+  width: 1.1mm;
+  height: 3.4mm;
+  background: var(--gold);
+  border-radius: 0.5mm;
+  flex: 0 0 auto;
+}
+
+.doc-block-continued {
+  font-size: 7.2pt;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------- summary */
+
+.doc-summary {
+  display: grid;
+  grid-template-columns: repeat(var(--cards, 4), minmax(0, 1fr));
+  gap: 2.4mm;
+}
+
+.doc-card {
+  border: 0.22mm solid var(--border);
+  border-inline-start: 1.1mm solid var(--emerald);
+  border-radius: 1.2mm;
+  padding: 2.2mm 2.6mm;
+  background: var(--surface);
+}
+
+.doc-card-label {
+  font-size: 7pt;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 0.6mm;
+}
+
+.doc-card-value {
+  font-size: 11.5pt;
+  font-weight: 700;
+  color: var(--emerald-dark);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------- table */
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 8.2pt;
+}
+
+.doc-table thead { display: table-header-group; }
+.doc-table tfoot { display: table-footer-group; }
+.doc-table tr { break-inside: avoid; page-break-inside: avoid; }
+
+.doc-table th {
+  background: var(--emerald);
+  color: #fff;
+  font-weight: 600;
+  font-size: 7.9pt;
+  padding: 1.7mm 1.8mm;
+  text-align: start;
+  border: 0.2mm solid var(--emerald);
+  line-height: 1.3;
+}
+
+.doc-table td {
+  padding: 1.35mm 1.8mm;
+  border: 0.18mm solid var(--border);
+  vertical-align: middle;
+  line-height: 1.35;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.doc-table tbody tr:nth-child(even) td { background: var(--zebra); }
+.doc-table tbody tr:last-child td { border-bottom-color: #C9D5CD; }
+
+.doc-table .num,
+.doc-table .cell-num {
+  text-align: center;
+  direction: ltr;
+  font-variant-numeric: tabular-nums;
+  /* A serial, date or code must never break across lines: a wrapped digit
+     doubles the row height and silently halves how many records fit a page. */
+  white-space: nowrap;
+}
+
+.doc-table .cell-strong { font-weight: 600; }
+.doc-table .cell-muted { color: var(--muted); }
+.doc-table .cell-empty { color: #A6B2AB; }
+
+.doc-table tfoot td {
+  background: var(--emerald-soft);
+  font-weight: 700;
+  border-top: 0.45mm solid var(--emerald);
+  color: var(--emerald-dark);
+}
+
+.doc-table--compact { font-size: 7.5pt; }
+.doc-table--compact td { padding: 0.95mm 1.4mm; }
+.doc-table--compact th { padding: 1.3mm 1.4mm; font-size: 7.3pt; }
+
+/* ------------------------------------------------------------- timetable */
+
+.doc-grid { border-collapse: collapse; table-layout: fixed; width: 100%; font-size: 7.7pt; }
+
+.doc-grid th {
+  background: var(--emerald);
+  color: #fff;
+  font-weight: 600;
+  padding: 1.8mm 1mm;
+  border: 0.2mm solid var(--emerald);
+  text-align: center;
+  font-size: 7.8pt;
+}
+
+.doc-grid .grid-corner { width: 20mm; background: var(--emerald-dark); }
+
+.doc-grid td {
+  border: 0.18mm solid var(--border);
+  padding: 1.1mm 1.2mm;
+  vertical-align: middle;
+  text-align: center;
+  height: 11mm;
+}
+
+.doc-grid .grid-period {
+  background: var(--emerald-soft);
+  font-weight: 700;
+  color: var(--emerald-dark);
+  width: 20mm;
+  font-size: 7.4pt;
+  line-height: 1.25;
+}
+
+.doc-grid .grid-period small { display: block; font-weight: 400; color: var(--muted); font-size: 6.4pt; }
+
+.grid-cell { display: block; line-height: 1.3; }
+.grid-cell .grid-subject { display: block; font-weight: 600; font-size: 7.9pt; color: var(--ink); }
+.grid-cell .grid-meta { display: block; font-size: 6.8pt; color: #4C5A54; margin-top: 0.3mm; }
+.grid-cell .grid-class { display: block; font-size: 6.6pt; color: var(--muted); }
+.grid-cell .grid-clash {
+  display: inline-block;
+  margin-top: 0.5mm;
+  padding: 0.15mm 1.1mm;
+  border: 0.25mm solid #B91C1C;
+  border-radius: 0.8mm;
+  background: #FEE2E2;
+  color: #7F1D1D;
+  font-size: 6.1pt;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.grid-cell .grid-resolved {
+  display: inline-block;
+  margin-top: 0.5mm;
+  padding: 0.15mm 1.1mm;
+  border: 0.22mm solid #15803D;
+  border-radius: 0.8mm;
+  background: #DCFCE7;
+  color: #166534;
+  font-size: 6.1pt;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.grid-cell .grid-unassigned {
+  display: inline-block;
+  margin-top: 0.5mm;
+  padding: 0.15mm 1.1mm;
+  border: 0.2mm solid #94A3B8;
+  border-radius: 0.8mm;
+  background: #F1F5F9;
+  color: #475569;
+  font-size: 6.1pt;
+  white-space: nowrap;
+}
+.grid-cell .grid-clash-other { display: block; margin-top: 0.3mm; font-size: 6.1pt; color: #7F1D1D; }
+.doc-grid td.grid-cell--clash { box-shadow: inset 0 0 0 0.25mm #B91C1C; }
+.doc-grid td.grid-cell--resolved { box-shadow: inset 0 0 0 0.22mm #15803D; }
+.doc-grid td.grid-cell--unassigned { box-shadow: inset 0 0 0 0.2mm #94A3B8; }
+
+.doc-legend-swatch.legend-clash,
+.doc-legend-swatch.legend-resolved,
+.doc-legend-swatch.legend-unassigned,
+.doc-legend-swatch.legend-break,
+.doc-legend-swatch.legend-empty { border-width: 0.25mm; border-style: solid; }
+
+.grid-break {
+  background: #F1F3F2 !important;
+  color: #6B7A73;
+  font-size: 7.2pt;
+  font-weight: 600;
+  letter-spacing: .3pt;
+}
+
+.grid-empty { color: #B4C0B8; font-size: 8pt; }
+
+.tone-1 { background: #EAF3ED; }
+.tone-2 { background: #EDF3FB; }
+.tone-3 { background: #FDF3E6; }
+.tone-4 { background: #F3EFFA; }
+.tone-5 { background: #FCEEEE; }
+.tone-6 { background: #EBF6F4; }
+
+/* ---------------------------------------------------------------- fields */
+
+.doc-section {
+  border: 0.22mm solid var(--border);
+  border-radius: 1.2mm;
+  padding: 2.2mm 2.8mm 1.6mm;
+  margin-bottom: 2.4mm;
+  break-inside: avoid;
+}
+
+.doc-section-title {
+  font-size: 8.1pt;
+  font-weight: 700;
+  color: var(--emerald);
+  margin: 0 0 1.4mm;
+  padding-bottom: 1.1mm;
+  border-bottom: 0.18mm solid var(--border);
+}
+
+.doc-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6mm 6mm; }
+
+.doc-field { display: flex; gap: 2mm; font-size: 8.1pt; padding: 0.75mm 0; align-items: baseline; }
+.doc-field-label { color: var(--muted); min-width: 27mm; flex: 0 0 auto; font-size: 7.7pt; }
+.doc-field-value { font-weight: 600; color: var(--ink); word-break: break-word; }
+.doc-field-value--missing { font-weight: 400; color: #9AA7A0; font-style: italic; }
+.doc-field--wide { grid-column: 1 / -1; }
+
+/* ----------------------------------------------------------------- notes */
+
+.doc-notes {
+  font-size: 7.6pt;
+  color: #4A5751;
+  background: var(--surface);
+  border: 0.22mm solid var(--border);
+  border-inline-start: 1.1mm solid var(--gold);
+  border-radius: 1mm;
+  padding: 2mm 2.6mm;
+  line-height: 1.55;
+}
+
+.doc-legend { display: flex; flex-wrap: wrap; gap: 1.6mm 4mm; font-size: 7.3pt; color: #4A5751; }
+.doc-legend-item { display: inline-flex; align-items: center; gap: 1.2mm; }
+.doc-legend-swatch { width: 3mm; height: 3mm; border-radius: 0.6mm; border: 0.18mm solid var(--border); display: inline-block; }
+
+/* ----------------------------------------------------------------- empty */
+
+.doc-empty {
+  border: 0.3mm dashed var(--border);
+  border-radius: 1.4mm;
+  padding: 12mm 6mm;
+  text-align: center;
+  color: var(--muted);
+  font-size: 8.6pt;
+}
+
+/* ---------------------------------------------------------------- footer */
+
+.doc-footer {
+  margin-top: 3mm;
+  padding-top: 1.8mm;
+  border-top: 0.22mm solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4mm;
+  flex: 0 0 auto;
+}
+
+.doc-signatures { display: flex; gap: 8mm; align-items: flex-end; }
+
+.doc-signature { text-align: center; min-width: 34mm; max-width: 46mm; position: relative; }
+.doc-signature-area {
+  position: relative;
+  height: 7mm;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.doc-signature-image {
+  display: block;
+  width: 30mm;
+  height: 7mm;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+}
+.doc-signature-stamp {
+  position: absolute;
+  inset-inline-end: -5mm;
+  bottom: -2mm;
+  width: 13mm;
+  height: 13mm;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.9;
+}
+.doc-signature-line {
+  border-top: 0.22mm dotted #94A3B8;
+  padding-top: 0;
+  font-size: 0;
+}
+.doc-signature-name {
+  font-size: 10.5pt;
+  line-height: 1.35;
+  margin-top: 0.8mm;
+  color: #1F2937;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.doc-signature-role { font-size: 7pt; color: var(--muted); margin-top: 0.4mm; }
+
+.doc-footer-meta {
+  text-align: end;
+  font-size: 6.8pt;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.doc-page-number {
+  font-size: 7.6pt;
+  font-weight: 600;
+  color: var(--emerald);
+  direction: ltr;
+}
+
+/* ------------------------------------------------------------- watermark */
+
+.doc-watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.doc-watermark span {
+  font-size: 46pt;
+  font-weight: 700;
+  color: var(--emerald);
+  opacity: 0.05;
+  transform: rotate(-30deg);
+  white-space: nowrap;
+  letter-spacing: 2pt;
+}
+
+.doc-page > *:not(.doc-watermark) { position: relative; z-index: 1; }
+
+/* --------------------------------------------------------- option states */
+
+body.doc-hide-signatures .doc-signatures { display: none; }
+body.doc-hide-watermark .doc-watermark { display: none; }
+body.doc-compact .doc-table td { padding: 0.85mm 1.3mm; font-size: 7.5pt; }
+body.doc-compact .doc-table th { padding: 1.2mm 1.3mm; font-size: 7.2pt; }
+body.doc-compact .doc-grid td { height: 9.5mm; padding: 0.8mm 1mm; }
+
+/* ----------------------------------------------------------------- print */
+
+@media print {
+  html, body { background: #fff; }
+  body.doc-body-shell { padding: 0; }
+  .doc-page {
+    margin: 0;
+    box-shadow: none;
+    break-after: page;
+    page-break-after: always;
+  }
+  .doc-page:last-child { break-after: auto; page-break-after: auto; }
+  .doc-toolbar { display: none !important; }
+}
+
+/* On-screen preview toolbar (never printed) */
+.doc-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+  padding: 2mm 4mm;
+  background: rgba(15, 81, 50, .96);
+  color: #fff;
+  font-size: 8pt;
+}
+
+/* A document loads none of the application's stylesheets, so the icon class
+   it borrows from the app has no size here: an unconstrained inline SVG
+   stretches to fill the flex line and covered the whole preview with a giant
+   printer glyph. Every icon inside a document is sized in paper units. */
+.doc-toolbar svg,
+.doc-toolbar .n-icon {
+  width: 4mm;
+  height: 4mm;
+  flex: 0 0 auto;
+  display: block;
+}
+.doc-toolbar strong { font-weight: 600; }
+.doc-toolbar .doc-toolbar-spacer { flex: 1; }
+.doc-toolbar button {
+  font: inherit;
+  color: #fff;
+  background: rgba(255, 255, 255, .14);
+  border: 0.2mm solid rgba(255, 255, 255, .35);
+  border-radius: 1.2mm;
+  padding: 1mm 2.6mm;
+  cursor: pointer;
+}
+.doc-toolbar button:hover { background: rgba(255, 255, 255, .25); }
+
+@media screen and (max-width: 900px) {
+  body.doc-body-shell { padding: 0; background: #DDE3DF; }
+}

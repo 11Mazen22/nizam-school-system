@@ -24,20 +24,30 @@ declare(strict_types=1);
  *  - Cells whose "subject" is actually a teacher name (printing error in the
  *    source) are skipped and reported.
  *
- * Idempotency: a year that already has timetable slots is left untouched, so
- * the deployment seed can run on every boot without duplicating rows. Pass
- * --replace to delete that year's slots and load the printed grid again.
+ * Idempotency and provenance:
+ *  - No flags: if the year already has slots, nothing is written (deployment
+ *    seed behaviour).
+ *  - --sync: re-run the import safely. Existing imported cells are compared
+ *    and updated only when the printed grid actually differs; every cell a
+ *    human edited (manual_override) and every cell a human deleted
+ *    (timetable_import_exclusions) is preserved and reported.
+ *  - --dry-run: prints the exact comparison (insert / update / preserve /
+ *    skip) without writing anything.
+ *  - --replace: removes only imported cells (manual corrections survive),
+ *    clears exclusions, then loads the printed grid again.
  *
- * Usage: php bin/import-timetables.php [--dry-run] [--replace]
+ * Usage: php bin/import-timetables.php [--dry-run] [--sync] [--replace]
  */
 
 require dirname(__DIR__) . '/app/bootstrap.php';
 
 use App\Database;
+use App\Repositories\TimetableRepository;
 use App\Services\TeacherAssignmentSyncService;
 
 $dryRun = in_array('--dry-run', $argv, true);
 $replace = in_array('--replace', $argv, true);
+$sync = in_array('--sync', $argv, true);
 $pdo = Database::connection();
 $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
@@ -49,9 +59,9 @@ if ($year === false) {
 $yearId = (int) $year['id'];
 
 $existingSlots = (int) $pdo->query('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId)->fetchColumn();
-if ($existingSlots > 0 && !$replace) {
+if ($existingSlots > 0 && !$replace && !$sync && !$dryRun) {
     echo "Timetables already loaded for {$year['label']} ({$existingSlots} slots); nothing to do.\n";
-    echo "Pass --replace to delete that year's slots and import the printed grid again.\n";
+    echo "Pass --sync to reconcile against the printed grid, or --dry-run to preview it.\n";
     exit(0);
 }
 
@@ -97,6 +107,10 @@ $dayMap = ['الأحد' => 2, 'الاثنين' => 3, 'الثلاثاء' => 4, '�
 $createdSubjects = 0;
 $createdTeachers = 0;
 $inserted = 0;
+$updated = 0;
+$preserved = 0;
+$excluded = 0;
+$unchanged = 0;
 $skipped = [];
 $teacherIds = [];
 $existingTeachers = [];
@@ -195,6 +209,21 @@ foreach ($classStmt->fetchAll() as $row) {
     $classRows[(string) $row['name']] = (int) $row['id'];
 }
 
+// Existing cells and their provenance. The importer never deletes a manual
+// correction, and a human deletion is remembered as an exclusion.
+$existing = [];
+$existingStmt = $pdo->prepare(
+    'SELECT t.*, c.name AS class_name FROM timetables t
+     JOIN classes c ON c.id = t.class_id
+     WHERE t.academic_year_id = :year'
+);
+$existingStmt->execute(['year' => $yearId]);
+foreach ($existingStmt->fetchAll() as $row) {
+    $key = (int) $row['class_id'] . '|' . (int) $row['day_of_week'] . '|' . (int) $row['period_number'];
+    $existing[$key] = $row;
+}
+$exclusions = (new TimetableRepository())->importExclusions($yearId);
+
 // Slots already taken in this run, keyed by teacher and by class. The printed
 // grid lists teachers by first name only, so a handful of cells book the same
 // name in two classes during one period. A teacher cannot be in two rooms at
@@ -205,6 +234,10 @@ foreach ($classStmt->fetchAll() as $row) {
 // carry on.
 $teacherSlotUse = [];
 $classSlotUse = [];
+$paperClashes = [];
+$preservedCells = [];
+$excludedCells = [];
+$updatedCells = [];
 
 if (!$dryRun) {
     $pdo->beginTransaction();
@@ -212,8 +245,25 @@ if (!$dryRun) {
 
 try {
     if ($replace && !$dryRun) {
-        $pdo->prepare('DELETE FROM timetables WHERE academic_year_id = :year')->execute(['year' => $yearId]);
-        echo "Removed the existing timetable slots for {$year['label']}.\n";
+        $repository = new TimetableRepository();
+        $removed = $repository->deleteImportedForYear($yearId);
+        $repository->clearImportExclusions($yearId);
+        $existing = [];
+        $exclusions = [];
+        echo "Removed {$removed} imported slots for {$year['label']}; manual corrections were kept.\n";
+    }
+
+    // Seed availability with the cells that are already real. An imported
+    // cell is removed from the map when the loop reaches it, so it may be
+    // compared; a manual cell keeps its booking for the whole run.
+    foreach ($existing as $existingRow) {
+        $slotKey = (int) $existingRow['class_id'] . '|' . (int) $existingRow['day_of_week'] . '|' . (int) $existingRow['period_number'];
+        $slotLabel = (string) $existingRow['class_name'] . ' #' . (int) $existingRow['id'];
+        $classSlotUse[$slotKey] = ['id' => (int) $existingRow['id'], 'label' => $slotLabel];
+        if ($existingRow['teacher_id'] !== null) {
+            $teacherKey = (int) $existingRow['teacher_id'] . '|' . (int) $existingRow['day_of_week'] . '|' . (int) $existingRow['period_number'];
+            $teacherSlotUse[$teacherKey] = ['id' => (int) $existingRow['id'], 'label' => $slotLabel];
+        }
     }
 
     foreach ($data['classes'] as $class) {
@@ -242,68 +292,176 @@ try {
                 $skipped[] = "{$class['class_id']} {$cell['day']} p{$cell['period']}: unrecognised subject '{$label}'";
                 continue;
             }
+            // Activity periods (sports, financial literacy, chemistry /
+            // business) are printed with no teacher. They are still real
+            // scheduled lessons, so they load with no teacher rather than
+            // leaving a hole in the class timetable.
             $teacherName = trim((string) $cell['teacher']);
-            if ($teacherName === '') {
-                $skipped[] = "{$class['class_id']} {$cell['day']} p{$cell['period']}: no teacher printed for '{$label}'";
-                continue;
-            }
             $names = array_values(array_filter(array_map('trim', explode('/', $teacherName))));
-            $primary = $names[0] ?? '';
-            if ($primary === '') {
-                $skipped[] = "{$class['class_id']} {$cell['day']} p{$cell['period']}: empty teacher for '{$label}'";
-                continue;
-            }
             $note = count($names) > 1 ? $label . ' group pair: ' . implode(' / ', $names) : null;
             if (in_array($label, ['G+F', 'G+A', 'ألماني/فرنساوي'], true) && $note === null) {
                 $note = $label . ' split-group language lesson';
             }
 
-            $teacherId = teacherId($primary);
             $period = (int) $cell['period'];
             $classKey = $classId . '|' . $day . '|' . $period;
+            $existingSlot = $existing[$classKey] ?? null;
+
+            // A cell a human edited is the school's decision. Re-importing the
+            // printed grid must never silently replace it.
+            if ($existingSlot !== null && dbBool($existingSlot['manual_override'] ?? 0)) {
+                $preserved++;
+                $preservedCells[] = "{$class['class_id']} {$cell['day']} p{$period}: manual correction kept";
+                continue;
+            }
+
+            // A cell a human deleted stays deleted until someone clears the
+            // exclusion explicitly (--replace does that).
+            if ($existingSlot === null && isset($exclusions[$classKey])) {
+                $excluded++;
+                $excludedCells[] = "{$class['class_id']} {$cell['day']} p{$period}: manually removed ({$exclusions[$classKey]})";
+                continue;
+            }
+
+            $classSlotUse[$classKey] = [
+                'id' => $existingSlot !== null ? (int) $existingSlot['id'] : null,
+                'label' => "{$class['class_id']} {$label}",
+            ];
+
+            // The row being compared must not count itself as busy when we
+            // choose the teacher for that same row. A row that was already a
+            // printed clash stays a printed clash: re-importing must not
+            // silently "fix" the paper's contradiction or erase its evidence.
+            $preservePrintedClash = $existingSlot !== null
+                && $existingSlot['teacher_id'] === null
+                && $teacherName !== ''
+                && trim((string) ($existingSlot['printed_teacher'] ?? '')) === $teacherName;
+
+            if ($preservePrintedClash) {
+                $teacherId = null;
+                $printedTeacher = $teacherName;
+            } else {
+                if ($existingSlot !== null && $existingSlot['teacher_id'] !== null) {
+                    $oldTeacherKey = (int) $existingSlot['teacher_id'] . '|' . $day . '|' . $period;
+                    unset($teacherSlotUse[$oldTeacherKey]);
+                }
+
+                // A shared cell may print two names. Use the first printed teacher
+                // who is free in this period, exactly as the gap sync does, so a
+                // pair covering two classes is not reported as a clash.
+                $teacherId = null;
+                foreach ($names as $name) {
+                    $candidate = teacherId($name);
+                    if ($candidate !== null && !isset($teacherSlotUse[$candidate . '|' . $day . '|' . $period])) {
+                        $teacherId = $candidate;
+                        break;
+                    }
+                }
+                $printedTeacher = null;
+                if ($teacherId === null) {
+                    foreach ($names as $name) {
+                        $candidate = teacherId($name);
+                        if ($candidate !== null) {
+                            // The paper places this teacher in two classes at once.
+                            // The database must never record a real double-booking,
+                            // so the lesson keeps the printed name in
+                            // printed_teacher and no teacher id: the class
+                            // timetable stays complete and the clash stays visible.
+                            $heldBy = $teacherSlotUse[$candidate . '|' . $day . '|' . $period]['label'] ?? 'another class';
+                            $paperClashes[] = "{$class['class_id']} {$cell['day']} p{$period}: {$name} already printed in {$heldBy}";
+                            $printedTeacher = $teacherName;
+                            break;
+                        }
+                    }
+                }
+            }
             $teacherKey = $teacherId . '|' . $day . '|' . $period;
-            if (isset($classSlotUse[$classKey])) {
-                $skipped[] = "{$class['class_id']} {$cell['day']} p{$period}: class already has {$classSlotUse[$classKey]} then; skipped '{$label}'";
-                continue;
+            if ($teacherId !== null) {
+                $teacherSlotUse[$teacherKey] = [
+                    'id' => $existingSlot !== null ? (int) $existingSlot['id'] : null,
+                    'label' => "{$class['class_id']} {$label}",
+                ];
             }
-            if (isset($teacherSlotUse[$teacherKey])) {
-                $skipped[] = "{$class['class_id']} {$cell['day']} p{$period}: teacher {$primary} already booked with {$teacherSlotUse[$teacherKey]}; skipped '{$label}'";
-                continue;
+
+            // The grouping note is explanatory, not source data. Keep the one
+            // already stored when the subject has not changed, so a re-import
+            // does not churn identical lessons over wording alone.
+            if ($existingSlot !== null && (int) $existingSlot['subject_id'] === $subjectId
+                && trim((string) ($existingSlot['note'] ?? '')) !== '') {
+                $note = (string) $existingSlot['note'];
             }
-            $teacherSlotUse[$teacherKey] = "{$class['class_id']} {$label}";
-            $classSlotUse[$classKey] = $label;
+
+            $same = $existingSlot !== null
+                && (int) $existingSlot['subject_id'] === $subjectId
+                && (int) ($existingSlot['teacher_id'] ?? 0) === (int) ($teacherId ?? 0)
+                && trim((string) ($existingSlot['note'] ?? '')) === trim((string) ($note ?? ''))
+                && trim((string) ($existingSlot['printed_teacher'] ?? '')) === trim((string) ($printedTeacher ?? ''));
 
             try {
                 if ($dryRun) {
-                    $inserted++;
+                    if ($existingSlot === null) {
+                        $inserted++;
+                    } elseif ($same) {
+                        $unchanged++;
+                    } else {
+                        $updated++;
+                        $updatedCells[] = "{$class['class_id']} {$cell['day']} p{$period}: would update";
+                    }
                     $perClass++;
                     continue;
                 }
+
+                if ($same) {
+                    $unchanged++;
+                    $perClass++;
+                    foreach (array_slice($names, 1) as $extra) {
+                        teacherId($extra);
+                    }
+                    continue;
+                }
+
                 // A savepoint keeps one rejected row from aborting the whole
                 // PostgreSQL transaction (MySQL simply continues after a
                 // failed statement, so it needs none).
                 if ($driver === 'pgsql') {
                     $pdo->exec('SAVEPOINT timetable_slot');
                 }
-                $pdo->prepare(
-                    'INSERT INTO timetables (academic_year_id, class_id, day_of_week, period_number, subject_id, teacher_id, note)
-                     VALUES (:year, :class, :day, :period, :subject, :teacher, :note)'
-                )->execute([
-                    'year' => $yearId,
-                    'class' => $classId,
-                    'day' => $day,
-                    'period' => $period,
-                    'subject' => $subjectId,
-                    'teacher' => $teacherId,
-                    'note' => $note,
-                ]);
+                if ($existingSlot !== null) {
+                    (new TimetableRepository())->updateImported(
+                        (int) $existingSlot['id'],
+                        $subjectId,
+                        $teacherId,
+                        $note,
+                        $printedTeacher,
+                        'timetables_17.json'
+                    );
+                    $updated++;
+                    $updatedCells[] = "{$class['class_id']} {$cell['day']} p{$period}: updated from printed grid";
+                } else {
+                    $pdo->prepare(
+                        'INSERT INTO timetables
+                            (academic_year_id, class_id, day_of_week, period_number, subject_id, teacher_id,
+                             note, printed_teacher, origin, import_source, imported_at)
+                         VALUES (:year, :class, :day, :period, :subject, :teacher, :note, :printed,
+                                 \'imported\', \'timetables_17.json\', CURRENT_TIMESTAMP)'
+                    )->execute([
+                        'year' => $yearId,
+                        'class' => $classId,
+                        'day' => $day,
+                        'period' => $period,
+                        'subject' => $subjectId,
+                        'teacher' => $teacherId,
+                        'note' => $note,
+                        'printed' => $printedTeacher,
+                    ]);
+                    $inserted++;
+                }
                 if ($driver === 'pgsql') {
                     $pdo->exec('RELEASE SAVEPOINT timetable_slot');
                 }
                 foreach (array_slice($names, 1) as $extra) {
                     teacherId($extra); // keep the second group teacher on record
                 }
-                $inserted++;
                 $perClass++;
             } catch (PDOException $e) {
                 if ($driver === 'pgsql') {
@@ -339,8 +497,12 @@ if (!$dryRun) {
     $load = (new TeacherAssignmentSyncService())->sync($yearId);
 }
 
-echo "\n" . ($dryRun ? 'DRY RUN -- nothing written' : 'Committed') . "\n";
+echo "\n" . ($dryRun ? 'DRY RUN -- nothing written (comparison only)' : 'Committed') . "\n";
 echo "slots inserted: {$inserted}\n";
+echo "slots updated from the printed grid: {$updated}\n";
+echo "slots already correct: {$unchanged}\n";
+echo "manual corrections preserved: {$preserved}\n";
+echo "manual deletions preserved: {$excluded}\n";
 if (!$dryRun) {
     echo "assignments created: {$load['created']}, corrected: {$load['updated']}\n";
 }
@@ -349,4 +511,19 @@ echo "teachers created: {$createdTeachers}\n";
 echo 'skipped: ' . count($skipped) . "\n";
 foreach ($skipped as $reason) {
     echo '  - ' . $reason . "\n";
+}
+foreach ($updatedCells as $reason) {
+    echo '  ~ ' . $reason . "\n";
+}
+foreach ($preservedCells as $reason) {
+    echo '  = ' . $reason . "\n";
+}
+foreach ($excludedCells as $reason) {
+    echo '  x ' . $reason . "\n";
+}
+if ($paperClashes !== []) {
+    echo 'printed clashes loaded as printed: ' . count($paperClashes) . "\n";
+    foreach ($paperClashes as $reason) {
+        echo '  - ' . $reason . "\n";
+    }
 }

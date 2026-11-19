@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "description": "Egyptian secondary education rules, configurable per academic year and track. Grade levels follow the grades.sort_order ladder: 1 = First Secondary (Grade 10), 2 = Second Secondary (Grade 11), 3 = Third Secondary (Grade 12).",
+  "grade_levels": {
+    "1": { "code": "GRADE_10", "name_ar": "الصف الأول الثانوي", "name_en": "First Secondary Grade" },
+    "2": { "code": "GRADE_11", "name_ar": "الصف الثاني الثانوي", "name_en": "Second Secondary Grade" },
+    "3": { "code": "GRADE_12", "name_ar": "الصف الثالث الثانوي", "name_en": "Third Secondary Grade" }
+  },
+  "tracks": {
+    "GENERAL_SECONDARY": { "name_ar": "ثانوية عامة", "name_en": "General Secondary" },
+    "BACCALAUREATE": { "name_ar": "بكالوريا", "name_en": "Baccalaureate" }
+  },
+  "grade_tracks": {
+    "2026/2027": {
+      "1": ["GENERAL_SECONDARY", "BACCALAUREATE"],
+      "2": ["GENERAL_SECONDARY", "BACCALAUREATE"],
+      "3": ["GENERAL_SECONDARY"]
+    },
+    "2027/2028": {
+      "1": ["GENERAL_SECONDARY", "BACCALAUREATE"],
+      "2": ["GENERAL_SECONDARY", "BACCALAUREATE"],
+      "3": ["GENERAL_SECONDARY", "BACCALAUREATE"]
+    }
+  },
+  "default_grade_tracks": ["GENERAL_SECONDARY", "BACCALAUREATE"],
+  "class_prefixes": { "A": 1, "B": 2, "C": 3 },
+  "attendance": {
+    "min_attendance_percent": 85,
+    "truancy_statuses": ["absent"],
+    "attended_statuses": ["present", "late", "excused"],
+    "warning": { "consecutive_absences": 10, "separate_absences": 20 },
+    "critical": { "consecutive_absences": 15, "separate_absences": 30 }
+  },
+  "year_work": {
+    "enabled_tracks": ["BACCALAUREATE"],
+    "disabled_grade_levels_by_year": { "2026/2027": [3] },
+    "completion_requirement_percent": 60,
+    "weights": {
+      "weekly_assessment": 40,
+      "monthly_assessment": 20,
+      "class_work": 20,
+      "homework": 20
+    }
+  }
+}

@@ -5,14 +5,15 @@ declare(strict_types=1);
 /**
  * Nizam -- rebuild the timetable gap list from the official dataset.
  *
- * The 17 grids print 558 lessons; 507 loaded. The rest are printed lessons
- * that could not become rows: no teacher printed, a first name shared by two
- * teachers, or an absence-check cell. This command records them in
- * timetable_gaps, with the printed subject and teacher text intact, so the
- * school can see and fill them from /timetable/gaps.
+ * Loads every printed lesson the class timetable is still missing. A cell
+ * printed without a teacher (an activity period) loads without one, and a
+ * cell the paper itself double-books loads with its printed teacher; the
+ * timetable screen reports those clashes. Only a genuinely unrepresentable
+ * cell -- an unknown subject, or a teacher name with no staff record -- stays
+ * in timetable_gaps for the school to map.
  *
- * Idempotent: resolved gaps stay resolved, ignored gaps stay ignored, and a
- * gap whose lesson has since been loaded is closed.
+ * Idempotent: loaded cells are left alone, resolved gaps stay resolved,
+ * ignored gaps stay ignored, and a gap whose lesson now exists is closed.
  *
  * Usage: php bin/sync-timetable-gaps.php [--dry-run]
  */
@@ -40,7 +41,8 @@ $result = $service->sync(
 
 fwrite(STDOUT, 'academic year: ' . $year['label'] . "\n");
 fwrite(STDOUT, 'printed lessons already loaded: ' . $result['loaded'] . "\n");
-fwrite(STDOUT, 'gaps: ' . $result['gaps'] . "\n");
+fwrite(STDOUT, 'printed lessons loaded now: ' . ($result['imported'] ?? 0) . "\n");
+fwrite(STDOUT, 'remaining gaps: ' . $result['gaps'] . "\n");
 foreach (['no_teacher', 'teacher_conflict', 'unmapped_teacher', 'absence', 'other'] as $reason) {
     if (($result['by_reason'][$reason] ?? 0) > 0) {
         fwrite(STDOUT, '  ' . $reason . ': ' . $result['by_reason'][$reason] . "\n");

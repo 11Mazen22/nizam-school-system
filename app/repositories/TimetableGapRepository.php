@@ -67,23 +67,24 @@ final class TimetableGapRepository
      * teachers for that exact period. One query for the whole year, not one
      * per gap.
      *
-     * @return array<int, array<int, array<int, array{class_name:string,subject_ar:string,subject_en:string}>>>
+     * @return array<int, array<int, array<int, array{class_id:int,class_name:string,subject_ar:string,subject_en:string}>>>
      */
     public function bookings(int $yearId): array
     {
         $stmt = Database::connection()->prepare(
             'SELECT t.day_of_week, t.period_number, t.teacher_id,
-                    c.name AS class_name, s.name_ar AS subject_ar, s.name_en AS subject_en
+                    c.id AS class_id, c.name AS class_name, s.name_ar AS subject_ar, s.name_en AS subject_en
              FROM timetables t
              JOIN classes c ON c.id = t.class_id
              JOIN subjects s ON s.id = t.subject_id
-             WHERE t.academic_year_id = :year'
+             WHERE t.academic_year_id = :year AND t.teacher_id IS NOT NULL'
         );
         $stmt->execute(['year' => $yearId]);
 
         $map = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $map[(int) $row['day_of_week']][(int) $row['period_number']][(int) $row['teacher_id']] = [
+                'class_id' => (int) $row['class_id'],
                 'class_name' => (string) $row['class_name'],
                 'subject_ar' => (string) $row['subject_ar'],
                 'subject_en' => (string) $row['subject_en'],
@@ -120,6 +121,29 @@ final class TimetableGapRepository
             $status = (string) $row['status'];
             $counts[$status] = (int) $row['total'];
             $counts['total'] += (int) $row['total'];
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Reason counts per status, so the gaps screen can hide a reason filter
+     * that has no rows in the currently selected status while still showing
+     * it under a different status (resolved history is not deleted).
+     *
+     * @return array<string,array<string,int>> status => reason => count
+     */
+    public function reasonCountsByStatus(int $yearId): array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT status, reason, COUNT(*) AS total FROM timetable_gaps
+             WHERE academic_year_id = :year GROUP BY status, reason'
+        );
+        $stmt->execute(['year' => $yearId]);
+
+        $counts = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $counts[(string) $row['status']][(string) $row['reason']] = (int) $row['total'];
         }
 
         return $counts;
@@ -237,7 +261,7 @@ final class TimetableGapRepository
     {
         $stmt = Database::connection()->prepare(
             'SELECT teacher_id, COUNT(*) AS total FROM timetables
-             WHERE academic_year_id = :year GROUP BY teacher_id'
+             WHERE academic_year_id = :year AND teacher_id IS NOT NULL GROUP BY teacher_id'
         );
         $stmt->execute(['year' => $yearId]);
 

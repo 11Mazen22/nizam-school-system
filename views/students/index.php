@@ -13,6 +13,18 @@ ob_start(); ?>
       <?php if (hasPermission('students.promote')): ?><a href="/students/promotion" class="btn btn-outline-primary"><?= icon('trending-up') ?><span><?= e(__('promotion.title')) ?></span></a><?php endif; ?>
       <?php if ($canCreate): ?><a href="/students/create" class="btn btn-primary"><?= icon('plus') ?><span><?= e(__('students.add')) ?></span></a><?php endif; ?>
 <?php
+// The register exports exactly the filters currently applied on screen.
+$docKey = 'students';
+$docParams = [
+    'q' => (string) $q,
+    'grade_id' => (string) ((int) $gradeId),
+    'class_id' => (string) ((int) $classId),
+    'religion' => (string) $religion,
+    'missing' => (string) $missing,
+];
+require dirname(__DIR__) . '/partials/export-menu.php';
+?>
+<?php
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>

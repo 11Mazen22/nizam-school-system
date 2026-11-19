@@ -47,9 +47,14 @@ final class DashboardStatsService
 
         $onlyUserId = ($_SESSION['role_code'] ?? null) === 'admin' ? null : (int) ($_SESSION['user_id'] ?? 0);
 
-        // Core attendance and capacity
+        // Core attendance and capacity. On a non-working day there is nothing
+        // to record, so the "not taken yet" list stays empty instead of
+        // flagging every class in the school.
         $attendance = hasPermission('attendance.view') ? $this->repository->attendanceForDate($yearId, date('Y-m-d')) : null;
-        $pendingAttendance = hasPermission('attendance.view') ? $this->repository->classesWithoutAttendance($yearId, date('Y-m-d')) : [];
+        $pendingAttendance = [];
+        if (hasPermission('attendance.view') && AttendancePolicyService::isSchoolDay()) {
+            $pendingAttendance = $this->repository->classesWithoutAttendance($yearId, date('Y-m-d'));
+        }
         $capacity = hasPermission('classes.view') ? (new ClassRepository())->densityForYear($yearId, null) : [];
 
         // Action Center Items. Missing attendance is deliberately not copied

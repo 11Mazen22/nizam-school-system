@@ -15,6 +15,11 @@ ob_start(); ?>
         <span><?= e(__('finance.create_invoice')) ?></span>
       </a>
     <?php endif; ?>
+<?php
+$docKey = 'finance';
+$docParams = [];
+require dirname(__DIR__) . '/partials/export-menu.php';
+?>
 <?php $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
@@ -26,7 +31,7 @@ require dirname(__DIR__) . '/layout/start.php';
     <div class="card stat-card stat-blue h-100">
       <div class="card-body">
         <div>
-          <div class="stat-value" dir="ltr"><?= number_format((float) $summary['total_billed'], 2) ?></div>
+          <div class="stat-value" dir="ltr"><?= money($summary['total_billed']) ?></div>
           <div class="stat-label"><?= e(__('finance.total_billed')) ?></div>
         </div>
         <div class="stat-icon"><?= icon('wallet') ?></div>
@@ -37,7 +42,7 @@ require dirname(__DIR__) . '/layout/start.php';
     <div class="card stat-card stat-teal h-100">
       <div class="card-body">
         <div>
-          <div class="stat-value text-success" dir="ltr"><?= number_format((float) $summary['total_collected'], 2) ?></div>
+          <div class="stat-value text-success" dir="ltr"><?= money($summary['total_collected']) ?></div>
           <div class="stat-label"><?= e(__('finance.total_collected')) ?></div>
         </div>
         <div class="stat-icon"><?= icon('check-circle') ?></div>
@@ -48,7 +53,7 @@ require dirname(__DIR__) . '/layout/start.php';
     <div class="card stat-card stat-amber h-100">
       <div class="card-body">
         <div>
-          <div class="stat-value text-danger" dir="ltr"><?= number_format((float) $summary['total_outstanding'], 2) ?></div>
+          <div class="stat-value text-danger" dir="ltr"><?= money($summary['total_outstanding']) ?></div>
           <div class="stat-label"><?= e(__('finance.total_outstanding')) ?></div>
         </div>
         <div class="stat-icon"><?= icon('clock') ?></div>
@@ -103,10 +108,10 @@ require dirname(__DIR__) . '/layout/start.php';
                 </td>
                 <td><?= e($inv['title']) ?></td>
                 <td dir="ltr" class="font-monospace fw-semibold">
-                  <?= number_format((float) $inv['total_amount'] - (float) $inv['discount_amount'], 2) ?>
+                  <?= money((float) $inv['total_amount'] - (float) $inv['discount_amount']) ?>
                 </td>
                 <td dir="ltr" class="font-monospace text-success">
-                  <?= number_format((float) $inv['paid_amount'], 2) ?>
+                  <?= money($inv['paid_amount']) ?>
                 </td>
                 <td>
                   <?php if ($inv['status'] === 'paid'): ?>

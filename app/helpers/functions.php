@@ -77,7 +77,9 @@ function __(string $key, array $replace = []): string
     static $lang = null;
     static $loadedLocale = null;
 
-    $locale = $_SESSION['locale'] ?? 'ar';
+    // One locale source of truth: LocaleService always returns a supported
+    // 'ar'/'en' value from the session, defaulting safely before setup.
+    $locale = \App\Services\LocaleService::current();
     if ($lang === null || $loadedLocale !== $locale) {
         $path = dirname(__DIR__, 2) . "/lang/{$locale}.php";
         $lang = is_file($path) ? require $path : [];
@@ -94,12 +96,40 @@ function __(string $key, array $replace = []): string
 /** Current UI direction, driven by the active language -- §C "RTL is designed, not mirrored." */
 function currentDirection(): string
 {
-    return ($_SESSION['locale'] ?? 'ar') === 'ar' ? 'rtl' : 'ltr';
+    return \App\Services\LocaleService::current() === 'ar' ? 'rtl' : 'ltr';
 }
 
 function currentLocale(): string
 {
-    return $_SESSION['locale'] ?? 'ar';
+    return \App\Services\LocaleService::current();
+}
+
+/**
+ * Format an amount with this school's configured base currency. Every finance
+ * amount and printable financial total goes through this helper, so changing
+ * currencies in Settings -> Profile is reflected immediately with no redeploy.
+ */
+function money(float|int|string $amount, ?string $locale = null): string
+{
+    return \App\Services\SchoolSettingsService::money($amount, $locale);
+}
+
+/** Configured PHP weekday numbers (0=Sunday .. 6=Saturday). */
+function schoolWeekDays(): array
+{
+    return \App\Services\SchoolSettingsService::workingWeekdays();
+}
+
+/** True when a date is one of the configured weekly working days. */
+function isSchoolDay(string $date): bool
+{
+    return \App\Services\SchoolSettingsService::isWorkingDate($date);
+}
+
+/** Timetable day numbers (1=Saturday .. 6=Thursday) that are enabled. */
+function schoolTimetableDays(): array
+{
+    return \App\Services\SchoolSettingsService::timetableDays();
 }
 
 /**
@@ -154,6 +184,20 @@ function isRtlSafeNumericCell(string $value): bool
 function hasPermission(string $code): bool
 {
     return in_array($code, $_SESSION['permissions'] ?? [], true);
+}
+
+/** Stable human-readable label for a module key in the active locale. */
+function moduleLabel(string $key): string
+{
+    $translated = __('module.label.' . $key);
+    if ($translated !== 'module.label.' . $key) {
+        return $translated;
+    }
+    $row = (new \App\Repositories\ModuleRepository())->find($key);
+    if ($row === null) {
+        return $key;
+    }
+    return currentLocale() === 'ar' ? (string) $row['name_ar'] : (string) $row['name_en'];
 }
 
 /**
@@ -230,13 +274,13 @@ function navItems(): array
         ['key' => 'library', 'href' => '/library', 'label' => 'nav.library', 'permission' => 'library.view', 'icon' => 'book-open', 'group' => 'operations', 'module' => 'library'],
 
         ['key' => 'welfare-discipline', 'href' => '/welfare/discipline', 'label' => 'nav.discipline', 'permission' => 'welfare.view', 'icon' => 'alert-triangle', 'group' => 'welfare', 'module' => 'welfare'],
-        ['key' => 'welfare-health', 'href' => '/welfare/health', 'label' => 'nav.health', 'permission' => 'welfare.view', 'icon' => 'heart-pulse', 'group' => 'welfare', 'module' => 'welfare'],
+        ['key' => 'welfare-health', 'href' => '/welfare/health', 'label' => 'nav.health', 'permission' => 'welfare.view', 'icon' => 'heart-pulse', 'group' => 'welfare', 'module' => 'health_records'],
 
         ['key' => 'finance', 'href' => '/finance', 'label' => 'nav.finance', 'permission' => 'finance.view', 'icon' => 'wallet', 'group' => 'business', 'module' => 'finance'],
         ['key' => 'hr', 'href' => '/hr', 'label' => 'nav.hr', 'permission' => 'hr.view', 'icon' => 'briefcase', 'group' => 'business', 'module' => 'hr'],
 
         ['key' => 'portal-teacher', 'href' => '/portal/teacher', 'label' => 'nav.portal_teacher', 'permission' => 'portal.teacher', 'icon' => 'chalkboard-teacher', 'group' => 'portals', 'module' => 'core'],
-        ['key' => 'portal-family', 'href' => '/portal/family', 'label' => 'nav.portal_family', 'permission' => 'portal.family', 'icon' => 'home', 'group' => 'portals', 'module' => 'core'],
+        ['key' => 'portal-family', 'href' => '/portal/family', 'label' => 'nav.portal_family', 'permission' => 'portal.family', 'icon' => 'home', 'group' => 'portals', 'module' => 'guardian_portal'],
 
         ['key' => 'reports', 'href' => '/reports', 'label' => 'nav.reports', 'permission' => 'reports.view', 'icon' => 'chart', 'group' => 'reports', 'module' => 'reports'],
         ['key' => 'activity-log', 'href' => '/activity-log', 'label' => 'nav.activity_log', 'permission' => 'activity_log.view', 'icon' => 'activity', 'group' => 'reports', 'module' => 'core'],

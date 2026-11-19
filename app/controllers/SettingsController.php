@@ -10,8 +10,14 @@ use App\Flash;
 use App\Repositories\SchoolRepository;
 use App\Request;
 use App\Services\ActivityLogger;
+use App\Services\AcademicRulesService;
+use App\Services\LocaleService;
+use App\Services\SchoolSettingsService;
+use App\Services\SettingsAuditService;
 use App\Services\SettingsService;
+use App\Services\SignatoryService;
 use App\Services\UploadService;
+use InvalidArgumentException;
 use PDO;
 use RuntimeException;
 
@@ -63,12 +69,52 @@ final class SettingsController extends Controller
         $nameAr = $request->post('name_ar', '') ?: '';
         $address = $request->post('address', '') ?: null;
         $phone = $request->post('phone', '') ?: null;
+        $email = $request->post('email', '') ?: null;
+        $website = $request->post('website', '') ?: null;
+        $country = (string) ($request->post('country', 'EG') ?: 'EG');
+        $timezone = (string) ($request->post('timezone', 'Africa/Cairo') ?: 'Africa/Cairo');
+        $currency = (string) ($request->post('currency', 'EGP') ?: 'EGP');
         $footerText = $request->post('footer_text', '') ?: null;
 
-        if ($name === '' || $nameAr === '') {
-            $this->view('settings/profile', ['error' => __('validation.required'), 'school' => $school]);
+        $checks = [
+            [$name !== '' && mb_strlen($name) <= 150, 'settings.error.profile_name'],
+            [$nameAr !== '' && mb_strlen($nameAr) <= 150, 'settings.error.profile_name'],
+            [$email === null || filter_var($email, FILTER_VALIDATE_EMAIL) !== false, 'settings.error.email'],
+            [$website === null || filter_var($website, FILTER_VALIDATE_URL) !== false, 'settings.error.website'],
+            [mb_strlen($country) <= 2 && preg_match('/^[A-Za-z]{2}$/', $country) === 1, 'settings.error.country'],
+            [mb_strlen($address ?? '') <= 255, 'settings.error.too_long'],
+            [mb_strlen($phone ?? '') <= 30, 'settings.error.too_long'],
+        ];
+        foreach ($checks as [$valid, $errorKey]) {
+            if (!$valid) {
+                $this->view('settings/profile', ['error' => __($errorKey), 'school' => $school]);
+                return;
+            }
+        }
+
+        try {
+            $timezone = SchoolSettingsService::validateTimezone($timezone);
+            $currency = SchoolSettingsService::validateCurrency($currency);
+            $weekInput = $request->postArray('school_week_days');
+            $schoolWeek = $weekInput !== []
+                ? SchoolSettingsService::normalizeWeekdays($weekInput)
+                : SchoolSettingsService::normalizeWeekdays((string) ($request->post('school_week', '0,1,2,3,4') ?: '0,1,2,3,4'));
+        } catch (InvalidArgumentException) {
+            $this->view('settings/profile', ['error' => __('settings.error.profile_calendar'), 'school' => $school]);
             return;
         }
+
+        $before = [
+            'name' => $school['name'] ?? '', 'name_ar' => $school['name_ar'] ?? '',
+            'address' => $school['address'] ?? '', 'phone' => $school['phone'] ?? '',
+            'email' => $school['email'] ?? '', 'website' => $school['website'] ?? '',
+            'school_type' => $school['school_type'] ?? '', 'school_structure' => $school['school_structure'] ?? '',
+            'country' => $school['country'] ?? '', 'region' => $school['region'] ?? '',
+            'timezone' => $school['timezone'] ?? '', 'currency' => $school['currency'] ?? '',
+            'school_week' => $school['school_week'] ?? '', 'tax_number' => $school['tax_number'] ?? '',
+            'affiliation_code' => $school['affiliation_code'] ?? '',
+            'report_footer' => (string) (SettingsService::get('reports.school_footer_text', '') ?? ''),
+        ];
 
         // Named arguments, deliberately: this call used to pass 16 positional
         // values into an 18-parameter method, which silently wrote currency
@@ -82,18 +128,18 @@ final class SettingsController extends Controller
             nameAr: $nameAr,
             address: $address,
             phone: $phone,
-            email: $request->post('email', '') ?: null,
-            website: $request->post('website', '') ?: null,
-            country: (string) ($request->post('country', 'EG') ?: 'EG'),
+            email: $email,
+            website: $website,
+            country: $country,
             region: $request->post('region', '') ?: null,
-            timezone: (string) ($request->post('timezone', 'Africa/Cairo') ?: 'Africa/Cairo'),
+            timezone: $timezone,
             // Not present on this form: keep whatever is configured rather
             // than resetting it to a hardcoded default on every save.
             defaultLocale: (string) ($school['default_locale'] ?? 'ar'),
-            currency: (string) ($request->post('currency', 'EGP') ?: 'EGP'),
+            currency: $currency,
             dateFormat: (string) ($school['date_format'] ?? 'YYYY-MM-DD'),
             numberFormat: (string) ($school['number_format'] ?? 'standard'),
-            schoolWeek: (string) ($request->post('school_week', '0,1,2,3,4') ?: '0,1,2,3,4'),
+            schoolWeek: $schoolWeek,
             schoolType: (string) ($request->post('school_type', 'language_school') ?: 'language_school'),
             schoolStructure: (string) ($request->post('school_structure', 'k12_combined') ?: 'k12_combined'),
             taxNumber: $request->post('tax_number', '') ?: null,
@@ -125,7 +171,28 @@ final class SettingsController extends Controller
             $this->schools->updateLogoPath((int) $school['id'], null);
         }
 
-        ActivityLogger::log('settings.update', 'settings', null, 'Profile settings updated');
+        SchoolSettingsService::reload();
+        $afterRow = $this->schools->full() ?? [];
+        $after = [
+            'name' => $afterRow['name'] ?? '', 'name_ar' => $afterRow['name_ar'] ?? '',
+            'address' => $afterRow['address'] ?? '', 'phone' => $afterRow['phone'] ?? '',
+            'email' => $afterRow['email'] ?? '', 'website' => $afterRow['website'] ?? '',
+            'school_type' => $afterRow['school_type'] ?? '', 'school_structure' => $afterRow['school_structure'] ?? '',
+            'country' => $afterRow['country'] ?? '', 'region' => $afterRow['region'] ?? '',
+            'timezone' => $afterRow['timezone'] ?? '', 'currency' => $afterRow['currency'] ?? '',
+            'school_week' => $afterRow['school_week'] ?? '', 'tax_number' => $afterRow['tax_number'] ?? '',
+            'affiliation_code' => $afterRow['affiliation_code'] ?? '',
+            'report_footer' => (string) (SettingsService::get('reports.school_footer_text', '') ?? ''),
+            'logo' => $hasNewLogo ? 'uploaded' : ($request->post('remove_logo') === '1' ? 'removed' : ($afterRow['logo_path'] ?? '')),
+        ];
+        $changes = [];
+        foreach ($after as $field => $newValue) {
+            $oldValue = $before[$field] ?? '';
+            if ((string) $oldValue !== (string) $newValue) {
+                $changes[$field] = ['old' => $oldValue, 'new' => $newValue];
+            }
+        }
+        SettingsAuditService::record('profile', $changes, 'School profile updated');
         Flash::set('success', __('settings.saved'));
         $this->redirect('/settings/profile');
     }
@@ -173,8 +240,11 @@ final class SettingsController extends Controller
             return;
         }
 
-        SettingsService::set('app.default_language', $language, 'string');
-        ActivityLogger::log('settings.update', 'settings', null, 'Localization settings updated');
+        $previous = (string) (SettingsService::get('app.default_language', 'ar') ?? 'ar');
+        LocaleService::setDefault($language, (int) ($_SESSION['user_id'] ?? 0));
+        SettingsAuditService::record('localization', [
+            'app.default_language' => ['old' => $previous, 'new' => $language],
+        ], 'Default language changed');
         Flash::set('success', __('settings.saved'));
         $this->redirect('/settings/localization');
     }
@@ -201,11 +271,20 @@ final class SettingsController extends Controller
     // -------------------------------------------------------- Academic
     public function academic(Request $request): void
     {
+        $defaults = self::safeAttendanceDefaults();
         $this->view('settings/academic', [
             'error' => null,
             'expectedWeeklyCapacity' => SettingsService::get('academic.expected_weekly_capacity', 20),
             'studentIdPattern' => SettingsService::get('academic.student_id_pattern', 'STU-{year}-{seq:6}'),
             'teacherIdPattern' => SettingsService::get('academic.teacher_id_pattern', 'TCH-{seq:6}'),
+            'rules' => [
+                'academic.attendance_min_percent' => SettingsService::get('academic.attendance_min_percent', $defaults['min_percent']),
+                'academic.attendance_warning_consecutive' => SettingsService::get('academic.attendance_warning_consecutive', $defaults['warning_consecutive']),
+                'academic.attendance_warning_separate' => SettingsService::get('academic.attendance_warning_separate', $defaults['warning_separate']),
+                'academic.attendance_critical_consecutive' => SettingsService::get('academic.attendance_critical_consecutive', $defaults['critical_consecutive']),
+                'academic.attendance_critical_separate' => SettingsService::get('academic.attendance_critical_separate', $defaults['critical_separate']),
+                'academic.year_work_completion_percent' => SettingsService::get('academic.year_work_completion_percent', 60),
+            ],
         ]);
     }
 
@@ -214,31 +293,133 @@ final class SettingsController extends Controller
         $capacity = (int) ($request->post('expected_weekly_capacity', '') ?: 0);
         $studentPattern = $request->post('student_id_pattern', '') ?: '';
         $teacherPattern = $request->post('teacher_id_pattern', '') ?: '';
+        $defaults = self::safeAttendanceDefaults();
+        $yearDefaults = self::safeYearWorkDefaults();
+        // HTML form names use underscores (PHP normalizes dots in POST keys).
+        $ruleFields = [
+            'academic.attendance_min_percent' => ['academic_attendance_min_percent', $defaults['min_percent']],
+            'academic.attendance_warning_consecutive' => ['academic_attendance_warning_consecutive', $defaults['warning_consecutive']],
+            'academic.attendance_warning_separate' => ['academic_attendance_warning_separate', $defaults['warning_separate']],
+            'academic.attendance_critical_consecutive' => ['academic_attendance_critical_consecutive', $defaults['critical_consecutive']],
+            'academic.attendance_critical_separate' => ['academic_attendance_critical_separate', $defaults['critical_separate']],
+            'academic.year_work_completion_percent' => ['academic_year_work_completion_percent', $yearDefaults['completion_percent']],
+        ];
+        $rules = [];
+        foreach ($ruleFields as $settingKey => [$formKey, $fallback]) {
+            $rules[$settingKey] = (int) ($request->post($formKey, (string) $fallback) ?: $fallback);
+        }
 
         $error = null;
         if ($capacity < 1 || $capacity > 60) {
             $error = __('settings.error.capacity_range');
         } elseif (!preg_match('/\{seq:\d+\}/', $studentPattern) || !preg_match('/\{seq:\d+\}/', $teacherPattern)) {
-            // IdPattern::render's whole mechanism depends on a {seq:N} token --
-            // a pattern without one would give every future student/teacher
-            // the exact same generated code.
             $error = __('settings.error.pattern_missing_seq');
+        } elseif ($rules['academic.attendance_min_percent'] < 1 || $rules['academic.attendance_min_percent'] > 100) {
+            $error = __('settings.error.percent_range');
+        } elseif ($rules['academic.year_work_completion_percent'] < 1 || $rules['academic.year_work_completion_percent'] > 100) {
+            $error = __('settings.error.percent_range');
+        } else {
+            foreach ($rules as $key => $value) {
+                if ($value < 1 || $value > 365) {
+                    $error = __('settings.error.absence_range');
+                    break;
+                }
+            }
         }
 
         if ($error !== null) {
             $this->view('settings/academic', [
                 'error' => $error, 'expectedWeeklyCapacity' => $capacity,
                 'studentIdPattern' => $studentPattern, 'teacherIdPattern' => $teacherPattern,
+                'rules' => $rules,
             ]);
             return;
         }
 
-        SettingsService::set('academic.expected_weekly_capacity', $capacity, 'int');
-        SettingsService::set('academic.student_id_pattern', $studentPattern, 'string');
-        SettingsService::set('academic.teacher_id_pattern', $teacherPattern, 'string');
-        ActivityLogger::log('settings.update', 'settings', null, 'Academic rule settings updated');
+        $changes = [];
+        foreach ([
+            'academic.expected_weekly_capacity' => $capacity,
+            'academic.student_id_pattern' => $studentPattern,
+            'academic.teacher_id_pattern' => $teacherPattern,
+        ] + $rules as $key => $value) {
+            $old = SettingsService::get($key);
+            if ((string) $old !== (string) $value) {
+                $changes[$key] = ['old' => $old, 'new' => $value];
+                SettingsService::set($key, $value, is_int($value) ? 'int' : 'string');
+            }
+        }
+        SettingsAuditService::record('academic_rules', $changes, 'Academic and attendance rules updated');
+        AcademicRulesService::reload();
         Flash::set('success', __('settings.saved'));
         $this->redirect('/settings/academic');
+    }
+
+    // ------------------------------------------------------ Signatures
+    /**
+     * The two authorized signatures the school prints on its documents.
+     *
+     * This is a Settings screen, not a per-document prompt: configure the
+     * principal and student-affairs signatory once, choose the Arabic
+     * typeface that distinguishes them, and every document that declares
+     * those roles uses the same resolved block on every applicable page.
+     */
+    public function signatures(Request $request): void
+    {
+        $this->view('settings/signatures', [
+            'error' => null,
+            'errorId' => 0,
+            'rows' => (new SignatoryService())->settingsRows(),
+            'fonts' => SignatoryService::FONTS,
+            'placements' => SignatoryService::PLACEMENTS,
+        ]);
+    }
+
+    public function saveSignature(Request $request): void
+    {
+        $id = (int) ($request->paramString('id') ?? 0);
+        $service = new SignatoryService();
+
+        try {
+            $service->save(
+                $id,
+                [
+                    'name_ar' => (string) ($request->post('name_ar', '') ?? ''),
+                    'name_en' => (string) ($request->post('name_en', '') ?? ''),
+                    'title_ar' => (string) ($request->post('title_ar', '') ?? ''),
+                    'title_en' => (string) ($request->post('title_en', '') ?? ''),
+                    'font_key' => (string) ($request->post('font_key', '') ?? ''),
+                    'font_size' => (string) ($request->post('font_size', '10.5') ?? '10.5'),
+                    'font_weight' => (string) ($request->post('font_weight', '600') ?? '600'),
+                    'text_color' => (string) ($request->post('text_color', '#1F2937') ?? '#1F2937'),
+                    'letter_spacing' => (string) ($request->post('letter_spacing', '0') ?? '0'),
+                    'alignment' => (string) ($request->post('alignment', 'center') ?? 'center'),
+                    'placement' => (string) ($request->post('placement', 'every_page') ?? 'every_page'),
+                    'is_active' => $request->post('is_active') === '1',
+                ],
+                $request->file('signature'),
+                $request->file('stamp'),
+                $request->post('remove_signature') === '1',
+                $request->post('remove_stamp') === '1',
+            );
+        } catch (RuntimeException $exception) {
+            $key = match ($exception->getMessage()) {
+                'not_found' => 'settings.signatures.error.not_found',
+                'image_invalid' => 'settings.signatures.error.image',
+                default => 'settings.signatures.error.validation',
+            };
+            http_response_code(422);
+            $this->view('settings/signatures', [
+                'error' => __($key),
+                'errorId' => $id,
+                'rows' => $service->settingsRows(),
+                'fonts' => SignatoryService::FONTS,
+                'placements' => SignatoryService::PLACEMENTS,
+            ]);
+            return;
+        }
+
+        Flash::set('success', __('settings.saved'));
+        $this->redirect('/settings/signatures');
     }
 
     // -------------------------------------------------------- Security
@@ -279,10 +460,19 @@ final class SettingsController extends Controller
             return;
         }
 
-        SettingsService::set('security.login_max_attempts', $maxAttempts, 'int');
-        SettingsService::set('security.lockout_minutes', $lockoutMinutes, 'int');
-        SettingsService::set('security.session_timeout_minutes', $sessionTimeout, 'int');
-        ActivityLogger::log('settings.update', 'settings', null, 'Security settings updated');
+        $changes = [];
+        foreach ([
+            'security.login_max_attempts' => $maxAttempts,
+            'security.lockout_minutes' => $lockoutMinutes,
+            'security.session_timeout_minutes' => $sessionTimeout,
+        ] as $key => $value) {
+            $old = SettingsService::get($key);
+            if ((string) $old !== (string) $value) {
+                $changes[$key] = ['old' => $old, 'new' => $value];
+                SettingsService::set($key, $value, 'int');
+            }
+        }
+        SettingsAuditService::record('security', $changes, 'Security settings updated');
         Flash::set('success', __('settings.saved'));
         $this->redirect('/settings/security');
     }
@@ -337,8 +527,13 @@ final class SettingsController extends Controller
             return;
         }
 
-        SettingsService::set('backup.default_folder', $folder, 'string');
-        ActivityLogger::log('settings.update', 'settings', null, 'Backup settings updated');
+        $previous = (string) (SettingsService::get('backup.default_folder', 'database/backups') ?? 'database/backups');
+        if ($previous !== $folder) {
+            SettingsService::set('backup.default_folder', $folder, 'string');
+            SettingsAuditService::record('backup', [
+                'backup.default_folder' => ['old' => $previous, 'new' => $folder],
+            ], 'Backup destination updated');
+        }
         Flash::set('success', __('settings.saved'));
         $this->redirect('/settings/backup');
     }
@@ -346,5 +541,30 @@ final class SettingsController extends Controller
     private static function isPgsql(): bool
     {
         return Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
+    }
+
+    /** @return array{min_percent:int,warning_consecutive:int,warning_separate:int,critical_consecutive:int,critical_separate:int} */
+    private static function safeAttendanceDefaults(): array
+    {
+        $fallback = [
+            'min_percent' => 85, 'warning_consecutive' => 10, 'warning_separate' => 20,
+            'critical_consecutive' => 15, 'critical_separate' => 30,
+        ];
+        try {
+            $rules = AcademicRulesService::attendanceRules();
+            return array_intersect_key($rules, $fallback) + $fallback;
+        } catch (\Throwable) {
+            return $fallback;
+        }
+    }
+
+    /** @return array{completion_percent:int} */
+    private static function safeYearWorkDefaults(): array
+    {
+        try {
+            return AcademicRulesService::yearWorkRules('GENERAL_SECONDARY', 3);
+        } catch (\Throwable) {
+            return ['completion_percent' => 60];
+        }
     }
 }

@@ -15,6 +15,7 @@ $tabs = [
     'modules' => ['icon' => 'puzzle', 'label' => 'settings.tab.modules'],
     'localization' => ['icon' => 'grid', 'label' => 'settings.tab.localization'],
     'academic' => ['icon' => 'calendar', 'label' => 'settings.tab.academic'],
+    'signatures' => ['icon' => 'edit', 'label' => 'settings.tab.signatures'],
     'structure' => ['icon' => 'layers', 'label' => 'settings.tab.structure'],
     'security' => ['icon' => 'lock', 'label' => 'settings.tab.security'],
     'privacy' => ['icon' => 'shield-check', 'label' => 'settings.tab.privacy'],
@@ -25,7 +26,8 @@ $tabs = [
 <div class="n-settings-layout">
   <nav class="n-settings-nav" aria-label="<?= e(__('settings.title')) ?>">
     <?php foreach ($tabs as $slug => $tab): ?>
-      <a class="nav-link<?= $activeSettingsTab === $slug ? ' active' : '' ?>" href="/settings/<?= e($slug) ?>">
+      <a class="nav-link<?= $activeSettingsTab === $slug ? ' active' : '' ?>" href="/settings/<?= e($slug) ?>"
+         data-unsaved-nav-confirm data-unsaved-message="<?= e(__('settings.unsaved_warning')) ?>">
         <?= icon($tab['icon']) ?>
         <span><?= e(__($tab['label'])) ?></span>
       </a>

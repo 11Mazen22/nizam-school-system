@@ -54,6 +54,16 @@ if (Test-Path "$stage\app\storage\uploads") {
 }
 New-Item -ItemType Directory -Path "$stage\app\storage\uploads" -Force | Out-Null
 Set-Content -Path "$stage\app\storage\uploads\.htaccess" -Value "php_flag engine off`nOptions -ExecCGI"
+# Development sessions and generated document/ZIP artifacts are not part of
+# the product. They were tens of MB in this working tree and would otherwise
+# be copied verbatim into the installer, shipping other people's temp files.
+if (Test-Path "$stage\app\storage\sessions") {
+    Get-ChildItem "$stage\app\storage\sessions\*" -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+}
+if (Test-Path "$stage\app\storage\tmp") {
+    Remove-Item -Recurse -Force "$stage\app\storage\tmp"
+}
+New-Item -ItemType Directory -Path "$stage\app\storage\tmp" -Force | Out-Null
 # config/config.php itself must never ship -- the packaged product writes its
 # own into ProgramData via the Setup Wizard, exactly like every other install.
 Remove-Item -Path "$stage\app\config\config.php" -ErrorAction SilentlyContinue
@@ -103,7 +113,10 @@ Write-Host "Checking for stray external URLs in the staged app..."
 $externalHits = 0
 $searchFiles = Get-ChildItem -Path "$stage\app" -Include *.php, *.html, *.css, *.js -Recurse | Where-Object { $_.FullName -notmatch "\\vendor\\" }
 foreach ($file in $searchFiles) {
-    $matches = Select-String -Path $file.FullName -Pattern "https?://[a-zA-Z0-9.-]+" -AllMatches
+    # Require a real host name: a translation such as "starts with https://."
+    # is not a network dependency, but the old pattern matched its trailing
+    # full stop as a domain and wrongly aborted the offline-guarantee build.
+    $matches = Select-String -Path $file.FullName -Pattern "https?://[a-zA-Z0-9][a-zA-Z0-9.-]*" -AllMatches
     foreach ($m in $matches) {
         foreach ($g in $m.Matches) {
             if ($g.Value -notin @("http://www.w3.org", "http://", "https://")) {

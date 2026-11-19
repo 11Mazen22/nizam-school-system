@@ -17,7 +17,7 @@ $definitions = [
     'subjects' => 'id INT, name_en TEXT, name_ar TEXT',
     'teacher_assignments' => 'class_id INT, academic_year_id INT, subject_id INT, status VARCHAR(20)',
     'exams' => 'id INT, academic_year_id INT, max_score DECIMAL(5,2)',
-    'exam_scores' => 'id INT AUTO_INCREMENT PRIMARY KEY, exam_id INT, student_id INT, subject_id INT, score DECIMAL(5,2), notes VARCHAR(255), recorded_by INT, UNIQUE(exam_id,student_id,subject_id)',
+    'exam_scores' => 'id INT AUTO_INCREMENT PRIMARY KEY, exam_id INT, student_id INT, subject_id INT, score DECIMAL(5,2), notes VARCHAR(255), recorded_by INT, source VARCHAR(20) DEFAULT "manual", import_batch VARCHAR(40), UNIQUE(exam_id,student_id,subject_id)',
     'activity_logs' => 'user_id INT, action TEXT, entity_type TEXT, entity_id INT, description TEXT, metadata TEXT, ip_address TEXT',
 ];
 foreach ($definitions as $table => $columns) {

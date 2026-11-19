@@ -16,15 +16,23 @@ use RuntimeException;
 /**
  * Nizam -- timetable gaps and printed-name mapping.
  *
- * 507 of the 558 printed lessons loaded directly. The remaining 51 cells are
- * printed lessons that could not become rows: 38 have no teacher printed at
- * all, 12 collide because two different teachers share a first name and the
- * grid prints only that first name, and one is an absence-check period rather
- * than a lesson. They are stored as gaps so the school can see exactly where
- * the paper timetable and the digital one differ, and fill them in.
+ * Every printed cell that is a real lesson becomes a lesson row, because a
+ * class timetable with holes in it is not the school's timetable. The cells
+ * the first importer refused are exactly the ones the paper itself prints
+ * incompletely: activity periods with no teacher name, and first names the
+ * grid double-books in two classes at once. Those load faithfully: a lesson may
+ * have no teacher, and a cell the paper double-books keeps the printed name in
+ * printed_teacher while the database keeps its one-teacher-per-period
+ * guarantee. A gap remains only when a cell genuinely
+ * cannot be represented -- an unrecognised subject, or a teacher name that
+ * matches no staff record and must not be invented.
  */
 final class TimetableGapService
 {
+    /** The filter values the screen and the document accept, in display order. */
+    public const STATUSES = ['open', 'resolved', 'ignored', 'all'];
+    public const REASONS = ['no_teacher', 'teacher_conflict', 'unmapped_teacher', 'absence', 'other'];
+
     public function __construct(
         private readonly TimetableGapRepository $gaps = new TimetableGapRepository(),
         private readonly TimetableRepository $timetables = new TimetableRepository(),
@@ -36,11 +44,87 @@ final class TimetableGapService
     }
 
     /**
+     * One place that decides what a gap filter means, shared by the screen,
+     * its document and the repository query, so a printed list can never show
+     * a different selection than the page it was exported from.
+     *
+     * @param array<string,mixed> $input
+     * @return array{filters:array<string,mixed>, status:string, reason:string, class_id:int, teacher:string}
+     */
+    public static function normalizeFilters(array $input): array
+    {
+        $status = (string) ($input['status'] ?? 'open');
+        if (!in_array($status, self::STATUSES, true)) {
+            $status = 'open';
+        }
+        $reason = (string) ($input['reason'] ?? '');
+        if (!in_array($reason, self::REASONS, true)) {
+            $reason = '';
+        }
+        $classId = (int) ($input['class_id'] ?? 0);
+        $teacher = trim((string) ($input['teacher'] ?? ''));
+
+        $filters = [];
+        if ($status !== 'all') {
+            $filters['status'] = $status;
+        }
+        if ($reason !== '') {
+            $filters['reason'] = $reason;
+        }
+        if ($classId > 0) {
+            $filters['class_id'] = $classId;
+        }
+        if ($teacher !== '') {
+            $filters['teacher'] = $teacher;
+        }
+
+        return [
+            'filters' => $filters,
+            'status' => $status,
+            'reason' => $reason,
+            'class_id' => $classId,
+            'teacher' => $teacher,
+        ];
+    }
+
+    public static function statusLabel(string $status): string
+    {
+        return match ($status) {
+            'resolved' => __('timetable.gaps_resolved'),
+            'ignored' => __('timetable.gaps_ignored'),
+            'all' => __('timetable.gaps_filter_all'),
+            default => __('timetable.gaps_open'),
+        };
+    }
+
+    public static function reasonLabel(string $reason): string
+    {
+        return match ($reason) {
+            'no_teacher' => __('timetable.gaps_no_teacher'),
+            'teacher_conflict' => __('timetable.gaps_conflict'),
+            'unmapped_teacher' => __('timetable.gaps_unmapped'),
+            'absence' => __('timetable.gaps_absence'),
+            default => __('timetable.gaps_other'),
+        };
+    }
+
+    /** Bootstrap badge tone for a reason; the screen's only presentation concern. */
+    public static function reasonBadge(string $reason): string
+    {
+        return match ($reason) {
+            'no_teacher' => 'warning',
+            'teacher_conflict' => 'danger',
+            'unmapped_teacher', 'absence' => 'secondary',
+            default => 'light',
+        };
+    }
+
+    /**
      * Rebuilds the gap list from the extracted dataset. Idempotent: running it
      * again updates the printed text and the reason, keeps resolved/ignored
      * gaps as they are, and closes a gap whose lesson has since been loaded.
      *
-     * @return array{loaded:int, gaps:int, by_reason:array<string,int>, dry_run:bool}
+     * @return array{loaded:int, imported:int, gaps:int, by_reason:array<string,int>, dry_run:bool}
      */
     public function sync(int $yearId, string $jsonPath, bool $dryRun = false): array
     {
@@ -83,7 +167,7 @@ final class TimetableGapService
             $booked[(int) $row['teacher_id']][(int) $row['day_of_week']][(int) $row['period_number']] = true;
         }
 
-        $result = ['loaded' => 0, 'gaps' => 0, 'by_reason' => [], 'dry_run' => $dryRun];
+        $result = ['loaded' => 0, 'imported' => 0, 'gaps' => 0, 'by_reason' => [], 'dry_run' => $dryRun];
 
         foreach ($data['classes'] as $class) {
             $className = strtoupper((string) ($class['class_id'] ?? ''));
@@ -112,7 +196,7 @@ final class TimetableGapService
                             $classId,
                             $day,
                             $period,
-                            (int) $existing['teacher_id'],
+                            ($existing['teacher_id'] ?? null) !== null ? (int) $existing['teacher_id'] : null,
                             (int) $existing['subject_id'],
                             (int) $existing['id']
                         );
@@ -121,28 +205,89 @@ final class TimetableGapService
                 }
 
                 $teacherRaw = trim((string) ($cell['teacher'] ?? ''));
-                $primary = TimetableSource::primaryTeacher($teacherRaw);
-                $teacherId = $primary !== '' ? ($teacherIds[$primary] ?? null) : null;
+                $names = TimetableSource::teacherNames($teacherRaw);
+
+                // A group cell prints two teachers for one lesson ("خالد/إيناس").
+                // Use whichever printed name is on record and still free; only
+                // if both are busy does the paper itself clash.
+                $teacherId = null;
+                foreach ($names as $name) {
+                    $candidate = $teacherIds[$name] ?? null;
+                    if ($candidate !== null && !isset($booked[$candidate][$day][$period])) {
+                        $teacherId = $candidate;
+                        break;
+                    }
+                }
+                $printedTeacher = null;
+                if ($teacherId === null) {
+                    foreach ($names as $name) {
+                        if (isset($teacherIds[$name])) {
+                            // The paper schedules this teacher in two classes in
+                            // the same period. The database refuses a real
+                            // double-booking, so the lesson keeps the printed
+                            // name in printed_teacher and no teacher id: the
+                            // class timetable stays complete and the clash
+                            // stays visible instead of being dropped.
+                            $printedTeacher = $teacherRaw;
+                            break;
+                        }
+                    }
+                }
+                // The lesson is printed but no staff record carries the name:
+                // that is a mapping problem for the school, never a reason to
+                // invent a teacher.
+                $unmapped = $names !== [] && $teacherId === null && $printedTeacher === null;
+
+                $subjectId = TimetableSource::subjectName($label);
+                $subjectRowId = $subjectId !== null ? ($subjectIds[$subjectId] ?? null) : null;
 
                 if (in_array($label, TimetableSource::NOT_LESSONS, true)) {
                     $reason = 'absence';
-                } elseif ($teacherRaw === '') {
-                    $reason = 'no_teacher';
-                } elseif ($teacherId === null) {
-                    $reason = 'unmapped_teacher';
-                } elseif (isset($booked[$teacherId][$day][$period])) {
-                    $reason = 'teacher_conflict';
-                } else {
-                    // The cell prints a lesson and a known, free teacher but
-                    // still did not load -- e.g. a subject label outside the
-                    // package's vocabulary. Keep it visible rather than drop
-                    // it on the floor.
+                    $result['by_reason'][$reason] = ($result['by_reason'][$reason] ?? 0) + 1;
+                    $result['gaps']++;
+                } elseif ($subjectRowId === null) {
+                    // A subject label outside the package's vocabulary: keep it
+                    // visible rather than drop it on the floor.
                     $reason = 'other';
+                    $result['by_reason'][$reason] = ($result['by_reason'][$reason] ?? 0) + 1;
+                    $result['gaps']++;
+                } elseif ($unmapped) {
+                    $reason = 'unmapped_teacher';
+                    $result['by_reason'][$reason] = ($result['by_reason'][$reason] ?? 0) + 1;
+                    $result['gaps']++;
+                } elseif ($dryRun) {
+                    $result['imported']++;
+                    $reason = '';
+                } else {
+                    // The printed lesson loads exactly as printed: with its
+                    // teacher when the grid names one, without a teacher for an
+                    // activity period that prints none.
+                    $timetableId = $this->timetables->create(
+                        $yearId,
+                        $classId,
+                        $day,
+                        $period,
+                        $subjectRowId,
+                        $teacherId,
+                        count($names) > 1 ? $label . ' | ' . implode(' / ', $names) : null,
+                        $printedTeacher
+                    );
+                    $this->gaps->resolveSlot($yearId, $classId, $day, $period, $teacherId, $subjectRowId, $timetableId);
+                    $loaded[$classId][$day][$period] = [
+                        'id' => $timetableId,
+                        'teacher_id' => $teacherId,
+                        'subject_id' => $subjectRowId,
+                    ];
+                    if ($teacherId !== null) {
+                        $booked[$teacherId][$day][$period] = true;
+                    }
+                    $result['imported']++;
+                    $reason = '';
                 }
 
-                $subjectId = TimetableSource::subjectName($label);
-                $result['by_reason'][$reason] = ($result['by_reason'][$reason] ?? 0) + 1;
-                $result['gaps']++;
+                if ($reason === '' || $dryRun) {
+                    continue;
+                }
 
                 if (!$dryRun) {
                     $this->gaps->upsert(
@@ -321,6 +466,80 @@ final class TimetableGapService
     }
 
     /**
+     * Live conflict check for the printed-name mapping screen.
+     *
+     * Two independent problems are reported: the printed name already belongs
+     * to a different staff record, and attaching this teacher would put them in
+     * two rooms during the same lesson (the master timetable unique key would
+     * reject the gap resolution).
+     *
+     * @return array{conflict:bool,alias_owner:?array<string,mixed>,slot_conflicts:list<array<string,mixed>>}
+     */
+    public function mappingConflicts(int $yearId, string $printedName, ?int $teacherId): array
+    {
+        $printedName = trim($printedName);
+        $aliasOwner = null;
+
+        if ($printedName !== '') {
+            $aliases = $this->aliases->all();
+            $ownerId = (int) ($aliases[$printedName] ?? 0);
+            if ($ownerId > 0 && $ownerId !== $teacherId) {
+                $owner = $this->teachers->find($ownerId);
+                $aliasOwner = [
+                    'teacher_id' => $ownerId,
+                    'name' => (string) ($owner['full_name'] ?? ('#' . $ownerId)),
+                ];
+            }
+            foreach ($this->teachers->all('active') as $teacher) {
+                if ((string) $teacher['full_name'] === $printedName && (int) $teacher['id'] !== $teacherId) {
+                    $aliasOwner = [
+                        'teacher_id' => (int) $teacher['id'],
+                        'name' => (string) $teacher['full_name'],
+                    ];
+                    break;
+                }
+            }
+        }
+
+        $slotConflicts = [];
+        if ($teacherId !== null && $printedName !== '') {
+            foreach ($this->gaps->forYear($yearId, ['teacher' => $printedName, 'status' => 'open']) as $gap) {
+                $day = (int) $gap['day_of_week'];
+                $period = (int) $gap['period_number'];
+                if ($this->timetables->teacherSlotTaken($yearId, $teacherId, $day, $period)) {
+                    $slotConflicts[] = [
+                        'class' => (string) ($gap['class_name'] ?? ''),
+                        'day' => $day,
+                        'period' => $period,
+                    ];
+                }
+            }
+        }
+
+        return [
+            'conflict' => $aliasOwner !== null || $slotConflicts !== [],
+            'alias_owner' => $aliasOwner,
+            'slot_conflicts' => $slotConflicts,
+        ];
+    }
+
+    /** A normalized full name that already exists as a staff record. */
+    public function findTeacherByName(string $fullName, ?int $excludeId = null): ?array
+    {
+        $needle = mb_strtolower((string) preg_replace('/\s+/u', ' ', trim($fullName)));
+        if ($needle === '') {
+            return null;
+        }
+        foreach ($this->teachers->all('active') as $teacher) {
+            $name = mb_strtolower((string) preg_replace('/\s+/u', ' ', trim((string) $teacher['full_name'])));
+            if ($name === $needle && (int) $teacher['id'] !== $excludeId) {
+                return $teacher;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Renames the staff record that was auto-created from a printed first name
      * to the person's real full name. Lessons join the record by id, so the
      * whole timetable follows the rename immediately; the printed text is kept
@@ -339,6 +558,9 @@ final class TimetableGapService
         }
         if (mb_strlen($fullName) > 150) {
             throw new RuntimeException('name_too_long');
+        }
+        if ($this->findTeacherByName($fullName, $teacherId) !== null) {
+            throw new RuntimeException('teacher_duplicate');
         }
 
         (new TeacherService())->update(
@@ -390,6 +612,9 @@ final class TimetableGapService
         }
         if (mb_strlen($fullName) > 150) {
             throw new RuntimeException('name_too_long');
+        }
+        if ($this->findTeacherByName($fullName) !== null) {
+            throw new RuntimeException('teacher_duplicate');
         }
 
         $id = (new TeacherService())->create($fullName, null, null);

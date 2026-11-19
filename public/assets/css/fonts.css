@@ -27,3 +27,46 @@
   font-display: swap;
   src: url('/assets/fonts/manrope-latin.woff2') format('woff2');
 }
+
+/*
+ * Authorized-signature typefaces. Kept separate from the interface stack so
+ * the two signatories are visually distinct, and loaded only on the
+ * signatures settings screen / document preview where they are actually used.
+ * All three are SIL Open Font License (see the OFL text files alongside the
+ * binaries).
+ */
+@font-face {
+  font-family: 'Aref Ruqaa';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/ArefRuqaa-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Aref Ruqaa';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/ArefRuqaa-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/Amiri-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/Amiri-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Reem Kufi';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/ReemKufi-Regular.woff2') format('woff2');
+}

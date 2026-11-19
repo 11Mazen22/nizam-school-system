@@ -7,10 +7,11 @@ ob_start(); ?>
       <?= icon('chevron-left', 'n-flip-rtl') ?>
       <span><?= e(__('common.back')) ?></span>
     </a>
-    <button type="button" class="btn btn-outline-dark d-inline-flex align-items-center gap-2" data-print-report>
-      <?= icon('printer') ?>
-      <span><?= e(__('common.print')) ?></span>
-    </button>
+    <?php
+    $docKey = 'invoice';
+    $docParams = ['id' => (string) ((int) $invoice['id'])];
+    require dirname(__DIR__) . '/partials/export-menu.php';
+    ?>
     <?php if ($balance > 0 && hasPermission('finance.manage')): ?>
       <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#paymentModal">
         <?= icon('plus') ?>
@@ -39,24 +40,24 @@ $balance = max(0.0, $netAmount - (float) $invoice['paid_amount']);
           </li>
           <li class="d-flex justify-content-between mb-2">
             <span class="text-muted"><?= e(__('finance.gross_amount')) ?></span>
-            <span dir="ltr" class="font-monospace"><?= number_format((float) $invoice['total_amount'], 2) ?></span>
+            <span dir="ltr" class="font-monospace"><?= money($invoice['total_amount']) ?></span>
           </li>
           <li class="d-flex justify-content-between mb-2">
             <span class="text-muted"><?= e(__('finance.discount')) ?></span>
-            <span dir="ltr" class="font-monospace text-danger">- <?= number_format((float) $invoice['discount_amount'], 2) ?></span>
+            <span dir="ltr" class="font-monospace text-danger">- <?= money($invoice['discount_amount']) ?></span>
           </li>
           <hr>
           <li class="d-flex justify-content-between mb-2 fs-5">
             <span class="fw-semibold"><?= e(__('finance.net_amount')) ?></span>
-            <strong dir="ltr" class="font-monospace text-primary"><?= number_format($netAmount, 2) ?></strong>
+            <strong dir="ltr" class="font-monospace text-primary"><?= money($netAmount) ?></strong>
           </li>
           <li class="d-flex justify-content-between mb-2">
             <span class="text-muted"><?= e(__('finance.total_collected')) ?></span>
-            <span dir="ltr" class="font-monospace text-success"><?= number_format((float) $invoice['paid_amount'], 2) ?></span>
+            <span dir="ltr" class="font-monospace text-success"><?= money($invoice['paid_amount']) ?></span>
           </li>
           <li class="d-flex justify-content-between mb-0 fs-5">
             <span class="fw-semibold text-danger"><?= e(__('finance.balance_due')) ?></span>
-            <strong dir="ltr" class="font-monospace text-danger"><?= number_format($balance, 2) ?></strong>
+            <strong dir="ltr" class="font-monospace text-danger"><?= money($balance) ?></strong>
           </li>
         </ul>
       </div>
@@ -90,7 +91,7 @@ $balance = max(0.0, $netAmount - (float) $invoice['paid_amount']);
                 <?php foreach ($payments as $p): ?>
                   <tr>
                     <td dir="ltr" class="font-monospace small fw-bold text-success"><?= e($p['receipt_number']) ?></td>
-                    <td dir="ltr" class="font-monospace fw-semibold"><?= number_format((float) $p['amount'], 2) ?></td>
+                    <td dir="ltr" class="font-monospace fw-semibold"><?= money($p['amount']) ?></td>
                     <td><?= e(__('finance.method_' . $p['payment_method'])) ?></td>
                     <td dir="ltr" class="small"><?= e($p['payment_date']) ?></td>
                   </tr>

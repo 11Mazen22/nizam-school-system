@@ -150,7 +150,9 @@ final class AuthService
         $_SESSION['full_name'] = $user['full_name'];
         $_SESSION['role_code'] = $user['role_code'];
         $_SESSION['permissions'] = $this->users->permissionCodesFor((int) $user['id']);
-        $_SESSION['locale'] = $_SESSION['locale'] ?? 'ar';
+        // New session language comes from the DB-backed per-user preference,
+        // falling back to the school-wide default in Settings -> Localization.
+        LocaleService::seedSession((int) $user['id']);
 
         ActivityLogger::log('login', 'users', (int) $user['id'], "User '{$user['username']}' signed in");
     }

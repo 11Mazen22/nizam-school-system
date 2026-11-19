@@ -175,6 +175,69 @@ final class StudentRepository
     }
 
     /**
+     * Every active student in the year with the columns an official roster
+     * prints -- the whole school in one query, not a paginated screen slice.
+     * A document must never silently contain only the first page of students
+     * that the list screen happened to be showing.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function rosterForYear(
+        int $academicYearId,
+        int $gradeId = 0,
+        int $classId = 0,
+        string $missing = '',
+        string $religion = '',
+        string $term = ''
+    ): array {
+        $sql = "SELECT s.id, s.student_code, s.full_name, s.gender, s.date_of_birth, s.religion,
+                       s.phone, s.guardian_phone, s.address, s.status,
+                       c.name AS class_name, c.grade_id,
+                       g.name_en AS grade_name_en, g.name_ar AS grade_name_ar, g.sort_order
+                FROM students s
+                JOIN student_enrollments e ON e.student_id = s.id
+                     AND e.academic_year_id = :year AND e.status = 'active'
+                LEFT JOIN classes c ON c.id = e.class_id
+                LEFT JOIN grades g ON g.id = c.grade_id
+                WHERE s.status = 'active'";
+
+        if ($gradeId > 0) {
+            $sql .= ' AND c.grade_id = :grade_id';
+        }
+        if ($classId > 0) {
+            $sql .= ' AND e.class_id = :class_id';
+        }
+        if ($religion !== '') {
+            $sql .= ' AND s.religion = :religion';
+        }
+        if ($term !== '') {
+            $sql .= ' AND (LOWER(s.full_name) LIKE LOWER(:term1) OR LOWER(s.student_code) LIKE LOWER(:term2))';
+        }
+        $sql .= $this->missingCondition($missing);
+        $sql .= ' ORDER BY COALESCE(g.sort_order, 999) ASC, c.name ASC, s.full_name ASC';
+
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->bindValue(':year', $academicYearId, \PDO::PARAM_INT);
+        if ($gradeId > 0) {
+            $stmt->bindValue(':grade_id', $gradeId, \PDO::PARAM_INT);
+        }
+        if ($classId > 0) {
+            $stmt->bindValue(':class_id', $classId, \PDO::PARAM_INT);
+        }
+        if ($religion !== '') {
+            $stmt->bindValue(':religion', $religion);
+        }
+        if ($term !== '') {
+            $like = '%' . $term . '%';
+            $stmt->bindValue(':term1', $like);
+            $stmt->bindValue(':term2', $like);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * The completeness picture for the active year: how many students still
      * lack the fields the printed rosters never carried, and how many have
      * no linked guardian at all. Shown on the list so the school can work

@@ -12,6 +12,9 @@ ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('exams.max_score')) ?>: <?= e($exam['max_score']) ?> &nbsp;|&nbsp; <?= e(__('exams.term')) ?> <?= (int)$exam['term'] ?></p>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
 <a href="/exams" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?> <?= e(__('common.back')) ?></a>
+<a href="/exams/<?= (int) $exam['id'] ?>/scores/import?class_id=<?= (int) ($classId ?? 0) ?>" class="btn btn-outline-success">
+  <?= icon('upload') ?> <?= e(__('exams.import_title')) ?>
+</a>
 <?php
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';

@@ -1,0 +1,235 @@
+/*
+ * The application-side interface of the NIZAM Document Engine: the export
+ * action menu, the preview modal, and the bulk-export progress dialog.
+ *
+ * Deliberately separate from document.css -- that file is the printed
+ * document's own design system and must never leak application styling into
+ * a generated file, or the reverse.
+ */
+
+/* The export menu lives in the shared page hero, which clips its own
+   decorative background. A dropdown inside it would be cut off at the hero's
+   bottom edge (the menu opened and only its first item was visible), so the
+   hero releases that clip on the screens that actually carry an export menu.
+   Its background gradients never overflow, so nothing else changes. */
+.n-hero:has(.n-export),
+.n-profile-hero:has(.n-export) { overflow: visible; }
+.n-hero:has(.n-export)::after {
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+}
+
+.n-export { display: inline-flex; }
+
+.n-export .n-export-group { align-items: stretch; }
+
+.n-export .n-export-main { display: inline-flex; align-items: center; gap: .45rem; }
+
+.n-export .n-export-toggle { padding-inline: .5rem; }
+
+.n-export-menu {
+  min-width: 15rem;
+  padding: .4rem;
+  border: 1px solid #DCE4DE;
+  border-radius: .75rem;
+  box-shadow: 0 1rem 2.5rem rgba(15, 81, 50, .14);
+}
+
+.n-export-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .5rem .65rem;
+  border-radius: .5rem;
+  font-size: .875rem;
+}
+
+.n-export-menu .dropdown-item .n-icon { color: #64748B; flex: 0 0 auto; }
+.n-export-menu .dropdown-item:hover .n-icon { color: #0F5132; }
+
+/* ------------------------------------------------------------- preview */
+
+.n-doc-modal .modal-content {
+  border: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2rem 4rem rgba(15, 25, 20, .22);
+}
+
+.n-doc-modal-head {
+  flex-wrap: wrap;
+  gap: .75rem;
+  background: #F7F9F7;
+  border-bottom: 1px solid #DCE4DE;
+  padding: .85rem 1.1rem;
+}
+
+.n-doc-modal-title { display: flex; align-items: center; gap: .7rem; }
+
+.n-doc-modal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: .65rem;
+  background: #EAF3ED;
+  color: #0F5132;
+}
+
+.n-doc-modal-tools {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+}
+
+.n-doc-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.n-doc-toggle input { accent-color: #0F5132; margin: 0; }
+
+.n-doc-preview-body {
+  position: relative;
+  padding: 0;
+  background: #E9EDEA;
+  height: min(68vh, 780px);
+}
+
+.n-doc-preview-frame { position: absolute; inset: 0; }
+.n-doc-preview-frame iframe { width: 100%; height: 100%; border: 0; background: #E9EDEA; display: block; }
+
+.n-doc-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  background: rgba(233, 237, 234, .96);
+  color: #475569;
+  font-size: .875rem;
+}
+
+.n-doc-spinner {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  border: 2px solid rgba(15, 81, 50, .18);
+  border-top-color: #0F5132;
+  animation: n-doc-spin .8s linear infinite;
+}
+
+@keyframes n-doc-spin { to { transform: rotate(360deg); } }
+
+.n-doc-error {
+  position: absolute;
+  inset: auto 1rem 1rem;
+  z-index: 4;
+  background: #FFF1F0;
+  border: 1px solid #F1C7C4;
+  color: #8C2F2A;
+  border-radius: .6rem;
+  padding: .7rem .9rem;
+  font-size: .85rem;
+}
+
+.n-doc-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  flex-wrap: wrap;
+  background: #F7F9F7;
+  border-top: 1px solid #DCE4DE;
+}
+
+.n-doc-foot-hint { font-size: .78rem; color: #64748B; max-width: 46ch; }
+.n-doc-foot-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.n-doc-foot-actions .btn { display: inline-flex; align-items: center; gap: .4rem; }
+
+/* ---------------------------------------------------------------- bulk */
+
+.n-doc-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .75rem;
+  font-size: .875rem;
+  margin-bottom: .6rem;
+}
+
+.n-doc-progress-count { color: #0F5132; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.n-doc-progress-bar {
+  height: .6rem;
+  border-radius: 999px;
+  background: #E6ECE8;
+  overflow: hidden;
+}
+
+.n-doc-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0F5132, #1C7A4E);
+  transition: width .25s ease;
+}
+
+.n-doc-progress-item {
+  margin: .65rem 0 0;
+  font-size: .82rem;
+  color: #475569;
+  min-height: 1.2em;
+}
+
+.n-doc-progress-error { margin: .5rem 0 0; font-size: .8rem; color: #B4493F; }
+
+.n-doc-bulk-done { text-align: center; padding: 1.4rem .5rem; }
+.n-doc-bulk-check { color: #1C7A4E; display: inline-flex; margin-bottom: .5rem; }
+
+/* --------------------------------------------------------------- toasts */
+
+.n-toast-stack {
+  position: fixed;
+  inset-block-end: 1.25rem;
+  inset-inline-end: 1.25rem;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  max-width: min(24rem, calc(100vw - 2rem));
+}
+
+.n-toast {
+  background: #0F5132;
+  color: #fff;
+  border-radius: .7rem;
+  padding: .7rem .95rem;
+  font-size: .84rem;
+  line-height: 1.5;
+  box-shadow: 0 .6rem 1.6rem rgba(15, 25, 20, .2);
+  animation: n-toast-in .2s ease both;
+}
+
+.n-toast-danger { background: #8C2F2A; }
+.n-toast.is-leaving { opacity: 0; transform: translateY(.35rem); transition: all .24s ease; }
+
+@keyframes n-toast-in { from { opacity: 0; transform: translateY(.5rem); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 767.98px) {
+  .n-doc-preview-body { height: 62vh; }
+  .n-doc-modal-tools { width: 100%; }
+  .n-doc-foot-hint { display: none; }
+  .n-doc-foot-actions { width: 100%; }
+  .n-doc-foot-actions .btn { flex: 1 1 auto; justify-content: center; }
+}

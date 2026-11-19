@@ -8,6 +8,7 @@ use App\Controller;
 use App\Database;
 use App\Middleware\AcademicYearContext;
 use App\Request;
+use App\Services\AcademicRulesService;
 
 /**
  * Nizam -- weekly assessment distribution.
@@ -40,9 +41,22 @@ final class AssessmentController extends Controller
             }
         }
 
+        $yearWork = null;
+        if ($yearId !== null) {
+            $label = (string) (AcademicYearContext::label() ?? '');
+            $yearWork = [
+                'year' => $label,
+                'grade11' => AcademicRulesService::yearWorkRules('BACCALAUREATE', 2, $label),
+                'grade12' => AcademicRulesService::yearWorkRules('BACCALAUREATE', 3, $label),
+                'tracks11' => AcademicRulesService::tracksForGrade(2, $label),
+                'tracks12' => AcademicRulesService::tracksForGrade(3, $label),
+            ];
+        }
+
         $this->view('assessments/index', [
             'byClass' => $byClass,
             'hasActiveYear' => $yearId !== null,
+            'yearWork' => $yearWork,
         ]);
     }
 }

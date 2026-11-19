@@ -181,19 +181,19 @@ $yearLabel = \App\Middleware\AcademicYearContext::label();
           <div class="col">
             <div class="p-3 border rounded bg-light">
               <div class="small text-muted"><?= e(__('finance.total_billed')) ?></div>
-              <div class="fs-4 fw-bold" dir="ltr"><?= number_format((float) $fin['total_billed'], 2) ?></div>
+              <div class="fs-4 fw-bold" dir="ltr"><?= money($fin['total_billed']) ?></div>
             </div>
           </div>
           <div class="col">
             <div class="p-3 border rounded bg-light">
               <div class="small text-muted"><?= e(__('finance.total_collected')) ?></div>
-              <div class="fs-4 fw-bold text-success" dir="ltr"><?= number_format((float) $fin['total_collected'], 2) ?></div>
+              <div class="fs-4 fw-bold text-success" dir="ltr"><?= money($fin['total_collected']) ?></div>
             </div>
           </div>
           <div class="col">
             <div class="p-3 border rounded bg-light">
               <div class="small text-muted"><?= e(__('finance.total_outstanding')) ?></div>
-              <div class="fs-4 fw-bold text-danger" dir="ltr"><?= number_format((float) $fin['total_outstanding'], 2) ?></div>
+              <div class="fs-4 fw-bold text-danger" dir="ltr"><?= money($fin['total_outstanding']) ?></div>
             </div>
           </div>
         </div>

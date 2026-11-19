@@ -4,6 +4,7 @@
  *
  * @var array<string, list<array<string, mixed>>> $byClass
  * @var bool                                      $hasActiveYear
+ * @var array<string,mixed>|null                  $yearWork
  */
 use App\Middleware\CsrfMiddleware;
 
@@ -28,6 +29,24 @@ ob_start(); ?>
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
+
+<?php if (!empty($yearWork)): ?>
+  <div class="card mb-3 n-reveal">
+    <div class="card-body d-flex flex-wrap align-items-center gap-2">
+      <?= icon('clipboard-check', 'text-success') ?>
+      <strong><?= e(__('assessments.yearwork_title')) ?></strong>
+      <span class="text-muted small"><?= e($yearWork['year']) ?></span>
+      <span class="ms-auto"></span>
+      <span class="badge text-bg-<?= $yearWork['grade11']['enabled'] ? 'success' : 'secondary' ?>">
+        <?= e(__('students.grade_2')) ?>: <?= e($yearWork['grade11']['enabled'] ? __('common.enabled') : __('common.disabled')) ?>
+      </span>
+      <span class="badge text-bg-<?= $yearWork['grade12']['enabled'] ? 'success' : 'secondary' ?>">
+        <?= e(__('students.grade_3')) ?>: <?= e($yearWork['grade12']['enabled'] ? __('common.enabled') : __('common.disabled')) ?>
+      </span>
+      <span class="badge text-bg-light border"><?= e(__('assessments.yearwork_required')) ?>: <?= (int) $yearWork['grade11']['completion_percent'] ?>%</span>
+    </div>
+  </div>
+<?php endif; ?>
 
 <?php if (!$hasActiveYear): ?>
   <div class="n-empty-state">

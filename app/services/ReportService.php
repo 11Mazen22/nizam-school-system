@@ -378,6 +378,8 @@ final class ReportService
             // locale -- an ISO-ish Y-m-d order is unambiguous in both
             // directions, which is the actual goal, not a per-locale format.
             'generated_at' => date('Y-m-d H:i'),
+            'school_name' => SchoolSettingsService::displayName($locale),
+            'school_logo_url' => '/logo',
             'year_label' => $year['label'],
             'filters_summary' => $filtersSummary,
             'headers' => $headers,

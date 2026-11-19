@@ -205,7 +205,7 @@ final class BackupService
      * in memory, at creation time stays valid regardless, since the actual
      * .sql file on disk is never touched by a later restore.
      *
-     * @return array{id: int, filename: string}
+     * @return array{id: int, filename: string, record_count: int, table_count: int}
      */
     public function run(string $type, ?int $userId = null, ?string $notes = null): array
     {
@@ -241,6 +241,27 @@ final class BackupService
         $handle = false;
         $uploaded = false;
 
+        // Resolve the table set once so both the manifest and the dump cover
+        // exactly the same tables (including any added by newer migrations).
+        $tablesToDump = $isPgsql
+            ? self::orderedTables($pdo)
+            : array_values(array_unique(array_merge(
+                array_intersect(self::TABLE_ORDER, $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN)),
+                $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN)
+            )));
+        $recordCounts = [];
+        $totalRecords = 0;
+        foreach ($tablesToDump as $table) {
+            try {
+                $quoted = $isPgsql ? '"' . $table . '"' : '`' . $table . '`';
+                $count = (int) $pdo->query('SELECT COUNT(*) FROM ' . $quoted)->fetchColumn();
+            } catch (\Throwable) {
+                $count = 0;
+            }
+            $recordCounts[$table] = $count;
+            $totalRecords += $count;
+        }
+
         try {
             $handle = fopen($filepath, 'wb');
             if ($handle === false) {
@@ -256,22 +277,20 @@ final class BackupService
             $schemaVersion = count($this->migrations->getAppliedMigrations($pdo));
             $formatVersion = $isPgsql ? self::FORMAT_VERSION_PGSQL : self::FORMAT_VERSION_MYSQL;
             $write(sprintf("-- NIZAM-BACKUP %s schema=%04d\n", $formatVersion, $schemaVersion));
-            $write("-- Hadaba Al-Ahram Language School Backup\n-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n\n");
+            $write("-- Created: " . date('Y-m-d H:i:s') . "\n-- Type: {$type}\n");
+            $manifest = [
+                'app_version' => '1.1.0',
+                'created_by' => (string) ($userId ?? ''),
+                'table_count' => count($tablesToDump),
+                'record_count' => $totalRecords,
+                'records_per_table' => $recordCounts,
+            ];
+            $write('-- Manifest: ' . json_encode($manifest, JSON_UNESCAPED_UNICODE) . "\n\n");
 
-            if ($isPgsql) {
-                foreach (self::orderedTables($pdo) as $table) {
+            foreach ($tablesToDump as $table) {
+                if ($isPgsql) {
                     $this->dumpTablePgsql($pdo, $table, $write);
-                }
-            } else {
-                $actualTables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-                $tablesToDump = array_values(array_intersect(self::TABLE_ORDER, $actualTables));
-                foreach ($actualTables as $table) {
-                    if (!in_array($table, $tablesToDump, true)) {
-                        $tablesToDump[] = $table;
-                    }
-                }
-
-                foreach ($tablesToDump as $table) {
+                } else {
                     $this->dumpTable($pdo, $table, $write);
                 }
             }
@@ -300,7 +319,7 @@ final class BackupService
             ]);
             ActivityLogger::log('backup.created', 'backups', $id, "Created {$type} backup: {$filename} ({$size} bytes)");
 
-            return ['id' => $id, 'filename' => $filename];
+            return ['id' => $id, 'filename' => $filename, 'record_count' => $totalRecords, 'table_count' => count($tablesToDump)];
         } catch (Throwable $e) {
             if (is_resource($handle)) {
                 fclose($handle);

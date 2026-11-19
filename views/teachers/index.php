@@ -8,6 +8,11 @@ ob_start(); ?>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
 <div class="n-stat-mini"><span class="n-stat-mini-value" data-count-up><?= count($teachers) ?></span><span class="n-stat-mini-label"><?= e(__('teachers.total_teachers')) ?></span></div><?php if ($canCreate): ?><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal"><?= icon('upload') ?><?= e(__('app.import')) ?></button><a href="/teachers/create" class="btn btn-primary"><?= icon('plus') ?><?= e(__('teachers.add')) ?></a><?php endif; ?>
 <?php
+$docKey = 'teachers';
+$docParams = ['q' => (string) $q, 'religion' => (string) $religion, 'subject' => ''];
+require dirname(__DIR__) . '/partials/export-menu.php';
+?>
+<?php
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>

@@ -10,7 +10,9 @@ use App\Middleware\AcademicYearContext;
 use App\Repositories\ClassRepository;
 use App\Repositories\EnrollmentRepository;
 use App\Request;
+use App\Services\AttendancePolicyService;
 use App\Services\AttendanceService;
+use App\Services\SchoolSettingsService;
 use RuntimeException;
 
 final class AttendanceController extends Controller
@@ -49,6 +51,8 @@ final class AttendanceController extends Controller
             'students'  => $students,
             'existing'  => $existing,
             'yearId'    => $yearId,
+            'workingDays' => SchoolSettingsService::workingWeekdays(),
+            'isWorkingDay' => SchoolSettingsService::isWorkingDate($date),
         ]);
     }
 
@@ -62,6 +66,11 @@ final class AttendanceController extends Controller
         if ($classId <= 0) {
             Flash::set('danger', __('attendance.no_class'));
             $this->redirect('/attendance');
+            return;
+        }
+        if (!SchoolSettingsService::isWorkingDate($date)) {
+            Flash::set('danger', __('attendance.non_working_day'));
+            $this->redirect('/attendance?class_id=' . $classId . '&date=' . urlencode($date));
             return;
         }
 
@@ -117,6 +126,10 @@ final class AttendanceController extends Controller
             $chronic = $this->service->getChronicAbsentees($yearId);
         }
 
+        $alerts = $yearId
+            ? (new AttendancePolicyService())->alertsForYear($yearId, $classId > 0 ? $classId : null)
+            : [];
+
         $this->view('attendance/report', [
             'classes'  => $classes,
             'classId'  => $classId,
@@ -127,6 +140,7 @@ final class AttendanceController extends Controller
             'summary'  => $summary,
             'summaryTotal' => $summaryTotal,
             'chronic'  => $chronic,
+            'alerts'   => $alerts,
         ]);
     }
 }

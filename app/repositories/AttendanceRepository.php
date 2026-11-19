@@ -7,7 +7,7 @@ namespace App\Repositories;
 use App\Database;
 use PDO;
 
-final class AttendanceRepository
+class AttendanceRepository
 {
     /**
      * Load all records for a class on a given date, keyed by student_id.
@@ -90,7 +90,7 @@ final class AttendanceRepository
      * Students with absence_count >= threshold in the active year — chronic absenteeism flag.
      * @return array<int, array<string,mixed>>
      */
-    public function chronicAbsentees(int $yearId, int $threshold = 5): array
+    public function chronicAbsentees(int $yearId, ?int $threshold = null): array
     {
         $stmt = Database::connection()->prepare(
             "SELECT ar.student_id, s.full_name, s.student_code,
@@ -106,6 +106,10 @@ final class AttendanceRepository
              HAVING COUNT(*) >= :threshold
              ORDER BY absent_count DESC"
         );
+        if ($threshold === null) {
+            $rules = \App\Services\AcademicRulesService::attendanceRules();
+            $threshold = $rules['warning_separate'];
+        }
         $stmt->execute(['year' => $yearId, 'threshold' => $threshold]);
         return $stmt->fetchAll();
     }
@@ -164,4 +168,57 @@ final class AttendanceRepository
         $stmt->execute(['class' => $classId, 'from' => $from, 'to' => $to]);
         return $stmt->fetchAll();
     }
+    /**
+     * Every recorded status for one student in a year, keyed by YYYY-MM-DD.
+     * Used by the attendance policy engine for streaks and eligibility.
+     *
+     * @return array<string,string> date => status
+     */
+    public function statusesForStudent(int $studentId, int $yearId, ?string $to = null): array
+    {
+        $sql = 'SELECT record_date, status FROM attendance_records
+                 WHERE student_id = :student AND academic_year_id = :year';
+        $params = ['student' => $studentId, 'year' => $yearId];
+        if ($to !== null) {
+            $sql .= ' AND record_date <= :to';
+            $params['to'] = $to;
+        }
+        $sql .= ' ORDER BY record_date ASC';
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->execute($params);
+        $map = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $map[(string) $row['record_date']] = (string) $row['status'];
+        }
+        return $map;
+    }
+
+    /** @return array<int,array<string,string>> student id => (date => status) */
+    public function statusesForYear(int $yearId, ?string $to = null): array
+    {
+        $sql = 'SELECT student_id, record_date, status FROM attendance_records
+                 WHERE academic_year_id = :year';
+        $params = ['year' => $yearId];
+        if ($to !== null) {
+            $sql .= ' AND record_date <= :to';
+            $params['to'] = $to;
+        }
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->execute($params);
+        $map = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $map[(int) $row['student_id']][(string) $row['record_date']] = (string) $row['status'];
+        }
+        return $map;
+    }
+
+    /** Minimal identity used by absence notifications. */
+    public function studentIdentity(int $studentId): ?array
+    {
+        $stmt = Database::connection()->prepare('SELECT id, full_name, student_code FROM students WHERE id = :id');
+        $stmt->execute(['id' => $studentId]);
+        $row = $stmt->fetch();
+        return $row === false ? null : $row;
+    }
+
 }

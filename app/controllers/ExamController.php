@@ -10,9 +10,11 @@ use App\Middleware\AcademicYearContext;
 use App\Repositories\ClassRepository;
 use App\Repositories\ExamRepository;
 use App\Request;
+use App\Response;
+use App\Services\ExamScoreImportService;
 use App\Services\ExamService;
-use Mpdf\Mpdf;
 use RuntimeException;
+use Throwable;
 
 final class ExamController extends Controller
 {
@@ -143,6 +145,226 @@ final class ExamController extends Controller
         $this->redirect("/exams/{$examId}/scores?class_id={$classId}&subject_id={$subjectId}");
     }
 
+    // ── Excel score import ────────────────────────────────────────────────────
+
+    private const IMPORT_SESSION = 'exam_score_import';
+
+    /** GET /exams/{id}/scores/import — workbook upload and template download. */
+    public function importForm(Request $request): void
+    {
+        $context = $this->importContext($request);
+        if ($context === null) {
+            $this->redirect('/exams');
+            return;
+        }
+
+        $this->view('exams/score-import', [
+            'exam' => $context['exam'],
+            'classes' => $context['classes'],
+            'classId' => $context['classId'],
+            'headers' => ExamScoreImportService::HEADERS,
+        ]);
+    }
+
+    /** GET /exams/{id}/scores/import/template?class_id=N */
+    public function importTemplate(Request $request): void
+    {
+        $context = $this->importContext($request);
+        if ($context === null) {
+            $this->redirect('/exams');
+            return;
+        }
+
+        try {
+            $bytes = (new ExamScoreImportService())->template(
+                (int) $context['exam']['id'],
+                $context['classId'],
+                currentLocale()
+            );
+        } catch (RuntimeException) {
+            Flash::set('danger', __('exams.import_class_required'));
+            $this->redirect('/exams/' . (int) $context['exam']['id'] . '/scores/import?class_id=' . $context['classId']);
+            return;
+        }
+
+        Response::noStore();
+        Response::downloadFile(
+            $bytes,
+            'exam-scores-' . (string) $context['classId'] . '.xlsx',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        exit;
+    }
+
+    /** POST /exams/{id}/scores/import/preview — parse + validate, write nothing. */
+    public function importPreview(Request $request): void
+    {
+        $context = $this->importContext($request);
+        if ($context === null) {
+            $this->redirect('/exams');
+            return;
+        }
+        $examId = (int) $context['exam']['id'];
+        $classId = $context['classId'];
+        $back = "/exams/{$examId}/scores/import?class_id={$classId}";
+
+        $file = $_FILES['scores_file'] ?? null;
+        if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            Flash::set('danger', __('exams.import_file_missing'));
+            $this->redirect($back);
+            return;
+        }
+
+        try {
+            $service = new ExamScoreImportService();
+            $parsed = $service->parse((string) $file['tmp_name']);
+            if ($parsed === []) {
+                Flash::set('warning', __('exams.import_no_rows'));
+                $this->redirect($back);
+                return;
+            }
+            $result = $service->validate($parsed, $examId, $classId);
+        } catch (RuntimeException $e) {
+            Flash::set('danger', __($this->importErrorKey($e->getMessage())));
+            $this->redirect($back);
+            return;
+        } catch (Throwable $e) {
+            error_log('Exam score import parse error: ' . $e->getMessage());
+            Flash::set('danger', __('exams.import_unreadable'));
+            $this->redirect($back);
+            return;
+        }
+
+        $token = bin2hex(random_bytes(12));
+        $directory = dataPath() . '/storage/imports/exam-scores';
+        @mkdir($directory, 0775, true);
+        $path = $directory . '/' . $token . '.xlsx';
+        if (!move_uploaded_file((string) $file['tmp_name'], $path) && !rename((string) $file['tmp_name'], $path)) {
+            Flash::set('danger', __('exams.import_unreadable'));
+            $this->redirect($back);
+            return;
+        }
+
+        $staged = $_SESSION[self::IMPORT_SESSION] ?? [];
+        if (!is_array($staged)) {
+            $staged = [];
+        }
+        foreach ($staged as $oldToken => $old) {
+            if (!is_array($old) || (int) ($old['created_at'] ?? 0) < time() - 3600) {
+                if (is_string($old['path'] ?? null) && is_file($old['path'])) {
+                    @unlink($old['path']);
+                }
+                unset($staged[$oldToken]);
+            }
+        }
+        $staged[$token] = [
+            'path' => $path,
+            'exam_id' => $examId,
+            'class_id' => $classId,
+            'file' => (string) ($file['name'] ?? ''),
+            'created_at' => time(),
+        ];
+        $_SESSION[self::IMPORT_SESSION] = $staged;
+
+        $this->view('exams/score-import-preview', [
+            'exam' => $context['exam'],
+            'classId' => $classId,
+            'className' => $context['className'],
+            'token' => $token,
+            'rows' => $result['rows'],
+            'counts' => $result['counts'],
+            'fileName' => (string) ($file['name'] ?? ''),
+        ]);
+    }
+
+    /** POST /exams/{id}/scores/import/commit — re-validate, then write in one transaction. */
+    public function importCommit(Request $request): void
+    {
+        $examId = (int) ($request->paramInt('id') ?? 0);
+        $token = (string) ($request->post('token', '') ?: '');
+        $staged = is_array($_SESSION[self::IMPORT_SESSION] ?? null)
+            ? ($_SESSION[self::IMPORT_SESSION][$token] ?? null) : null;
+
+        if (!is_array($staged) || (int) $staged['exam_id'] !== $examId) {
+            Flash::set('danger', __('exams.import_expired'));
+            $this->redirect('/exams/' . $examId . '/scores');
+            return;
+        }
+        unset($_SESSION[self::IMPORT_SESSION][$token]);
+        $path = (string) ($staged['path'] ?? '');
+
+        try {
+            $service = new ExamScoreImportService();
+            $parsed = $service->parse($path);
+            $result = $service->validate($parsed, (int) $staged['exam_id'], (int) $staged['class_id']);
+            if ($result['counts']['error'] > 0) {
+                Flash::set('danger', __('exams.import_errors_changed'));
+                $this->redirect('/exams/' . $examId . '/scores/import?class_id=' . (int) $staged['class_id']);
+                return;
+            }
+            $outcome = $service->commit(
+                $result['rows'],
+                $examId,
+                (int) ($_SESSION['user_id'] ?? 0) ?: null
+            );
+            Flash::set('success', strtr(__('exams.import_done'), ['{saved}' => (string) $outcome['saved']]));
+        } catch (RuntimeException $e) {
+            Flash::set('danger', __($this->importErrorKey($e->getMessage())));
+        } catch (Throwable $e) {
+            error_log('Exam score import commit error: ' . $e->getMessage());
+            Flash::set('danger', __('exams.import_failed'));
+        } finally {
+            if ($path !== '' && is_file($path)) {
+                @unlink($path);
+            }
+        }
+
+        $this->redirect("/exams/{$examId}/scores?class_id=" . (int) $staged['class_id']);
+    }
+
+    private function importErrorKey(string $code): string
+    {
+        return match ($code) {
+            'exam_import_file_missing' => 'exams.import_file_missing',
+            'exam_import_file_too_large' => 'exams.import_file_too_large',
+            'exam_import_format' => 'exams.import_format',
+            'exam_import_unreadable' => 'exams.import_unreadable',
+            'exam_import_empty' => 'exams.import_no_rows',
+            'exam_import_headers' => 'exams.import_headers',
+            'exam_import_too_many_rows' => 'exams.import_too_many_rows',
+            'exam_not_found' => 'exams.import_exam_not_found',
+            'class_not_found' => 'exams.import_class_not_found',
+            'export_failed' => 'exams.import_export_failed',
+            default => 'exams.import_failed',
+        };
+    }
+
+    /** @return array{exam:array,classes:array,classId:int,className:string}|null */
+    private function importContext(Request $request): ?array
+    {
+        $examId = (int) ($request->paramInt('id') ?? 0);
+        $yearId = AcademicYearContext::activeYearId();
+        $exam = $this->repo->find($examId);
+        if ($exam === null || $yearId === null || (int) $exam['academic_year_id'] !== $yearId) {
+            Flash::set('danger', __('exams.not_found'));
+            return null;
+        }
+        $classes = $this->classes->allForYear($yearId);
+        $classId = (int) ($request->query('class_id') ?? $request->post('class_id', '0') ?? '0');
+        if ($classId > 0 && !in_array($classId, array_map('intval', array_column($classes, 'id')), true)) {
+            $classId = 0;
+        }
+        $className = '';
+        foreach ($classes as $class) {
+            if ((int) $class['id'] === $classId) {
+                $className = trim((string) $class['name']);
+                break;
+            }
+        }
+
+        return ['exam' => $exam, 'classes' => $classes, 'classId' => $classId, 'className' => $className];
+    }
+
     /** GET /exams/ranking?class_id=N — class ranking table. */
     public function ranking(Request $request): void
     {
@@ -174,30 +396,26 @@ final class ExamController extends Controller
         $studentId = $request->paramInt('id') ?? 0;
         $yearId    = AcademicYearContext::activeYearId() ?? 0;
 
-        $report = $this->service->getStudentReport($studentId, $yearId);
-
-        // Check if mPDF is available
-        if (!class_exists(Mpdf::class)) {
-            Flash::set('danger', __('exams.pdf_unavailable'));
-            $this->redirect('/exams');
+        // The report card is a NIZAM document like every other export: one
+        // engine, one design system, correct Arabic shaping. The previous
+        // mPDF view here rendered the same data with a fallback font and no
+        // institutional identity, so it was retired with the rest of the
+        // legacy print path.
+        try {
+            $result = (new \App\Services\Documents\DocumentEngine())->export(
+                'report-card',
+                ['student_id' => (string) $studentId],
+                'pdf',
+                []
+            );
+        } catch (\Throwable) {
+            Flash::set('danger', __('document.errors.generic'));
+            $this->redirect('/students/' . $studentId);
             return;
         }
 
-        // Fetch student name for PDF header
-        $studentRow = \App\Database::connection()
-            ->prepare('SELECT full_name, student_code FROM students WHERE id = :id');
-        $studentRow->execute(['id' => $studentId]);
-        $student = $studentRow->fetch() ?: ['full_name' => "Student #{$studentId}", 'student_code' => ''];
-
-        $mpdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'default_font' => 'dejavusans']);
-        $mpdf->SetDirectionality(currentLocale() === 'ar' ? 'rtl' : 'ltr');
-
-        ob_start();
-        require dirname(__DIR__, 2) . '/views/exams/report_card_pdf.php';
-        $html = ob_get_clean();
-
-        $mpdf->WriteHTML($html);
-        $mpdf->Output("report_card_{$studentId}.pdf", 'I');
+        \App\Response::noStore();
+        \App\Response::downloadFile($result['bytes'], $result['filename'], $result['contentType'], true);
         exit;
     }
 }

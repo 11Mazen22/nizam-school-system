@@ -66,10 +66,10 @@ require dirname(__DIR__) . '/layout/start.php';
                 </td>
                 <td><?= e($inv['title']) ?></td>
                 <td dir="ltr" class="font-monospace fw-semibold">
-                  <?= number_format((float) $inv['total_amount'] - (float) $inv['discount_amount'], 2) ?>
+                  <?= money((float) $inv['total_amount'] - (float) $inv['discount_amount']) ?>
                 </td>
                 <td dir="ltr" class="font-monospace text-success">
-                  <?= number_format((float) $inv['paid_amount'], 2) ?>
+                  <?= money($inv['paid_amount']) ?>
                 </td>
                 <td>
                   <?php if ($inv['status'] === 'paid'): ?>

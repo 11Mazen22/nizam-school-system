@@ -134,22 +134,14 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
 <?php else: ?>
   <?php $exportQuery = http_build_query($filters + ((($q ?? '') !== '') ? ['q' => $q] : [])); ?>
   <div class="n-report-toolbar no-print">
-    <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" data-print-report>
-      <?= icon('printer', 'n-icon-sm') ?>
-      <span><?= e(__('reports.print')) ?></span>
-    </button>
-    <?php if (in_array('pdf', $report['formats'], true)): ?>
-      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/pdf?<?= e($exportQuery) ?>">
-        <?= icon('download', 'n-icon-sm') ?>
-        <span><?= e(__('reports.export_pdf')) ?></span>
-      </a>
-    <?php endif; ?>
-    <?php if (in_array('excel', $report['formats'], true)): ?>
-      <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" href="/reports/<?= e($key) ?>/export/excel?<?= e($exportQuery) ?>">
-        <?= icon('download', 'n-icon-sm') ?>
-        <span><?= e(__('reports.export_excel')) ?></span>
-      </a>
-    <?php endif; ?>
+    <?php
+    // The report document is produced by the shared document engine, so it
+    // prints as a designed report rather than as the filtered screen.
+    $docKey = 'report';
+    $docParams = array_merge(['report' => $key], $filters, ((($q ?? '') !== '') ? ['q' => $q] : []));
+    $docCompact = true;
+    require dirname(__DIR__) . '/partials/export-menu.php';
+    ?>
   </div>
 
   <?php if (!empty($reportHasRows)): ?>
@@ -174,6 +166,10 @@ $needsSubject = in_array($key, ['teachers-by-subject', 'workload'], true);
   <div id="report-results" data-live-results>
   <div id="reportPrintArea" class="n-report-document">
     <div class="n-report-document-head">
+      <?php if (!empty($report['school_logo_url'])): ?>
+        <img src="<?= e($report['school_logo_url']) ?>" alt="" class="n-report-logo" style="height:48px;max-width:120px;object-fit:contain;margin-bottom:.5rem;">
+      <?php endif; ?>
+      <div class="fw-semibold small mb-1"><?= e($report['school_name'] ?? '') ?></div>
       <h2 class="h5 mb-1"><?= e($report['title']) ?></h2>
       <div class="text-muted small">
         <?= e(__('reports.year')) ?>: <?= e($report['year_label']) ?>

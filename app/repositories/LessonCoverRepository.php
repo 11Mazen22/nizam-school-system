@@ -40,7 +40,7 @@ final class LessonCoverRepository
              FROM timetables t
              JOIN classes c ON c.id = t.class_id
              JOIN subjects s ON s.id = t.subject_id
-             JOIN teachers te ON te.id = t.teacher_id
+             LEFT JOIN teachers te ON te.id = t.teacher_id
              LEFT JOIN lesson_covers lc
                     ON lc.cover_date = :cover_date AND lc.timetable_id = t.id
              LEFT JOIN teachers ct ON ct.id = lc.cover_teacher_id
@@ -111,7 +111,7 @@ final class LessonCoverRepository
             'SELECT t.*, c.name AS class_name, te.full_name AS teacher_name
              FROM timetables t
              JOIN classes c ON c.id = t.class_id
-             JOIN teachers te ON te.id = t.teacher_id
+             LEFT JOIN teachers te ON te.id = t.teacher_id
              WHERE t.id = :id AND t.academic_year_id = :year'
         );
         $stmt->execute(['id' => $timetableId, 'year' => $yearId]);

@@ -80,31 +80,48 @@ final class ExamRepository
         return $map;
     }
 
-    /** Upsert a score (MySQL ON DUPLICATE KEY, Postgres ON CONFLICT). */
-    public function upsertScore(int $examId, int $studentId, int $subjectId, ?float $score, ?string $notes, ?int $recordedBy): void
-    {
+    /**
+     * Upsert a score (MySQL ON DUPLICATE KEY, Postgres ON CONFLICT).
+     *
+     * `source` records how the mark arrived -- 'manual' from the score sheet,
+     * 'import' from an Excel workbook -- and `importBatch` ties an imported
+     * mark to the file that produced it.
+     */
+    public function upsertScore(
+        int $examId,
+        int $studentId,
+        int $subjectId,
+        ?float $score,
+        ?string $notes,
+        ?int $recordedBy,
+        string $source = 'manual',
+        ?string $importBatch = null,
+    ): void {
         $pdo     = Database::connection();
         $isPgsql = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
 
         if ($isPgsql) {
             $stmt = $pdo->prepare(
-                'INSERT INTO exam_scores (exam_id, student_id, subject_id, score, notes, recorded_by)
-                 VALUES (:exam, :student, :subject, :score, :notes, :by)
+                'INSERT INTO exam_scores (exam_id, student_id, subject_id, score, notes, recorded_by, source, import_batch)
+                 VALUES (:exam, :student, :subject, :score, :notes, :by, :source, :batch)
                  ON CONFLICT (exam_id, student_id, subject_id) DO UPDATE
                    SET score=EXCLUDED.score, notes=EXCLUDED.notes,
-                       recorded_by=EXCLUDED.recorded_by, updated_at=CURRENT_TIMESTAMP'
+                       recorded_by=EXCLUDED.recorded_by, source=EXCLUDED.source,
+                       import_batch=EXCLUDED.import_batch, updated_at=CURRENT_TIMESTAMP'
             );
         } else {
             $stmt = $pdo->prepare(
-                'INSERT INTO exam_scores (exam_id, student_id, subject_id, score, notes, recorded_by)
-                 VALUES (:exam, :student, :subject, :score, :notes, :by)
+                'INSERT INTO exam_scores (exam_id, student_id, subject_id, score, notes, recorded_by, source, import_batch)
+                 VALUES (:exam, :student, :subject, :score, :notes, :by, :source, :batch)
                  ON DUPLICATE KEY UPDATE
-                   score=VALUES(score), notes=VALUES(notes), recorded_by=VALUES(recorded_by)'
+                   score=VALUES(score), notes=VALUES(notes), recorded_by=VALUES(recorded_by),
+                   source=VALUES(source), import_batch=VALUES(import_batch)'
             );
         }
         $stmt->execute([
             'exam' => $examId, 'student' => $studentId, 'subject' => $subjectId,
             'score' => $score, 'notes' => $notes, 'by' => $recordedBy,
+            'source' => $source, 'batch' => $importBatch,
         ]);
     }
 
@@ -133,12 +150,39 @@ final class ExamRepository
     }
 
     /**
+     * Every actively enrolled student in the class, whether or not any mark
+     * has been entered. The ranking is a roster document: a student without
+     * scores must still appear (and say so), never silently disappear from
+     * the class list or be treated as a zero.
+     *
+     * @return list<array{student_id:int,full_name:string,student_code:string}>
+     */
+    public function rosterForClass(int $classId, int $yearId): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT s.id AS student_id, s.full_name, s.student_code
+             FROM student_enrollments en
+             JOIN students s ON s.id = en.student_id
+             WHERE en.class_id = :class AND en.academic_year_id = :year
+               AND en.status = 'active'
+             ORDER BY s.full_name ASC, s.id ASC"
+        );
+        $stmt->execute(['class' => $classId, 'year' => $yearId]);
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Raw marked rows for class ranking, one row per exam score.
      *
      * Deliberately unaggregated: the weighted-average formula lives in
      * AcademicCalculationService, never in SQL. A second formula here would
      * let the ranking screen and the report card disagree about the same
      * student's average, which is exactly the class of bug this replaced.
+     *
+     * Only marked rows are returned; ExamService starts from the full roster
+     * and merges these in, so an unmarked student is a visible row with no
+     * average rather than a missing inner join.
      *
      * @return array<int, array<string,mixed>>
      */
@@ -151,11 +195,12 @@ final class ExamRepository
              JOIN students s ON s.id = en.student_id
              JOIN exam_scores es ON es.student_id = s.id
              JOIN exams e ON e.id = es.exam_id
-             WHERE en.class_id = :class AND en.status = 'active'
-               AND e.academic_year_id = :year AND es.score IS NOT NULL
+             WHERE en.class_id = :class AND en.academic_year_id = :enrolled_year
+               AND en.status = 'active'
+               AND e.academic_year_id = :exam_year AND es.score IS NOT NULL
              ORDER BY s.full_name ASC, e.id ASC"
         );
-        $stmt->execute(['class' => $classId, 'year' => $yearId]);
+        $stmt->execute(['class' => $classId, 'enrolled_year' => $yearId, 'exam_year' => $yearId]);
         return $stmt->fetchAll();
     }
 

@@ -20,9 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  document.querySelectorAll('[data-print-report]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      window.print();
-    });
-  });
+  // Printing and exporting are handled by the shared document engine
+  // (document-export.js) from the report toolbar's export menu.
 });

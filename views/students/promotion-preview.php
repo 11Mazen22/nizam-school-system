@@ -5,7 +5,17 @@ $activeNav = 'students';
 $pageScripts = ['/assets/js/promotion.js'];
 ob_start(); ?>
 <p class="n-hero-sub"><span dir="ltr"><?= e($source['label']) ?> &rarr; <?= e($target['label']) ?></span></p>
-<?php $pageSubtitleHtml = (string) ob_get_clean();
+<?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
+<?php
+// The promotion list prints as a document of its own: the proposal the school
+// is about to confirm, not a screenshot of this form.
+$docKey = 'promotion';
+$docParams = ['source' => (string) ((int) $source['id']), 'target' => (string) ((int) $target['id'])];
+$docCompact = true;
+require dirname(__DIR__) . '/partials/export-menu.php';
+?>
+<?php
+$pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 use App\Middleware\CsrfMiddleware;
 ?>

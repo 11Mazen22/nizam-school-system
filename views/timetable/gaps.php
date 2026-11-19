@@ -11,6 +11,9 @@
  * @var string $reason
  * @var int $classId
  * @var string $teacher
+ * @var list<array{value:string,label:string}> $statusOptions
+ * @var list<array{value:string,label:string}> $reasonOptions
+ * @var array<string,string> $reasonLabels
  * @var array<int,string> $dayLabels
  * @var array<int, array<int, array<int, array{class_name:string,subject_ar:string,subject_en:string}>>> $bookings
  * @var array<string,int> $teacherIdsByName
@@ -46,6 +49,17 @@ ob_start(); ?>
 <a href="/timetable/covers" class="btn btn-outline-secondary"><?= icon('calendar') ?><?= e(__('timetable.covers_title')) ?></a>
 <a href="/timetable/staff" class="btn btn-outline-secondary"><?= icon('users-group') ?><?= e(__('timetable.staff_title')) ?></a>
 <?php
+$docKey = 'timetable-gaps';
+$docParams = [
+    'status' => $status,
+    'reason' => $reason,
+    'class_id' => $classId > 0 ? (string) $classId : '',
+    'teacher' => $teacher,
+];
+$docCompact = true;
+require dirname(__DIR__) . '/partials/export-menu.php';
+?>
+<?php
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
@@ -67,8 +81,8 @@ require dirname(__DIR__) . '/layout/start.php';
     <div class="n-filter-field">
       <label class="visually-hidden" for="gapStatus"><?= e(__('verification.status')) ?></label>
       <select id="gapStatus" name="status" class="form-select" data-auto-submit>
-        <?php foreach (['open' => __('timetable.gaps_open'), 'resolved' => __('timetable.gaps_resolved'), 'ignored' => __('timetable.gaps_ignored'), 'all' => __('timetable.gaps_filter_all')] as $value => $label): ?>
-          <option value="<?= e($value) ?>" <?= $status === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+        <?php foreach ($statusOptions as $option): ?>
+          <option value="<?= e($option['value']) ?>" <?= $status === $option['value'] ? 'selected' : '' ?>><?= e($option['label']) ?></option>
         <?php endforeach; ?>
       </select>
     </div>
@@ -76,8 +90,8 @@ require dirname(__DIR__) . '/layout/start.php';
       <label class="visually-hidden" for="gapReason"><?= e(__('timetable.gaps_reason')) ?></label>
       <select id="gapReason" name="reason" class="form-select" data-auto-submit>
         <option value=""><?= e(__('timetable.gaps_all_reasons')) ?></option>
-        <?php foreach (['no_teacher' => __('timetable.gaps_no_teacher'), 'teacher_conflict' => __('timetable.gaps_conflict'), 'unmapped_teacher' => __('timetable.gaps_unmapped'), 'absence' => __('timetable.gaps_absence'), 'other' => __('timetable.gaps_other')] as $value => $label): ?>
-          <option value="<?= e($value) ?>" <?= $reason === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+        <?php foreach ($reasonOptions as $option): ?>
+          <option value="<?= e($option['value']) ?>" <?= $reason === $option['value'] ? 'selected' : '' ?>><?= e($option['label']) ?></option>
         <?php endforeach; ?>
       </select>
     </div>
@@ -124,13 +138,7 @@ require dirname(__DIR__) . '/layout/start.php';
           <?php foreach ($gaps as $gap): ?>
             <?php
             $gapId = (int) $gap['id'];
-            $reasonLabel = match ((string) $gap['reason']) {
-                'no_teacher' => __('timetable.gaps_no_teacher'),
-                'teacher_conflict' => __('timetable.gaps_conflict'),
-                'unmapped_teacher' => __('timetable.gaps_unmapped'),
-                'absence' => __('timetable.gaps_absence'),
-                default => __('timetable.gaps_other'),
-            };
+            $reasonLabel = $reasonLabels[(string) $gap['reason']] ?? __('timetable.gaps_other');
             $reasonBadge = match ((string) $gap['reason']) {
                 'no_teacher' => 'warning',
                 'teacher_conflict' => 'danger',

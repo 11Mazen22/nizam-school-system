@@ -16,6 +16,10 @@ $schoolName = $school === null
     : (currentLocale() === 'ar' ? $school['name_ar'] : $school['name']);
 $logoUrl = !empty($school['logo_path']) ? '/logo' : '/assets/img/hadaba-logo.png';
 
+$allAcademicYears = hasPermission('academic_years.manage')
+    ? (new \App\Repositories\AcademicYearRepository())->all()
+    : [];
+
 $navItemsList = navItems();
 $navGroups = [
     'main' => 'nav.group.main',
@@ -131,8 +135,9 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
   <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/app.css')) ?>">
   <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/theme.css')) ?>">
   <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/components.css')) ?>">
+  <link rel="stylesheet" href="<?= e(assetUrl('/assets/css/documents-ui.css')) ?>">
 </head>
-<body class="n-app-body">
+<body class="n-app-body" data-locale="<?= e(currentLocale()) ?>" data-direction="<?= e(currentDirection()) ?>">
 <a class="n-skip-link" href="#main-content"><?= e($pageTitle) ?></a>
 
 <div class="nizam-shell" id="nizamShell">
@@ -242,9 +247,32 @@ $renderNavGroups = static function (array $groups, array $labels, string $active
 
       <div class="n-topbar-actions">
         <?php if (AcademicYearContext::activeYearId() !== null): ?>
-          <span class="n-year-pill d-none d-xl-inline-flex" title="<?= e(__('shell.current_year')) ?>">
-            <?= icon('calendar') ?><span dir="ltr"><?= e(AcademicYearContext::label() ?? '') ?></span>
-          </span>
+          <?php if ($allAcademicYears !== []): ?>
+            <div class="dropdown d-none d-xl-block">
+              <button class="n-year-pill dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                      aria-expanded="false" title="<?= e(__('shell.current_year')) ?>">
+                <?= icon('calendar') ?><span dir="ltr"><?= e(AcademicYearContext::label() ?? '') ?></span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end n-year-menu">
+                <li><h6 class="dropdown-header"><?= e(__('shell.switch_year')) ?></h6></li>
+                <?php foreach ($allAcademicYears as $year): ?>
+                  <li>
+                    <form method="post" action="/academic-years/<?= (int) $year['id'] ?>/activate">
+                      <?= CsrfMiddleware::field() ?>
+                      <button type="submit" class="dropdown-item <?= (int) $year['id'] === AcademicYearContext::activeYearId() ? 'active' : '' ?>">
+                        <span dir="ltr"><?= e($year['label']) ?></span>
+                        <?php if (!empty($year['is_closed'])): ?><span class="badge text-bg-light ms-1"><?= e(__('academic_years.closed')) ?></span><?php endif; ?>
+                      </button>
+                    </form>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            </div>
+          <?php else: ?>
+            <span class="n-year-pill d-none d-xl-inline-flex" title="<?= e(__('shell.current_year')) ?>">
+              <?= icon('calendar') ?><span dir="ltr"><?= e(AcademicYearContext::label() ?? '') ?></span>
+            </span>
+          <?php endif; ?>
         <?php endif; ?>
 
         <?php if ($quickActions !== []): ?>

@@ -225,7 +225,38 @@ try {
     seedCheck($counts['students'] === 778, 'Exactly 778 populated source students exist', (string) $counts['students']);
     seedCheck($counts['enrollments'] === 778, 'Exactly 778 active enrollments exist', (string) $counts['enrollments']);
     seedCheck($counts['subjects'] === 17, 'The 17-subject catalogue is complete', (string) $counts['subjects']);
-    seedCheck($counts['timetables'] === 507, 'Exactly 507 timetable slots exist', (string) $counts['timetables']);
+    // 558 cells are printed; one is an absence check rather than a lesson, so
+    // every real printed lesson must exist. Activity periods printed without a
+    // teacher load without one -- the class timetable is never left with holes.
+    seedCheck($counts['timetables'] === 557, 'All 557 printed lessons exist as timetable slots', (string) $counts['timetables']);
+
+    // The paper double-books ten first names. Those cells stay complete with
+    // the printed name, while the database keeps its one-teacher-per-period
+    // guarantee, so the clash can be seen but never recorded as a booking.
+    $printedClashes = $count('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId . " AND printed_teacher IS NOT NULL");
+    seedCheck($printedClashes === 10, 'The ten printed double-booked cells keep their printed teacher', (string) $printedClashes);
+    seedCheck(
+        $count('SELECT COUNT(*) FROM timetables WHERE academic_year_id = ' . $yearId . ' AND printed_teacher IS NOT NULL AND teacher_id IS NOT NULL') === 0,
+        'A printed clash carries no teacher booking'
+    );
+    seedCheck(
+        $count('SELECT COUNT(*) FROM (SELECT teacher_id, day_of_week, period_number FROM timetables WHERE academic_year_id = ' . $yearId . ' AND teacher_id IS NOT NULL GROUP BY teacher_id, day_of_week, period_number HAVING COUNT(*) > 1) duplicates') === 0,
+        'No teacher is booked in two classes in the same period'
+    );
+
+    $duplicateRejected = false;
+    $pdo->beginTransaction();
+    try {
+        $slot = $pdo->query('SELECT class_id, day_of_week, period_number, subject_id, teacher_id FROM timetables WHERE academic_year_id = ' . $yearId . ' AND teacher_id IS NOT NULL LIMIT 1')->fetch();
+        $free = $pdo->query('SELECT c.id FROM classes c WHERE c.academic_year_id = ' . $yearId . ' AND c.id <> ' . (int) $slot['class_id'] . ' AND NOT EXISTS (SELECT 1 FROM timetables t WHERE t.academic_year_id = ' . $yearId . ' AND t.class_id = c.id AND t.day_of_week = ' . (int) $slot['day_of_week'] . ' AND t.period_number = ' . (int) $slot['period_number'] . ') ORDER BY c.id LIMIT 1')->fetchColumn();
+        $pdo->prepare('INSERT INTO timetables (academic_year_id, class_id, day_of_week, period_number, subject_id, teacher_id) VALUES (?, ?, ?, ?, ?, ?)')
+            ->execute([$yearId, (int) $free, (int) $slot['day_of_week'], (int) $slot['period_number'], (int) $slot['subject_id'], (int) $slot['teacher_id']]);
+    } catch (PDOException) {
+        $duplicateRejected = true;
+    } finally {
+        $pdo->rollBack();
+    }
+    seedCheck($duplicateRejected, 'The database itself rejects a duplicate teacher booking');
     seedCheck($counts['assessments'] === 45, 'Exactly 45 assessment rows exist', (string) $counts['assessments']);
     seedCheck($counts['teachers'] >= 29, 'The printed teachers were created', (string) $counts['teachers']);
     seedCheck($counts['gender_confirmed'] === 778, 'Every source student has the reviewed roster gender', (string) $counts['gender_confirmed']);

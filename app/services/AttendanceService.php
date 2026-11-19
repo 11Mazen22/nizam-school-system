@@ -13,11 +13,11 @@ use RuntimeException;
 final class AttendanceService
 {
     private const VALID_STATUSES = ['present', 'absent', 'late', 'excused'];
-    private const ABSENTEE_THRESHOLD = 5;
 
     public function __construct(
         private readonly AttendanceRepository $repo = new AttendanceRepository(),
         private readonly EnrollmentRepository $enrollments = new EnrollmentRepository(),
+        private readonly AttendancePolicyService $policy = new AttendancePolicyService(),
     ) {
     }
 
@@ -60,36 +60,52 @@ final class AttendanceService
     }
 
     /**
-     * Fire in-app notifications for students who just hit the chronic threshold.
+     * Fire in-app notifications when a student today reaches an Egyptian
+     * Ministry-of-Education absence threshold. Thresholds come from the
+     * configurable rules engine, never from a hardcoded constant.
      * @param array<int, array{status:string, notes:?string}> $records
      */
     private function triggerAbsenteeNotifications(int $yearId, int $classId, array $records, ?int $userId): void
     {
+        $rules = AcademicRulesService::attendanceRules();
         $absentIds = [];
         foreach ($records as $studentId => $entry) {
-            if (($entry['status'] ?? '') === 'absent') {
+            if (in_array((string) ($entry['status'] ?? ''), $rules['truancy_statuses'], true)) {
                 $absentIds[] = (int) $studentId;
             }
         }
-        if (empty($absentIds)) {
+        if ($absentIds === []) {
             return;
         }
 
-        $absentees = $this->repo->chronicAbsentees($yearId, self::ABSENTEE_THRESHOLD);
-        $absenteeStudentIds = array_column($absentees, 'student_id');
-
         $notifService = new InAppNotificationService();
-        foreach ($absentees as $row) {
-            if (!in_array((int) $row['student_id'], $absentIds, true)) {
-                continue; // only fire for students marked absent today who also hit threshold
+        foreach ($absentIds as $studentId) {
+            $status = $this->policy->studentStatus($studentId, $yearId);
+            if ($status['level'] === 'ok') {
+                continue;
             }
+            $student = $this->repo->studentIdentity($studentId);
+            $name = (string) ($student['full_name'] ?? ('#' . $studentId));
+            $critical = $status['level'] === 'critical';
             $notifService->notifyAdmins(
-                'attendance.chronic_absent',
-                'Chronic Absenteeism Alert',
-                'تحذير غياب متكرر',
-                sprintf("Student %s has been absent %d times this year.", $row['full_name'], $row['absent_count']),
-                sprintf("الطالب %s غاب %d مرة هذا العام.", $row['full_name'], $row['absent_count']),
-                '/attendance'
+                $critical ? 'attendance.absence_critical' : 'attendance.absence_warning',
+                $critical ? __('attendance.absence_critical_subject') : __('attendance.absence_warning_subject'),
+                $critical ? __('attendance.absence_critical_subject_ar') : __('attendance.absence_warning_subject_ar'),
+                sprintf(
+                    __('attendance.absence_alert_body'),
+                    $name,
+                    $status['consecutive'],
+                    $status['absent'],
+                    $critical ? $rules['critical_consecutive'] : $rules['warning_consecutive']
+                ),
+                sprintf(
+                    __('attendance.absence_alert_body_ar'),
+                    $name,
+                    $status['consecutive'],
+                    $status['absent'],
+                    $critical ? $rules['critical_consecutive'] : $rules['warning_consecutive']
+                ),
+                '/attendance/report?class_id=' . $classId
             );
         }
     }
@@ -106,6 +122,6 @@ final class AttendanceService
 
     public function getChronicAbsentees(int $yearId): array
     {
-        return $this->repo->chronicAbsentees($yearId, self::ABSENTEE_THRESHOLD);
+        return $this->repo->chronicAbsentees($yearId);
     }
 }

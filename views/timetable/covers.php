@@ -29,6 +29,12 @@ ob_start(); ?>
 <a href="/timetable" class="btn btn-outline-secondary"><?= icon('chevron-left', 'n-flip-rtl') ?><?= e(__('timetable.title')) ?></a>
 <a href="/timetable/gaps" class="btn btn-outline-secondary"><?= icon('alert-triangle') ?><?= e(__('timetable.gaps_title')) ?></a>
 <?php
+$docKey = 'timetable-covers';
+$docParams = ['date' => $date];
+$docCompact = true;
+require dirname(__DIR__) . '/partials/export-menu.php';
+?>
+<?php
 $pageActions = (string) ob_get_clean();
 require dirname(__DIR__) . '/layout/start.php';
 ?>
@@ -119,7 +125,7 @@ require dirname(__DIR__) . '/layout/start.php';
                 <?= e(currentLocale() === 'ar' ? (string) $lesson['subject_ar'] : (string) $lesson['subject_en']) ?>
               </td>
               <td data-label="<?= e(__('timetable.covers_regular')) ?>">
-                <?= e((string) $lesson['teacher_name']) ?>
+                <?= e(trim((string) ($lesson['teacher_name'] ?? '')) !== '' ? (string) $lesson['teacher_name'] : __('timetable.gaps_no_teacher')) ?>
                 <?php if ($onLeave): ?>
                   <span class="badge text-bg-warning ms-1"><?= e(__('timetable.covers_on_leave_short')) ?></span>
                 <?php endif; ?>

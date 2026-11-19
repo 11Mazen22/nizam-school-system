@@ -5,6 +5,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    initLocaleSync();
     initFlashMessages(reduceMotion);
     initRevealGroups(reduceMotion);
     initCountUp(reduceMotion);
@@ -18,6 +19,7 @@
     initTableFilters();
     initJsOnly();
     initUnsavedGuards();
+    initLanguageSwitch();
     initLoadingForms();
     initCopyButtons();
     initHashTabs();
@@ -182,9 +184,9 @@
   }
 
   function initCommonActions() {
-    document.querySelectorAll('[data-print-report]').forEach(function (button) {
-      button.addEventListener('click', function () { window.print(); });
-    });
+    // Printing is owned by the document engine (document-export.js): every
+    // printable view renders an independent document, never the application
+    // page through window.print().
     document.querySelectorAll('[data-history-back]').forEach(function (button) {
       button.addEventListener('click', function () { window.history.back(); });
     });
@@ -892,17 +894,72 @@
     });
   }
 
+  var hasUnsavedChanges = false;
+
+  /** Keep localStorage, <html lang/dir> and the session-rendered page in sync. */
+  function initLocaleSync() {
+    var locale = document.body.getAttribute('data-locale');
+    var direction = document.body.getAttribute('data-direction');
+    if (!locale || !direction) return;
+    try { window.localStorage.setItem('nizam.locale', locale); } catch (error) { /* private mode */ }
+    document.documentElement.setAttribute('lang', locale);
+    document.documentElement.setAttribute('dir', direction);
+  }
+
+  /** Navbar EN/ع switch: reflect the change locally before the server round-trip. */
+  function initLanguageSwitch() {
+    document.querySelectorAll('a[href^="/lang?to="]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        var locale = link.getAttribute('href').indexOf('to=en') !== -1 ? 'en' : 'ar';
+        var direction = locale === 'ar' ? 'rtl' : 'ltr';
+        try { window.localStorage.setItem('nizam.locale', locale); } catch (error) { /* private mode */ }
+        document.documentElement.setAttribute('lang', locale);
+        document.documentElement.setAttribute('dir', direction);
+        document.body.setAttribute('data-locale', locale);
+        document.body.setAttribute('data-direction', direction);
+        document.querySelectorAll('.n-lang-switch a').forEach(function (item) {
+          item.classList.toggle('active', item === link);
+        });
+      });
+    });
+  }
+
   function initUnsavedGuards() {
-    var dirty = false;
     document.querySelectorAll('form[data-unsaved-guard]').forEach(function (form) {
-      form.addEventListener('input', function () { dirty = true; });
-      form.addEventListener('change', function () { dirty = true; });
-      form.addEventListener('submit', function () { dirty = false; });
+      form.addEventListener('input', function () { hasUnsavedChanges = true; });
+      form.addEventListener('change', function () { hasUnsavedChanges = true; });
+      form.addEventListener('submit', function () { hasUnsavedChanges = false; });
     });
     window.addEventListener('beforeunload', function (event) {
-      if (!dirty) return;
+      if (!hasUnsavedChanges) return;
       event.preventDefault();
       event.returnValue = '';
+    });
+
+    // Settings uses separate screens; a tab switch must warn before leaving
+    // a dirty form instead of silently discarding edits.
+    document.querySelectorAll('a[data-unsaved-nav-confirm]').forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        if (!hasUnsavedChanges) return;
+        event.preventDefault();
+        var message = link.getAttribute('data-unsaved-message') || 'You have unsaved changes.';
+        var modalEl = document.getElementById('nizamConfirmModal');
+        if (!modalEl || !window.bootstrap) {
+          if (window.confirm(message)) { window.location.href = link.getAttribute('href'); }
+          return;
+        }
+        var messageEl = document.getElementById('nizamConfirmMessage');
+        var confirmBtn = document.getElementById('nizamConfirmButton');
+        if (messageEl) messageEl.textContent = message;
+        var modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        var onConfirm = function () {
+          confirmBtn.removeEventListener('click', onConfirm);
+          hasUnsavedChanges = false;
+          window.location.href = link.getAttribute('href');
+        };
+        confirmBtn.addEventListener('click', onConfirm);
+        modal.show();
+      });
     });
   }
 

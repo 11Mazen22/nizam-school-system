@@ -1,0 +1,1628 @@
+
+> nizam-school-system@1.1.0 test
+> php tests/import-contract.php && php tests/roster-religion-decode.php && php tests/official-roster-data.php && php tests/exam-integrity.php && php tests/authorization-refresh.php && php tests/academic-calculation.php && php tests/academic-configuration.php && php tests/academic-rules-engine.php && php tests/i18n-parity.php && php tests/module-integrity.php && php tests/scheduled-auth.php && php tests/redesign-checks.php && php tests/live-search-contract.php && php tests/document-engine-contract.php && php tests/online-readiness.php && php tests/teacher-load-sync.php && php tests/official-seed.php && php tests/http/run.php
+
+PASS: 6 import and pre-write validation checks
+PASS: 51 roster religion decode checks
+Official roster source data
+============================================================
+  ok    All 17 official roster files are present
+  ok    All 778 populated source rows are represented
+  ok    Every student has one unique class/source-row address
+  ok    Every source student has a reviewed M/F value
+  ok    Reviewed gender totals are pinned (418 M / 360 F)
+  ok    All 753 Muslim values (672 source + 102 name-inferred)
+  ok    All 25 Christian values (21 source + 4 name-inferred)
+  ok    No religions remain unconfirmed after name inference
+  ok    B7 shorthand is never decoded as the A4 Christian marker
+  ok    No birth date is fabricated
+  ok    B5 includes its populated L17 source row
+  ok    B5 L17 is the exact printed student, once
+  ok    The single B5 مسلم marker is applied as the confirmed whole-page default
+  ok    A4 has one printed م- combined marker
+  ok    A4 م- is decoded as the user-confirmed Christian marker
+[2026-11-19 02:02:33] ERROR: PHP error: Undefined array key "source_typo_corrected" {"file":"I:\\Nizam-School-System\\tests\\official-roster-data.php","line":135,"severity":2}
+  ok    Second-language totals match the reviewed cells/headings
+  ok    Every normalized language records its evidence source
+  ok    The committed roster audit is version 7
+  ok    The audit pins all 17 source-image checksums
+  ok    The audit records the exact source total
+
+20 passed, 0 failed.
+PASS: subject isolation, full roster, six invalid batches, database rollback
+PASS: CSV user mapping/hash, invalid update unchanged, grants, role revocation, archived session invalidation
+PASS: percentage, weighting, band boundaries, ranking/report parity, score-sheet resolution, no-scale handling
+PASS: stage lifecycle, grade linkage, multi-term calendars, overlap/range rules, exclusive default scale, band replacement
+Academic rules engine
+============================================================
+  ok    Committed academic-rules package is version 1
+  ok    Both Egyptian tracks are configured
+  ok    Grade 12 in 2026/2027 is General Secondary only
+  ok    Grade 12 in 2027/2028 supports both tracks
+  ok    Grade 11 in 2026/2027 includes Baccalaureate
+  ok    Class C07 maps to grade level 3
+  ok    Class B4 maps to grade level 2
+  ok    Minimum eligibility attendance is 85%
+  ok    Warning thresholds are 10 / 20
+  ok    Action thresholds are 15 / 30
+  ok    Excused absence counts as attended
+  ok    Baccalaureate year-work is active with a 60% requirement
+  ok    Grade 12 General Secondary 2026/2027 has no year-work
+  ok    Grade 12 year-work activates in 2027/2028
+  ok    Year-work component weights total 100%
+  ok    School days are unique and non-empty
+  ok    Only configured school weekdays count
+  ok    Full attendance is eligible with no warning
+  ok    12 consecutive absences raise a warning
+  ok    16 consecutive absences require administrative action
+  ok    Year-work engine exposes status and recording
+
+21 passed, 0 failed.
+Translation parity
+============================================================
+  ok    Arabic and English define exactly the same keys
+  ok    No duplicate English keys
+  ok    No duplicate Arabic keys
+  ok    Every literal key used in code exists in en.php
+  ok    Every literal key used in code exists in ar.php
+
+5 passed, 0 failed.
+PASS: finance settlement/overpayment/cancellation atomicity, library stock and double-return, transport capacity, leave decisions, admissions conversion guards
+Scheduled endpoint auth
+  ok    Repo default token is rejected
+  ok    Example placeholder token is rejected
+  ok    Empty token is rejected
+  ok    Unconfigured token is rejected
+  ok    A configured secret authenticates
+  ok    A wrong secret is rejected
+
+Request::header()
+  ok    Authorization header is readable
+  ok    Hyphenated custom header is normalised
+  ok    Content-Type is read from its server var
+  ok    Absent header returns null
+
+Request::ip() proxy boundary
+  ok    Forwarded address is ignored by default
+  ok    Trusted Railway proxy exposes the originating client
+  ok    Malformed forwarded address falls back safely
+
+PASS: scheduled auth
+PASS: dashboard pending-attendance rows are not duplicated
+PASS: translation parity (1991 keys in both locales)
+PASS: icon audit (70 distinct icon names, all defined)
+WARN: n-* tokens referenced in views with no direct CSS mention (verify they are variant hooks): n-list-search, n-year-menu, n-doc-modal, n-doc-modal-head, n-doc-modal-title, n-doc-modal-icon, n-doc-modal-tools, n-doc-toggle, n-doc-preview-body, n-doc-loading, n-doc-spinner, n-doc-preview-frame, n-doc-error, n-doc-modal-foot, n-doc-foot-hint, n-doc-foot-actions, n-doc-progress-head, n-doc-progress-count, n-doc-progress-bar, n-doc-progress-item, n-doc-progress-error, n-doc-bulk-done, n-doc-bulk-check, n-toast-stack, n-export, n-export-group, n-export-main, n-export-toggle, n-export-menu, n-report-logo
+PASS: every view with its own heading suppresses the shared hero
+PASS: shared layout hero present
+PASS: every view uses the shared hero (no legacy page heads)
+PASS: navigation coverage (31 nav links all resolve to GET routes)
+PASS: auth and recovery routes are network-only in the service worker
+PASS: collapsed sidebar releases its full-width flex column
+PASS: sidebar search keeps its dark surface while focused
+PASS: sidebar scroll position survives navigation
+PASS: sidebar has motion with a reduced-motion fallback
+PASS: views require no inline JavaScript CSP exception
+ALL CHECKS PASSED
+Live search coverage
+  ok    students/index.php is wired for live filtering
+  ok    teachers/index.php is wired for live filtering
+  ok    classes/index.php is wired for live filtering
+  ok    subjects/index.php is wired for live filtering
+  ok    guardians/index.php is wired for live filtering
+  ok    users/index.php is wired for live filtering
+  ok    library/index.php is wired for live filtering
+  ok    library/borrows.php is wired for live filtering
+  ok    finance/index.php is wired for live filtering
+  ok    finance/invoices.php is wired for live filtering
+  ok    finance/structures.php is wired for live filtering
+  ok    hr/index.php is wired for live filtering
+  ok    hr/leaves.php is wired for live filtering
+  ok    transport/index.php is wired for live filtering
+  ok    academic-years/index.php is wired for live filtering
+  ok    assessments/index.php is wired for live filtering
+  ok    exams/index.php is wired for live filtering
+  ok    exams/ranking.php is wired for live filtering
+  ok    admissions/index.php is wired for live filtering
+  ok    welfare/health.php is wired for live filtering
+  ok    welfare/discipline.php is wired for live filtering
+  ok    timetable/gaps.php is wired for live filtering
+  ok    timetable/covers.php is wired for live filtering
+  ok    attendance/report.php is wired for live filtering
+  ok    reports/show.php is wired for live filtering
+  ok    notifications/index.php is wired for live filtering
+  ok    activity-log/index.php is wired for live filtering
+  ok    students/archived.php is wired for live filtering
+  ok    teachers/archived.php is wired for live filtering
+  ok    students/verification.php is wired for live filtering
+  ok    backups/index.php is wired for live filtering
+
+Unsaved sheets never offer a dead or destructive filter
+  ok    attendance/mark.php keeps its filter in-page and cannot submit a search
+  ok    exams/scores.php keeps its filter in-page and cannot submit a search
+  ok    The shared table filter supports every list page
+  ok    The query is written to the URL for refresh/share
+  ok    Stale server-backed filter requests are cancelled
+  ok    Arabic letter variants are matched consistently
+  ok    No-match rows are rendered explicitly
+  ok    JS-only controls are revealed only when scripting is available
+  ok    Live-result pagination swaps the requested page in place
+  ok    In-place pagination preserves the reading position and keyboard focus
+  ok    Back/forward navigation refreshes the live result page
+  ok    Student pagination uses a compact accessible window instead of every page number
+
+Server-side filters (work without JavaScript)
+  ok    app/controllers/AttendanceController.php filters its list on the server
+  ok    app/controllers/ExamController.php filters its list on the server
+  ok    app/controllers/ReportController.php filters its list on the server
+  ok    Backup search runs in SQL across the whole history
+  ok    Backup totals are counted for the filtered history
+  ok    The backup controller reads the search term
+  ok    Backup pagination keeps the search term
+  ok    attendance/mark.php keeps its select/date scope auto-submitting
+  ok    attendance/report.php keeps its select/date scope auto-submitting
+  ok    exams/scores.php keeps its select/date scope auto-submitting
+  ok    exams/ranking.php keeps its select/date scope auto-submitting
+  ok    timetable/index.php keeps its select/date scope auto-submitting
+  ok    timetable/covers.php keeps its select/date scope auto-submitting
+  ok    reports/show.php keeps its select/date scope auto-submitting
+  ok    Every GET filter form is covered by the no-Enter handler
+PASS: live search is wired across 31 list/filter pages
+Document engine contract
+============================================================
+  ok    Registry exposes exactly the reviewed document types
+  ok    Every document inherits a real on-screen permission
+  ok    Every document offers PDF and only supported formats
+  ok    Every document has a title in both languages
+  ok    No view references an unregistered document type
+  ok    Every integrated screen renders the shared export menu
+  ok    No view still carries the legacy print button hook
+  ok    No view prints itself with window.print()
+  ok    app.js no longer prints the application page
+  ok    reports-filter.js no longer prints the application page
+  ok    Required document asset exists: public/assets/css/document.css
+  ok    Required document asset exists: public/assets/css/documents-ui.css
+  ok    Required document asset exists: public/assets/js/document-export.js
+  ok    Required document asset exists: public/assets/js/document-viewer.js
+  ok    Required document asset exists: bin/document-render.mjs
+  ok    Required document asset exists: views/documents/document.php
+  ok    Required document asset exists: views/documents/partials/header.php
+  ok    Required document asset exists: views/documents/partials/footer.php
+  ok    A 500-row table is composed across multiple pages
+  ok    Pagination conserves every row (500 in, 500 out)
+  ok    Continuation pages are explicitly marked
+  ok    Every page chunk repeats its column headings
+  ok    The document renders its own page geometry
+  ok    The document numbers its own pages
+  ok    The document contains no application navigation
+  ok    The document loads no application script
+  ok    The document contains no application URLs
+  ok    Fonts are embedded for deterministic rendering
+  ok    The document declares its own paper size
+  ok    The workbook is a real xlsx package
+  ok    An Arabic workbook is declared right-to-left
+  ok    The workbook carries the real records, not a header shell
+  ok    The workbook carries the institutional identity
+  ok    An English workbook is not forced into RTL
+
+34 passed, 0 failed.
+PASS: document engine architecture, independence, pagination and legacy-print removal
+Online production-readiness contract
+============================================================
+  ok    Database boolean normalization covers MySQL and PostgreSQL representations
+  ok    Cross-database runtime SQL uses standard single-quoted text literals
+  ok    Module updates use native-boolean SQL literals
+  ok    Postgres migration set is present
+  ok    001_schools_settings.sql splits into executable statements
+  ok    002_roles_permissions_users.sql splits into executable statements
+  ok    003_academic_years.sql splits into executable statements
+  ok    004_grades_subjects_staffing.sql splits into executable statements
+  ok    005_classes.sql splits into executable statements
+  ok    006_students_enrollments.sql splits into executable statements
+  ok    007_teachers_assignments.sql splits into executable statements
+  ok    008_activity_backups_login_attempts.sql splits into executable statements
+  ok    009_promotion_locks.sql splits into executable statements
+  ok    010_app_role_and_rls.sql splits into executable statements
+  ok    011_migrations_select_grant.sql splits into executable statements
+  ok    012_sequence_update_grant.sql splits into executable statements
+  ok    013_migrations_disable_rls.sql splits into executable statements
+  ok    014_pin_function_search_path.sql splits into executable statements
+  ok    015_users_email.sql splits into executable statements
+  ok    016_seeded_school_logo_path.sql splits into executable statements
+  ok    017_attendance_tracking.sql splits into executable statements
+  ok    018_grading_examinations.sql splits into executable statements
+  ok    019_disciplinary_health.sql splits into executable statements
+  ok    020_timetables.sql splits into executable statements
+  ok    021_notifications.sql splits into executable statements
+  ok    022_notification_categories.sql splits into executable statements
+  ok    023_universal_platform_foundation.sql splits into executable statements
+  ok    024_role_template_permissions.sql splits into executable statements
+  ok    025_admin_full_permissions.sql splits into executable statements
+  ok    026_request_replays.sql splits into executable statements
+  ok    027_admin_recovery_tokens.sql splits into executable statements
+  ok    028_complete_app_role_rls.sql splits into executable statements
+  ok    029_roster_verification_and_timetable_gaps.sql splits into executable statements
+  ok    030_manual_weekly_periods.sql splits into executable statements
+  ok    031_teacher_subject_source.sql splits into executable statements
+  ok    032_school_package_import.sql splits into executable statements
+  ok    033_lesson_covers.sql splits into executable statements
+  ok    034_user_mfa.sql splits into executable statements
+  ok    035_unknown_dob_gender.sql splits into executable statements
+  ok    036_roster_structured_attributes.sql splits into executable statements
+  ok    037_teacher_religion.sql splits into executable statements
+  ok    038_student_source_identity.sql splits into executable statements
+  ok    039_feature_flag_modules.sql splits into executable statements
+  ok    040_academic_tracks_and_year_work.sql splits into executable statements
+  ok    041_timetable_source_complete.sql splits into executable statements
+  ok    Postgres role templates use explicit CROSS JOIN syntax
+  ok    001_roles.sql splits into executable seed statements
+  ok    002_permissions.sql splits into executable seed statements
+  ok    003_role_permissions.sql splits into executable seed statements
+  ok    004_settings.sql splits into executable seed statements
+  ok    005_subjects.sql splits into executable seed statements
+  ok    006_grades.sql splits into executable seed statements
+  ok    007_academic_year.sql splits into executable seed statements
+  ok    008_role_template_permissions.sql splits into executable seed statements
+  ok    Postgres seeds contain no MySQL-only write syntax
+  ok    Academic-year seeds honor the PostgreSQL SMALLINT flag contract
+  ok    Fresh Postgres administrators receive the complete permission catalogue
+  ok    Role templates are re-applied after the full fresh-install catalogue exists
+  ok    schools enables RLS
+  ok    schools grants the nizam_app RLS policy
+  ok    settings enables RLS
+  ok    settings grants the nizam_app RLS policy
+  ok    roles enables RLS
+  ok    roles grants the nizam_app RLS policy
+  ok    permissions enables RLS
+  ok    permissions grants the nizam_app RLS policy
+  ok    role_permissions enables RLS
+  ok    role_permissions grants the nizam_app RLS policy
+  ok    users enables RLS
+  ok    users grants the nizam_app RLS policy
+  ok    academic_years enables RLS
+  ok    academic_years grants the nizam_app RLS policy
+  ok    grades enables RLS
+  ok    grades grants the nizam_app RLS policy
+  ok    subjects enables RLS
+  ok    subjects grants the nizam_app RLS policy
+  ok    subject_staffing_requirements enables RLS
+  ok    subject_staffing_requirements grants the nizam_app RLS policy
+  ok    classes enables RLS
+  ok    classes grants the nizam_app RLS policy
+  ok    students enables RLS
+  ok    students grants the nizam_app RLS policy
+  ok    student_enrollments enables RLS
+  ok    student_enrollments grants the nizam_app RLS policy
+  ok    teachers enables RLS
+  ok    teachers grants the nizam_app RLS policy
+  ok    teacher_subjects enables RLS
+  ok    teacher_subjects grants the nizam_app RLS policy
+  ok    teacher_assignments enables RLS
+  ok    teacher_assignments grants the nizam_app RLS policy
+  ok    activity_logs enables RLS
+  ok    activity_logs grants the nizam_app RLS policy
+  ok    backups enables RLS
+  ok    backups grants the nizam_app RLS policy
+  ok    login_attempts enables RLS
+  ok    login_attempts grants the nizam_app RLS policy
+  ok    promotion_locks enables RLS
+  ok    promotion_locks grants the nizam_app RLS policy
+  ok    attendance_records enables RLS
+  ok    attendance_records grants the nizam_app RLS policy
+  ok    exams enables RLS
+  ok    exams grants the nizam_app RLS policy
+  ok    exam_scores enables RLS
+  ok    exam_scores grants the nizam_app RLS policy
+  ok    disciplinary_records enables RLS
+  ok    disciplinary_records grants the nizam_app RLS policy
+  ok    health_records enables RLS
+  ok    health_records grants the nizam_app RLS policy
+  ok    timetables enables RLS
+  ok    timetables grants the nizam_app RLS policy
+  ok    notifications enables RLS
+  ok    notifications grants the nizam_app RLS policy
+  ok    installed_modules enables RLS
+  ok    installed_modules grants the nizam_app RLS policy
+  ok    campuses enables RLS
+  ok    campuses grants the nizam_app RLS policy
+  ok    educational_stages enables RLS
+  ok    educational_stages grants the nizam_app RLS policy
+  ok    academic_terms enables RLS
+  ok    academic_terms grants the nizam_app RLS policy
+  ok    grading_scales enables RLS
+  ok    grading_scales grants the nizam_app RLS policy
+  ok    grading_scale_bands enables RLS
+  ok    grading_scale_bands grants the nizam_app RLS policy
+  ok    attendance_codes enables RLS
+  ok    attendance_codes grants the nizam_app RLS policy
+  ok    guardians enables RLS
+  ok    guardians grants the nizam_app RLS policy
+  ok    student_guardians enables RLS
+  ok    student_guardians grants the nizam_app RLS policy
+  ok    admissions_applications enables RLS
+  ok    admissions_applications grants the nizam_app RLS policy
+  ok    fee_categories enables RLS
+  ok    fee_categories grants the nizam_app RLS policy
+  ok    fee_structures enables RLS
+  ok    fee_structures grants the nizam_app RLS policy
+  ok    student_invoices enables RLS
+  ok    student_invoices grants the nizam_app RLS policy
+  ok    invoice_payments enables RLS
+  ok    invoice_payments grants the nizam_app RLS policy
+  ok    staff_departments enables RLS
+  ok    staff_departments grants the nizam_app RLS policy
+  ok    staff_designations enables RLS
+  ok    staff_designations grants the nizam_app RLS policy
+  ok    staff_leaves enables RLS
+  ok    staff_leaves grants the nizam_app RLS policy
+  ok    transport_routes enables RLS
+  ok    transport_routes grants the nizam_app RLS policy
+  ok    student_transport enables RLS
+  ok    student_transport grants the nizam_app RLS policy
+  ok    library_books enables RLS
+  ok    library_books grants the nizam_app RLS policy
+  ok    library_borrows enables RLS
+  ok    library_borrows grants the nizam_app RLS policy
+  ok    request_replays enables RLS
+  ok    request_replays grants the nizam_app RLS policy
+  ok    admin_recovery_tokens enables RLS
+  ok    admin_recovery_tokens grants the nizam_app RLS policy
+  ok    roster_verifications enables RLS
+  ok    roster_verifications grants the nizam_app RLS policy
+  ok    teacher_aliases enables RLS
+  ok    teacher_aliases grants the nizam_app RLS policy
+  ok    timetable_gaps enables RLS
+  ok    timetable_gaps grants the nizam_app RLS policy
+  ok    assessment_schedules enables RLS
+  ok    assessment_schedules grants the nizam_app RLS policy
+  ok    import_batches enables RLS
+  ok    import_batches grants the nizam_app RLS policy
+  ok    lesson_covers enables RLS
+  ok    lesson_covers grants the nizam_app RLS policy
+  ok    mfa_recovery_codes enables RLS
+  ok    mfa_recovery_codes grants the nizam_app RLS policy
+  ok    year_work_entries enables RLS
+  ok    year_work_entries grants the nizam_app RLS policy
+  ok    Container applies Postgres migrations on start
+  ok    Container runs live PostgreSQL smoke checks before Apache
+  ok    Migration and runtime DB identities are separate
+  ok    Container uses the persistent data root
+  ok    Supabase is optional, not a startup requirement
+  ok    Every external container base is digest-pinned
+  ok    Online vendor tree is rebuilt from composer.lock
+  ok    Production image enables OPcache
+  ok    Online Apache normalizes dynamic/static security headers without duplicates
+  ok    Upload storage is selected by storage configuration
+  ok    Upload storage is not coupled to the DB driver
+  ok    Postgres backups discover the live table catalog
+  ok    Backups exclude short-lived recovery credentials
+  ok    Example configuration contains no credential-like password literal
+  ok    The readiness probe checks the schema without needing CREATE privileges
+  ok    Official package ships the 17 class pathway labels
+  ok    Official package declares the school-confirmed 50-student class capacity
+  ok    Official package ships all 17 student rosters
+  ok    Official package ships the versioned 778-row roster enrichment audit
+  ok    Official package ships all 17 class timetables
+  ok    Official package ships the 45 weekly assessment rows
+  ok    Official package ships the third-secondary spreadsheet and its audit
+  ok    Third-secondary audit pins 540 fully classified students in 12 classes
+  ok    The official data directory is not excluded from the cloud image
+  ok    Container can seed the official school data on first boot
+  ok    Official seed marker lives on the persistent volume
+  ok    Only the trusted seed CLI receives passthru; Apache keeps process spawning disabled
+  ok    Official data is seeded before the production smoke check
+  ok    The seed runner pins the official year and writes its completion marker
+  ok    Timetable import keeps one rejected slot from aborting a PostgreSQL transaction
+
+204 passed, 0 failed.
+  ok    Seeded an active year and a grade
+
+Manual load protection
+  ok    An edit on the assignment screen saves the new periods
+  ok    An edited assignment is marked manual
+  ok    The sync keeps the hand-edited load
+  ok    The sync creates the missing assignment
+  ok    The sync corrects nothing on its first pass
+  ok    The hand-edited periods are unchanged (6, not the grid's 2)
+
+Derived load correction
+  ok    A derived assignment starts with the printed cell count
+  ok    A derived assignment is marked timetable
+  ok    A grid change corrects the derived load
+  ok    The hand-edited load is still kept on the second pass
+  ok    The derived load now equals its two printed cells
+  ok    A repeat sync changes nothing
+  ok    Both teaching pairs are linked to the teacher
+  ok    Derived links are marked as timetable evidence
+
+Qualification versus teaching evidence
+  ok    Teaching a subject does not claim a qualification
+  ok    A declared qualification satisfies the warning check
+  ok    Declaring one subject keeps the other teaching evidence
+  ok    Clearing declarations restores both timetable evidence rows
+  ok    Clearing declarations removes the qualification
+
+Substitute cover
+  ok    The cover date maps to the school Sunday
+  ok    The cover board lists both lessons of the day
+  ok    The absent teacher is marked on approved leave
+  ok    The cover board reuses the weekly free/busy evidence
+  ok    A teacher already teaching that period cannot cover
+  ok    A free teacher can cover the lesson
+  ok    A substitute cannot cover two classes in one period
+  ok    Removing the cover restores the regular teacher
+
+Roster enrichment for existing students
+  ok    A new roster row is importable
+  ok    The roster row creates the student
+  ok    A returning roster row is recognised as an existing student
+  ok    A returning row enriches the existing student instead of skipping it
+  ok    The enriched fields land on the existing student
+  ok    A generic CSV cannot claim official-roster authority from its Notes text
+  ok    Enrichment does not overwrite the printed class attribute
+  ok    A repeat enriched import changes nothing
+  ok    The guardian import creates a guardian
+  ok    The guardian import links the guardian to the student
+  ok    Re-importing the same guardian phone does not duplicate them
+
+Two-factor authentication
+  ok    TOTP matches the RFC 6238 reference vector
+  ok    A code is accepted inside its time step
+  ok    A wrong code is rejected
+  ok    Base32 secrets round-trip
+  ok    Enabling two-factor issues eight recovery codes
+  ok    The account is marked as protected only after a valid code
+  ok    A recovery code can stand in for the authenticator
+  ok    A recovery code cannot be reused
+  ok    A correct second factor completes the sign-in
+  ok    The authenticated session is established after the code
+  ok    Disabling needs the correct password
+  ok    Disabling needs a current code and clears protection
+  ok    Disabling removes the recovery codes
+
+------------------------------------------------------------
+Teaching-load sync: 52 passed, 0 failed
+Official school data seed (mysql)
+============================================================
+  ok    Migrations apply to a fresh database
+  ok    Reference seeds apply to a fresh database
+  ok    The seed command succeeds on a fresh database
+  info  classes: 17
+  info  students: 778
+  info  enrollments: 778
+  info  teachers: 37
+  info  subjects: 17
+  info  timetables: 557
+  info  assessments: 45
+  info  gender_confirmed: 778
+  info  religion_confirmed: 778
+  info  second_language_confirmed: 425
+  ok    Exactly 17 official classes exist
+  ok    Exactly 778 populated source students exist
+  ok    Exactly 778 active enrollments exist
+  ok    The 17-subject catalogue is complete
+  ok    All 557 printed lessons exist as timetable slots
+  ok    Exactly 45 assessment rows exist
+  ok    The printed teachers were created
+  ok    Every source student has the reviewed roster gender
+  ok    All 778 students carry a religion (672 source-backed + 106 name-inferred)
+  ok    Exactly 425 second-language values are proved by the source
+  ok    Every reviewed gender carries official-roster provenance
+  ok    Every confirmed religion carries the versioned source rule
+  ok    No religion remains explicitly unconfirmed after name inference
+  ok    Every second language records printed-cell or class-heading evidence
+  ok    The populated B5 L17 source row is restored exactly once
+  ok    The source does not fabricate any birth date for A/B students
+  ok    A1-A9 and B1-B8 are all present
+  ok    Every class carries its official Arabic pathway label
+  ok    All 17 official classes carry the school-confirmed 50-student capacity
+  ok    B7 has only its one name-inferred Christian (يؤنا), not the A4 marker rule
+  ok    All 12 third-secondary classes exist
+  ok    All 540 third-secondary students were imported
+  ok    Every third-secondary student has gender, birth date and religion from the source ID/name
+  ok    20 third-secondary students carry a Christian name marker
+  ok    The seed marker records the official year
+  ok    The marker records reviewed data version 7
+  ok    The marker records the verified student count
+  ok    A forced second seed succeeds
+  ok    A second run creates no duplicate classes
+  ok    A second run creates no duplicate students
+  ok    A second run creates no duplicate enrollments
+  ok    A second run creates no duplicate timetable slots
+  ok    A second run creates no duplicate assessments
+  ok    A second run creates no duplicate subjects
+  ok    A second run creates no duplicate teachers
+  ok    A boot with the marker present is a clean no-op
+  ok    The marker short-circuits before any importer runs
+  ok    All seeded enrollments are active
+
+41 passed, 0 failed.
+Nizam HTTP pipeline suite
+============================================================
+Database: nizam_http_test_a7265510 (temporary, dropped on exit)
+
+Applied 37 migrations.
+Ran 8 seed files.
+Seeded 2 users (admin + zero-permission role).
+
+  ok    Route table parsed (229 handlers)
+  ok    Every route handler exists and accepts (Request)
+Server: http://127.0.0.1:18589
+
+Anonymous visitor
+  ok    GET /healthz answers 200
+  ok    GET /healthz body is "ok"
+  ok    GET / redirects
+  ok    GET / redirects to /login
+  ok    GET /login renders
+  ok    Login page cannot be cached
+  ok    Login form carries a CSRF token
+  ok    Security headers are present on the login page
+  ok    CSP rejects inline JavaScript
+  ok    CSP restricts base URLs, form targets, and plugins
+  ok    Unauthenticated GET /dashboard is not rendered
+  ok    Unauthenticated GET /dashboard redirects to /login
+  ok    Unauthenticated GET /students redirects to /login
+  ok    Unknown route returns a real 404
+  ok    POST /login without a CSRF token is rejected (419)
+  ok    POST /login with a forged CSRF token is rejected (419)
+  ok    Wrong password re-renders the login form
+  ok    Wrong password does not establish a session
+
+Administrator session
+  ok    Admin got a CSRF token
+  ok    Valid credentials redirect
+  ok    Valid credentials redirect to /dashboard
+  ok    Session ID is regenerated at login (fixation defence)
+  ok    Admin can load /dashboard
+  ok    Admin can load /students (students.view granted)
+  ok    Admin can load /settings/profile
+  ok    Admin can load /settings/structure
+  ok    Admin can load /settings/terms
+  ok    Admin can load /settings/grading
+  ok    Structure form carries a CSRF token
+  ok    POST that writes data without a CSRF token is rejected (419)
+  ok    Rejected POST wrote nothing
+  ok    Authenticated POST with a valid CSRF token is accepted
+  ok    Successful write redirects back to the screen (PRG)
+  ok    Accepted POST persisted exactly one stage
+  ok    Duplicate stage code is rejected by redirecting with an error
+  ok    Duplicate stage code created no second row
+  ok    Invalid stage is rejected by redirecting with an error
+  ok    Invalid stage created no row
+
+Module landing pages (administrator)
+  ok    Admin can load /academic-years
+  ok    Admin can load /grades
+  ok    Admin can load /subjects
+  ok    Admin can load /classes
+  ok    Admin can load /teachers
+  ok    Admin can load /students
+  ok    Admin can load /assignments
+  ok    Admin can load /attendance
+  ok    Admin can load /exams
+  ok    Admin can load /timetable
+  ok    Admin can load /admissions
+  ok    Admin can load /guardians
+  ok    Admin can load /finance
+  ok    Admin can load /hr
+  ok    Admin can load /transport
+  ok    Admin can load /library
+  ok    Admin can load /welfare/discipline
+  ok    Admin can load /welfare/health
+  ok    Admin can load /reports
+  ok    Admin can load /activity-log
+  ok    Admin can load /users
+  ok    Admin can load /settings/modules
+  ok    Admin can load /settings/localization
+  ok    Admin can load /settings/academic
+  ok    Admin can load /settings/security
+  ok    Admin can load /settings/backup
+  ok    Admin can load /backups
+  ok    Admin can load /notifications
+  ok    Excel report export responds
+  ok    Excel report export is a real XLSX archive
+  ok    Excel export has the XLSX content type
+  ok    PDF report export responds
+  ok    PDF report export has a valid PDF signature
+  ok    Unsupported report export format is rejected
+
+Write paths (administrator)
+  ok    Write forms carry a session CSRF token
+  ok    POST /grades redirects
+  ok    POST /grades persisted one grade
+  ok    Invalid grade is rejected
+  ok    Invalid grade created no row
+  ok    Created grade is retrievable
+  ok    Edit grade redirects
+  ok    Edit grade persisted
+
+Offline queue replay (idempotency)
+  ok    GET /csrf-token returns 200 for a signed-in user
+  ok    GET /csrf-token returns a 64-character token
+  ok    GET /csrf-token redirects an anonymous request
+  ok    First offline submission is processed normally
+  ok    Replay with the same queue id is suppressed (204)
+  ok    Replay did not create a duplicate grade
+  ok    GET /settings/offline renders the pending-sends screen
+  ok    Pending-sends screen exposes the local queue list
+  ok    GET /settings/offline requires authentication
+  ok    /dashboard renders exactly one page title
+  ok    /students renders exactly one page title
+  ok    /finance renders exactly one page title
+  ok    /guardians renders exactly one page title
+  ok    /timetable renders exactly one page title
+  ok    /reports renders exactly one page title
+  ok    /exams renders exactly one page title
+  ok    Shared layout hero renders on a screen that does not build its own header
+  ok    /students uses the shared hero (one title)
+  ok    /students renders the shared hero
+  ok    /students carries no legacy page head
+  ok    /students carries no legacy module header
+  ok    /students/archived uses the shared hero (one title)
+  ok    /students/archived renders the shared hero
+  ok    /students/archived carries no legacy page head
+  ok    /students/archived carries no legacy module header
+  ok    /students/create uses the shared hero (one title)
+  ok    /students/create renders the shared hero
+  ok    /students/create carries no legacy page head
+  ok    /students/create carries no legacy module header
+  ok    /teachers uses the shared hero (one title)
+  ok    /teachers renders the shared hero
+  ok    /teachers carries no legacy page head
+  ok    /teachers carries no legacy module header
+  ok    /teachers/archived uses the shared hero (one title)
+  ok    /teachers/archived renders the shared hero
+  ok    /teachers/archived carries no legacy page head
+  ok    /teachers/archived carries no legacy module header
+  ok    /teachers/create uses the shared hero (one title)
+  ok    /teachers/create renders the shared hero
+  ok    /teachers/create carries no legacy page head
+  ok    /teachers/create carries no legacy module header
+  ok    /guardians uses the shared hero (one title)
+  ok    /guardians renders the shared hero
+  ok    /guardians carries no legacy page head
+  ok    /guardians carries no legacy module header
+  ok    /guardians/create uses the shared hero (one title)
+  ok    /guardians/create renders the shared hero
+  ok    /guardians/create carries no legacy page head
+  ok    /guardians/create carries no legacy module header
+  ok    /finance uses the shared hero (one title)
+  ok    /finance renders the shared hero
+  ok    /finance carries no legacy page head
+  ok    /finance carries no legacy module header
+  ok    /finance/invoices uses the shared hero (one title)
+  ok    /finance/invoices renders the shared hero
+  ok    /finance/invoices carries no legacy page head
+  ok    /finance/invoices carries no legacy module header
+  ok    /finance/invoices/create uses the shared hero (one title)
+  ok    /finance/invoices/create renders the shared hero
+  ok    /finance/invoices/create carries no legacy page head
+  ok    /finance/invoices/create carries no legacy module header
+  ok    /finance/structures uses the shared hero (one title)
+  ok    /finance/structures renders the shared hero
+  ok    /finance/structures carries no legacy page head
+  ok    /finance/structures carries no legacy module header
+  ok    /exams uses the shared hero (one title)
+  ok    /exams renders the shared hero
+  ok    /exams carries no legacy page head
+  ok    /exams carries no legacy module header
+  ok    /exams/ranking uses the shared hero (one title)
+  ok    /exams/ranking renders the shared hero
+  ok    /exams/ranking carries no legacy page head
+  ok    /exams/ranking carries no legacy module header
+  ok    /attendance uses the shared hero (one title)
+  ok    /attendance renders the shared hero
+  ok    /attendance carries no legacy page head
+  ok    /attendance carries no legacy module header
+  ok    /timetable uses the shared hero (one title)
+  ok    /timetable renders the shared hero
+  ok    /timetable carries no legacy page head
+  ok    /timetable carries no legacy module header
+  ok    /reports uses the shared hero (one title)
+  ok    /reports renders the shared hero
+  ok    /reports carries no legacy page head
+  ok    /reports carries no legacy module header
+  ok    /library uses the shared hero (one title)
+  ok    /library renders the shared hero
+  ok    /library carries no legacy page head
+  ok    /library carries no legacy module header
+  ok    /library/create uses the shared hero (one title)
+  ok    /library/create renders the shared hero
+  ok    /library/create carries no legacy page head
+  ok    /library/create carries no legacy module header
+  ok    /library/borrows uses the shared hero (one title)
+  ok    /library/borrows renders the shared hero
+  ok    /library/borrows carries no legacy page head
+  ok    /library/borrows carries no legacy module header
+  ok    /transport uses the shared hero (one title)
+  ok    /transport renders the shared hero
+  ok    /transport carries no legacy page head
+  ok    /transport carries no legacy module header
+  ok    /transport/create uses the shared hero (one title)
+  ok    /transport/create renders the shared hero
+  ok    /transport/create carries no legacy page head
+  ok    /transport/create carries no legacy module header
+  ok    /hr uses the shared hero (one title)
+  ok    /hr renders the shared hero
+  ok    /hr carries no legacy page head
+  ok    /hr carries no legacy module header
+  ok    /hr/leaves uses the shared hero (one title)
+  ok    /hr/leaves renders the shared hero
+  ok    /hr/leaves carries no legacy page head
+  ok    /hr/leaves carries no legacy module header
+  ok    /academic-years uses the shared hero (one title)
+  ok    /academic-years renders the shared hero
+  ok    /academic-years carries no legacy page head
+  ok    /academic-years carries no legacy module header
+  ok    /academic-years/create uses the shared hero (one title)
+  ok    /academic-years/create renders the shared hero
+  ok    /academic-years/create carries no legacy page head
+  ok    /academic-years/create carries no legacy module header
+  ok    /admissions uses the shared hero (one title)
+  ok    /admissions renders the shared hero
+  ok    /admissions carries no legacy page head
+  ok    /admissions carries no legacy module header
+  ok    /admissions/create uses the shared hero (one title)
+  ok    /admissions/create renders the shared hero
+  ok    /admissions/create carries no legacy page head
+  ok    /admissions/create carries no legacy module header
+  ok    /assignments uses the shared hero (one title)
+  ok    /assignments renders the shared hero
+  ok    /assignments carries no legacy page head
+  ok    /assignments carries no legacy module header
+  ok    /assignments/workload uses the shared hero (one title)
+  ok    /assignments/workload renders the shared hero
+  ok    /assignments/workload carries no legacy page head
+  ok    /assignments/workload carries no legacy module header
+  ok    /assignments/archived uses the shared hero (one title)
+  ok    /assignments/archived renders the shared hero
+  ok    /assignments/archived carries no legacy page head
+  ok    /assignments/archived carries no legacy module header
+  ok    /classes uses the shared hero (one title)
+  ok    /classes renders the shared hero
+  ok    /classes carries no legacy page head
+  ok    /classes carries no legacy module header
+  ok    /subjects uses the shared hero (one title)
+  ok    /subjects renders the shared hero
+  ok    /subjects carries no legacy page head
+  ok    /subjects carries no legacy module header
+  ok    /subjects/create uses the shared hero (one title)
+  ok    /subjects/create renders the shared hero
+  ok    /subjects/create carries no legacy page head
+  ok    /subjects/create carries no legacy module header
+  ok    /users uses the shared hero (one title)
+  ok    /users renders the shared hero
+  ok    /users carries no legacy page head
+  ok    /users carries no legacy module header
+  ok    /notifications uses the shared hero (one title)
+  ok    /notifications renders the shared hero
+  ok    /notifications carries no legacy page head
+  ok    /notifications carries no legacy module header
+  ok    /backups uses the shared hero (one title)
+  ok    /backups renders the shared hero
+  ok    /backups carries no legacy page head
+  ok    /backups carries no legacy module header
+  ok    /welfare/health uses the shared hero (one title)
+  ok    /welfare/health renders the shared hero
+  ok    /welfare/health carries no legacy page head
+  ok    /welfare/health carries no legacy module header
+  ok    /welfare/discipline uses the shared hero (one title)
+  ok    /welfare/discipline renders the shared hero
+  ok    /welfare/discipline carries no legacy page head
+  ok    /welfare/discipline carries no legacy module header
+  ok    /settings/profile uses the shared hero (one title)
+  ok    /settings/profile renders the shared hero
+  ok    /settings/profile carries no legacy page head
+  ok    /settings/profile carries no legacy module header
+  ok    /settings/security uses the shared hero (one title)
+  ok    /settings/security renders the shared hero
+  ok    /settings/security carries no legacy page head
+  ok    /settings/security carries no legacy module header
+  ok    /settings/academic uses the shared hero (one title)
+  ok    /settings/academic renders the shared hero
+  ok    /settings/academic carries no legacy page head
+  ok    /settings/academic carries no legacy module header
+  ok    /settings/localization uses the shared hero (one title)
+  ok    /settings/localization renders the shared hero
+  ok    /settings/localization carries no legacy page head
+  ok    /settings/localization carries no legacy module header
+  ok    /settings/modules uses the shared hero (one title)
+  ok    /settings/modules renders the shared hero
+  ok    /settings/modules carries no legacy page head
+  ok    /settings/modules carries no legacy module header
+  ok    /settings/structure uses the shared hero (one title)
+  ok    /settings/structure renders the shared hero
+  ok    /settings/structure carries no legacy page head
+  ok    /settings/structure carries no legacy module header
+  ok    /settings/backup uses the shared hero (one title)
+  ok    /settings/backup renders the shared hero
+  ok    /settings/backup carries no legacy page head
+  ok    /settings/backup carries no legacy module header
+  ok    /settings/offline uses the shared hero (one title)
+  ok    /settings/offline renders the shared hero
+  ok    /settings/offline carries no legacy page head
+  ok    /settings/offline carries no legacy module header
+  ok    /students (ar) declares dir="rtl"
+  ok    /students (ar) has exactly one title
+  ok    /students (ar) renders without PHP diagnostics
+  ok    /students (ar) keeps the shared hero
+  ok    /students/archived (ar) declares dir="rtl"
+  ok    /students/archived (ar) has exactly one title
+  ok    /students/archived (ar) renders without PHP diagnostics
+  ok    /students/archived (ar) keeps the shared hero
+  ok    /students/create (ar) declares dir="rtl"
+  ok    /students/create (ar) has exactly one title
+  ok    /students/create (ar) renders without PHP diagnostics
+  ok    /students/create (ar) keeps the shared hero
+  ok    /teachers (ar) declares dir="rtl"
+  ok    /teachers (ar) has exactly one title
+  ok    /teachers (ar) renders without PHP diagnostics
+  ok    /teachers (ar) keeps the shared hero
+  ok    /teachers/archived (ar) declares dir="rtl"
+  ok    /teachers/archived (ar) has exactly one title
+  ok    /teachers/archived (ar) renders without PHP diagnostics
+  ok    /teachers/archived (ar) keeps the shared hero
+  ok    /teachers/create (ar) declares dir="rtl"
+  ok    /teachers/create (ar) has exactly one title
+  ok    /teachers/create (ar) renders without PHP diagnostics
+  ok    /teachers/create (ar) keeps the shared hero
+  ok    /guardians (ar) declares dir="rtl"
+  ok    /guardians (ar) has exactly one title
+  ok    /guardians (ar) renders without PHP diagnostics
+  ok    /guardians (ar) keeps the shared hero
+  ok    /guardians/create (ar) declares dir="rtl"
+  ok    /guardians/create (ar) has exactly one title
+  ok    /guardians/create (ar) renders without PHP diagnostics
+  ok    /guardians/create (ar) keeps the shared hero
+  ok    /finance (ar) declares dir="rtl"
+  ok    /finance (ar) has exactly one title
+  ok    /finance (ar) renders without PHP diagnostics
+  ok    /finance (ar) keeps the shared hero
+  ok    /finance/invoices (ar) declares dir="rtl"
+  ok    /finance/invoices (ar) has exactly one title
+  ok    /finance/invoices (ar) renders without PHP diagnostics
+  ok    /finance/invoices (ar) keeps the shared hero
+  ok    /finance/invoices/create (ar) declares dir="rtl"
+  ok    /finance/invoices/create (ar) has exactly one title
+  ok    /finance/invoices/create (ar) renders without PHP diagnostics
+  ok    /finance/invoices/create (ar) keeps the shared hero
+  ok    /finance/structures (ar) declares dir="rtl"
+  ok    /finance/structures (ar) has exactly one title
+  ok    /finance/structures (ar) renders without PHP diagnostics
+  ok    /finance/structures (ar) keeps the shared hero
+  ok    /exams (ar) declares dir="rtl"
+  ok    /exams (ar) has exactly one title
+  ok    /exams (ar) renders without PHP diagnostics
+  ok    /exams (ar) keeps the shared hero
+  ok    /exams/ranking (ar) declares dir="rtl"
+  ok    /exams/ranking (ar) has exactly one title
+  ok    /exams/ranking (ar) renders without PHP diagnostics
+  ok    /exams/ranking (ar) keeps the shared hero
+  ok    /attendance (ar) declares dir="rtl"
+  ok    /attendance (ar) has exactly one title
+  ok    /attendance (ar) renders without PHP diagnostics
+  ok    /attendance (ar) keeps the shared hero
+  ok    /timetable (ar) declares dir="rtl"
+  ok    /timetable (ar) has exactly one title
+  ok    /timetable (ar) renders without PHP diagnostics
+  ok    /timetable (ar) keeps the shared hero
+  ok    /reports (ar) declares dir="rtl"
+  ok    /reports (ar) has exactly one title
+  ok    /reports (ar) renders without PHP diagnostics
+  ok    /reports (ar) keeps the shared hero
+  ok    /library (ar) declares dir="rtl"
+  ok    /library (ar) has exactly one title
+  ok    /library (ar) renders without PHP diagnostics
+  ok    /library (ar) keeps the shared hero
+  ok    /library/create (ar) declares dir="rtl"
+  ok    /library/create (ar) has exactly one title
+  ok    /library/create (ar) renders without PHP diagnostics
+  ok    /library/create (ar) keeps the shared hero
+  ok    /library/borrows (ar) declares dir="rtl"
+  ok    /library/borrows (ar) has exactly one title
+  ok    /library/borrows (ar) renders without PHP diagnostics
+  ok    /library/borrows (ar) keeps the shared hero
+  ok    /transport (ar) declares dir="rtl"
+  ok    /transport (ar) has exactly one title
+  ok    /transport (ar) renders without PHP diagnostics
+  ok    /transport (ar) keeps the shared hero
+  ok    /transport/create (ar) declares dir="rtl"
+  ok    /transport/create (ar) has exactly one title
+  ok    /transport/create (ar) renders without PHP diagnostics
+  ok    /transport/create (ar) keeps the shared hero
+  ok    /hr (ar) declares dir="rtl"
+  ok    /hr (ar) has exactly one title
+  ok    /hr (ar) renders without PHP diagnostics
+  ok    /hr (ar) keeps the shared hero
+  ok    /hr/leaves (ar) declares dir="rtl"
+  ok    /hr/leaves (ar) has exactly one title
+  ok    /hr/leaves (ar) renders without PHP diagnostics
+  ok    /hr/leaves (ar) keeps the shared hero
+  ok    /academic-years (ar) declares dir="rtl"
+  ok    /academic-years (ar) has exactly one title
+  ok    /academic-years (ar) renders without PHP diagnostics
+  ok    /academic-years (ar) keeps the shared hero
+  ok    /academic-years/create (ar) declares dir="rtl"
+  ok    /academic-years/create (ar) has exactly one title
+  ok    /academic-years/create (ar) renders without PHP diagnostics
+  ok    /academic-years/create (ar) keeps the shared hero
+  ok    /admissions (ar) declares dir="rtl"
+  ok    /admissions (ar) has exactly one title
+  ok    /admissions (ar) renders without PHP diagnostics
+  ok    /admissions (ar) keeps the shared hero
+  ok    /admissions/create (ar) declares dir="rtl"
+  ok    /admissions/create (ar) has exactly one title
+  ok    /admissions/create (ar) renders without PHP diagnostics
+  ok    /admissions/create (ar) keeps the shared hero
+  ok    /assignments (ar) declares dir="rtl"
+  ok    /assignments (ar) has exactly one title
+  ok    /assignments (ar) renders without PHP diagnostics
+  ok    /assignments (ar) keeps the shared hero
+  ok    /assignments/workload (ar) declares dir="rtl"
+  ok    /assignments/workload (ar) has exactly one title
+  ok    /assignments/workload (ar) renders without PHP diagnostics
+  ok    /assignments/workload (ar) keeps the shared hero
+  ok    /assignments/archived (ar) declares dir="rtl"
+  ok    /assignments/archived (ar) has exactly one title
+  ok    /assignments/archived (ar) renders without PHP diagnostics
+  ok    /assignments/archived (ar) keeps the shared hero
+  ok    /classes (ar) declares dir="rtl"
+  ok    /classes (ar) has exactly one title
+  ok    /classes (ar) renders without PHP diagnostics
+  ok    /classes (ar) keeps the shared hero
+  ok    /subjects (ar) declares dir="rtl"
+  ok    /subjects (ar) has exactly one title
+  ok    /subjects (ar) renders without PHP diagnostics
+  ok    /subjects (ar) keeps the shared hero
+  ok    /subjects/create (ar) declares dir="rtl"
+  ok    /subjects/create (ar) has exactly one title
+  ok    /subjects/create (ar) renders without PHP diagnostics
+  ok    /subjects/create (ar) keeps the shared hero
+  ok    /users (ar) declares dir="rtl"
+  ok    /users (ar) has exactly one title
+  ok    /users (ar) renders without PHP diagnostics
+  ok    /users (ar) keeps the shared hero
+  ok    /notifications (ar) declares dir="rtl"
+  ok    /notifications (ar) has exactly one title
+  ok    /notifications (ar) renders without PHP diagnostics
+  ok    /notifications (ar) keeps the shared hero
+  ok    /backups (ar) declares dir="rtl"
+  ok    /backups (ar) has exactly one title
+  ok    /backups (ar) renders without PHP diagnostics
+  ok    /backups (ar) keeps the shared hero
+  ok    /welfare/health (ar) declares dir="rtl"
+  ok    /welfare/health (ar) has exactly one title
+  ok    /welfare/health (ar) renders without PHP diagnostics
+  ok    /welfare/health (ar) keeps the shared hero
+  ok    /welfare/discipline (ar) declares dir="rtl"
+  ok    /welfare/discipline (ar) has exactly one title
+  ok    /welfare/discipline (ar) renders without PHP diagnostics
+  ok    /welfare/discipline (ar) keeps the shared hero
+  ok    /settings/profile (ar) declares dir="rtl"
+  ok    /settings/profile (ar) has exactly one title
+  ok    /settings/profile (ar) renders without PHP diagnostics
+  ok    /settings/profile (ar) keeps the shared hero
+  ok    /settings/security (ar) declares dir="rtl"
+  ok    /settings/security (ar) has exactly one title
+  ok    /settings/security (ar) renders without PHP diagnostics
+  ok    /settings/security (ar) keeps the shared hero
+  ok    /settings/academic (ar) declares dir="rtl"
+  ok    /settings/academic (ar) has exactly one title
+  ok    /settings/academic (ar) renders without PHP diagnostics
+  ok    /settings/academic (ar) keeps the shared hero
+  ok    /settings/localization (ar) declares dir="rtl"
+  ok    /settings/localization (ar) has exactly one title
+  ok    /settings/localization (ar) renders without PHP diagnostics
+  ok    /settings/localization (ar) keeps the shared hero
+  ok    /settings/modules (ar) declares dir="rtl"
+  ok    /settings/modules (ar) has exactly one title
+  ok    /settings/modules (ar) renders without PHP diagnostics
+  ok    /settings/modules (ar) keeps the shared hero
+  ok    /settings/structure (ar) declares dir="rtl"
+  ok    /settings/structure (ar) has exactly one title
+  ok    /settings/structure (ar) renders without PHP diagnostics
+  ok    /settings/structure (ar) keeps the shared hero
+  ok    /settings/backup (ar) declares dir="rtl"
+  ok    /settings/backup (ar) has exactly one title
+  ok    /settings/backup (ar) renders without PHP diagnostics
+  ok    /settings/backup (ar) keeps the shared hero
+  ok    /settings/offline (ar) declares dir="rtl"
+  ok    /settings/offline (ar) has exactly one title
+  ok    /settings/offline (ar) renders without PHP diagnostics
+  ok    /settings/offline (ar) keeps the shared hero
+  ok    /students (en) declares dir="ltr"
+  ok    /students (en) has exactly one title
+  ok    /students (en) renders without PHP diagnostics
+  ok    /students (en) keeps the shared hero
+  ok    /students/archived (en) declares dir="ltr"
+  ok    /students/archived (en) has exactly one title
+  ok    /students/archived (en) renders without PHP diagnostics
+  ok    /students/archived (en) keeps the shared hero
+  ok    /students/create (en) declares dir="ltr"
+  ok    /students/create (en) has exactly one title
+  ok    /students/create (en) renders without PHP diagnostics
+  ok    /students/create (en) keeps the shared hero
+  ok    /teachers (en) declares dir="ltr"
+  ok    /teachers (en) has exactly one title
+  ok    /teachers (en) renders without PHP diagnostics
+  ok    /teachers (en) keeps the shared hero
+  ok    /teachers/archived (en) declares dir="ltr"
+  ok    /teachers/archived (en) has exactly one title
+  ok    /teachers/archived (en) renders without PHP diagnostics
+  ok    /teachers/archived (en) keeps the shared hero
+  ok    /teachers/create (en) declares dir="ltr"
+  ok    /teachers/create (en) has exactly one title
+  ok    /teachers/create (en) renders without PHP diagnostics
+  ok    /teachers/create (en) keeps the shared hero
+  ok    /guardians (en) declares dir="ltr"
+  ok    /guardians (en) has exactly one title
+  ok    /guardians (en) renders without PHP diagnostics
+  ok    /guardians (en) keeps the shared hero
+  ok    /guardians/create (en) declares dir="ltr"
+  ok    /guardians/create (en) has exactly one title
+  ok    /guardians/create (en) renders without PHP diagnostics
+  ok    /guardians/create (en) keeps the shared hero
+  ok    /finance (en) declares dir="ltr"
+  ok    /finance (en) has exactly one title
+  ok    /finance (en) renders without PHP diagnostics
+  ok    /finance (en) keeps the shared hero
+  ok    /finance/invoices (en) declares dir="ltr"
+  ok    /finance/invoices (en) has exactly one title
+  ok    /finance/invoices (en) renders without PHP diagnostics
+  ok    /finance/invoices (en) keeps the shared hero
+  ok    /finance/invoices/create (en) declares dir="ltr"
+  ok    /finance/invoices/create (en) has exactly one title
+  ok    /finance/invoices/create (en) renders without PHP diagnostics
+  ok    /finance/invoices/create (en) keeps the shared hero
+  ok    /finance/structures (en) declares dir="ltr"
+  ok    /finance/structures (en) has exactly one title
+  ok    /finance/structures (en) renders without PHP diagnostics
+  ok    /finance/structures (en) keeps the shared hero
+  ok    /exams (en) declares dir="ltr"
+  ok    /exams (en) has exactly one title
+  ok    /exams (en) renders without PHP diagnostics
+  ok    /exams (en) keeps the shared hero
+  ok    /exams/ranking (en) declares dir="ltr"
+  ok    /exams/ranking (en) has exactly one title
+  ok    /exams/ranking (en) renders without PHP diagnostics
+  ok    /exams/ranking (en) keeps the shared hero
+  ok    /attendance (en) declares dir="ltr"
+  ok    /attendance (en) has exactly one title
+  ok    /attendance (en) renders without PHP diagnostics
+  ok    /attendance (en) keeps the shared hero
+  ok    /timetable (en) declares dir="ltr"
+  ok    /timetable (en) has exactly one title
+  ok    /timetable (en) renders without PHP diagnostics
+  ok    /timetable (en) keeps the shared hero
+  ok    /reports (en) declares dir="ltr"
+  ok    /reports (en) has exactly one title
+  ok    /reports (en) renders without PHP diagnostics
+  ok    /reports (en) keeps the shared hero
+  ok    /library (en) declares dir="ltr"
+  ok    /library (en) has exactly one title
+  ok    /library (en) renders without PHP diagnostics
+  ok    /library (en) keeps the shared hero
+  ok    /library/create (en) declares dir="ltr"
+  ok    /library/create (en) has exactly one title
+  ok    /library/create (en) renders without PHP diagnostics
+  ok    /library/create (en) keeps the shared hero
+  ok    /library/borrows (en) declares dir="ltr"
+  ok    /library/borrows (en) has exactly one title
+  ok    /library/borrows (en) renders without PHP diagnostics
+  ok    /library/borrows (en) keeps the shared hero
+  ok    /transport (en) declares dir="ltr"
+  ok    /transport (en) has exactly one title
+  ok    /transport (en) renders without PHP diagnostics
+  ok    /transport (en) keeps the shared hero
+  ok    /transport/create (en) declares dir="ltr"
+  ok    /transport/create (en) has exactly one title
+  ok    /transport/create (en) renders without PHP diagnostics
+  ok    /transport/create (en) keeps the shared hero
+  ok    /hr (en) declares dir="ltr"
+  ok    /hr (en) has exactly one title
+  ok    /hr (en) renders without PHP diagnostics
+  ok    /hr (en) keeps the shared hero
+  ok    /hr/leaves (en) declares dir="ltr"
+  ok    /hr/leaves (en) has exactly one title
+  ok    /hr/leaves (en) renders without PHP diagnostics
+  ok    /hr/leaves (en) keeps the shared hero
+  ok    /academic-years (en) declares dir="ltr"
+  ok    /academic-years (en) has exactly one title
+  ok    /academic-years (en) renders without PHP diagnostics
+  ok    /academic-years (en) keeps the shared hero
+  ok    /academic-years/create (en) declares dir="ltr"
+  ok    /academic-years/create (en) has exactly one title
+  ok    /academic-years/create (en) renders without PHP diagnostics
+  ok    /academic-years/create (en) keeps the shared hero
+  ok    /admissions (en) declares dir="ltr"
+  ok    /admissions (en) has exactly one title
+  ok    /admissions (en) renders without PHP diagnostics
+  ok    /admissions (en) keeps the shared hero
+  ok    /admissions/create (en) declares dir="ltr"
+  ok    /admissions/create (en) has exactly one title
+  ok    /admissions/create (en) renders without PHP diagnostics
+  ok    /admissions/create (en) keeps the shared hero
+  ok    /assignments (en) declares dir="ltr"
+  ok    /assignments (en) has exactly one title
+  ok    /assignments (en) renders without PHP diagnostics
+  ok    /assignments (en) keeps the shared hero
+  ok    /assignments/workload (en) declares dir="ltr"
+  ok    /assignments/workload (en) has exactly one title
+  ok    /assignments/workload (en) renders without PHP diagnostics
+  ok    /assignments/workload (en) keeps the shared hero
+  ok    /assignments/archived (en) declares dir="ltr"
+  ok    /assignments/archived (en) has exactly one title
+  ok    /assignments/archived (en) renders without PHP diagnostics
+  ok    /assignments/archived (en) keeps the shared hero
+  ok    /classes (en) declares dir="ltr"
+  ok    /classes (en) has exactly one title
+  ok    /classes (en) renders without PHP diagnostics
+  ok    /classes (en) keeps the shared hero
+  ok    /subjects (en) declares dir="ltr"
+  ok    /subjects (en) has exactly one title
+  ok    /subjects (en) renders without PHP diagnostics
+  ok    /subjects (en) keeps the shared hero
+  ok    /subjects/create (en) declares dir="ltr"
+  ok    /subjects/create (en) has exactly one title
+  ok    /subjects/create (en) renders without PHP diagnostics
+  ok    /subjects/create (en) keeps the shared hero
+  ok    /users (en) declares dir="ltr"
+  ok    /users (en) has exactly one title
+  ok    /users (en) renders without PHP diagnostics
+  ok    /users (en) keeps the shared hero
+  ok    /notifications (en) declares dir="ltr"
+  ok    /notifications (en) has exactly one title
+  ok    /notifications (en) renders without PHP diagnostics
+  ok    /notifications (en) keeps the shared hero
+  ok    /backups (en) declares dir="ltr"
+  ok    /backups (en) has exactly one title
+  ok    /backups (en) renders without PHP diagnostics
+  ok    /backups (en) keeps the shared hero
+  ok    /welfare/health (en) declares dir="ltr"
+  ok    /welfare/health (en) has exactly one title
+  ok    /welfare/health (en) renders without PHP diagnostics
+  ok    /welfare/health (en) keeps the shared hero
+  ok    /welfare/discipline (en) declares dir="ltr"
+  ok    /welfare/discipline (en) has exactly one title
+  ok    /welfare/discipline (en) renders without PHP diagnostics
+  ok    /welfare/discipline (en) keeps the shared hero
+  ok    /settings/profile (en) declares dir="ltr"
+  ok    /settings/profile (en) has exactly one title
+  ok    /settings/profile (en) renders without PHP diagnostics
+  ok    /settings/profile (en) keeps the shared hero
+  ok    /settings/security (en) declares dir="ltr"
+  ok    /settings/security (en) has exactly one title
+  ok    /settings/security (en) renders without PHP diagnostics
+  ok    /settings/security (en) keeps the shared hero
+  ok    /settings/academic (en) declares dir="ltr"
+  ok    /settings/academic (en) has exactly one title
+  ok    /settings/academic (en) renders without PHP diagnostics
+  ok    /settings/academic (en) keeps the shared hero
+  ok    /settings/localization (en) declares dir="ltr"
+  ok    /settings/localization (en) has exactly one title
+  ok    /settings/localization (en) renders without PHP diagnostics
+  ok    /settings/localization (en) keeps the shared hero
+  ok    /settings/modules (en) declares dir="ltr"
+  ok    /settings/modules (en) has exactly one title
+  ok    /settings/modules (en) renders without PHP diagnostics
+  ok    /settings/modules (en) keeps the shared hero
+  ok    /settings/structure (en) declares dir="ltr"
+  ok    /settings/structure (en) has exactly one title
+  ok    /settings/structure (en) renders without PHP diagnostics
+  ok    /settings/structure (en) keeps the shared hero
+  ok    /settings/backup (en) declares dir="ltr"
+  ok    /settings/backup (en) has exactly one title
+  ok    /settings/backup (en) renders without PHP diagnostics
+  ok    /settings/backup (en) keeps the shared hero
+  ok    /settings/offline (en) declares dir="ltr"
+  ok    /settings/offline (en) has exactly one title
+  ok    /settings/offline (en) renders without PHP diagnostics
+  ok    /settings/offline (en) keeps the shared hero
+  ok    GET /assessments renders the weekly assessment schedule
+  ok    /assessments renders exactly one page title
+  ok    /assessments uses the shared hero
+  ok    GET /assessments requires authentication
+  ok    Roster template downloads
+  ok    Template carries the documented headers
+  ok    Roster import screen renders
+  ok    Roster upload reaches the preview
+  ok    Preview marks exactly one valid row
+  ok    Preview lists every uploaded row
+  ok    Preview flags the row with an unknown class
+  ok    Preview carries a commit token
+  ok    Roster commit redirects to the student list
+  ok    Commit created the valid row
+  ok    Commit skipped the invalid row
+  ok    Commit kept the printed class attribute
+  ok    Recovery screen is reachable when users already exist
+  ok    Recovery screen cannot be cached
+  ok    Recovery screen offers the token form
+  ok    Recovery screen offers a username-free command
+  ok    Recovery CLI can discover accounts without a remembered username
+  ok    Username-free recovery lists the administrator identity
+  ok    CLI issues a one-time recovery code
+  ok    Recovery code is stored in the shared database
+  ok    Recovery no longer depends on a CLI/web token file
+  ok    Recovery reset is accepted
+  ok    Recovery reset lands on the sign-in page
+  ok    Recovery clears account failed-attempt state
+  ok    Recovery clears the browser IP throttle
+  ok    Successful reset consumes the code atomically
+  ok    Sign-in pre-fills the recovered username
+  ok    Recovered username can be copied from the success notice
+  ok    Recovery success notice renders the actual username
+  ok    A used recovery code is rejected
+  ok    The recovered password signs in
+  ok    Recovered sign-in reaches the dashboard
+  ok    Recovery reports a temporarily unavailable account
+  ok    Failed account update does not consume the valid code
+  ok    The same unexpired code works after the account is re-enabled
+  ok    Deferred successful reset consumes the held code
+  ok    Recovery restores the original password
+  ok    POST /subjects redirects
+  ok    POST /subjects persisted one subject
+  ok    Invalid subject re-renders the form
+  ok    Invalid subject created no row
+  ok    Duplicate subject code re-renders the form
+  ok    Duplicate subject code created no row
+  ok    POST /teachers redirects
+  ok    POST /teachers persisted one teacher
+  ok    Invalid teacher re-renders the form
+  ok    Invalid teacher created no row
+  ok    Created teacher is retrievable
+  ok    Teacher religion is stored when recorded
+  ok    Teacher religion filter finds the matching teacher
+  ok    Teacher religion filter excludes other religions
+  ok    POST /classes redirects
+  ok    POST /classes persisted one class
+  ok    Duplicate class name is rejected
+  ok    Duplicate class name created no row
+  ok    Edit class redirects
+  ok    Edit class persisted
+  ok    POST /admissions redirects
+  ok    POST /admissions persisted one application
+  ok    Application without a name is rejected
+  ok    Rejected application created no row
+  ok    Application status update redirects
+  ok    Application status update persisted
+  ok    Conversion redirects
+  ok    Conversion redirects to the new student
+  ok    Conversion produced a student id
+  ok    Application is marked enrolled after conversion
+
+Roster verification
+  ok    GET /students/verification renders
+  ok    The class list includes the active class
+  ok    GET /students/verification requires authentication
+  ok    GET /students/verification/{id} renders the class
+  ok    The class screen lists its student
+  ok    Saving a roster correction redirects
+  ok    The printed attribute is stored verbatim
+  ok    A corrected value is marked as printed
+  ok    An unambiguous religion is derived
+  ok    Signing a roster off redirects
+  ok    The sign-off is stored
+  ok    The sign-off stores a SHA-256 fingerprint
+  ok    Editing the roster invalidates the sign-off
+  ok    Changing the attribute updates the derived religion
+  ok    Shorthand is stored verbatim
+  ok    Shorthand never overwrites the religion
+  ok    Reopening verification redirects
+
+Timetable gaps
+  ok    GET /timetable/gaps renders
+  ok    The gap screen shows the printed subject
+  ok    GET /timetable/gaps requires authentication
+  ok    Resolving a gap redirects
+  ok    Resolving a gap creates the lesson
+  ok    The gap is marked resolved
+  ok    The lesson creates the missing assignment
+  ok    Reopening a gap redirects
+  ok    Reopening removes the lesson it created
+  ok    The gap returns to open
+  ok    GET /timetable/staff renders
+  ok    Renaming a printed teacher redirects
+  ok    The staff record takes the real full name
+  ok    The printed name is kept as an alias
+  ok    POST /guardians redirects
+  ok    POST /guardians persisted one guardian
+  ok    Guardian without name/phone is rejected
+  ok    Rejected guardian created no row
+  ok    Edit guardian redirects
+  ok    Edit guardian persisted
+  ok    Guardian link redirects
+  ok    Guardian link persisted
+  ok    POST /finance/invoices redirects
+  ok    POST /finance/invoices persisted one invoice
+  ok    Invoice without an amount is rejected
+  ok    Rejected invoice created no row
+  ok    Payment redirects
+  ok    Payment updated the invoice balance
+  ok    Partial payment set the invoice status
+  ok    Overpayment is refused without a server error
+  ok    Refused overpayment stored no receipt
+  ok    POST /transport redirects
+  ok    POST /transport persisted one route
+  ok    Invalid route is rejected
+  ok    Rejected route created no row
+  ok    Transport assignment redirects
+  ok    Transport assignment persisted
+  ok    POST /library redirects
+  ok    POST /library persisted one book
+  ok    New book starts with its full stock
+  ok    Book without title/author is rejected
+  ok    Rejected book created no row
+  ok    Borrow redirects
+  ok    Borrow persisted one loan
+  ok    Borrow decremented availability
+  ok    Borrowing an exhausted title is refused without a server error
+  ok    Refused borrow stored no loan
+  ok    Return redirects
+  ok    Return restored availability
+  ok    Double return did not inflate stock
+  ok    POST /hr/leaves redirects
+  ok    POST /hr/leaves persisted one request
+  ok    Leave without dates/reason is rejected
+  ok    Rejected leave created no row
+  ok    Leave decision redirects
+  ok    Leave decision persisted
+  ok    A decided leave cannot be re-decided
+  ok    POST /hr/departments redirects
+  ok    POST /hr/departments persisted one department
+  ok    POST /users redirects
+  ok    POST /users persisted one user
+  ok    Duplicate username is rejected
+  ok    Duplicate username created no row
+  ok    Invalid username is rejected
+  ok    Invalid username created no row
+  ok    Unread notification is stored for the signed-in administrator
+  ok    Notifications renders with an unread item
+  ok    Unread notification appears in the inbox
+  ok    Unread notifications render the protected mark-all action
+  ok    POST /academic-years redirects
+  ok    POST /academic-years persisted one year
+  ok    Invalid academic year re-renders the form
+  ok    Invalid academic year created no row
+  ok    POST /students redirects
+  ok    POST /students persisted one student
+  ok    Created student is retrievable
+  ok    Invalid student re-renders the form
+  ok    Invalid student created no row
+  ok    Edit student redirects
+  ok    Edit student persisted
+  ok    Student religion filter finds the matching student
+  ok    Student religion filter excludes other religions
+  ok    Populated attendance sheet renders
+  ok    Attendance bulk controls render for a populated class
+  ok    Populated attendance sheet has no PHP diagnostics
+  ok    POST /exams redirects
+  ok    POST /exams persisted one exam
+  ok    Exam without a name is rejected
+  ok    Rejected exam created no row
+  ok    Edit exam redirects
+  ok    Edit exam persisted
+  ok    POST /attendance redirects
+  ok    POST /attendance persisted one mark
+  ok    Attendance without a class is rejected
+  ok    Rejected attendance created no row
+  ok    POST /assignments redirects
+  ok    POST /assignments persisted one assignment
+  ok    Invalid assignment re-renders the form
+  ok    Rejected assignment created no row
+  ok    Selected-class timetable renders
+  ok    Timetable renders its add-slot dialog
+  ok    Timetable behavior is loaded from CSP-safe external JavaScript
+  ok    POST /timetable redirects
+  ok    POST /timetable persisted one slot
+  ok    Invalid timetable slot is rejected
+  ok    Rejected timetable slot created no row
+  ok    A duplicate class slot is rejected by redirect
+  ok    A duplicate class slot created no second row
+  ok    POST /welfare/discipline redirects
+  ok    POST /welfare/discipline persisted one record
+  ok    Discipline record without a student is rejected
+  ok    Rejected discipline record created no row
+  ok    POST /welfare/health redirects
+  ok    POST /welfare/health persisted one record
+  ok    Health record without a student is rejected
+  ok    Rejected health record created no row
+  ok    POST /settings/profile redirects
+  ok    Profile save persisted the school name
+  ok    Profile save logged actor, old/new values and area as JSON metadata
+  ok    Invalid profile re-renders the form
+  ok    Rejected profile changed nothing
+  ok    POST /settings/localization redirects
+  ok    Localization save persisted
+  ok    Invalid language is rejected
+  ok    Rejected language changed nothing
+  ok    New session starts in the saved default language
+  ok    Navbar language toggle persists to the database
+  ok    POST /settings/academic redirects
+  ok    Academic rules save persisted
+  ok    Out-of-range academic rules re-render the form
+  ok    POST /settings/security redirects
+  ok    Security save persisted
+  ok    Out-of-range security value re-renders the form
+  ok    Module toggle redirects
+  ok    Module toggle disabled the module
+  ok    Module toggle re-enabled the module
+  ok    A core module cannot be disabled
+
+Role workspaces (administrator)
+  ok    /portal/teacher does not crash
+  ok    /portal/teacher is not permission-denied for admin
+  ok    /portal/family does not crash
+  ok    /portal/family is not permission-denied for admin
+  ok    /portal/student does not crash
+  ok    /portal/student is not permission-denied for admin
+
+Module gate
+  ok    Disabled module does not render
+  ok    Disabled module redirects to the dashboard
+  ok    Re-enabled module renders again
+
+Locale switch and open-redirect guard
+  ok    Locale switch redirects
+  ok    Locale switch returns to the same-origin path that referred it
+  ok    Locale switch refuses a foreign Referer host (open-redirect guard)
+
+Zero-permission role (deny by default)
+  ok    Limited user can sign in
+  ok    Limited user can load a route that only requires authentication
+  ok    Limited user is denied /students (students.view)
+  ok    Limited user is denied /settings/profile (settings.manage)
+  ok    Limited user is denied /finance (finance.view)
+  ok    Limited user is denied the academic configuration screens
+  ok    Limited user is denied POST /grades
+  ok    Denied POST /grades persisted nothing
+  ok    Limited user is denied POST /subjects
+  ok    Denied POST /subjects persisted nothing
+  ok    Limited user is denied POST /teachers
+  ok    Denied POST /teachers persisted nothing
+  ok    Limited user is denied POST /classes
+  ok    Denied POST /classes persisted nothing
+  ok    Limited user is denied POST /admissions
+  ok    Denied POST /admissions persisted nothing
+  ok    Limited user is denied POST /guardians
+  ok    Denied POST /guardians persisted nothing
+  ok    Limited user is denied POST /finance/invoices
+  ok    Denied POST /finance/invoices persisted nothing
+  ok    Limited user is denied POST /hr/leaves
+  ok    Denied POST /hr/leaves persisted nothing
+  ok    Limited user is denied POST /transport
+  ok    Denied POST /transport persisted nothing
+  ok    Limited user is denied POST /library
+  ok    Denied POST /library persisted nothing
+  ok    Limited user is denied POST /users
+  ok    Denied POST /users persisted nothing
+  ok    Limited user is denied POST /academic-years
+  ok    Denied POST /academic-years persisted nothing
+  ok    Limited user is denied POST /students
+  ok    Denied POST /students persisted nothing
+  ok    Limited user is denied POST /exams
+  ok    Denied POST /exams persisted nothing
+  ok    Limited user is denied POST /attendance
+  ok    Denied POST /attendance persisted nothing
+  ok    Limited user is denied POST /timetable
+  ok    Denied POST /timetable persisted nothing
+  ok    Limited user is denied POST /assignments
+  ok    Denied POST /assignments persisted nothing
+  ok    Limited user is denied POST /welfare/discipline
+  ok    Denied POST /welfare/discipline persisted nothing
+  ok    Limited user is denied POST /welfare/health
+  ok    Denied POST /welfare/health persisted nothing
+  ok    Limited user is denied POST /settings/profile
+  ok    Denied profile save changed nothing
+  ok    Limited user is denied POST /settings/modules/{key}/toggle
+  ok    Denied module toggle changed nothing
+
+Backup and restore integrity
+  ok    Backup/restore child process completes
+  ok    Backup checksum, tamper rejection, and restore assertions pass
+  ok    Restored database retains an active administrator
+
+Live search: full-history and server-side filtering
+  ok    Student search responds
+  ok    Student search filters on the server
+  ok    Student search is case-insensitive on the server
+  ok    Backup page 1 does not contain the older matching row
+  ok    Backup search responds
+  ok    Backup search reaches a row that lives on a later pagination page
+  ok    Backup search keeps the term in the field
+  ok    Backup search shows an explicit no-match state
+  ok    Filtered backup pagination keeps the search term
+  ok    Attendance report lists the class rows
+  ok    Attendance report filters on the server by q
+  ok    Attendance report shows an explicit no-match state
+  ok    Class ranking lists the scored students
+  ok    Class ranking filters on the server by q
+  ok    Religion report renders its table
+  ok    Report search filters the table on the server
+  ok    Report search keeps its field available after a no-match term
+
+Document engine
+  ok    Student register renders the shared export menu
+  ok    Student register carries no legacy print hook
+  ok    Class timetable offers its own document export
+  ok    Class timetable offers bulk export of all class timetables
+  ok    Bulk options endpoint responds
+  ok    Bulk options list real export groups
+  ok    Bulk options report the real record count of each group
+  ok    Class timetable document renders over HTTP
+  ok    The document renders its own A4 pages
+  ok    The document numbers its own pages
+  ok    The document contains no application chrome
+  ok    The document loads no application script
+  ok    Student register document renders
+  ok    The document respects the on-screen filter
+  ok    Student register PDF export responds
+  ok    Student register export is a real PDF
+  ok    The PDF has real content
+  ok    The PDF is served with the PDF content type
+  ok    Student register Excel export responds
+  ok    Excel export is a real xlsx archive, not a renamed CSV
+  ok    The xlsx opens as a valid OOXML package
+  ok    The workbook contains the exported records
+  ok    The workbook carries its stylesheet (formatting, not a data dump)
+  ok    Class timetable PNG export responds
+  ok    PNG export is a real image
+  ok    The PNG is a full-page render at 2x (2248x1590)
+  ok    Bulk export starts a job with a real document count
+  ok    Bulk export reports every document as completed
+  ok    No document failed inside the bulk run
+  ok    Bulk archive downloads
+  ok    Bulk export produces a real ZIP archive
+  ok    The archive contains one document per exported entity
+  ok    The archive also carries its README
+  ok    The archive is organised in a named export folder
+  ok    Report card is served by the document engine
+  ok    Report card is a real PDF
+  ok    An unauthenticated export is refused
+  ok    An unauthenticated document view is refused
+
+Live search in a real browser
+Live search in a real browser
+  ok    The student list starts with both fixture rows
+  ok    The student fixture renders a second page
+  ok    Student pagination replaces only the results region
+  ok    Student pagination preserves the exact reading position
+  ok    Student page 2 renders the requested records
+  ok    Back navigation restores page 1 without reloading the document
+  ok    Typing filters students without Enter and without reloading the page
+  ok    The student query is written to the URL
+  ok    Only the matching student remains visible
+  ok    A refresh keeps the student search term in the field
+  ok    A refresh restores the filtered student view from the server
+  ok    A no-match student term still filters in place
+  ok    The no-match student term is kept in the URL
+  ok    A no-match student term hides every row behind an explicit empty state
+  ok    Clearing the student term removes q from the URL
+  ok    The attendance sheet reveals its filter only when scripting is available
+  ok    The attendance filter has no query name, so it cannot submit the unsaved sheet
+  ok    Typing filters the unsaved attendance sheet without reloading it
+  ok    The matching backup is not on page 1 before searching (it is older history)
+  ok    The backup history renders its fixture rows
+  ok    Typing filters the backup history without Enter or a reload
+  ok    The backup query is written to the URL
+  ok    The backup search reaches a row that lives on a later pagination page
+  ok    A refresh keeps the backup search term
+  ok    A refresh restores the matched backup from the server
+  ok    The filtered backup history still paginates
+  ok    Backup pagination links keep the search term
+  ok    Opening page 2 keeps the search term in the URL
+  ok    Page 2 of the filtered history shows matching rows
+  ok    A no-match backup term filters in place
+  ok    A no-match backup term hides every row behind an explicit empty state
+  ok    The no-match backup term is kept in the URL
+  ok    No page or console errors were raised during the live-search pass
+PASS: live-search browser checks
+  ok    The browser pass enforces no-Enter typing, URL refresh and no-match states
+
+Logout
+  ok    Logout redirects
+  ok    Session no longer authenticates after logout
+  ok    Logout without a CSRF token is rejected
+
+------------------------------------------------------------
+HTTP pipeline: 1010 passed, 0 failed, 0 skipped
+PASS: routing, session regeneration, CSRF rejection, permission denial, module gate, validation, flash redirects, logout

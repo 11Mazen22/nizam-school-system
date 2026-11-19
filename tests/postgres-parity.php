@@ -155,6 +155,9 @@ try {
     );
     $teacherColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'teachers'")->fetchAll(PDO::FETCH_COLUMN);
     check(in_array('religion', $teacherColumns, true), 'Migration 037 adds the teacher religion field');
+    $enrollmentColumns = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'student_enrollments'")->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('academic_track', $enrollmentColumns, true), 'Migration 040 adds the enrollment academic track');
+    check(in_array('year_work_entries', $tables, true), 'Migration 040 creates the year-work entries table');
     check(
         in_array('national_id', $studentColumns, true) && in_array('source_student_code', $studentColumns, true),
         'Migration 038 adds student source identity columns'

@@ -11,6 +11,7 @@ use App\Middleware\CsrfMiddleware;
 $pageTitle = __('timetable.staff_title');
 $activeNav = 'timetable';
 $canManage = hasPermission('timetable.manage');
+$pageScripts[] = '/assets/js/timetable-staff.js';
 
 ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('timetable.staff_subtitle')) ?></p>
@@ -57,6 +58,11 @@ require dirname(__DIR__) . '/layout/start.php';
                 <strong><?= e((string) $row['printed_name']) ?></strong>
                 <?php if (!$isKnown): ?>
                   <div><span class="badge text-bg-warning"><?= e(__('timetable.staff_unregistered')) ?></span></div>
+                <?php else: ?>
+                  <div><span class="badge text-bg-success"><?= e(__('timetable.staff_linked')) ?></span></div>
+                <?php endif; ?>
+                <?php if (!empty($row['conflict']['conflict'])): ?>
+                  <div class="mt-1"><span class="badge text-bg-danger"><?= e(__('timetable.staff_conflict')) ?></span></div>
                 <?php endif; ?>
                 <?php if (!empty($row['aliases'])): ?>
                   <div class="small text-muted mt-1">
@@ -120,12 +126,26 @@ require dirname(__DIR__) . '/layout/start.php';
         </div>
         <div class="col-md-5">
           <label class="form-label small" for="newFullName"><?= e(__('timetable.staff_full_name')) ?></label>
-          <input id="newFullName" type="text" name="full_name" class="form-control" maxlength="150" required>
+          <input id="newFullName" type="text" name="full_name" class="form-control" maxlength="150" required
+                 list="teacherNameList" autocomplete="off">
+          <datalist id="teacherNameList">
+            <?php foreach ($teachers as $teacher): ?>
+              <option value="<?= e((string) $teacher['full_name']) ?>"></option>
+            <?php endforeach; ?>
+          </datalist>
         </div>
         <div class="col-md-3">
           <button type="submit" class="btn btn-primary w-100"><?= icon('plus') ?><?= e(__('timetable.staff_create')) ?></button>
         </div>
       </form>
+      <div id="mappingChecker" class="mt-2"
+           data-clear="<?= e(__('timetable.mapping_clear')) ?>"
+           data-name-taken="<?= e(__('timetable.mapping_name_taken')) ?>"
+           data-slot="<?= e(__('timetable.mapping_slot_conflict')) ?>"
+           data-checking="<?= e(__('timetable.mapping_checking')) ?>">
+        <span id="mappingStatus" class="small badge text-bg-success"><?= e(__('timetable.mapping_clear')) ?></span>
+        <div id="mappingSuggestions" class="d-flex flex-wrap gap-1 mt-1"></div>
+      </div>
     </div>
   </div>
 <?php endif; ?>

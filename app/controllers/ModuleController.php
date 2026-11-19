@@ -36,11 +36,29 @@ final class ModuleController extends Controller
         $result = $this->manager->setEnabled($key, $enable);
 
         if ($result['success']) {
-            Flash::success(__('modules.toggle_success'));
+            Flash::success(__('modules.toggle_success', ['module' => moduleLabel($key)]));
         } else {
-            Flash::error($result['error'] ?? __('modules.toggle_error'));
+            Flash::error($this->errorMessage((string) ($result['error'] ?? '')));
         }
 
         Response::redirect('/settings/modules');
+    }
+
+    /** Map stable ModuleManager reason codes to localized, specific messages. */
+    private function errorMessage(string $code): string
+    {
+        if ($code === 'core_module') {
+            return __('modules.error.core');
+        }
+        if (str_starts_with($code, 'missing_dependency:')) {
+            $dep = substr($code, strlen('missing_dependency:'));
+            return __('modules.error.missing_dependency', ['module' => moduleLabel($dep)]);
+        }
+        if (str_starts_with($code, 'active_dependents:')) {
+            $keys = array_filter(explode(',', substr($code, strlen('active_dependents:'))));
+            $labels = array_map(static fn (string $k): string => moduleLabel($k), $keys);
+            return __('modules.error.active_dependents', ['modules' => implode('، ', $labels)]);
+        }
+        return $code !== '' ? $code : __('modules.toggle_error');
     }
 }

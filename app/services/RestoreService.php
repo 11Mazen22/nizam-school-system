@@ -65,6 +65,48 @@ final class RestoreService
     }
 
     /**
+     * Read-only pre-flight inspection for the restore screen. Uses the same
+     * validation as execute() but performs no writes, and returns a small
+     * manifest summary so an administrator can confirm the archive before the
+     * irreversible step.
+     *
+     * @return array{schema_version:int,format_version:string,table_count:int,record_count:int,dialect:?string}
+     */
+    public function inspect(string $filepath): array
+    {
+        $verified = $this->backups->verify($filepath);
+        $sql = $verified['sql'];
+        $format = 'unknown';
+        if (preg_match('/^-- NIZAM-BACKUP (\S+)/', $sql, $m)) {
+            $format = $m[1];
+        }
+        $tableCount = preg_match_all('/^-- Table: /m', $sql);
+        $recordCount = preg_match_all('/^INSERT INTO /m', $sql);
+        // Cross-dialect conversion is checked here too so an incompatible file
+        // is rejected at preview time, not only at execute time.
+        $dialect = SqlDialectConverter::detectSource($sql);
+        $target = Database::connection()->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $schemaVersion = $verified['schemaVersion'];
+        if ($dialect !== null && $dialect !== $target) {
+            // Cross-dialect restores intentionally skip the schema-version
+            // check, matching execute()/validate() (migration counts differ).
+            SqlDialectConverter::convert($sql, $dialect, $target);
+        } else {
+            $currentSchema = count((new MigrationService())->getAppliedMigrations(Database::connection()));
+            if ($schemaVersion !== $currentSchema) {
+                throw new RuntimeException('schema_version_mismatch');
+            }
+        }
+        return [
+            'schema_version' => $schemaVersion,
+            'format_version' => $format,
+            'table_count' => (int) $tableCount,
+            'record_count' => (int) $recordCount,
+            'dialect' => $dialect,
+        ];
+    }
+
+    /**
      * §I.3: validate -> mandatory pre-restore emergency backup -> replay ->
      * structural sanity check -> activity log.
      *
@@ -110,7 +152,12 @@ final class RestoreService
                 $this->runStructuralChecks($pdo);
             }
 
-            ActivityLogger::log('backup.restore', 'backups', $preRestore['id'], 'Database restored from uploaded backup');
+            ActivityLogger::log('backup.restore', 'backups', $preRestore['id'], 'Database restored from uploaded backup', [
+                'actor' => (string) ($_SESSION['username'] ?? ''),
+                'safety_snapshot' => $preRestore['filename'],
+                'source_file' => basename($filepath),
+                'time' => date('Y-m-d H:i:s'),
+            ]);
         } catch (Throwable $e) {
             error_log('[Hadaba] Restore failed: ' . $e->getMessage());
             ActivityLogger::log('backup.restore_failed', 'backups', $preRestore['id'], 'Restore failed -- see storage/logs for detail');

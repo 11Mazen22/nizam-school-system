@@ -31,7 +31,7 @@ final class ModuleGateMiddleware implements MiddlewareInterface
             return true;
         }
 
-        Flash::warning(__('modules.disabled_notice', ['module' => $this->moduleKey]));
+        Flash::warning(__('modules.disabled_notice', ['module' => moduleLabel($this->moduleKey)]));
         Response::redirect('/dashboard');
         return false;
     }

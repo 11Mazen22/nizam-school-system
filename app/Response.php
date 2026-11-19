@@ -39,6 +39,28 @@ final class Response
     }
 
     /**
+     * Streams a generated document.
+     *
+     * Sends both the legacy ASCII filename and the RFC 5987 UTF-8 form, so a
+     * document whose natural name is Arabic (or whose export is an Arabic
+     * file inside a ZIP) arrives with a readable name on every browser
+     * instead of a percent-encoded or transliterated one.
+     */
+    public static function downloadFile(string $bytes, string $filename, string $contentType, bool $inline = false): void
+    {
+        $fallback = preg_replace('/[^A-Za-z0-9 ._\-]/', '_', $filename) ?: 'document';
+
+        header('Content-Type: ' . $contentType);
+        header(
+            'Content-Disposition: ' . ($inline ? 'inline' : 'attachment')
+            . '; filename="' . $fallback . '"'
+            . "; filename*=UTF-8''" . rawurlencode($filename)
+        );
+        header('Content-Length: ' . strlen($bytes));
+        echo $bytes;
+    }
+
+    /**
      * Streams a file for inline display (an <img> tag's src, not a save-file
      * dialog) with an explicitly-set Content-Type (decision #11 / §O-18) --
      * used for student/teacher photos and the school logo. Short private

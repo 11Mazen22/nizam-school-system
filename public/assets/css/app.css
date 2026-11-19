@@ -1152,6 +1152,9 @@ input[type="file"]::file-selector-button { margin-inline-end: 10px; padding: 6px
 .n-timetable-slot { min-height: 70px; padding: 8px; border: 1px solid #d6e0ff; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; background: var(--n-primary-softer); text-align: start; }
 .n-timetable-slot strong { color: var(--n-primary-strong); font-size: .73rem; }
 .n-timetable-slot small { margin-block-start: 3px; color: var(--n-muted); font-size: .65rem; }
+.n-timetable-slot .n-slot-missing { color: #a1772a; font-style: italic; }
+.n-timetable-slot .n-slot-conflict { display: inline-flex; align-items: center; gap: 3px; color: #b4493f; font-weight: 600; }
+.n-timetable-slot .n-slot-conflict .n-icon { width: 11px; height: 11px; }
 .n-timetable-empty { width: 100%; min-height: 70px; border: 1px dashed var(--n-border-strong); border-radius: 8px; color: var(--n-faint); background: transparent; }
 .n-timetable-empty:hover { color: var(--n-primary); border-color: #9fb3ff; background: var(--n-primary-softer); }
 
@@ -1215,6 +1218,15 @@ input[type="file"]::file-selector-button { margin-inline-end: 10px; padding: 6px
 .n-settings-card-head p { margin: 4px 0 0; color: var(--n-muted); font-size: .73rem; }
 .n-settings-card-body { padding: 18px; }
 .n-settings-save { margin-block-start: 20px; padding-block-start: 15px; border-top: 1px solid var(--n-border); display: flex; justify-content: flex-end; }
+
+/* Authorized-signature live preview: a miniature of the document footer. */
+.n-signature-preview { position: relative; padding: 16px 18px 13px; border: 1px dashed var(--n-border); border-radius: 10px; background: #fff; text-align: center; }
+.n-signature-preview-area { position: relative; height: 42px; display: flex; align-items: flex-end; justify-content: center; }
+.n-signature-preview-image { display: block; width: 150px; height: 42px; background-repeat: no-repeat; background-position: center bottom; background-size: contain; }
+.n-signature-preview-stamp { position: absolute; inset-inline-end: 8%; bottom: -3px; width: 48px; height: 48px; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: .9; }
+.n-signature-preview-line { border-top: 1px dotted #94A3B8; }
+.n-signature-preview-name { min-height: 1.6em; margin-top: 5px; color: #1F2937; font-size: 1.25rem; font-weight: 600; }
+.n-signature-preview-title { margin-top: 2px; color: var(--n-muted); font-size: .72rem; }
 
 .n-import-steps { margin: 0 0 17px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; list-style: none; }
 .n-import-steps li { padding: 9px; border-radius: 8px; color: var(--n-muted); background: var(--n-surface-subtle); font-size: .68rem; text-align: center; }

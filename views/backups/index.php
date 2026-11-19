@@ -36,7 +36,7 @@ $lastPage = max(1, (int) ceil($total / $limit));
         <span><?= e(__('backups.create')) ?></span>
       </div>
       <div class="card-body">
-        <form method="post" action="/backups" data-confirm="<?= e(__('backups.confirm_create')) ?>">
+        <form method="post" action="/backups" data-confirm="<?= e(__('backups.confirm_create')) ?>" data-loading-submit>
           <?= CsrfMiddleware::field() ?>
           <div class="mb-3">
             <label class="form-label"><?= e(__('common.notes')) ?> <span class="text-muted"><?= e(__('common.optional')) ?></span></label>
@@ -66,12 +66,21 @@ $lastPage = max(1, (int) ceil($total / $limit));
           <?= icon('shield-check') ?>
           <span><?= e(__('backups.restore_safety_notice')) ?></span>
         </div>
-        <form method="post" action="/backups/restore" enctype="multipart/form-data" id="restoreForm">
+        <form method="post" action="/backups/restore" enctype="multipart/form-data" id="restoreForm"
+              data-loading-submit
+              data-validate-url="/backups/validate"
+              data-csrf="<?= e(CsrfMiddleware::token()) ?>">
           <?= CsrfMiddleware::field() ?>
           <div class="mb-3">
             <label class="form-label"><?= e(__('backups.upload_prompt')) ?></label>
-            <input type="file" name="backup_file" class="form-control" accept=".sql" required>
+            <input type="file" name="backup_file" id="restoreFile" class="form-control" accept=".sql" required>
           </div>
+          <div id="restorePreflight" class="alert alert-secondary small d-none" role="status" aria-live="polite"
+               data-checking="<?= e(__('backups.preflight_checking')) ?>"
+               data-ready="<?= e(__('backups.preflight_ready')) ?>"
+               data-tables="<?= e(__('backups.preflight_tables')) ?>"
+               data-records="<?= e(__('backups.preflight_records')) ?>"
+               data-schema="<?= e(__('backups.preflight_schema')) ?>"></div>
           <div class="mb-3">
             <label class="form-label" for="restoreConfirmPhrase"><?= e(__('backups.confirm_phrase_prompt')) ?></label>
             <input type="text" id="restoreConfirmPhrase" class="form-control" autocomplete="off" dir="ltr">

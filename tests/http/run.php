@@ -952,6 +952,63 @@ try {
     $pdo->exec("DELETE FROM timetable_gaps WHERE id = {$gapId}");
     $pdo->exec("DELETE FROM teacher_assignments WHERE teacher_id = {$teacherId} AND subject_id = {$subjectId} AND class_id = {$classId} AND academic_year_id = {$activeYearId}");
 
+    // --- printed clash resolution (044) -----------------------------------
+    http_out();
+    http_out('Printed clash resolution');
+    $pdo->exec("DELETE FROM timetable_resolutions WHERE academic_year_id = {$activeYearId} AND class_id = {$classId} AND day_of_week = 3 AND period_number = 8");
+    $pdo->exec("DELETE FROM timetables WHERE academic_year_id = {$activeYearId} AND class_id = {$classId} AND day_of_week = 3 AND period_number = 8");
+    $pdo->prepare(
+        "INSERT INTO timetables
+            (academic_year_id, class_id, day_of_week, period_number, subject_id, teacher_id, printed_teacher, origin, import_source)
+         VALUES (:year, :class, 3, 8, :subject, NULL, 'HTTP Printed Clash', 'imported', 'http-test')"
+    )->execute(['year' => $activeYearId, 'class' => $classId, 'subject' => $subjectId]);
+    $clashId = (int) $pdo->lastInsertId();
+
+    $clashPage = $admin->get('/timetable/clashes');
+    same(200, $clashPage['status'], 'GET /timetable/clashes renders');
+    ok(str_contains($clashPage['body'], 'HTTP Printed Clash'), 'The clash board shows the printed teacher');
+    same(302, $anon->get('/timetable/clashes')['status'], 'GET /timetable/clashes requires authentication');
+    $clashToken = $admin->csrf($clashPage['body']);
+
+    same(302, $admin->post('/timetable/clashes/' . $clashId . '/resolve', [
+        'teacher_id' => '999999',
+        '_csrf_token' => $clashToken,
+    ])['status'], 'A rejected clash resolution redirects');
+    same(0, (int) $scalar("SELECT COUNT(*) FROM timetables WHERE id = {$clashId} AND teacher_id IS NOT NULL"), 'An invalid teacher leaves the clash unresolved');
+
+    same(302, $admin->post('/timetable/clashes/' . $clashId . '/resolve', [
+        'teacher_id' => (string) $teacherId,
+        'note' => 'HTTP resolution',
+        '_csrf_token' => $clashToken,
+    ])['status'], 'Resolving a printed clash redirects');
+    same((int) $teacherId, (int) $scalar("SELECT teacher_id FROM timetables WHERE id = {$clashId}"), 'The clash gets a real free teacher');
+    same('HTTP Printed Clash', $scalar("SELECT printed_teacher FROM timetables WHERE id = {$clashId}"), 'The printed teacher stays as evidence');
+    same('manual', $scalar("SELECT origin FROM timetables WHERE id = {$clashId}"), 'A resolution is recorded as a human decision');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM timetable_resolutions WHERE timetable_id = {$clashId} AND resolved_teacher_id = {$teacherId}"), 'The resolution is recorded in history');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM teacher_assignments WHERE teacher_id = {$teacherId} AND subject_id = {$subjectId} AND class_id = {$classId} AND academic_year_id = {$activeYearId}"), 'The resolution creates the missing teaching assignment');
+
+    $pdo->exec("DELETE FROM timetable_resolutions WHERE timetable_id = {$clashId}");
+    $pdo->exec("DELETE FROM timetables WHERE id = {$clashId}");
+    $pdo->exec("DELETE FROM teacher_assignments WHERE teacher_id = {$teacherId} AND subject_id = {$subjectId} AND class_id = {$classId} AND academic_year_id = {$activeYearId}");
+
+    // --- dynamic gap reason filters ---------------------------------------
+    $pdo->exec("DELETE FROM timetable_gaps WHERE academic_year_id = {$activeYearId} AND class_id = {$classId} AND day_of_week IN (2,4) AND period_number = 8");
+    $pdo->prepare(
+        "INSERT INTO timetable_gaps (academic_year_id, class_id, day_of_week, period_number, subject_id, subject_raw, reason, status)
+         VALUES (:year, :class, 2, 8, :subject, 'Open fixture', 'no_teacher', 'open')"
+    )->execute(['year' => $activeYearId, 'class' => $classId, 'subject' => $subjectId]);
+    $pdo->prepare(
+        "INSERT INTO timetable_gaps (academic_year_id, class_id, day_of_week, period_number, subject_id, subject_raw, reason, status)
+         VALUES (:year, :class, 4, 8, :subject, 'Resolved fixture', 'teacher_conflict', 'resolved')"
+    )->execute(['year' => $activeYearId, 'class' => $classId, 'subject' => $subjectId]);
+
+    $openReasons = $admin->get('/timetable/gaps');
+    ok(str_contains($openReasons['body'], 'option value="no_teacher"'), 'An open reason stays in the filter');
+    ok(!str_contains($openReasons['body'], 'option value="teacher_conflict"'), 'A reason with no open rows is hidden');
+    $resolvedReasons = $admin->get('/timetable/gaps?status=resolved');
+    ok(str_contains($resolvedReasons['body'], 'option value="teacher_conflict"'), 'The same reason returns when resolved history is selected');
+    $pdo->exec("DELETE FROM timetable_gaps WHERE academic_year_id = {$activeYearId} AND class_id = {$classId} AND day_of_week IN (2,4) AND period_number = 8");
+
     // --- printed-name mapping ---------------------------------------------
     $staffPage = $admin->get('/timetable/staff');
     same(200, $staffPage['status'], 'GET /timetable/staff renders');
@@ -1138,6 +1195,49 @@ try {
     same(200, $admin->post('/assignments', ['teacher_id' => '0', 'subject_id' => '0', 'class_id' => '0', 'weekly_periods' => '0', '_csrf_token' => $formToken])['status'], 'Invalid assignment re-renders the form');
     same($before + 1, $count('teacher_assignments'), 'Rejected assignment created no row');
 
+    // --- Excel score import: template, validated preview, transactional commit
+    // Placed after the assignment because the template is built from the
+    // class's real subject assignments, not from invented sample rows.
+    http_out();
+    http_out('Excel score import');
+    $template = $admin->get('/exams/' . $examId . '/scores/import/template?class_id=' . $classId);
+    same(200, $template['status'], 'GET the real class score template');
+    ok(str_starts_with($template['body'], 'PK'), 'The template is a real xlsx workbook');
+    $templatePath = sys_get_temp_dir() . '/nizam-http-template.xlsx';
+    file_put_contents($templatePath, $template['body']);
+    $workbook = PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+    $workbook->getSheet(0)->setCellValue('D2', 73.5);
+    $filledPath = sys_get_temp_dir() . '/nizam-http-filled.xlsx';
+    (new PhpOffice\PhpSpreadsheet\Writer\Xlsx($workbook))->save($filledPath);
+    $prepared = (string) file_get_contents($filledPath);
+
+    $importForm = $admin->get('/exams/' . $examId . '/scores/import?class_id=' . $classId);
+    same(200, $importForm['status'], 'GET the score import form');
+    same(302, $anon->get('/exams/' . $examId . '/scores/import?class_id=' . $classId)['status'], 'The import form requires authentication');
+
+    $preview = $admin->upload('/exams/' . $examId . '/scores/import/preview', 'scores_file', 'scores.xlsx', $prepared, [
+        'class_id' => (string) $classId, '_csrf_token' => $formToken,
+    ]);
+    same(200, $preview['status'], 'Uploading a workbook renders the validation preview');
+    ok(str_contains($preview['body'], 'Ready to save: 1'), 'The real roster row is ready to save');
+    preg_match('/name="token" value="([^"]+)"/', $preview['body'], $importTokenMatch);
+    $importToken = $importTokenMatch[1] ?? '';
+    ok($importToken !== '', 'The preview stages a commit token');
+    same(0, (int) $scalar("SELECT COUNT(*) FROM exam_scores WHERE exam_id = {$examId}"), 'The preview writes no marks');
+
+    $commit = $admin->post('/exams/' . $examId . '/scores/import/commit', [
+        'token' => $importToken, '_csrf_token' => $formToken,
+    ]);
+    same(302, $commit['status'], 'Confirming the import redirects');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM exam_scores WHERE exam_id = {$examId}"), 'The confirmed import writes exactly one mark');
+    same('import', $scalar("SELECT source FROM exam_scores WHERE exam_id = {$examId} LIMIT 1"), 'The mark records its imported provenance');
+    same(1, (int) $scalar("SELECT COUNT(*) FROM activity_logs WHERE action = 'exam.scores_imported' AND entity_id = {$examId}"), 'The import is recorded in the activity log');
+
+    $pdo->exec("DELETE FROM exam_scores WHERE exam_id = {$examId}");
+    $pdo->exec("DELETE FROM activity_logs WHERE action = 'exam.scores_imported' AND entity_id = {$examId}");
+    @unlink($templatePath);
+    @unlink($filledPath);
+
     $timetablePage = $admin->get('/timetable?class_id=' . $classId);
     same(200, $timetablePage['status'], 'Selected-class timetable renders');
     ok(strpos($timetablePage['body'], 'id="addSlotModal"') !== false, 'Timetable renders its add-slot dialog');
@@ -1147,11 +1247,11 @@ try {
     // teacher/subject/class tuple that has no teaching assignment, so a slot
     // posted first is correctly rejected (the ordering is the prerequisite).
     $before = $count('timetables');
-    same(302, $admin->post('/timetable', ['class_id' => (string) $classId, 'day_of_week' => '1', 'period_number' => '1', 'subject_id' => (string) $subjectId, 'teacher_id' => (string) $teacherId, '_csrf_token' => $formToken])['status'], 'POST /timetable redirects');
+    same(302, $admin->post('/timetable', ['class_id' => (string) $classId, 'day_of_week' => '2', 'period_number' => '1', 'subject_id' => (string) $subjectId, 'teacher_id' => (string) $teacherId, '_csrf_token' => $formToken])['status'], 'POST /timetable redirects');
     same($before + 1, $count('timetables'), 'POST /timetable persisted one slot');
     same(302, $admin->post('/timetable', ['class_id' => '0', 'day_of_week' => '9', 'period_number' => '0', 'subject_id' => '0', 'teacher_id' => '0', '_csrf_token' => $formToken])['status'], 'Invalid timetable slot is rejected');
     same($before + 1, $count('timetables'), 'Rejected timetable slot created no row');
-    same(302, $admin->post('/timetable', ['class_id' => (string) $classId, 'day_of_week' => '1', 'period_number' => '1', 'subject_id' => (string) $subjectId, 'teacher_id' => (string) $teacherId, '_csrf_token' => $formToken])['status'], 'A duplicate class slot is rejected by redirect');
+    same(302, $admin->post('/timetable', ['class_id' => (string) $classId, 'day_of_week' => '2', 'period_number' => '1', 'subject_id' => (string) $subjectId, 'teacher_id' => (string) $teacherId, '_csrf_token' => $formToken])['status'], 'A duplicate class slot is rejected by redirect');
     same($before + 1, $count('timetables'), 'A duplicate class slot created no second row');
 
     // Welfare: discipline and health
@@ -1170,6 +1270,9 @@ try {
     // Settings: profile, localization, academic rules, security
     same(302, $admin->post('/settings/profile', ['name' => 'HTTP School', 'name_ar' => 'مدرسة اختبار', 'address' => '', 'phone' => '', 'email' => '', 'website' => '', 'country' => 'EG', 'region' => '', 'timezone' => 'Africa/Cairo', 'currency' => 'EGP', 'school_week' => '0,1,2,3,4', 'school_type' => 'language_school', 'school_structure' => 'k12_combined', 'footer_text' => 'HTTP footer', 'tax_number' => '', 'affiliation_code' => '', '_csrf_token' => $formToken])['status'], 'POST /settings/profile redirects');
     same('HTTP School', $scalar('SELECT name FROM schools ORDER BY id LIMIT 1'), 'Profile save persisted the school name');
+    $profileAudit = (string) $scalar("SELECT metadata FROM activity_logs WHERE action = 'settings.update' AND description = 'School profile updated' ORDER BY id DESC LIMIT 1");
+    ok(str_contains($profileAudit, '"area":"profile"') && str_contains($profileAudit, '"old"') && str_contains($profileAudit, '"new"'),
+        'Profile save logged actor, old/new values and area as JSON metadata');
     same(200, $admin->post('/settings/profile', ['name' => '', 'name_ar' => '', '_csrf_token' => $formToken])['status'], 'Invalid profile re-renders the form');
     same('HTTP School', $scalar('SELECT name FROM schools ORDER BY id LIMIT 1'), 'Rejected profile changed nothing');
 
@@ -1177,6 +1280,18 @@ try {
     same('en', $scalar("SELECT value FROM settings WHERE setting_key = 'app.default_language'"), 'Localization save persisted');
     same(302, $admin->post('/settings/localization', ['default_language' => 'xx', '_csrf_token' => $formToken])['status'], 'Invalid language is rejected');
     same('en', $scalar("SELECT value FROM settings WHERE setting_key = 'app.default_language'"), 'Rejected language changed nothing');
+
+    // New sessions must start in the DB-backed default language, not a
+    // hardcoded session fallback.
+    $langSession = new Browser($base, 'new-language-session');
+    $langToken = $langSession->csrf($langSession->get('/login')['body']);
+    $langSession->post('/login', ['username' => 'http_admin', 'password' => $password, '_csrf_token' => (string) $langToken]);
+    ok(str_contains($langSession->get('/dashboard')['body'], 'dir="ltr"'), 'New session starts in the saved default language');
+
+    // Navbar switch persists to the DB so the next sign-in stays in that language.
+    $admin->get('/lang?to=ar');
+    same('ar', $scalar("SELECT value FROM settings WHERE setting_key = 'app.default_language'"), 'Navbar language toggle persists to the database');
+    $admin->get('/lang?to=en');
 
     same(302, $admin->post('/settings/academic', ['expected_weekly_capacity' => '24', 'student_id_pattern' => 'STU-{year}-{seq:5}', 'teacher_id_pattern' => 'TCH-{seq:5}', '_csrf_token' => $formToken])['status'], 'POST /settings/academic redirects');
     same('24', $scalar("SELECT value FROM settings WHERE setting_key = 'academic.expected_weekly_capacity'"), 'Academic rules save persisted');
@@ -1456,6 +1571,110 @@ try {
     $religionNoMatch = $admin->get('/reports/religion?year=' . $activeYear . '&q=zzz-no-such-cell');
     ok(!str_contains($religionNoMatch['body'], 'id="report-table"'), 'Report search filters the table on the server');
     ok(str_contains($religionNoMatch['body'], 'name="q"'), 'Report search keeps its field available after a no-match term');
+
+    // ------------------------------------------------------- Document engine
+    // The engine is verified through the real router, the real permission
+    // chain and the real data: the same records the pages show, rendered into
+    // independent documents and genuinely checked as PDF/XLSX/PNG/ZIP.
+    http_out();
+    http_out('Document engine');
+
+    $studentsPage = $admin->get('/students');
+    ok(str_contains($studentsPage['body'], 'data-document-export') && str_contains($studentsPage['body'], 'data-doc-key="students"'), 'Student register renders the shared export menu');
+    ok(!str_contains($studentsPage['body'], 'data-print-report'), 'Student register carries no legacy print hook');
+
+    $timetableView = $admin->get('/timetable?class_id=' . $classId);
+    ok(str_contains($timetableView['body'], 'data-doc-key="timetable-class"'), 'Class timetable offers its own document export');
+    ok(str_contains($timetableView['body'], 'data-doc-bulk="1"'), 'Class timetable offers bulk export of all class timetables');
+
+    $bulkOptions = $admin->get('/documents/students/bulk-options');
+    same(200, $bulkOptions['status'], 'Bulk options endpoint responds');
+    $bulkGroups = json_decode($bulkOptions['body'], true);
+    ok(is_array($bulkGroups['groups'] ?? null) && $bulkGroups['groups'] !== [], 'Bulk options list real export groups');
+    ok(($bulkGroups['groups'][0]['count'] ?? 0) > 0, 'Bulk options report the real record count of each group');
+
+    $docPage = $admin->get('/documents/timetable-class?class_id=' . $classId);
+    same(200, $docPage['status'], 'Class timetable document renders over HTTP');
+    ok(str_contains($docPage['body'], 'doc-page'), 'The document renders its own A4 pages');
+    ok((bool) preg_match('/صفحة 1|page 1 of/iu', $docPage['body']), 'The document numbers its own pages');
+    ok(!str_contains($docPage['body'], 'nizam-sidebar') && !str_contains($docPage['body'], 'data-document-export'), 'The document contains no application chrome');
+    ok(!str_contains($docPage['body'], '/assets/js/app.js'), 'The document loads no application script');
+
+    $studentsDoc = $admin->get('/documents/students?q=Live+Search+Alpha');
+    same(200, $studentsDoc['status'], 'Student register document renders');
+    ok(str_contains($studentsDoc['body'], 'Live Search Alpha') && !str_contains($studentsDoc['body'], 'Live Search Beta'), 'The document respects the on-screen filter');
+
+    $pdfExport = $admin->get('/documents/students/export/pdf?q=Live+Search+Alpha');
+    same(200, $pdfExport['status'], 'Student register PDF export responds');
+    ok(str_starts_with($pdfExport['body'], '%PDF-'), 'Student register export is a real PDF');
+    ok(strlen($pdfExport['body']) > 5000, 'The PDF has real content');
+    ok(str_contains(implode("\n", $pdfExport['headers']), 'application/pdf'), 'The PDF is served with the PDF content type');
+
+    $xlsxExport = $admin->get('/documents/students/export/xlsx?q=Live+Search+Alpha');
+    same(200, $xlsxExport['status'], 'Student register Excel export responds');
+    ok(str_starts_with($xlsxExport['body'], "PK"), 'Excel export is a real xlsx archive, not a renamed CSV');
+
+    $xlsxPath = $tempPath . '/document-check.xlsx';
+    file_put_contents($xlsxPath, $xlsxExport['body']);
+    $workbook = new ZipArchive();
+    $openedXlsx = $workbook->open($xlsxPath) === true;
+    ok($openedXlsx, 'The xlsx opens as a valid OOXML package');
+    if ($openedXlsx) {
+        $workbookXml = (string) $workbook->getFromName('xl/workbook.xml');
+        $sheetXml = (string) $workbook->getFromName('xl/worksheets/sheet1.xml');
+        $sharedXml = (string) $workbook->getFromName('xl/sharedStrings.xml');
+        ok(str_contains($workbookXml . $sheetXml . $sharedXml, 'Live Search Alpha'), 'The workbook contains the exported records');
+        ok($workbook->getFromName('xl/styles.xml') !== false, 'The workbook carries its stylesheet (formatting, not a data dump)');
+        $workbook->close();
+    }
+
+    $pngExport = $admin->get('/documents/timetable-class/export/png?class_id=' . $classId . '&scale=2');
+    same(200, $pngExport['status'], 'Class timetable PNG export responds');
+    ok(str_starts_with($pngExport['body'], "\x89PNG"), 'PNG export is a real image');
+    $pngSize = @getimagesizefromstring($pngExport['body']);
+    ok(is_array($pngSize) && $pngSize[0] >= 1900 && $pngSize[1] >= 1300, 'The PNG is a full-page render at 2x (' . (is_array($pngSize) ? $pngSize[0] . 'x' . $pngSize[1] : 'no dimensions') . ')');
+
+    $jobStart = $admin->get('/documents/bulk/start?key=timetable-class&class_id=' . $classId . '&group=classes&bulk_format=pdf');
+    $job = json_decode($jobStart['body'], true);
+    ok(!empty($job['token']) && ($job['total'] ?? 0) > 0, 'Bulk export starts a job with a real document count');
+    $steps = 0;
+    $lastStep = null;
+    while (!empty($job['token']) && $steps < 40) {
+        $lastStep = json_decode($admin->get('/documents/bulk/' . $job['token'] . '/step')['body'], true);
+        $steps++;
+        if (!empty($lastStep['complete'])) {
+            break;
+        }
+    }
+    ok(($lastStep['done'] ?? 0) === ($job['total'] ?? -1), 'Bulk export reports every document as completed');
+    ok(($lastStep['failed'] ?? 1) === 0, 'No document failed inside the bulk run');
+
+    $zipDownload = $admin->get('/documents/bulk/' . $job['token'] . '/download');
+    same(200, $zipDownload['status'], 'Bulk archive downloads');
+    ok(str_starts_with($zipDownload['body'], "PK"), 'Bulk export produces a real ZIP archive');
+    $zipPath = $tempPath . '/document-check.zip';
+    file_put_contents($zipPath, $zipDownload['body']);
+    $archive = new ZipArchive();
+    if ($archive->open($zipPath) === true) {
+        $names = [];
+        for ($i = 0; $i < $archive->numFiles; $i++) {
+            $names[] = (string) $archive->getNameIndex($i);
+        }
+        $archive->close();
+        $pdfEntries = array_values(array_filter($names, static fn (string $name): bool => str_ends_with($name, '.pdf')));
+        ok(count($pdfEntries) === ($job['total'] ?? 0), 'The archive contains one document per exported entity');
+        ok(count($names) === count($pdfEntries) + 1, 'The archive also carries its README');
+        ok(str_contains(implode(' ', $pdfEntries), 'NIZAM_Export'), 'The archive is organised in a named export folder');
+    } else {
+        ok(false, 'The bulk ZIP opens as a valid archive');
+    }
+
+    $reportCard = $admin->get('/exams/report-card/' . $alphaId);
+    same(200, $reportCard['status'], 'Report card is served by the document engine');
+    ok(str_starts_with($reportCard['body'], '%PDF-'), 'Report card is a real PDF');
+
+    same(302, $anon->get('/documents/students/export/pdf')['status'], 'An unauthenticated export is refused');
+    same(302, $anon->get('/documents/students')['status'], 'An unauthenticated document view is refused');
 
     // The browser pass proves what the HTTP assertions cannot: typing with no
     // Enter, a partial region update (no navigation), URL synchronisation,

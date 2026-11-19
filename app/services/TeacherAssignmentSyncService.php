@@ -53,7 +53,7 @@ final class TeacherAssignmentSyncService
         $stmt = $pdo->prepare(
             'SELECT teacher_id, subject_id, class_id, COUNT(*) AS lessons
              FROM timetables
-             WHERE academic_year_id = :year
+             WHERE academic_year_id = :year AND teacher_id IS NOT NULL
              GROUP BY teacher_id, subject_id, class_id
              ORDER BY class_id, teacher_id, subject_id'
         );

@@ -50,7 +50,7 @@ use App\Middleware\CsrfMiddleware;
                       </span>
                     </td>
                     <td dir="ltr" class="font-monospace fw-bold text-primary">
-                      <?= number_format((float) $st['amount'], 2) ?>
+                      <?= money($st['amount']) ?>
                     </td>
                   </tr>
                 <?php endforeach; ?>

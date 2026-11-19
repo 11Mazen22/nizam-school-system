@@ -38,6 +38,18 @@ use App\Middleware\CsrfMiddleware;
   </div>
   <div class="n-profile-actions">
     <a href="/teachers" class="btn btn-ghost"><?= icon('chevron-left', 'n-flip-rtl') ?><span><?= e(__('teachers.title')) ?></span></a>
+    <?php
+    $docKey = 'teacher';
+    $docParams = ['id' => (string) ((int) $teacher['id'])];
+    require dirname(__DIR__) . '/partials/export-menu.php';
+    ?>
+    <?php
+    $docKey = 'timetable-teacher';
+    $docLabel = __('document.title.timetable-teacher');
+    $docParams = ['teacher_id' => (string) ((int) $teacher['id'])];
+    require dirname(__DIR__) . '/partials/export-menu.php';
+    $docLabel = null;
+    ?>
     <?php if (hasPermission('assignments.view')): ?>
       <a href="/assignments" class="btn btn-outline-secondary"><?= icon('clipboard-list') ?><span><?= e(__('assignments.title')) ?></span></a>
     <?php endif; ?>

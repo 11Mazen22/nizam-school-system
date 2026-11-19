@@ -23,4 +23,10 @@ INSERT IGNORE INTO settings (setting_key, value, value_type) VALUES
   ('security.login_max_attempts',         '5',    'int'),
   ('security.lockout_minutes',            '15',   'int'),
   ('security.session_timeout_minutes',    '60',   'int'),
-  ('reports.school_footer_text',          NULL,   'string');
+  ('reports.school_footer_text',          NULL,   'string'),
+  ('academic.attendance_min_percent',      '85',   'int'),
+  ('academic.attendance_warning_consecutive', '10', 'int'),
+  ('academic.attendance_warning_separate',    '20', 'int'),
+  ('academic.attendance_critical_consecutive','15', 'int'),
+  ('academic.attendance_critical_separate',   '30', 'int'),
+  ('academic.year_work_completion_percent',   '60', 'int');

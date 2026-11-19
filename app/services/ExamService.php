@@ -162,46 +162,85 @@ final class ExamService
     }
 
     /**
-     * Class ranking. The weighted average is computed by the shared calculator,
-     * not by SQL, so a student's rank and their report-card average can never
-     * disagree.
+     * Class ranking over the full enrolled roster.
+     *
+     * Every active enrollment is a row. Students with marked assessments are
+     * ranked by the shared weighted-average calculator; students with no
+     * recorded mark are kept in a separate, clearly labelled section and are
+     * never ranked or averaged as zero. A student who has never been marked
+     * is a real member of the class, not a missing join.
      */
     public function getClassRanking(int $classId, int $yearId): array
     {
         $scale = $this->calculator->scale();
 
         $grouped = [];
-        $students = [];
         foreach ($this->repo->rankingRows($classId, $yearId) as $row) {
-            $studentId = (int) $row['student_id'];
-            $students[$studentId] = [
-                'student_id'   => $studentId,
-                'full_name'    => $row['full_name'],
-                'student_code' => $row['student_code'],
-            ];
-            $grouped[$studentId][] = $row;
+            $grouped[(int) $row['student_id']][] = $row;
         }
 
         $ranking = [];
-        foreach ($grouped as $studentId => $entries) {
-            $percentage = $this->calculator->weightedPercentage($entries);
+        foreach ($this->repo->rosterForClass($classId, $yearId) as $student) {
+            $studentId = (int) $student['student_id'];
+            $entries = $grouped[$studentId] ?? [];
+            $percentage = $entries !== [] ? $this->calculator->weightedPercentage($entries) : null;
+
+            if ($percentage === null) {
+                $ranking[] = [
+                    'student_id' => $studentId,
+                    'full_name' => (string) $student['full_name'],
+                    'student_code' => (string) $student['student_code'],
+                    'weighted_avg' => null,
+                    'band_label' => null,
+                    'gpa_point' => null,
+                    'is_passing' => null,
+                    'scored' => false,
+                    'rank' => null,
+                ];
+                continue;
+            }
+
             $description = $this->calculator->describePercentage($percentage, $scale);
-            $ranking[] = $students[$studentId] + [
+            $ranking[] = [
+                'student_id' => $studentId,
+                'full_name' => (string) $student['full_name'],
+                'student_code' => (string) $student['student_code'],
                 'weighted_avg' => $percentage,
-                'band_label'   => $description['band_label'],
-                'gpa_point'    => $description['gpa_point'],
-                'is_passing'   => $description['is_passing'],
+                'band_label' => $description['band_label'],
+                'gpa_point' => $description['gpa_point'],
+                'is_passing' => $description['is_passing'],
+                'scored' => true,
+                'rank' => null,
             ];
         }
 
         usort($ranking, static function (array $a, array $b): int {
-            $left = $a['weighted_avg'] ?? -1.0;
-            $right = $b['weighted_avg'] ?? -1.0;
-            return $right <=> $left;
+            if ($a['scored'] !== $b['scored']) {
+                return $a['scored'] ? -1 : 1;
+            }
+            if ($a['scored']) {
+                return (float) $b['weighted_avg'] <=> (float) $a['weighted_avg'];
+            }
+
+            return strcmp((string) $a['full_name'], (string) $b['full_name']);
         });
 
-        foreach ($ranking as $index => &$row) {
-            $row['rank'] = $index + 1;
+        // Competition ranking: equal averages share a rank, and the next
+        // distinct average takes the position after the tie (1, 2, 2, 4).
+        $position = 0;
+        $rank = 0;
+        $previous = null;
+        foreach ($ranking as &$row) {
+            $position++;
+            if (!$row['scored']) {
+                $row['rank'] = null;
+                continue;
+            }
+            if ($previous === null || (float) $row['weighted_avg'] !== (float) $previous) {
+                $rank = $position;
+                $previous = $row['weighted_avg'];
+            }
+            $row['rank'] = $rank;
         }
         unset($row);
 

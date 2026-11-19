@@ -80,6 +80,17 @@ if (preg_match('/^(row|L|R)\s*[LR]?\s*\d+$/iu', $publicNotes) === 1) {
   </div>
   <div class="n-profile-actions">
     <a href="/students" class="btn btn-ghost"><?= icon('chevron-left', 'n-flip-rtl') ?><span><?= e(__('students.title')) ?></span></a>
+    <?php
+    $docKey = 'student';
+    $docParams = ['id' => (string) ((int) $student['id'])];
+    require dirname(__DIR__) . '/partials/export-menu.php';
+    ?>
+    <?php
+    $docKey = 'report-card';
+    $docLabel = __('document.title.report-card');
+    require dirname(__DIR__) . '/partials/export-menu.php';
+    $docLabel = null;
+    ?>
     <?php if (hasPermission('attendance.view')): ?>
       <a href="/attendance" class="btn btn-outline-secondary"><?= icon('check-circle') ?><span><?= e(__('nav.attendance')) ?></span></a>
     <?php endif; ?>

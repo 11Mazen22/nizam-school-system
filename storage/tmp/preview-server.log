@@ -1,0 +1,187 @@
+[Thu Nov 19 02:17:59 2026] PHP 8.2.12 Development Server (http://127.0.0.1:8124) started
+[Thu Nov 19 02:18:01 2026] 127.0.0.1:52989 Accepted
+[Thu Nov 19 02:18:02 2026] 127.0.0.1:52989 Closing
+[Thu Nov 19 02:18:02 2026] 127.0.0.1:52991 Accepted
+[Thu Nov 19 02:18:02 2026] 127.0.0.1:52991 Closing
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53002 Accepted
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53002 Closing
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53004 Accepted
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53005 Accepted
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53004 [200]: GET /assets/vendor/bootstrap/css/bootstrap.rtl.min.css
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53005 [200]: GET /assets/css/fonts.css?v=1794571316
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53006 Accepted
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53006 [200]: GET /assets/css/app.css?v=1795046072
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53004 Closing
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53005 Closing
+[Thu Nov 19 02:18:09 2026] 127.0.0.1:53006 Closing
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53009 Accepted
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53010 Accepted
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53009 [200]: GET /assets/css/theme.css?v=1794947293
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53011 Accepted
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53010 [200]: GET /assets/css/components.css?v=1794948121
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53012 Accepted
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53011 [200]: GET /assets/css/documents-ui.css?v=1795045984
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53013 Accepted
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53012 [200]: GET /logo
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53012 Closing
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53009 Closing
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53013 [200]: GET /assets/vendor/jquery/jquery.min.js
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53010 Closing
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53011 Closing
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53013 Closing
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53015 Accepted
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53015 [200]: GET /assets/vendor/bootstrap/js/bootstrap.bundle.min.js
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53015 Closing
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53016 Accepted
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53016 [200]: GET /assets/js/app.js?v=1795042774
+[Thu Nov 19 02:18:10 2026] 127.0.0.1:53016 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53017 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53017 [200]: GET /assets/js/confirm.js?v=1788717399
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53017 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53018 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53018 [200]: GET /assets/js/offline-queue.js?v=1794569770
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53018 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53019 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53020 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53021 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53019 [200]: GET /assets/fonts/manrope-latin.woff2
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53020 [200]: GET /assets/fonts/alexandria-arabic.woff2
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53021 [200]: GET /assets/js/document-export.js?v=1795042578
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53019 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53020 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53021 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53022 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53022 [200]: GET /assets/js/timetable.js?v=1794599042
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53022 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53023 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53023 Closing
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53024 Accepted
+[Thu Nov 19 02:18:11 2026] 127.0.0.1:53024 Closing
+[Thu Nov 19 02:18:14 2026] 127.0.0.1:53031 Accepted
+[Thu Nov 19 02:18:14 2026] 127.0.0.1:53031 Closing
+[Thu Nov 19 02:18:19 2026] 127.0.0.1:52667 Accepted
+[Thu Nov 19 02:18:20 2026] 127.0.0.1:52667 Closing
+[Thu Nov 19 02:18:20 2026] 127.0.0.1:52669 Accepted
+[Thu Nov 19 02:18:20 2026] 127.0.0.1:52670 Accepted
+[Thu Nov 19 02:18:20 2026] 127.0.0.1:52670 [200]: GET /assets/css/document.css?v=1795047133
+[Thu Nov 19 02:18:20 2026] 127.0.0.1:52669 [200]: GET /assets/js/document-viewer.js?v=1795042611
+[Thu Nov 19 02:18:20 2026] 127.0.0.1:52670 Closing
+[Thu Nov 19 02:18:20 2026] 127.0.0.1:52669 Closing
+[Thu Nov 19 02:18:23 2026] 127.0.0.1:52675 Accepted
+[Thu Nov 19 02:18:23 2026] 127.0.0.1:52675 Closing
+[Thu Nov 19 02:19:11 2026] 127.0.0.1:56101 Accepted
+[Thu Nov 19 02:19:11 2026] 127.0.0.1:56101 Closing
+[Thu Nov 19 02:19:23 2026] 127.0.0.1:62113 Accepted
+[Thu Nov 19 02:19:23 2026] 127.0.0.1:62113 Closing
+[Thu Nov 19 02:20:11 2026] 127.0.0.1:55554 Accepted
+[Thu Nov 19 02:20:11 2026] 127.0.0.1:55554 Closing
+[Thu Nov 19 02:20:23 2026] 127.0.0.1:59869 Accepted
+[Thu Nov 19 02:20:23 2026] 127.0.0.1:59869 Closing
+[Thu Nov 19 02:21:11 2026] 127.0.0.1:63817 Accepted
+[Thu Nov 19 02:21:11 2026] 127.0.0.1:63817 Closing
+[Thu Nov 19 02:21:23 2026] 127.0.0.1:59228 Accepted
+[Thu Nov 19 02:21:23 2026] 127.0.0.1:59228 Closing
+[Thu Nov 19 02:22:11 2026] 127.0.0.1:60184 Accepted
+[Thu Nov 19 02:22:11 2026] 127.0.0.1:60184 Closing
+[Thu Nov 19 02:22:23 2026] 127.0.0.1:57529 Accepted
+[Thu Nov 19 02:22:23 2026] 127.0.0.1:57529 Closing
+[Thu Nov 19 02:23:11 2026] 127.0.0.1:49154 Accepted
+[Thu Nov 19 02:23:11 2026] 127.0.0.1:49154 Closing
+[Thu Nov 19 02:23:23 2026] 127.0.0.1:53151 Accepted
+[Thu Nov 19 02:23:23 2026] 127.0.0.1:53151 Closing
+[Thu Nov 19 02:24:23 2026] 127.0.0.1:62583 Accepted
+[Thu Nov 19 02:24:23 2026] 127.0.0.1:62583 Closing
+[Thu Nov 19 02:24:23 2026] 127.0.0.1:62585 Accepted
+[Thu Nov 19 02:24:23 2026] 127.0.0.1:62585 Closing
+[Thu Nov 19 02:25:23 2026] 127.0.0.1:50168 Accepted
+[Thu Nov 19 02:25:23 2026] 127.0.0.1:50168 Closing
+[Thu Nov 19 02:25:23 2026] 127.0.0.1:50170 Accepted
+[Thu Nov 19 02:25:23 2026] 127.0.0.1:50170 Closing
+[Thu Nov 19 02:26:23 2026] 127.0.0.1:54260 Accepted
+[Thu Nov 19 02:26:23 2026] 127.0.0.1:54260 Closing
+[Thu Nov 19 02:26:23 2026] 127.0.0.1:54262 Accepted
+[Thu Nov 19 02:26:23 2026] 127.0.0.1:54262 Closing
+[Thu Nov 19 02:27:25 2026] 127.0.0.1:61168 Accepted
+[Thu Nov 19 02:27:25 2026] 127.0.0.1:61168 Closing
+[Thu Nov 19 02:27:25 2026] 127.0.0.1:61170 Accepted
+[Thu Nov 19 02:27:25 2026] 127.0.0.1:61170 Closing
+[Thu Nov 19 02:28:23 2026] 127.0.0.1:52711 Accepted
+[Thu Nov 19 02:28:23 2026] 127.0.0.1:52711 Closing
+[Thu Nov 19 02:28:23 2026] 127.0.0.1:52713 Accepted
+[Thu Nov 19 02:28:23 2026] 127.0.0.1:52713 Closing
+[Thu Nov 19 02:29:11 2026] 127.0.0.1:62136 Accepted
+[Thu Nov 19 02:29:11 2026] 127.0.0.1:62136 Closing
+[Thu Nov 19 02:29:23 2026] 127.0.0.1:53829 Accepted
+[Thu Nov 19 02:29:23 2026] 127.0.0.1:53829 Closing
+[Thu Nov 19 02:30:23 2026] 127.0.0.1:59129 Accepted
+[Thu Nov 19 02:30:23 2026] 127.0.0.1:59129 Closing
+[Thu Nov 19 02:30:23 2026] 127.0.0.1:59131 Accepted
+[Thu Nov 19 02:30:23 2026] 127.0.0.1:59131 Closing
+[Thu Nov 19 02:31:23 2026] 127.0.0.1:63802 Accepted
+[Thu Nov 19 02:31:23 2026] 127.0.0.1:63802 Closing
+[Thu Nov 19 02:31:23 2026] 127.0.0.1:63804 Accepted
+[Thu Nov 19 02:31:23 2026] 127.0.0.1:63804 Closing
+[Thu Nov 19 02:32:22 2026] 127.0.0.1:63689 Accepted
+[Thu Nov 19 02:32:22 2026] 127.0.0.1:63689 Closing
+[Thu Nov 19 02:32:24 2026] 127.0.0.1:63691 Accepted
+[Thu Nov 19 02:32:24 2026] 127.0.0.1:63691 Closing
+[Thu Nov 19 02:33:11 2026] 127.0.0.1:54152 Accepted
+[Thu Nov 19 02:33:11 2026] 127.0.0.1:54152 Closing
+[Thu Nov 19 02:33:23 2026] 127.0.0.1:54906 Accepted
+[Thu Nov 19 02:33:23 2026] 127.0.0.1:54906 Closing
+[Thu Nov 19 02:34:11 2026] 127.0.0.1:56633 Accepted
+[Thu Nov 19 02:34:11 2026] 127.0.0.1:56633 Closing
+[Thu Nov 19 02:34:23 2026] 127.0.0.1:49882 Accepted
+[Thu Nov 19 02:34:23 2026] 127.0.0.1:49882 Closing
+[Thu Nov 19 02:35:11 2026] 127.0.0.1:60820 Accepted
+[Thu Nov 19 02:35:11 2026] 127.0.0.1:60820 Closing
+[Thu Nov 19 02:35:23 2026] 127.0.0.1:55217 Accepted
+[Thu Nov 19 02:35:23 2026] 127.0.0.1:55217 Closing
+[Thu Nov 19 02:36:11 2026] 127.0.0.1:54497 Accepted
+[Thu Nov 19 02:36:11 2026] 127.0.0.1:54497 Closing
+[Thu Nov 19 02:36:23 2026] 127.0.0.1:61033 Accepted
+[Thu Nov 19 02:36:24 2026] 127.0.0.1:61033 Closing
+[Thu Nov 19 02:37:11 2026] 127.0.0.1:59768 Accepted
+[Thu Nov 19 02:37:11 2026] 127.0.0.1:59768 Closing
+[Thu Nov 19 02:37:23 2026] 127.0.0.1:59774 Accepted
+[Thu Nov 19 02:37:23 2026] 127.0.0.1:59774 Closing
+[Thu Nov 19 02:38:23 2026] 127.0.0.1:50162 Accepted
+[Thu Nov 19 02:38:23 2026] 127.0.0.1:50162 Closing
+[Thu Nov 19 02:38:23 2026] 127.0.0.1:50165 Accepted
+[Thu Nov 19 02:38:23 2026] 127.0.0.1:50165 Closing
+[Thu Nov 19 02:39:23 2026] 127.0.0.1:49877 Accepted
+[Thu Nov 19 02:39:23 2026] 127.0.0.1:49877 Closing
+[Thu Nov 19 02:39:23 2026] 127.0.0.1:49879 Accepted
+[Thu Nov 19 02:39:23 2026] 127.0.0.1:49879 Closing
+[Thu Nov 19 02:40:24 2026] 127.0.0.1:64365 Accepted
+[Thu Nov 19 02:40:24 2026] 127.0.0.1:64365 Closing
+[Thu Nov 19 02:40:24 2026] 127.0.0.1:64367 Accepted
+[Thu Nov 19 02:40:24 2026] 127.0.0.1:64367 Closing
+[Thu Nov 19 02:41:18 2026] 127.0.0.1:57324 Accepted
+[Thu Nov 19 02:41:18 2026] 127.0.0.1:57324 Closing
+[Thu Nov 19 02:41:23 2026] 127.0.0.1:57329 Accepted
+[Thu Nov 19 02:41:23 2026] 127.0.0.1:57329 Closing
+[Thu Nov 19 02:42:11 2026] 127.0.0.1:52122 Accepted
+[Thu Nov 19 02:42:11 2026] 127.0.0.1:52122 Closing
+[Thu Nov 19 02:42:23 2026] 127.0.0.1:61383 Accepted
+[Thu Nov 19 02:42:23 2026] 127.0.0.1:61383 Closing
+[Thu Nov 19 02:43:12 2026] 127.0.0.1:60714 Accepted
+[Thu Nov 19 02:43:12 2026] 127.0.0.1:60714 Closing
+[Thu Nov 19 02:43:23 2026] 127.0.0.1:60728 Accepted
+[Thu Nov 19 02:43:23 2026] 127.0.0.1:60728 Closing
+[Thu Nov 19 02:44:13 2026] 127.0.0.1:60849 Accepted
+[Thu Nov 19 02:44:13 2026] 127.0.0.1:60849 Closing
+[Thu Nov 19 02:44:23 2026] 127.0.0.1:59079 Accepted
+[Thu Nov 19 02:44:23 2026] 127.0.0.1:59079 Closing
+[Thu Nov 19 02:45:14 2026] 127.0.0.1:53449 Accepted
+[Thu Nov 19 02:45:14 2026] 127.0.0.1:53449 Closing
+[Thu Nov 19 02:45:23 2026] 127.0.0.1:56926 Accepted
+[Thu Nov 19 02:45:23 2026] 127.0.0.1:56926 Closing
+[Thu Nov 19 02:46:15 2026] 127.0.0.1:49273 Accepted
+[Thu Nov 19 02:46:15 2026] 127.0.0.1:49273 Closing
+[Thu Nov 19 02:46:23 2026] 127.0.0.1:49298 Accepted
+[Thu Nov 19 02:46:23 2026] 127.0.0.1:49298 Closing
+[Thu Nov 19 02:47:16 2026] 127.0.0.1:59571 Accepted
+[Thu Nov 19 02:47:16 2026] 127.0.0.1:59571 Closing
+[Thu Nov 19 02:47:23 2026] 127.0.0.1:59583 Accepted
+[Thu Nov 19 02:47:24 2026] 127.0.0.1:59583 Closing

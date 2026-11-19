@@ -13,7 +13,11 @@ $activeNav = 'attendance';
 ob_start(); ?>
 <p class="n-hero-sub"><?= e(__('attendance.report_subtitle')) ?></p>
 <?php $pageSubtitleHtml = (string) ob_get_clean(); ob_start(); ?>
-<button type="button" class="btn btn-outline-secondary no-print" data-print-report><?= icon('printer') ?> <?= e(__('common.print')) ?></button>
+<?php
+$docKey = 'attendance';
+$docParams = ['class_id' => (string) ((int) $classId), 'from' => (string) $from, 'to' => (string) $to];
+require dirname(__DIR__) . '/partials/export-menu.php';
+?>
       <a href="/attendance" class="btn btn-primary"><?= icon('check-circle') ?> <?= e(__('attendance.mark_title')) ?></a>
 <?php
 $pageActions = (string) ob_get_clean();
@@ -124,6 +128,46 @@ require dirname(__DIR__) . '/layout/start.php';
     </table>
   </div>
 </div>
+</div>
+<?php endif; ?>
+
+<?php if (!empty($alerts)): ?>
+<div class="card n-review-panel">
+  <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+    <?= icon('alert-triangle', 'text-danger') ?>
+    <span class="fw-semibold"><?= e(__('attendance.chronic_title')) ?></span>
+    <span class="badge bg-danger ms-auto"><?= count($alerts) ?></span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th><?= e(__('students.full_name')) ?></th>
+          <th><?= e(__('attendance.class')) ?></th>
+          <th><?= e(__('attendance.consecutive_absence')) ?></th>
+          <th><?= e(__('attendance.separate_absence')) ?></th>
+          <th><?= e(__('attendance.rate')) ?></th>
+          <th><?= e(__('verification.status')) ?></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($alerts as $alert): ?>
+          <tr>
+            <td><a href="/students/<?= (int)$alert['student_id'] ?>" class="fw-semibold text-decoration-none"><?= e($alert['full_name']) ?></a></td>
+            <td><?= e($alert['class_name']) ?></td>
+            <td><span class="badge bg-<?= ($alert['level'] === 'critical' ? 'danger' : 'warning') ?>"><?= (int)$alert['consecutive'] ?></span></td>
+            <td><span class="badge bg-light text-dark border"><?= (int)$alert['absent'] ?></span></td>
+            <td dir="ltr"><?= $alert['percent'] === null ? '—' : (float)$alert['percent'] . '%' ?></td>
+            <td>
+              <span class="badge bg-<?= $alert['level'] === 'critical' ? 'danger' : 'warning' ?>">
+                <?= e(__('attendance.level_' . $alert['level'])) ?>
+              </span>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
 </div>
 <?php endif; ?>
 

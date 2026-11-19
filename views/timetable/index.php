@@ -20,6 +20,9 @@ ob_start(); ?>
         <a href="/timetable/gaps" class="btn btn-outline-secondary btn-sm no-print">
           <?= icon('alert-triangle') ?> <?= e(__('timetable.gaps_title')) ?><?= (int) ($openGaps ?? 0) > 0 ? ' (' . (int) $openGaps . ')' : '' ?>
         </a>
+        <a href="/timetable/clashes" class="btn btn-outline-secondary btn-sm no-print">
+          <?= icon('alert-triangle') ?> <?= e(__('timetable.clashes_link')) ?><?= (int) ($openClashes ?? 0) > 0 ? ' (' . (int) $openClashes . ')' : '' ?>
+        </a>
         <a href="/timetable/covers" class="btn btn-outline-secondary btn-sm no-print">
           <?= icon('calendar') ?> <?= e(__('timetable.covers_title')) ?>
         </a>
@@ -28,9 +31,23 @@ ob_start(); ?>
         </a>
       <?php endif; ?>
       <?php if ($classId > 0): ?>
-        <button type="button" class="btn btn-outline-secondary btn-sm no-print" data-print-report>
-          <?= icon('printer') ?> <?= e(__('common.print') ?? 'Print') ?>
-        </button>
+        <?php
+        $docKey = 'timetable-class';
+        $docParams = ['class_id' => (string) ((int) $classId)];
+        $docCompact = true;
+        require dirname(__DIR__) . '/partials/export-menu.php';
+        ?>
+      <?php endif; ?>
+      <?php
+      $docKey = 'timetable-master';
+      $docParams = [];
+      $docCompact = true;
+      $docLabel = __('document.title.timetable-master');
+      require dirname(__DIR__) . '/partials/export-menu.php';
+      $docLabel = null;
+      ?>
+      <?php if ($classId > 0): ?>
+        <?php /* Bulk export of every class timetable lives in the class menu above. */ ?>
       <?php endif; ?>
       <?php if ($classId > 0 && hasPermission('timetable.manage')): ?>
         <form method="post" action="/timetable/clear" data-confirm="<?= e(__('timetable.confirm_clear')) ?>">
@@ -87,7 +104,20 @@ require dirname(__DIR__) . '/layout/start.php';
                   <strong>
                     <?= e(currentLocale() === 'ar' ? $slot['subject_ar'] : $slot['subject_en']) ?>
                   </strong>
-                  <small><?= e($slot['teacher_name']) ?></small>
+                  <?php
+                  $teacherName = trim((string) ($slot['teacher_name'] ?? ''));
+                  $printedName = trim((string) ($slot['printed_teacher'] ?? ''));
+                  ?>
+                  <?php if ($teacherName !== ''): ?>
+                    <small><?= e($teacherName) ?></small>
+                  <?php elseif ($printedName !== ''): ?>
+                    <small><?= e($printedName) ?></small>
+                    <small class="n-slot-conflict" title="<?= e(__('timetable.slot_conflict')) ?>">
+                      <?= icon('alert-triangle') ?><?= e(__('timetable.slot_conflict_short')) ?>
+                    </small>
+                  <?php else: ?>
+                    <small class="n-slot-missing"><?= e(__('timetable.gaps_no_teacher')) ?></small>
+                  <?php endif; ?>
                   <?php if (!empty($slot['note'])): ?><small class="n-slot-note" title="<?= e($slot['note']) ?>"><?= e($slot['note']) ?></small><?php endif; ?>
                   <?php if (hasPermission('timetable.manage')): ?>
                     <form method="post" action="/timetable/<?= (int)$slot['id'] ?>/delete" class="mt-1">

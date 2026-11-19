@@ -10,6 +10,7 @@ use App\Flash;
 use App\Repositories\BackupRepository;
 use App\Request;
 use App\Response;
+use App\Services\ActivityLogger;
 use App\Services\AuthService;
 use App\Services\BackupService;
 use App\Services\RestoreService;
@@ -55,13 +56,43 @@ final class BackupController extends Controller
         $userId = $_SESSION['user_id'] ?? null;
 
         try {
-            $this->backups->run('manual', $userId, $request->post('notes'));
-            Flash::set('success', __('backups.create_success'));
+            $result = $this->backups->run('manual', $userId, $request->post('notes'));
+            Flash::set('success', __('backups.create_success_with_count', [
+                'count' => (int) $result['record_count'],
+                'tables' => (int) $result['table_count'],
+            ]));
         } catch (RuntimeException) {
             Flash::set('danger', __('backups.create_failed'));
         }
 
         $this->redirect('/backups');
+    }
+
+    /**
+     * Read-only pre-flight check for the restore form. The browser posts the
+     * selected file here first; nothing is written until the separate
+     * /backups/restore request with its typed RESTORE confirmation.
+     */
+    public function validateUpload(Request $request): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        if (!isset($_FILES['backup_file']) || $_FILES['backup_file']['error'] !== UPLOAD_ERR_OK) {
+            http_response_code(422);
+            echo json_encode(['error' => __('backups.upload_required')], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+        if (strtolower(pathinfo((string) $_FILES['backup_file']['name'], PATHINFO_EXTENSION)) !== 'sql') {
+            http_response_code(422);
+            echo json_encode(['error' => __('backups.invalid_extension')], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+        try {
+            $summary = $this->restore->inspect($_FILES['backup_file']['tmp_name']);
+            echo json_encode($summary, JSON_UNESCAPED_UNICODE);
+        } catch (RuntimeException $e) {
+            http_response_code(422);
+            echo json_encode(['error' => $this->restoreErrorMessage($e->getMessage())], JSON_UNESCAPED_UNICODE);
+        }
     }
 
     /**

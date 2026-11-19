@@ -93,8 +93,24 @@ use App\Middleware\CsrfMiddleware;
           <input type="text" class="form-control" id="timezone" name="timezone" value="<?= e($school['timezone'] ?? 'Africa/Cairo') ?>">
         </div>
         <div class="col-md-4 mb-3">
-          <label class="form-label" for="school_week"><?= e(__('settings.profile.school_week')) ?></label>
-          <input type="text" class="form-control" id="school_week" name="school_week" value="<?= e($school['school_week'] ?? '0,1,2,3,4') ?>">
+          <label class="form-label d-block"><?= e(__('settings.profile.school_week')) ?></label>
+          <?php
+            $workingDays = array_map('intval', array_filter(explode(',', (string) ($school['school_week'] ?? '0,1,2,3,4')), 'strlen'));
+            $weekLabels = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+          ?>
+          <div class="d-flex flex-wrap gap-2">
+            <?php foreach ($weekLabels as $dayNumber => $dayKey): ?>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" name="school_week_days[]"
+                       id="school_week_<?= $dayNumber ?>" value="<?= $dayNumber ?>"
+                       <?= in_array($dayNumber, $workingDays, true) ? 'checked' : '' ?>>
+                <label class="form-check-label small" for="school_week_<?= $dayNumber ?>">
+                  <?= e(__('weekday.' . $dayKey)) ?>
+                </label>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <input type="hidden" name="school_week" value="<?= e($school['school_week'] ?? '0,1,2,3,4') ?>">
           <div class="form-text"><?= e(__('settings.profile.school_week_help')) ?></div>
         </div>
       </div>
