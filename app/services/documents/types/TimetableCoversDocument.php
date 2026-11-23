@@ -30,10 +30,6 @@ final class TimetableCoversDocument extends DocumentType
         return 'timetable.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx', 'png'];
-    }
 
     public function signatures(): array
     {
@@ -148,9 +144,7 @@ final class TimetableCoversDocument extends DocumentType
             ], true),
             'rows' => $rows,
             'totals' => [
-                ['value' => __('document.total'), 'class' => ''],
-                ['value' => (string) count($lessons), 'class' => 'cell-num'],
-                ['value' => '', 'class' => ''],
+                ['value' => __('document.total') . ': ' . count($lessons), 'class' => 'cell-total', 'colspan' => 3],
                 ['value' => '', 'class' => ''],
                 ['value' => (string) $leave, 'class' => 'cell-num'],
                 ['value' => (string) $covered, 'class' => 'cell-num'],

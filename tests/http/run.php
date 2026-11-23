@@ -1587,11 +1587,13 @@ try {
     ok(str_contains($timetableView['body'], 'data-doc-key="timetable-class"'), 'Class timetable offers its own document export');
     ok(str_contains($timetableView['body'], 'data-doc-bulk="1"'), 'Class timetable offers bulk export of all class timetables');
 
-    $bulkOptions = $admin->get('/documents/students/bulk-options');
+    $bulkOptions = $admin->get('/documents/students/capabilities');
     same(200, $bulkOptions['status'], 'Bulk options endpoint responds');
     $bulkGroups = json_decode($bulkOptions['body'], true);
-    ok(is_array($bulkGroups['groups'] ?? null) && $bulkGroups['groups'] !== [], 'Bulk options list real export groups');
-    ok(($bulkGroups['groups'][0]['count'] ?? 0) > 0, 'Bulk options report the real record count of each group');
+    ok(is_array($bulkGroups['bulk']['groups'] ?? null) && $bulkGroups['bulk']['groups'] !== [], 'Bulk options list real export groups');
+    ok(($bulkGroups['bulk']['groups'][0]['count'] ?? 0) > 0, 'Bulk options report the real record count of each group');
+    ok(count($bulkGroups['formats'] ?? []) === 5, 'Capabilities offer every download format to the menu');
+    ok(($bulkGroups['print']['key'] ?? '') === 'print', 'Capabilities describe the direct print action');
 
     $docPage = $admin->get('/documents/timetable-class?class_id=' . $classId);
     same(200, $docPage['status'], 'Class timetable document renders over HTTP');
@@ -1663,7 +1665,8 @@ try {
         $archive->close();
         $pdfEntries = array_values(array_filter($names, static fn (string $name): bool => str_ends_with($name, '.pdf')));
         ok(count($pdfEntries) === ($job['total'] ?? 0), 'The archive contains one document per exported entity');
-        ok(count($names) === count($pdfEntries) + 1, 'The archive also carries its README');
+        ok(count($names) === count($pdfEntries) + 2, 'The archive also carries its README and manifest');
+        ok(str_contains(implode(' ', $names), 'README.txt') && str_contains(implode(' ', $names), 'manifest.csv'), 'The archive documents itself');
         ok(str_contains(implode(' ', $pdfEntries), 'NIZAM_Export'), 'The archive is organised in a named export folder');
     } else {
         ok(false, 'The bulk ZIP opens as a valid archive');

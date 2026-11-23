@@ -32,10 +32,6 @@ final class ReportCardDocument extends DocumentType
         return 'exams.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'png'];
-    }
 
     public function signatures(): array
     {

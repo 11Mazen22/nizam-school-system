@@ -28,10 +28,6 @@ final class ClassTimetableDocument extends DocumentType
         return 'timetable.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'png', 'xlsx', 'zip'];
-    }
 
     public function signatures(): array
     {

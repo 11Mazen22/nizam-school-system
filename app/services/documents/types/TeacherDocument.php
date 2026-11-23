@@ -29,10 +29,6 @@ final class TeacherDocument extends DocumentType
         return 'teachers.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'png', 'xlsx'];
-    }
 
     public function signatures(): array
     {

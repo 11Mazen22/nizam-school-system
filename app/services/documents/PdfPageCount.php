@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace App\Services\Documents;
 
 /**
- * Read the real number of pages from a generated PDF.
+ * Read the real page geometry from a generated PDF.
  *
  * The renderer's own page count comes from the composed DOM, which is the
  * number the footer prints. That is only correct while the browser actually
  * emits exactly that many physical pages. Reading the PDF page tree here gives
  * us an independent, authoritative count to check it against -- no PDF library
  * and no external binary needed, and it works on the offline school server.
+ *
+ * Page size is read for the same reason: an A4 document that silently came
+ * out as US Letter would still open, but it would not print correctly on the
+ * school's paper, so exports verify both dimensions.
  */
 final class PdfPageCount
 {
@@ -37,5 +41,56 @@ final class PdfPageCount
         }
 
         return 0;
+    }
+
+    /**
+     * Every distinct MediaBox in the file, in points, as [width, height].
+     *
+     * @return list<array{0:float,1:float}>
+     */
+    public static function pageSizes(string $bytes): array
+    {
+        if (preg_match_all(
+            '/\/MediaBox\s*\[\s*(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s*\]/s',
+            $bytes,
+            $matches,
+            PREG_SET_ORDER
+        ) === false || $matches === []) {
+            return [];
+        }
+
+        $sizes = [];
+        foreach ($matches as $match) {
+            $width = round(abs((float) $match[3] - (float) $match[1]), 1);
+            $height = round(abs((float) $match[4] - (float) $match[2]), 1);
+            if ($width > 1 && $height > 1) {
+                $sizes[$width . 'x' . $height] = [$width, $height];
+            }
+        }
+
+        return array_values($sizes);
+    }
+
+    /**
+     * True when every page is A4 in the expected orientation.
+     * Tolerance is 2pt (~0.7mm): 595.28 x 841.89 points is A4.
+     */
+    public static function isA4(string $bytes, bool $landscape = false): bool
+    {
+        $sizes = self::pageSizes($bytes);
+        if ($sizes === []) {
+            return false;
+        }
+
+        $expectedWidth = $landscape ? 841.89 : 595.28;
+        $expectedHeight = $landscape ? 595.28 : 841.89;
+
+        foreach ($sizes as [$width, $height]) {
+            if (abs($width - $expectedWidth) > 2.0 || abs($height - $expectedHeight) > 2.0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -67,16 +67,12 @@ foreach ($registry->keys() as $key) {
     if (!in_array($type->permission(), $permissions, true)) {
         $badPermission[] = $key . ':' . $type->permission();
     }
-    if ($type->formats() === [] || !in_array('pdf', $type->formats(), true)) {
-        $badFormat[] = $key;
-    }
-    foreach ($type->formats() as $format) {
-        if (!in_array($format, ['pdf', 'xlsx', 'png', 'zip'], true)) {
-            $badFormat[] = $key . ':' . $format;
-        }
-    }
-    if (in_array('zip', $type->formats(), true) !== in_array($key, ['students', 'timetable-class', 'timetable-teacher'], true)) {
-        $badFormat[] = $key . ':zip-mismatch';
+    // Every document is built from the same block model, so every document
+    // offers every platform format. Divergence here is how the old system
+    // ended up advertising PNG on a document that refused it.
+    $expectedFormats = ['pdf', 'png', 'xlsx', 'csv', 'html'];
+    if ($type->formats() !== $expectedFormats) {
+        $badFormat[] = $key . ':' . implode(',', $type->formats());
     }
     foreach (['ar', 'en'] as $locale) {
         $path = $root . "/lang/{$locale}.php";
@@ -88,8 +84,20 @@ foreach ($registry->keys() as $key) {
 }
 
 check($badPermission === [], 'Every document inherits a real on-screen permission');
-check($badFormat === [], 'Every document offers PDF and only supported formats');
+check($badFormat === [], 'Every document offers the full platform format set');
 check($missingTitles === [], 'Every document has a title in both languages');
+
+$formatLabels = [];
+foreach (\App\Services\Documents\ExportFormat::all() as $formatKey) {
+    $meta = \App\Services\Documents\ExportFormat::meta($formatKey);
+    if ($meta['label'] === 'document.format.' . $formatKey || $meta['description'] === 'document.format.' . $formatKey . '_desc') {
+        $formatLabels[] = $formatKey;
+    }
+    if ($meta['extension'] === '' || $meta['mime'] === '') {
+        $formatLabels[] = $formatKey . ':meta';
+    }
+}
+check($formatLabels === [], 'Every export format has a localized label, extension and MIME type');
 
 // Every view that names a document key must use a registered one, and must
 // render the shared export menu rather than its own print markup.
@@ -148,6 +156,9 @@ foreach ([
     'views/documents/document.php',
     'views/documents/partials/header.php',
     'views/documents/partials/footer.php',
+    'app/services/documents/ExportFormat.php',
+    'app/services/documents/CsvExporter.php',
+    'app/services/documents/PdfPageCount.php',
 ] as $asset) {
     check(is_file($root . '/' . $asset), 'Required document asset exists: ' . $asset);
 }

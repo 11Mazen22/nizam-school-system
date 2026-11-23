@@ -23,8 +23,8 @@ final class PageComposer
 {
     /** Usable body height in mm, per orientation, measured against the layout's fixed header/footer. */
     private const BUDGET = [
-        'portrait' => 224.0,
-        'landscape' => 146.0,
+        'portrait' => 219.0,
+        'landscape' => 135.0,
     ];
 
     private const FONT_PT = 8.4;
@@ -47,12 +47,13 @@ final class PageComposer
      * table's last rows underneath the footer of a fixed-height page.
      */
     private const LINE_MM = 3.9;
-    private const CELL_PAD_MM = 3.1;
-    private const ROW_MIN_MM = 7.0;
+    private const CELL_PAD_MM = 2.95;
+    private const ROW_MIN_MM = 6.85;
     /** Header row (7.9pt, 1.7mm padding) plus its rules. */
-    private const HEAD_MM = 7.4;
-    private const BLOCK_TITLE_MM = 6.6;
-    private const GAP_MM = 3.2;
+    private const HEAD_MM = 7.3;
+    /** Heading line plus its 1.4mm bottom margin. */
+    private const BLOCK_TITLE_MM = 6.0;
+    private const GAP_MM = 3.4;
 
     /**
      * @return array{pages: list<list<array<string,mixed>>>, total: int}
@@ -283,15 +284,17 @@ final class PageComposer
                 fn (array $row): float => $this->rowHeight($row, $block['columns'] ?? []),
                 $block['rows'] ?? []
             )),
-            'grid' => $title + 8.2 + array_sum(array_map(
-                fn (array $row): float => $this->gridRowHeight($row),
-                $block['rows'] ?? []
-            )),
+            'grid' => $title + 8.0
+                + (!empty($block['legend']) ? 6.5 : 0.0)
+                + array_sum(array_map(
+                    fn (array $row): float => $this->gridRowHeight($row),
+                    $block['rows'] ?? []
+                )),
             'fields' => $title + array_sum(array_map(
                 fn (array $section): float => $this->sectionHeight($section),
                 $block['sections'] ?? []
             )),
-            'notes' => 4.0 + max(1, (int) ceil(mb_strlen((string) ($block['text'] ?? '')) / 138)) * self::LINE_MM,
+            'notes' => $title + 4.0 + max(1, (int) ceil(mb_strlen((string) ($block['text'] ?? '')) / 138)) * self::LINE_MM,
             default => 10.0,
         };
     }
@@ -300,12 +303,12 @@ final class PageComposer
     {
         $cards = count($block['cards'] ?? []);
         $perRow = max(1, (int) ($block['per_row'] ?? 4));
-        return (float) (max(1, (int) ceil($cards / $perRow)) * 17.0);
+        return (float) (max(1, (int) ceil($cards / $perRow)) * 14.2);
     }
 
     private function totalsHeight(array $block): float
     {
-        return empty($block['totals']) ? 0.0 : 8.0;
+        return empty($block['totals']) ? 0.0 : 8.7;
     }
 
     private function sectionHeight(array $section): float
@@ -318,9 +321,30 @@ final class PageComposer
     {
         $lines = 1;
         foreach ($row['cells'] ?? [] as $cell) {
-            $lines = max($lines, count($cell['lines'] ?? []) ?: 1);
+            // A timetable cell renders subject, teacher and (when the paper
+            // double-books a lesson) one status line. Counting only a
+            // pre-computed [] of lines previously made every cell look like a
+            // single line, so a clash-heavy class overflowed its page.
+            $count = count($cell['lines'] ?? []);
+            if ($count === 0) {
+                $count = !empty($cell['subject']) || !empty($cell['text']) ? 1 : 0;
+                if (!empty($cell['teacher'])) {
+                    $count++;
+                }
+                if (!empty($cell['clash']) || !empty($cell['resolved']) || !empty($cell['unassigned'])) {
+                    $count++;
+                }
+                if (!empty($cell['class'])) {
+                    $count++;
+                }
+                $count = max(1, $count);
+            }
+            $lines = max($lines, $count);
         }
-        return max(11.0, 3.2 + $lines * 3.9);
+
+        // 7.4pt at line-height 1.45 is 3.3mm per line, plus cell padding and
+        // borders. The cell height in document.css is only a minimum.
+        return max(10.5, 2.6 + $lines * 3.3);
     }
 
     /**

@@ -110,7 +110,13 @@ final class Response
         // relaxation -- a data: URI is bytes already inside the CSS file,
         // never a fetch to anywhere -- so it doesn't reopen the "nothing
         // external, ever" guarantee the rest of this policy protects.
-        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'");
+        //
+        // font-src 'self' data: -- the document preview and the hidden print
+        // frame must render with the same typefaces as the exported PDF/PNG,
+        // so document.php embeds the school's fonts as data: URIs. Without
+        // this, the browser silently substituted a system font only in the
+        // on-screen preview, which no longer matched the file it downloaded.
+        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'");
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('Referrer-Policy: same-origin');

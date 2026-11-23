@@ -6,6 +6,7 @@ namespace App\Services\Documents\Types;
 
 use App\Services\Documents\Document;
 use App\Services\Documents\DocumentIdentity;
+use App\Services\Documents\ExportFormat;
 
 /**
  * One NIZAM document type.
@@ -25,11 +26,21 @@ abstract class DocumentType
     /** The permission its on-screen equivalent already requires. */
     abstract public function permission(): string;
 
-    /** @return list<string> */
+    /**
+     * Every NIZAM document is built from the same block model, so every type
+     * can legitimately be produced in every platform format. Kept as a method
+     * rather than assumed in the engine so a future type whose data genuinely
+     * cannot be tabulated (say, a purely graphical certificate) can narrow its
+     * own list without changing the pipeline.
+     *
+     * @return list<string>
+     */
     public function formats(): array
     {
-        return ['pdf', 'xlsx', 'png'];
+        return ExportFormat::documents();
     }
+
+    /** @return list<string> */
 
     /** @return list<string> */
     public function signatures(): array

@@ -55,9 +55,16 @@ $cellValue = static function (mixed $cell): array {
       <tfoot>
         <tr>
           <?php $index = 0; foreach ($block['totals'] as $cell): ?>
-            <?php $parsed = $cellValue($cell); $column = $columns[$index] ?? []; ?>
-            <td class="<?= e($parsed['class']) ?>"<?= !empty($column['align']) ? ' style="text-align:' . e((string) $column['align']) . '"' : '' ?>><?= e($parsed['value']) ?></td>
-          <?php $index++; endforeach; ?>
+            <?php
+            $parsed = $cellValue($cell);
+            $column = $columns[$index] ?? [];
+            // A count-only total spans the identity columns; a spanning cell
+            // gives up its column alignment so the label reads from the start
+            // of the row instead of floating in a narrow numbering column.
+            $span = is_array($cell) ? max(1, (int) ($cell['colspan'] ?? 1)) : 1;
+            ?>
+            <td class="<?= e($parsed['class']) ?>"<?= $span > 1 ? ' colspan="' . $span . '"' : '' ?><?= $span === 1 && !empty($column['align']) ? ' style="text-align:' . e((string) $column['align']) . '"' : '' ?>><?= e($parsed['value']) ?></td>
+          <?php $index += $span; endforeach; ?>
         </tr>
       </tfoot>
     <?php endif; ?>

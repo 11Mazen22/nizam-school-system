@@ -33,10 +33,6 @@ final class StudentDocument extends DocumentType
         return 'students.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'png'];
-    }
 
     public function signatures(): array
     {

@@ -170,7 +170,13 @@ body.doc-body-shell { padding: 6mm 0; }
   text-align: end;
 }
 
-.doc-scope-pair { white-space: nowrap; }
+.doc-scope-pair {
+  white-space: nowrap;
+  padding: 0.45mm 1.7mm;
+  border: 0.18mm solid var(--border);
+  border-radius: 1mm;
+  background: var(--surface);
+}
 .doc-scope-label { color: #8592A0; }
 .doc-scope-value { color: var(--ink); font-weight: 600; }
 
@@ -263,6 +269,7 @@ body.doc-body-shell { padding: 6mm 0; }
   padding: 1.7mm 1.8mm;
   text-align: start;
   border: 0.2mm solid var(--emerald);
+  border-bottom: 0.45mm solid var(--gold);
   line-height: 1.3;
 }
 
@@ -299,6 +306,8 @@ body.doc-body-shell { padding: 6mm 0; }
   color: var(--emerald-dark);
 }
 
+.doc-table tfoot td.cell-total { text-align: start; }
+
 .doc-table--compact { font-size: 7.5pt; }
 .doc-table--compact td { padding: 0.95mm 1.4mm; }
 .doc-table--compact th { padding: 1.3mm 1.4mm; font-size: 7.3pt; }
@@ -324,7 +333,7 @@ body.doc-body-shell { padding: 6mm 0; }
   padding: 1.1mm 1.2mm;
   vertical-align: middle;
   text-align: center;
-  height: 11mm;
+  height: 10.5mm;
 }
 
 .doc-grid .grid-period {
@@ -577,47 +586,51 @@ body.doc-compact .doc-grid td { height: 9.5mm; padding: 0.8mm 1mm; }
     page-break-after: always;
   }
   .doc-page:last-child { break-after: auto; page-break-after: auto; }
-  .doc-toolbar { display: none !important; }
 }
 
-/* On-screen preview toolbar (never printed) */
-.doc-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  gap: 3mm;
-  padding: 2mm 4mm;
-  background: rgba(15, 81, 50, .96);
-  color: #fff;
-  font-size: 8pt;
-}
+/* ------------------------------------------------------- overflow repair */
 
-/* A document loads none of the application's stylesheets, so the icon class
-   it borrows from the app has no size here: an unconstrained inline SVG
-   stretches to fill the flex line and covered the whole preview with a giant
-   printer glyph. Every icon inside a document is sized in paper units. */
-.doc-toolbar svg,
-.doc-toolbar .n-icon {
-  width: 4mm;
-  height: 4mm;
-  flex: 0 0 auto;
-  display: block;
+/* Measured by bin/document-render.mjs *before* a file is produced. If the
+   content of a designed page is taller than its paper, the renderer adds one
+   of these levels and measures again, so a clipped row is never exported.
+   They only ever tighten what the page already contains; they never change
+   how many pages the footer numbers. */
+body.doc-autofit-1 .doc-flow { gap: 2.6mm; }
+body.doc-autofit-1 .doc-table td { padding: 1.1mm 1.7mm; }
+body.doc-autofit-1 .doc-table th { padding: 1.5mm 1.7mm; }
+body.doc-autofit-1 .doc-grid td { height: 10mm; }
+body.doc-autofit-1 .doc-card { padding: 1.9mm 2.3mm; }
+body.doc-autofit-1 .doc-section { padding: 1.9mm 2.5mm 1.3mm; }
+
+body.doc-autofit-2 .doc-flow { gap: 2.2mm; }
+body.doc-autofit-2 .doc-table td { padding: 0.95mm 1.5mm; font-size: 7.8pt; }
+body.doc-autofit-2 .doc-table th { padding: 1.25mm 1.5mm; font-size: 7.4pt; }
+body.doc-autofit-2 .doc-summary { gap: 1.8mm; }
+body.doc-autofit-2 .doc-card { padding: 1.6mm 2mm; }
+body.doc-autofit-2 .doc-card-value { font-size: 10.5pt; }
+body.doc-autofit-2 .doc-grid td { height: 9mm; }
+body.doc-autofit-2 .doc-block-title { margin-bottom: 1mm; }
+body.doc-autofit-2 .doc-section { padding: 1.6mm 2.2mm 1.1mm; margin-bottom: 1.8mm; }
+body.doc-autofit-2 .doc-field { padding: 0.5mm 0; }
+
+/* Last resort: reflow the whole body at 93%. Unlike a transform this changes
+   the layout, so the measurement sees the real new height too. */
+body.doc-autofit-3 .doc-flow { zoom: 0.93; }
+
+/* ------------------------------------------------------------ on screen */
+
+@media screen {
+  .doc-page { transition: box-shadow .18s ease, transform .18s ease; }
+  .doc-page:hover { box-shadow: 0 2.5mm 8mm rgba(15, 81, 50, .16); }
+  .doc-table tbody tr:hover td { background: #EFF5F1; }
 }
-.doc-toolbar strong { font-weight: 600; }
-.doc-toolbar .doc-toolbar-spacer { flex: 1; }
-.doc-toolbar button {
-  font: inherit;
-  color: #fff;
-  background: rgba(255, 255, 255, .14);
-  border: 0.2mm solid rgba(255, 255, 255, .35);
-  border-radius: 1.2mm;
-  padding: 1mm 2.6mm;
-  cursor: pointer;
-}
-.doc-toolbar button:hover { background: rgba(255, 255, 255, .25); }
 
 @media screen and (max-width: 900px) {
   body.doc-body-shell { padding: 0; background: #DDE3DF; }
+  .doc-page { margin-bottom: 3mm; }
 }
+
+/* The preview frame itself needs no paper shadow: the application shell
+   already provides the grey desk around it. */
+body.doc-embedded { background: #E4E9E5; }
+body.doc-embedded .doc-page { box-shadow: 0 1.5mm 5mm rgba(15, 81, 50, .14); }

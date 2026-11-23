@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Documents;
 
+use App\Logger;
 use RuntimeException;
 
 /**
@@ -16,6 +17,11 @@ use RuntimeException;
  * exports. It renders a *file on disk*, never the running application, so no
  * session, URL or application markup can ever appear in the output.
  *
+ * Every call is isolated in its own temporary directory that is removed in a
+ * finally block, so a failed or timed-out render can never leave a half
+ * written PDF, a stray PNG or a multi-megabyte HTML file behind on the school
+ * server.
+ *
  * If Node/Chromium is unavailable on a given installation the caller is told
  * plainly (document_renderer_unavailable) instead of silently producing a
  * lower-quality document -- the UI then offers the print-ready document,
@@ -23,6 +29,8 @@ use RuntimeException;
  */
 final class ChromiumRenderer
 {
+    private const DEFAULT_TIMEOUT = 180.0;
+
     private readonly string $projectRoot;
 
     public function __construct(?string $projectRoot = null)
@@ -30,7 +38,9 @@ final class ChromiumRenderer
         $this->projectRoot = $projectRoot ?? dirname(__DIR__, 3);
     }
 
-    /** @return array{bytes:string, pages:int} */
+    /**
+     * @return array{bytes:string, pages:int, fitted:int, overflow:bool, width:int, height:int}
+     */
     public function pdf(string $html): array
     {
         return $this->run($html, 'pdf', 1.0);
@@ -39,34 +49,58 @@ final class ChromiumRenderer
     /**
      * One PNG per designed page, already numbered from 1.
      *
-     * @return array{pages: list<string>, count:int}
+     * @return array{pages: list<string>, count:int, fitted:int, overflow:bool}
      */
     public function pngs(string $html, float $scale = 2.0): array
     {
         $result = $this->run($html, 'png', $scale);
-        $pages = [];
-        for ($index = 1; $index <= $result['pages']; $index++) {
-            $path = $result['out'] . '-' . $index . '.png';
-            if (is_file($path)) {
-                $pages[] = (string) file_get_contents($path);
-                @unlink($path);
-            }
-        }
 
-        return ['pages' => $pages, 'count' => count($pages)];
+        return [
+            'pages' => $result['files'],
+            'count' => count($result['files']),
+            'fitted' => $result['fitted'],
+            'overflow' => $result['overflow'],
+        ];
     }
 
     /**
-     * @return array{bytes:string, pages:int, out:string}
+     * Measure the composed document without producing a file. Used by the
+     * verification suite and by the preview when it needs the true physical
+     * page count.
+     *
+     * @return array{pages:int, fitted:int, overflow:bool, width:int, height:int}
+     */
+    public function measure(string $html): array
+    {
+        $result = $this->run($html, 'measure', 1.0);
+
+        return [
+            'pages' => $result['pages'],
+            'fitted' => $result['fitted'],
+            'overflow' => $result['overflow'],
+            'width' => $result['width'],
+            'height' => $result['height'],
+        ];
+    }
+
+    /**
+     * @return array{bytes:string, files:list<string>, pages:int, fitted:int, overflow:bool, width:int, height:int}
      */
     private function run(string $html, string $mode, float $scale): array
     {
-        $workspace = $this->workspace();
-        $token = bin2hex(random_bytes(8));
-        $htmlPath = $workspace . DIRECTORY_SEPARATOR . 'document-' . $token . '.html';
-        $outPath = $workspace . DIRECTORY_SEPARATOR . 'document-' . $token . ($mode === 'pdf' ? '.pdf' : '');
+        $this->assertAvailable();
 
-        if (file_put_contents($htmlPath, $html) === false) {
+        $directory = $this->workspace() . DIRECTORY_SEPARATOR . 'render-' . bin2hex(random_bytes(6));
+        if (!@mkdir($directory, 0775, true) && !is_dir($directory)) {
+            throw new RuntimeException('document_workspace_unavailable');
+        }
+
+        $htmlPath = $directory . DIRECTORY_SEPARATOR . 'document.html';
+        $outPath = $directory . DIRECTORY_SEPARATOR . 'document'
+            . ($mode === 'pdf' ? '.pdf' : ($mode === 'png' ? '-page' : '.measure'));
+
+        if (@file_put_contents($htmlPath, $html) === false) {
+            $this->removeDirectory($directory);
             throw new RuntimeException('document_renderer_failed');
         }
 
@@ -80,43 +114,86 @@ final class ChromiumRenderer
                 '--scale', (string) $scale,
             ]);
 
-            if ($code !== 0) {
+            $payload = $this->payload($stdout);
+            if ($code !== 0 || !is_array($payload) || empty($payload['ok'])) {
                 $reason = trim($stderr) !== '' ? trim($stderr) : trim($stdout);
-                if (preg_match('/not recognized|not found|Cannot find module|ENOENT/i', $reason) === 1) {
+                Logger::error('document renderer failed (' . $mode . '): ' . mb_substr($reason, 0, 1200));
+
+                if (preg_match('/not recognized|not found|Cannot find module|ERR_MODULE_NOT_FOUND|ENOENT/i', $reason) === 1) {
                     throw new RuntimeException('document_renderer_unavailable');
+                }
+                if (preg_match('/timed? ?out|timeout/i', $reason) === 1) {
+                    throw new RuntimeException('document_renderer_timeout');
                 }
                 throw new RuntimeException('document_renderer_failed');
             }
 
-            $payload = json_decode(trim($stdout), true);
-            if (!is_array($payload) || empty($payload['ok'])) {
-                throw new RuntimeException('document_renderer_failed');
-            }
+            $meta = [
+                'fitted' => (int) ($payload['fitted'] ?? 0),
+                'overflow' => (bool) ($payload['overflow'] ?? false),
+                'width' => (int) ($payload['width'] ?? 0),
+                'height' => (int) ($payload['height'] ?? 0),
+            ];
+            $pageCount = (int) ($payload['pages'] ?? 0);
 
             if ($mode === 'pdf') {
                 if (!is_file($outPath)) {
                     throw new RuntimeException('document_renderer_failed');
                 }
-                $bytes = (string) file_get_contents($outPath);
-                @unlink($outPath);
 
                 return [
-                    'bytes' => $bytes,
-                    'pages' => (int) ($payload['pages'] ?? 0),
-                    'out' => $outPath,
+                    'bytes' => (string) file_get_contents($outPath),
+                    'files' => [],
+                    'pages' => $pageCount,
+                    ...$meta,
+                ];
+            }
+
+            if ($mode === 'png') {
+                $files = glob($outPath . '-*.png') ?: [];
+                usort($files, static fn (string $a, string $b): int => strnatcmp($a, $b));
+                if ($files === []) {
+                    throw new RuntimeException('document_renderer_failed');
+                }
+                $pages = [];
+                foreach ($files as $file) {
+                    $pages[] = (string) file_get_contents($file);
+                }
+
+                return [
+                    'bytes' => '',
+                    'files' => $pages,
+                    'pages' => count($pages),
+                    ...$meta,
                 ];
             }
 
             return [
                 'bytes' => '',
-                'pages' => (int) ($payload['pages'] ?? 0),
-                'out' => $outPath,
+                'files' => [],
+                'pages' => $pageCount,
+                ...$meta,
             ];
         } finally {
-            // Only the input is removed here; PDF/PNG outputs are read by the
-            // caller from the returned path and cleaned up with the workspace.
-            @unlink($htmlPath);
+            $this->removeDirectory($directory);
         }
+    }
+
+    /** @return array<string,mixed>|null */
+    private function payload(string $stdout): ?array
+    {
+        foreach (array_reverse(preg_split('/\r?\n/', trim($stdout)) ?: []) as $line) {
+            $line = trim($line);
+            if ($line === '' || $line[0] !== '{') {
+                continue;
+            }
+            $decoded = json_decode($line, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
     }
 
     /** @return array{0:int,1:string,2:string} */
@@ -144,7 +221,7 @@ final class ChromiumRenderer
 
         $stdout = '';
         $stderr = '';
-        $deadline = microtime(true) + 120.0;
+        $deadline = microtime(true) + $this->timeout();
 
         while (true) {
             $stdout .= (string) stream_get_contents($pipes[1]);
@@ -161,7 +238,7 @@ final class ChromiumRenderer
                 proc_close($process);
                 throw new RuntimeException('document_renderer_timeout');
             }
-            usleep(60_000);
+            usleep(50_000);
         }
 
         $stdout .= (string) stream_get_contents($pipes[1]);
@@ -173,6 +250,21 @@ final class ChromiumRenderer
         return [$code, $stdout, $stderr];
     }
 
+    /**
+     * Fail before spawning a process when the installation plainly cannot
+     * render, so the user gets "print instead" rather than a 30-second wait.
+     */
+    private function assertAvailable(): void
+    {
+        $script = $this->projectRoot . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'document-render.mjs';
+        if (!is_file($script)) {
+            throw new RuntimeException('document_renderer_unavailable');
+        }
+        if (!is_dir($this->projectRoot . DIRECTORY_SEPARATOR . 'node_modules' . DIRECTORY_SEPARATOR . 'playwright')) {
+            throw new RuntimeException('document_renderer_unavailable');
+        }
+    }
+
     private function nodeBinary(): string
     {
         $configured = getenv('NIZAM_NODE_BIN');
@@ -180,7 +272,17 @@ final class ChromiumRenderer
             return trim($configured);
         }
 
-        return PHP_OS_FAMILY === 'Windows' ? 'node' : 'node';
+        return 'node';
+    }
+
+    private function timeout(): float
+    {
+        $configured = getenv('NIZAM_DOC_RENDER_TIMEOUT');
+        if (is_string($configured) && is_numeric($configured)) {
+            return max(30.0, min(600.0, (float) $configured));
+        }
+
+        return self::DEFAULT_TIMEOUT;
     }
 
     private function workspace(): string
@@ -192,5 +294,18 @@ final class ChromiumRenderer
         }
 
         return $base;
+    }
+
+    private function removeDirectory(string $directory): void
+    {
+        if (!is_dir($directory)) {
+            return;
+        }
+        foreach (glob($directory . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
+            if (is_file($file)) {
+                @unlink($file);
+            }
+        }
+        @rmdir($directory);
     }
 }

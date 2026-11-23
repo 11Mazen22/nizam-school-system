@@ -54,10 +54,25 @@ final class ExcelWorkbookBuilder
         $spreadsheet->removeSheetByIndex(0);
         $usedNames = [];
 
+        // Names are assigned before any sheet is written so the index sheet
+        // can point at the exact name each document received (including the
+        // numeric suffix a duplicate class or teacher name needs).
+        $names = [];
         foreach ($documents as $index => $document) {
-            $name = $this->sheetName($document, $index, $usedNames);
-            $sheet = new Worksheet($spreadsheet, $name);
-            $spreadsheet->addSheet($sheet, $index);
+            $names[$index] = $this->sheetName($document, $index, $usedNames);
+        }
+
+        $offset = 0;
+        if (count($documents) > 1) {
+            $indexSheet = new Worksheet($spreadsheet, $this->freeSheetName(__('document.workbook_index'), $usedNames));
+            $spreadsheet->addSheet($indexSheet, 0);
+            $this->writeIndex($indexSheet, $documents, $names, $identity);
+            $offset = 1;
+        }
+
+        foreach ($documents as $index => $document) {
+            $sheet = new Worksheet($spreadsheet, $names[$index]);
+            $spreadsheet->addSheet($sheet, $index + $offset);
             $this->writeSheet($sheet, $document, $identity);
         }
 
@@ -81,11 +96,21 @@ final class ExcelWorkbookBuilder
         if ($raw === '') {
             $raw = $document->title;
         }
+        if (trim($raw) === '') {
+            $raw = 'Sheet ' . ($index + 1);
+        }
+
+        return $this->freeSheetName($raw, $used);
+    }
+
+    /** Assign a unique, Excel-legal sheet name (31 characters, no []:*?/\\). */
+    private function freeSheetName(string $raw, array &$used): string
+    {
         $clean = function_exists('mb_substr') ? mb_substr($raw, 0, 31) : substr($raw, 0, 31);
         $clean = preg_replace('/[\\\\\\/\\?\\*\\[\\]:]/u', ' ', $clean) ?? $clean;
         $clean = trim($clean);
         if ($clean === '') {
-            $clean = 'Sheet ' . ($index + 1);
+            $clean = 'Sheet';
         }
 
         $base = $clean;
@@ -98,6 +123,113 @@ final class ExcelWorkbookBuilder
         $used[$clean] = true;
 
         return $clean;
+    }
+
+    /**
+     * A first sheet listing every other sheet. A fifty-teacher workbook is
+     * unusable without it: the tab strip shows a handful of names and the
+     * office has no way to find the rest except scrolling.
+     *
+     * @param list<Document> $documents
+     * @param array<int,string> $names
+     */
+    private function writeIndex(Worksheet $sheet, array $documents, array $names, DocumentIdentity $identity): void
+    {
+        $isRtl = $identity->locale === 'ar';
+        $sheet->setRightToLeft($isRtl);
+        $sheet->setShowGridlines(false);
+
+        $columns = [
+            ['label' => '#', 'width' => 8.0],
+            ['label' => __('document.workbook_sheet'), 'width' => 30.0],
+            ['label' => __('document.workbook_document'), 'width' => 34.0],
+            ['label' => __('document.rows_count'), 'width' => 12.0],
+            ['label' => __('document.workbook_scope'), 'width' => 46.0],
+        ];
+        $lastColumn = Coordinate::stringFromColumnIndex(count($columns));
+
+        $row = 1;
+        $this->titleRow($sheet, $row, $lastColumn, $identity->nameAr, 14, self::EMERALD_DARK);
+        $row++;
+        if ($identity->nameEn !== '' && $identity->nameEn !== $identity->nameAr) {
+            $this->titleRow($sheet, $row, $lastColumn, $identity->nameEn, 10, '64748B');
+            $row++;
+        }
+        $this->titleRow($sheet, $row, $lastColumn, __('document.workbook_title'), 12, self::EMERALD);
+        $row++;
+        $this->titleRow(
+            $sheet,
+            $row,
+            $lastColumn,
+            __('document.academic_year') . ': ' . $identity->yearLabel . '   |   '
+                . __('document.issued_on') . ': ' . $identity->issueDate,
+            9,
+            '64748B'
+        );
+        $row += 2;
+
+        $headerRow = $row;
+        foreach ($columns as $index => $column) {
+            $sheet->setCellValue([$index + 1, $row], $column['label']);
+        }
+        $this->styleHeader($sheet, [1, $headerRow, count($columns), $headerRow]);
+        $sheet->setAutoFilter('A' . $headerRow . ':' . $lastColumn . $headerRow);
+        $row++;
+
+        foreach ($documents as $index => $document) {
+            $sheet->setCellValue([1, $row], (string) ($index + 1));
+            $sheet->getStyle([1, $row])->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue([2, $row], $names[$index] ?? '');
+            $sheet->getStyle([2, $row])->getFont()->getColor()->setRGB(self::EMERALD);
+            $sheet->setCellValue([3, $row], $document->title . ($document->subtitle !== '' ? ' — ' . $document->subtitle : ''));
+            $sheet->setCellValue([4, $row], $this->recordCount($document));
+            $sheet->getStyle([4, $row])->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $scope = [];
+            foreach ($document->scopePairs() as $pair) {
+                $scope[] = $pair['label'] . ': ' . $pair['value'];
+            }
+            $sheet->setCellValue([5, $row], implode('   |   ', $scope));
+            if (($index % 2) === 1) {
+                $sheet->getStyle([1, $row, count($columns), $row])->getFill()
+                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB(self::ZEBRA);
+            }
+            $row++;
+        }
+
+        $range = [1, $headerRow, count($columns), max($headerRow, $row - 1)];
+        $sheet->getStyle($range)->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB(self::BORDER);
+        $sheet->getStyle($range)->getAlignment()
+            ->setHorizontal($isRtl ? Alignment::HORIZONTAL_RIGHT : Alignment::HORIZONTAL_LEFT)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+
+        foreach ($columns as $index => $column) {
+            $letter = Coordinate::stringFromColumnIndex($index + 1);
+            $sheet->getColumnDimension($letter)->setWidth((float) $column['width']);
+        }
+
+        $sheet->freezePane([1, $headerRow + 1]);
+        $pageSetup = $sheet->getPageSetup();
+        $pageSetup->setPaperSize(PageSetup::PAPERSIZE_A4);
+        $pageSetup->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+        $pageSetup->setFitToWidth(1);
+        $pageSetup->setFitToHeight(0);
+        $pageSetup->setRowsToRepeatAtTopByStartAndEnd($headerRow, $headerRow);
+        $sheet->getPageMargins()->setTop(0.5)->setBottom(0.5)->setLeft(0.4)->setRight(0.4);
+        $sheet->getHeaderFooter()->setOddFooter('&L&8' . $identity->nameAr . '&R&8&P / &N');
+    }
+
+    private function recordCount(Document $document): int
+    {
+        $count = 0;
+        foreach ($document->blocks as $block) {
+            if (in_array((string) ($block['type'] ?? ''), ['table', 'grid'], true)) {
+                $count += count((array) ($block['rows'] ?? []));
+            }
+        }
+
+        return $count;
     }
 
     private function writeSheet(Worksheet $sheet, Document $document, DocumentIdentity $identity): void
@@ -154,6 +286,7 @@ final class ExcelWorkbookBuilder
         $row += 2;
 
         $headerRowForPrint = null;
+        $autoFilterSet = false;
 
         // Column widths are measured from the text actually written, in
         // characters. PhpSpreadsheet's font-metric sizing leaves every Arabic
@@ -345,6 +478,12 @@ final class ExcelWorkbookBuilder
             }
             $this->styleHeader($sheet, [1, $headerRow, max(1, $column - 1), $headerRow]);
             $headerRowForPrint ??= $headerRow;
+            if (!$autoFilterSet) {
+                $sheet->setAutoFilter(
+                    'A' . $headerRow . ':' . Coordinate::stringFromColumnIndex(max(1, $column - 1)) . $headerRow
+                );
+                $autoFilterSet = true;
+            }
             $row++;
 
             $firstDataRow = $row;
@@ -425,6 +564,11 @@ final class ExcelWorkbookBuilder
         }
         $sheet->getPageMargins()->setTop(0.5)->setBottom(0.5)->setLeft(0.4)->setRight(0.4);
         $sheet->setShowGridlines(false);
+        $sheet->setSelectedCell('A1');
+        // The workbook is a print artefact too: its own footer carries the
+        // school name and page numbers just like the PDF. &P / &N are Excel's
+        // page / total-pages codes.
+        $sheet->getHeaderFooter()->setOddFooter('&L&8' . $identity->nameAr . '&R&8&P / &N');
     }
 
     private function titleRow(Worksheet $sheet, int $row, string $lastColumn, string $text, int $size, string $color): void

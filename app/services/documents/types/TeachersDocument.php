@@ -28,10 +28,6 @@ final class TeachersDocument extends DocumentType
         return 'teachers.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx', 'png'];
-    }
 
     public function signatures(): array
     {
@@ -116,9 +112,7 @@ final class TeachersDocument extends DocumentType
             ]),
             'rows' => $rows,
             'totals' => [
-                ['value' => __('document.total'), 'class' => ''],
-                ['value' => (string) count($teachers), 'class' => 'cell-num'],
-                ['value' => '', 'class' => ''],
+                ['value' => __('document.total') . ': ' . count($teachers), 'class' => 'cell-total', 'colspan' => 3],
                 ['value' => '', 'class' => ''],
                 ['value' => '', 'class' => ''],
                 ['value' => '', 'class' => ''],

@@ -22,7 +22,8 @@ $compact = (bool) ($options['compact'] ?? false);
 $bodyClass = 'doc-body-shell'
     . ($showSignatures ? '' : ' doc-hide-signatures')
     . ($showWatermark ? '' : ' doc-hide-watermark')
-    . ($compact ? ' doc-compact' : '');
+    . ($compact ? ' doc-compact' : '')
+    . ($embed ? ' doc-embedded' : '');
 ?>
 <!DOCTYPE html>
 <html lang="<?= e($identity->locale) ?>" dir="<?= e($identity->direction()) ?>" class="<?= $isLandscape ? 'doc-landscape' : 'doc-portrait' ?>">
@@ -30,6 +31,8 @@ $bodyClass = 'doc-body-shell'
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light only">
+<meta name="generator" content="NIZAM Document Engine">
 <title><?= e($document->title) ?><?= $identity->yearLabel !== '' ? ' — ' . e($identity->yearLabel) : '' ?></title>
 <?php if ($forExport): ?>
 <style><?= \App\Services\Documents\DocumentAssets::documentCss(true) ?></style>
@@ -65,21 +68,16 @@ foreach ($signatories as $signatory):
 <?php endif; ?>
 <?php endforeach; ?>
 </head>
-<body class="<?= e($bodyClass) ?>" data-document-key="<?= e($document->key) ?>">
-
-<?php if ($embed): ?>
-<div class="doc-toolbar">
-  <?= icon('printer', 'n-icon-sm') ?>
-  <strong><?= e($document->title) ?></strong>
-  <span><?= e($pageLabel($totalPages)) ?></span>
-  <span class="doc-toolbar-spacer"></span>
-  <button type="button" data-doc-print><?= e(__('document.print')) ?></button>
-</div>
-<?php endif; ?>
+<body class="<?= e($bodyClass) ?>"
+      data-document-key="<?= e($document->key) ?>"
+      data-year="<?= e($identity->yearLabel) ?>"
+      data-print="<?= !empty($options['print']) ? '1' : '0' ?>">
 
 <?php foreach ($pages as $index => $blocks): ?>
   <?php $pageNumber = $index + 1; ?>
-  <article class="doc-page<?= $isLandscape ? ' doc-page--landscape' : '' ?>">
+  <article class="doc-page<?= $isLandscape ? ' doc-page--landscape' : '' ?>"
+           data-page="<?= $pageNumber ?>"
+           aria-label="<?= e($pageLabel($pageNumber)) ?>">
     <?php /* Always rendered; visibility is a body class so the preview modal's
              watermark toggle can switch it without regenerating the document. */ ?>
     <div class="doc-watermark" aria-hidden="true"><span><?= e($identity->name()) ?></span></div>
@@ -134,7 +132,7 @@ foreach ($signatories as $signatory):
   </article>
 <?php endforeach; ?>
 
-<?php if ($embed): ?>
+<?php if ($embed || !empty($options['print'])): ?>
 <script src="<?= e(assetUrl('/assets/js/document-viewer.js')) ?>" defer></script>
 <?php endif; ?>
 </body>

@@ -30,10 +30,6 @@ final class PromotionDocument extends DocumentType
         return 'students.promote';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx', 'png'];
-    }
 
     public function signatures(): array
     {
@@ -151,9 +147,7 @@ final class PromotionDocument extends DocumentType
             ]),
             'rows' => $tableRows,
             'totals' => [
-                ['value' => __('document.total'), 'class' => ''],
-                ['value' => (string) count($rows), 'class' => 'cell-num'],
-                ['value' => '', 'class' => ''],
+                ['value' => __('document.total') . ': ' . count($rows), 'class' => 'cell-total', 'colspan' => 3],
                 ['value' => '', 'class' => ''],
                 ['value' => '', 'class' => ''],
                 ['value' => '', 'class' => ''],

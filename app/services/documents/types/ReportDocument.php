@@ -28,10 +28,6 @@ final class ReportDocument extends DocumentType
         return 'reports.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx', 'png'];
-    }
 
     public function signatures(): array
     {

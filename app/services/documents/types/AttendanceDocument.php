@@ -32,10 +32,6 @@ final class AttendanceDocument extends DocumentType
         return 'attendance.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx', 'png'];
-    }
 
     public function signatures(): array
     {
@@ -141,9 +137,7 @@ final class AttendanceDocument extends DocumentType
             ]),
             'rows' => $rows,
             'totals' => [
-                ['value' => __('document.total'), 'class' => ''],
-                ['value' => (string) count($summary), 'class' => 'cell-num'],
-                ['value' => '', 'class' => ''],
+                ['value' => __('document.total') . ': ' . count($summary), 'class' => 'cell-total', 'colspan' => 3],
                 ['value' => (string) $present, 'class' => 'cell-num'],
                 ['value' => (string) $absent, 'class' => 'cell-num'],
                 ['value' => (string) $late, 'class' => 'cell-num'],
@@ -236,9 +230,7 @@ final class AttendanceDocument extends DocumentType
             ]),
             'rows' => $tableRows,
             'totals' => [
-                ['value' => __('document.total'), 'class' => ''],
-                ['value' => (string) count($rows), 'class' => 'cell-num'],
-                ['value' => '', 'class' => ''],
+                ['value' => __('document.total') . ': ' . count($rows), 'class' => 'cell-total', 'colspan' => 3],
                 ['value' => '', 'class' => ''],
                 ['value' => '', 'class' => ''],
                 ['value' => '', 'class' => ''],

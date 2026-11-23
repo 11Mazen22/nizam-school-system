@@ -343,7 +343,7 @@ $router->get('/documents/bulk/start', [DocumentController::class, 'bulkStart'], 
 $router->get('/documents/bulk/{token}/step', [DocumentController::class, 'bulkStep'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 $router->get('/documents/bulk/{token}/download', [DocumentController::class, 'bulkDownload'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 $router->get('/documents/bulk/{token}/cancel', [DocumentController::class, 'bulkCancel'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
-$router->get('/documents/{key}/bulk-options', [DocumentController::class, 'bulkOptions'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
+$router->get('/documents/{key}/capabilities', [DocumentController::class, 'capabilities'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 $router->get('/documents/{key}', [DocumentController::class, 'show'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 $router->get('/documents/{key}/export/{format}', [DocumentController::class, 'export'], [$session, $csrf, $yearContext, RoleGuardMiddleware::requiresAuth()]);
 

@@ -28,10 +28,6 @@ final class MasterTimetableDocument extends DocumentType
         return 'timetable.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'png', 'xlsx'];
-    }
 
     public function signatures(): array
     {
@@ -77,14 +73,19 @@ final class MasterTimetableDocument extends DocumentType
 
         $totalSlots = 0;
         $filled = 0;
+        $emptyClasses = [];
         foreach ($classes as $class) {
             $slots = $repository->rowsForClass((int) $class['id'], $yearId);
             $totalSlots += count($slots);
-            if ($slots !== []) {
-                $filled++;
-            }
-
             $gradeLabel = $locale === 'ar' ? $class['grade_name_ar'] : $class['grade_name_en'];
+            if ($slots === []) {
+                // A blank grid is not a document: a class without lessons is
+                // reported once, by name, instead of taking a whole page.
+                $emptyClasses[] = (string) $class['name'];
+                continue;
+            }
+            $filled++;
+
             $document->addBlock(TimetableBlocks::grid(
                 trim($gradeLabel . ' — ' . $class['name'], ' —'),
                 $slots,
@@ -107,6 +108,14 @@ final class MasterTimetableDocument extends DocumentType
                 ['label' => __('document.academic_year'), 'value' => $identity->yearLabel, 'numeric' => false],
             ],
         ]], $document->blocks);
+
+        if ($emptyClasses !== []) {
+            $document->addBlock([
+                'type' => 'notes',
+                'title' => __('document.classes_without_timetable'),
+                'text' => implode('، ', $emptyClasses),
+            ]);
+        }
 
         $document->signatures = $this->signatures();
 

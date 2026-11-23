@@ -31,10 +31,6 @@ final class RankingDocument extends DocumentType
         return 'exams.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx', 'png'];
-    }
 
     public function signatures(): array
     {
@@ -155,9 +151,7 @@ final class RankingDocument extends DocumentType
                 'columns' => $columns,
                 'rows' => $rows,
                 'totals' => [
-                    ['value' => __('document.total'), 'class' => ''],
-                    ['value' => (string) count($scoredRows), 'class' => 'cell-num'],
-                    ['value' => '', 'class' => ''],
+                    ['value' => __('document.total') . ': ' . count($scoredRows), 'class' => 'cell-total', 'colspan' => 3],
                     ['value' => '', 'class' => ''],
                     ['value' => '', 'class' => ''],
                 ],

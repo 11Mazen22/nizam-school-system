@@ -28,10 +28,6 @@ final class InvoiceDocument extends DocumentType
         return 'finance.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'png'];
-    }
 
     public function signatures(): array
     {

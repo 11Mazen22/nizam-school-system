@@ -128,12 +128,28 @@ try {
             try {
                 $result = $engine->export($key, $documentParams, $format, ['signatures' => false]);
                 $bytes = $result['bytes'];
-                $check(strlen($bytes) > 200, "{$key}/{$format}: artifact has real content");
+                // A CSV of a register with no matching records is still a real
+                // file: its header row is the content. Binary formats are held
+                // to the size that proves actual data, not just a signature.
+                $minimum = $format === 'csv' ? 24 : 200;
+                $check(strlen($bytes) > $minimum, "{$key}/{$format}: artifact has real content");
 
                 if ($format === 'pdf') {
                     $check(str_starts_with($bytes, '%PDF'), "{$key}/pdf: real PDF header (visual layout not inspected)");
                     $composed = $engine->previewPages($key, $documentParams, ['signatures' => false])['pages'];
                     $check(PdfPageCount::fromBytes($bytes) === $composed, "{$key}/pdf: physical page count equals footer numbering");
+                    $check(
+                        PdfPageCount::isA4($bytes, false) || PdfPageCount::isA4($bytes, true),
+                        "{$key}/pdf: A4 paper geometry in its declared orientation"
+                    );
+                } elseif ($format === 'csv' && $result['contentType'] === 'text/csv; charset=UTF-8') {
+                    $check(str_starts_with($bytes, "\xEF\xBB\xBF"), "{$key}/csv: UTF-8 BOM so Excel opens Arabic correctly");
+                    $check(str_contains($bytes, ","), "{$key}/csv: real comma-separated rows");
+                } elseif ($format === 'html') {
+                    $check(str_starts_with($bytes, '<!DOCTYPE html>'), "{$key}/html: complete standalone document");
+                    $check(str_contains($bytes, 'doc-page'), "{$key}/html: carries the designed pages");
+                    $check(str_contains($bytes, '@font-face'), "{$key}/html: fonts embedded for offline fidelity");
+                    $check(!str_contains($bytes, 'http://') && !str_contains($bytes, 'https://'), "{$key}/html: no external URL to fetch");
                 } elseif ($format === 'xlsx') {
                     $path = tempnam(sys_get_temp_dir(), 'nizam_artifact_');
                     file_put_contents($path, $bytes);
@@ -149,7 +165,7 @@ try {
                 } elseif ($format === 'png' && $result['contentType'] === 'image/png') {
                     $size = @getimagesizefromstring($bytes);
                     $check(is_array($size) && (int) $size[0] > 100 && (int) $size[1] > 100, "{$key}/png: decodable image with real dimensions (appearance not judged)");
-                } elseif ($format === 'png' || $format === 'zip') {
+                } elseif ($format === 'png' || $format === 'zip' || $format === 'csv') {
                     $path = tempnam(sys_get_temp_dir(), 'nizam_artifact_');
                     file_put_contents($path, $bytes);
                     $zip = new ZipArchive();

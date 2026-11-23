@@ -44,11 +44,12 @@ $continued = !empty($block['continuation']);
                   <span class="grid-subject"><?= e((string) ($cell['subject'] ?? '')) ?></span>
                   <?php if (!empty($cell['teacher'])): ?><span class="grid-meta"><?= e((string) $cell['teacher']) ?></span><?php endif; ?>
                   <?php if (!empty($cell['clash'])): ?>
-                    <span class="grid-clash">⚠ <?= e(__('document.clash_badge')) ?></span>
-                    <?php if (!empty($cell['other'])): ?><span class="grid-clash-other"><?= e(__('document.clash_other_class')) ?>: <?= e((string) $cell['other']) ?></span><?php endif; ?>
+                    <?php /* One compact line: the other class is repeated in the per-class
+                             legend and in the conflicts workbook, so the paper only needs
+                             the marker and the class code to stay readable. */ ?>
+                    <span class="grid-clash" title="<?= e(__('document.clash_other_class')) ?>: <?= e((string) ($cell['other'] ?? '')) ?>">⚠ <?= e(trim((string) ($cell['other'] ?? '')) !== '' ? (string) $cell['other'] : __('document.clash_badge')) ?></span>
                   <?php elseif (!empty($cell['resolved'])): ?>
-                    <span class="grid-resolved">✓ <?= e(__('document.clash_status_resolved')) ?></span>
-                    <?php if ((string) ($cell['printed_teacher'] ?? '') !== ''): ?><span class="grid-clash-other"><?= e(__('document.clash_printed_teacher')) ?>: <?= e((string) $cell['printed_teacher']) ?></span><?php endif; ?>
+                    <span class="grid-resolved" title="<?= e(__('document.clash_printed_teacher')) ?>: <?= e((string) ($cell['printed_teacher'] ?? '')) ?>">✓ <?= e(__('document.clash_status_resolved')) ?></span>
                   <?php elseif (!empty($cell['unassigned'])): ?>
                     <span class="grid-unassigned"><?= e(__('document.legend_unassigned')) ?></span>
                   <?php endif; ?>

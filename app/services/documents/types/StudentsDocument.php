@@ -31,10 +31,6 @@ final class StudentsDocument extends DocumentType
         return 'students.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx', 'png', 'zip'];
-    }
 
     public function signatures(): array
     {
@@ -144,8 +140,12 @@ final class StudentsDocument extends DocumentType
             $tableRows[] = $line;
         }
 
-        $totals = [__('document.total'), (string) count($rows)];
-        for ($index = 2; $index < count($columns); $index++) {
+        $totals = [[
+            'value' => __('document.total') . ': ' . count($rows),
+            'class' => 'cell-total',
+            'colspan' => 3,
+        ]];
+        for ($index = 3; $index < count($columns); $index++) {
             $totals[] = '';
         }
 

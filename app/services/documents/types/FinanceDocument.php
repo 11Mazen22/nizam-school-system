@@ -29,10 +29,6 @@ final class FinanceDocument extends DocumentType
         return 'finance.view';
     }
 
-    public function formats(): array
-    {
-        return ['pdf', 'xlsx'];
-    }
 
     public function signatures(): array
     {
@@ -106,9 +102,7 @@ final class FinanceDocument extends DocumentType
             ], true),
             'rows' => $rows,
             'totals' => [
-                ['value' => __('document.total'), 'class' => ''],
-                ['value' => (string) count($invoices), 'class' => 'cell-num'],
-                ['value' => '', 'class' => ''],
+                ['value' => __('document.total') . ': ' . count($invoices), 'class' => 'cell-total', 'colspan' => 3],
                 ['value' => '', 'class' => ''],
                 ['value' => '', 'class' => ''],
                 ['value' => SchoolSettingsService::money((float) ($summary['total_billed'] ?? 0), $identity->locale), 'class' => 'cell-num'],
