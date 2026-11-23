@@ -40,7 +40,7 @@
 
 FROM composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c AS composer-bin
 
-FROM php:8.3-apache-bookworm@sha256:a14446c32a3c8aeb9b4dac7fb73b03dfd8006e670d9b43ea7947e4030d3cbae6 AS php-base
+FROM php:8.3-apache-bookworm@sha256:d60f7be79a869deb1562b6ecb2f555bccb65c8dd4af930b50ae4d14d4bd4696c AS php-base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
